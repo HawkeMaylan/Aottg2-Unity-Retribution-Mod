@@ -363,9 +363,9 @@ namespace Characters
         {
             StateActionWithTime(TitanState.Dead, BaseTitanAnimations.Die, 0f, 0.1f);
 
-            EffectSpawner.Spawn(EffectPrefabs.TitanDie2, BaseTitanCache.Core.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
+            EffectSpawner.Spawn(EffectPrefabs.TitanDie2, BaseTitanCache.Neck.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
             yield return new WaitForSeconds(45f);
-            EffectSpawner.Spawn(EffectPrefabs.TitanDie1, BaseTitanCache.Core.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
+            EffectSpawner.Spawn(EffectPrefabs.TitanDie1, BaseTitanCache.Neck.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
             yield return new WaitForSeconds(3f);
             PhotonNetwork.Destroy(gameObject);
         }
