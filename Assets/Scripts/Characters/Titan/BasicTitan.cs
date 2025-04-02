@@ -468,10 +468,11 @@ namespace Characters
             yield return new WaitForSeconds(1.4f);
             PlaySound(TitanSounds.Fall);
             yield return new WaitForSeconds(1f);
-            EffectSpawner.Spawn(EffectPrefabs.TitanDie1, BaseTitanCache.Hip.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
-            yield return new WaitForSeconds(2f);
-            yield return new WaitForSeconds(2f);
-            EffectSpawner.Spawn(EffectPrefabs.TitanDie2, BaseTitanCache.Hip.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
+            EffectSpawner.Spawn(EffectPrefabs.TitanDie2, BaseTitanCache.Core.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
+            yield return new WaitForSeconds(45f);
+            EffectSpawner.Spawn(EffectPrefabs.TitanDie1, BaseTitanCache.Core.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
+            yield return new WaitForSeconds(3f);
+            PhotonNetwork.Destroy(gameObject);
             PhotonNetwork.Destroy(gameObject);
         }
 

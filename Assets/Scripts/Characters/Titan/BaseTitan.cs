@@ -362,10 +362,11 @@ namespace Characters
         protected override IEnumerator WaitAndDie()
         {
             StateActionWithTime(TitanState.Dead, BaseTitanAnimations.Die, 0f, 0.1f);
-            yield return new WaitForSeconds(2f);
-            EffectSpawner.Spawn(EffectPrefabs.TitanDie1, BaseTitanCache.Hip.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
+
+            EffectSpawner.Spawn(EffectPrefabs.TitanDie2, BaseTitanCache.Core.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
+            yield return new WaitForSeconds(45f);
+            EffectSpawner.Spawn(EffectPrefabs.TitanDie1, BaseTitanCache.Core.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
             yield return new WaitForSeconds(3f);
-            EffectSpawner.Spawn(EffectPrefabs.TitanDie2, BaseTitanCache.Hip.position, Quaternion.Euler(-90f, 0f, 0f), GetSpawnEffectSize(), false);
             PhotonNetwork.Destroy(gameObject);
         }
 
