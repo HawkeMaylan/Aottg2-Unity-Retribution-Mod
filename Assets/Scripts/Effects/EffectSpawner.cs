@@ -38,6 +38,14 @@ namespace Effects
             {
                 float lifeTime = 10000000000f;
             }
+            else if (name == EffectPrefabs.TitanDie1)
+            {
+                float lifeTime = 60f;
+            }
+            else if (name == EffectPrefabs.TitanDie2)
+            {
+                float lifeTime = 60f;
+            }
 
             else
             {
