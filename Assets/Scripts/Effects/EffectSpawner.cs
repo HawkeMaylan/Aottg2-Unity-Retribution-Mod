@@ -34,9 +34,21 @@ namespace Effects
                 effect = go.AddComponent<GasBurstEffect>();
                 effect.Setup(info.Sender, 10f, settings);
             }
+            else if (name == EffectPrefabs.Blood2)
+            {
+                float lifeTime = 10000000000f;
+            }
+
             else
             {
+                float lifeTime = 10f;
+
+                if (settings != null)
+                    if (settings[0] is float)
+                        lifeTime = (float)settings[0];
+
                 effect = go.AddComponent<BaseEffect>();
+                effect.Setup(info.Sender, lifeTime, settings);
                 effect.Setup(info.Sender, 10f, settings);
             }
             ScaleEffect(go.transform, scale, scaleSize);
