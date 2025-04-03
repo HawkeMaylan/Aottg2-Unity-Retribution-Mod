@@ -16,7 +16,7 @@
 		"Embed1TimeMax": 3.05,
 		"Embed2TimeTotal": 2.0,
 		"Embed2TimeMultiplier": 1.00,
-		"AATriggerRange": 15.0,
+		"AATriggerRange": 0.0,
 		"Radius": 15.0,
 		"RadiusEmbed1Multiplier": 1.8,
 		"RadiusEmbed2Multiplier": 0.8,

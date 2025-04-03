@@ -127,7 +127,7 @@ namespace Projectiles
                 float restrictAngle = GetStat("RestrictAngle");
                 Color color = _color;
                 if (SettingsManager.InGameCurrent.Misc.ThunderspearPVP.Value)
-                    effectRadius = _radius * 1f;
+                    effectRadius = _radius * 2f;
                 else
                 {
                     if (_isEmbed)
@@ -148,7 +148,7 @@ namespace Projectiles
                             restrictAngle = GetStat("RestrictAngleEmbed2");
                         }
                     }
-                    effectRadius = _radius * 1f;
+                    effectRadius = _radius * 2f;
                 }
                 int killedPlayer = KillPlayersInRadius(_radius);
                 int killedTitan = KillTitansInRadius(_radius, restrictAngle);
@@ -210,11 +210,8 @@ namespace Projectiles
                         {
                             titan.GetHit("Thunderspear", damage, "Thunderspear", collider.name);
                         }
-                        else if (!_isEmbed && angle)
-                        {
-                            damage = 0;
-                            titan.GetHit("Thunderspear", damage, "TitanStun", collider.name);
-                        }
+
+                        
                         else if (angle)
                         {
                             damage = CalculateDamage();
