@@ -20,7 +20,7 @@
 		"Radius": 10.0,
 		"RadiusEmbed1Multiplier": 1.8,
 		"RadiusEmbed2Multiplier": 0.8,
-		"Speed": 150,
+		"Speed": 100,
 		"SpeedMultiplier": 1.5,
 		"StunRange": 30,
 		"StunDuration": 0.8,
