@@ -6,18 +6,18 @@
 		"RestrictAngle": 70
 	},
 	"Thunderspear": {
-		"Range": 150,
+		"Range": 70,
 		"RangeMultiplier": 0.33,
 		"RangeMin": 50,
-		"RangeMax": 250,
+		"RangeMax": 150,
 		"Embed1Time": -0.03,
 		"Embed1TimeMultiplier": 0.00016667,
-		"Embed1TimeMin": 2.00,
-		"Embed1TimeMax": 3.05,
+		"Embed1TimeMin": 1.00,
+		"Embed1TimeMax": 1.05,
 		"Embed2TimeTotal": 2.0,
 		"Embed2TimeMultiplier": 1.00,
 		"AATriggerRange": 0.0,
-		"Radius": 15.0,
+		"Radius": 10.0,
 		"RadiusEmbed1Multiplier": 1.8,
 		"RadiusEmbed2Multiplier": 0.8,
 		"Speed": 150,
@@ -31,9 +31,9 @@
 		"AmmoRound": 2,
 		"AmmoTotal": 24,
 		"DamageMultiplier": 1.5,
-		"RestrictAngle": 70,
-		"RestrictAngleEmbed1": 70,
-		"RestrictAngleEmbed2": 75
+		"RestrictAngle": 100,
+		"RestrictAngleEmbed1": 100,
+		"RestrictAngleEmbed2": 100
 	},
 	"AHSS": {
 		"Range": 25,
