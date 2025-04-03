@@ -239,6 +239,7 @@ namespace Projectiles
             var gameManager = (InGameManager)SceneLoader.CurrentGameManager;
             var position = transform.position;
             int soundPriority = (int)TSKillType.Air;
+            radius = radius * 1.5f;
 
             foreach (Human human in gameManager.Humans)
             {

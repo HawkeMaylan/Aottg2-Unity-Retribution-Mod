@@ -13,7 +13,7 @@
 		"Embed1Time": -0.03,
 		"Embed1TimeMultiplier": 0.00016667,
 		"Embed1TimeMin": 1.00,
-		"Embed1TimeMax": 1.05,
+		"Embed1TimeMax": 2.05,
 		"Embed2TimeTotal": 2.0,
 		"Embed2TimeMultiplier": 1.00,
 		"AATriggerRange": 0.0,
@@ -31,9 +31,9 @@
 		"AmmoRound": 2,
 		"AmmoTotal": 24,
 		"DamageMultiplier": 1.5,
-		"RestrictAngle": 100,
-		"RestrictAngleEmbed1": 100,
-		"RestrictAngleEmbed2": 100
+		"RestrictAngle": 120,
+		"RestrictAngleEmbed1": 120,
+		"RestrictAngleEmbed2": 120
 	},
 	"AHSS": {
 		"Range": 25,

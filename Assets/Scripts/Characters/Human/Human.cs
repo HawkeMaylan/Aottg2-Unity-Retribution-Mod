@@ -2668,7 +2668,7 @@ namespace Characters
                 else
                 {
                     float travelTime = tsInfo["Range"].AsFloat / tsInfo["Speed"].AsFloat;
-                    Weapon = new ThunderspearWeapon(this, Mathf.Clamp(Mathf.FloorToInt(Stats.Ammunition * 0.5f) - 20, 4, 30), tsInfo["AmmoRound"].AsInt, tsInfo["CD"].AsFloat, tsInfo["Radius"].AsFloat,
+                    Weapon = new ThunderspearWeapon(this, Mathf.Clamp(Mathf.FloorToInt(Stats.Ammunition * 0.1111111f) - 2, 1, 11), tsInfo["AmmoRound"].AsInt, tsInfo["CD"].AsFloat, tsInfo["Radius"].AsFloat,
                         tsInfo["Speed"].AsFloat, travelTime, tsInfo["Delay"].AsFloat, tsInfo);
                 }
             }
