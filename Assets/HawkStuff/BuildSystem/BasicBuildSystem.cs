@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class BasicBuildSystem : MonoBehaviour
 {
@@ -94,6 +95,7 @@ public class BasicBuildSystem : MonoBehaviour
         }
 
         currentobject = objects[cur];
+
         if (currentpreview != null)
             Destroy(currentpreview.gameObject);
 
@@ -118,12 +120,15 @@ public class BasicBuildSystem : MonoBehaviour
 
     public void showPreview(RaycastHit hit2)
     {
+        if (currentpreview == null) return; // Prevent using destroyed reference
+
         currentpos = hit2.point;
         currentpos -= Vector3.one * offset;
         currentpos /= gridSize;
         currentpos = new Vector3(Mathf.Round(currentpos.x), Mathf.Round(currentpos.y), Mathf.Round(currentpos.z));
         currentpos *= gridSize;
         currentpos += Vector3.one * offset;
+
         currentpreview.position = currentpos;
 
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -157,7 +162,17 @@ public class BasicBuildSystem : MonoBehaviour
                 return;
             }
 
-            Instantiate(currentobject.prefab, currentpos, Quaternion.Euler(currentrot));
+            // Get the prefab name (must match what's in Resources/Buildables)
+            string prefabName = currentobject.prefab.name;
+
+            // Build the full Photon path
+            string photonPath = "Buildables/" + prefabName;
+
+            // Instantiate across the network
+            PhotonNetwork.Instantiate(photonPath, currentpos, Quaternion.Euler(currentrot));
+
+            // Destroy preview after building
+            Destroy(currentpreview.gameObject);
         }
         else
         {
