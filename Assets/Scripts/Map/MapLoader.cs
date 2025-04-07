@@ -510,7 +510,7 @@ namespace Map
                         hashCounts.Add(hash, 0);
                     int meshPerHash = 65000 / filter.sharedMesh.vertexCount;
                     hashCounts[hash] += 1;
-                    hash += (hashCounts[hash] / meshPerHash).ToString();
+                    hash += (hashCounts[hash] / (meshPerHash + 1f)).ToString();
                     if (!roots.ContainsKey(hash))
                     {
                         var go = new GameObject();

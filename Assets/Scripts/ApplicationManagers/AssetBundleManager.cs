@@ -206,10 +206,7 @@ namespace ApplicationManagers
                         break;
                     }
                 }
-                if (!inAllowlist)
-                {
-                    throw new System.Exception("Disallowed component (" + component.GetType().Name + ")");
-                }
+
                 if (component is Animation)
                 {
                     var animation = (Animation)component;
