@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Material
-  m_Shader: {fileID: 10606, guid: 0000000000000000f000000000000000, type: 0}
+  m_Shader: {fileID: 10511, guid: 0000000000000000f000000000000000, type: 0}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -95,8 +95,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AO: 2.4
     - _AlphaClip: 1
     - _AlphaToMask: 1
+    - _BaseLight: 0.35
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
@@ -114,6 +116,7 @@ Material:
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
+    - _Occlusion: 7.5
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
