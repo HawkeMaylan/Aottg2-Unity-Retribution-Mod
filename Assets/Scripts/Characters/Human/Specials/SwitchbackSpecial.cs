@@ -12,14 +12,14 @@ namespace Characters
 
         public SwitchbackSpecial(BaseCharacter owner): base(owner)
         {
-            Cooldown = 2f;
+            Cooldown = 4f;
         }
 
         public bool RegisterCollision(Human human, Collision collision, float speed)
         {
             if (IsActive)
             {
-                human.Cache.Rigidbody.velocity = collision.contacts[0].normal.normalized * Mathf.Max(speed, 20f);
+                human.Cache.Rigidbody.velocity = collision.contacts[0].normal.normalized * Mathf.Max((speed * 0.5f), 20f);
                 _activeTimeLeft = 0f;
                 IsActive = false;
                 human.PlaySound(HumanSounds.Switchback);
@@ -29,11 +29,11 @@ namespace Characters
             return false;
         }
 
-        protected override void Activate()
-        {
-            ((Human)_owner).StartGrabImmunity(GrabIFrameDuration);
-            base.Activate();
-        }
+        ///protected override void Activate()
+        ///{
+        ///    ((Human)_owner).StartGrabImmunity(GrabIFrameDuration);
+        ///    base.Activate();
+        ///}
 
         protected override void Deactivate()
         {
