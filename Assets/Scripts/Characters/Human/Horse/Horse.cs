@@ -145,20 +145,20 @@ namespace Characters
                     _teleportTimeLeft -= Time.deltaTime;
                     float distance = Vector3.Distance(_owner.Cache.Transform.position, Cache.Transform.position);
                     float flatDistance = Util.DistanceIgnoreY(_owner.Cache.Transform.position, Cache.Transform.position);
-                    if (distance > 20f && _teleportTimeLeft <= 0f)
-                        TeleportToHuman();
-                    else if (flatDistance < 5f)
+                    ///if (distance > 20f && _teleportTimeLeft <= 0f)
+                        ///TeleportToHuman();
+                    if (flatDistance < 5f)
                     {
                         State = HorseState.Idle;
-                        _teleportTimeLeft = TeleportTime;
+                        ///_teleportTimeLeft = TeleportTime;
                     }
                     else if (flatDistance < 20f)
                     {
                         State = HorseState.WalkToPoint;
-                        _teleportTimeLeft = TeleportTime;
+                       // _teleportTimeLeft = TeleportTime;
                     }
                     else
-                        State = HorseState.RunToPoint;
+                        State = HorseState.Idle;
                     if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint)
                     {
                         Vector3 direction = (_owner.Cache.Transform.position - Cache.Transform.position);
