@@ -1,22 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
 using Settings;
 using Characters;
 using GameManagers;
 using ApplicationManagers;
-using System.Collections;
 
 namespace UI
 {
     class ItemHandler : MonoBehaviour
     {
-        public static List<string> AvailableItems = new List<string>() { "Flare1", "Flare2", "Flare3" };
         private BasePopup _itemWheelPopup;
+        private List<FieldInfo> _itemLists = new List<FieldInfo>();
+        private int _currentItemWheelIndex = 0;
         public bool IsActive;
         private InGameManager _inGameManager;
-
 
         private void Awake()
         {
@@ -29,6 +28,21 @@ namespace UI
             StartCoroutine(UpdateForever(1f));
         }
 
+        private void Update()
+        {
+            // Spacebar to switch wheels while open
+            if (IsActive && Input.GetKeyDown(KeyCode.Space))
+            {
+                NextItemWheel();
+            }
+
+            // Optional: press Escape to close
+            if (IsActive && Input.GetKeyDown(KeyCode.Escape))
+            {
+                SetItemWheel(false);
+            }
+        }
+
         public void ToggleItemWheel()
         {
             SetItemWheel(!IsActive);
@@ -36,12 +50,14 @@ namespace UI
 
         public void SetItemWheel(bool enable)
         {
+            if (!InGameMenu.InMenu())
+                ScanItemLists();
+
             if (enable)
             {
-                if (!InGameMenu.InMenu())
+                if (_itemLists.Count > 0)
                 {
-                    ((WheelPopup)_itemWheelPopup).Show(SettingsManager.InputSettings.Interaction.ItemMenu.ToString(),
-                        GetItemWheelOptions(), () => OnItemWheelSelect());
+                    ShowItemWheel(_currentItemWheelIndex);
                     IsActive = true;
                 }
             }
@@ -52,49 +68,82 @@ namespace UI
             }
         }
 
-        private IEnumerator UpdateForever(float delay)
+        public void NextItemWheel()
         {
-            while (true)
-            {
-                yield return new WaitForSeconds(delay);
-                if (IsActive)
-                {
-                    ((WheelPopup)_itemWheelPopup).Show(SettingsManager.InputSettings.Interaction.ItemMenu.ToString(),
-                        GetItemWheelOptions(), () => OnItemWheelSelect());
-                }
-            }
+            if (!_itemWheelPopup.gameObject.activeSelf || !IsActive || _itemLists.Count == 0)
+                return;
+
+            _currentItemWheelIndex++;
+            if (_currentItemWheelIndex >= _itemLists.Count)
+                _currentItemWheelIndex = 0;
+
+            ShowItemWheel(_currentItemWheelIndex);
         }
 
-        private void OnItemWheelSelect()
+        private void ShowItemWheel(int index)
         {
             BaseCharacter character = _inGameManager.CurrentCharacter;
-            int selected = ((WheelPopup)_itemWheelPopup).SelectedItem;
-            if (character != null && selected < character.Items.Count)
+            if (character is not Human human || _itemLists.Count == 0)
+                return;
+
+            FieldInfo field = _itemLists[index];
+            string wheelName = field.Name;
+            List<SimpleUseable> list = (List<SimpleUseable>)field.GetValue(human);
+
+            List<string> itemNames = new List<string>();
+            foreach (var item in list)
             {
-                character.UseItem(selected);
+                string name = item.Name;
+                if (item.MaxUses != -1)
+                    name += $" ({item.UsesLeft})";
+                else if (item.GetCooldownLeft() > 0f)
+                    name += $" ({(int)item.GetCooldownLeft()})";
+                itemNames.Add(name);
             }
+
+            ((WheelPopup)_itemWheelPopup).Show(wheelName, itemNames, () => OnItemSelect(list));
+        }
+
+        private void OnItemSelect(List<SimpleUseable> list)
+        {
+            BaseCharacter character = _inGameManager.CurrentCharacter;
+            if (character is not Human)
+                return;
+
+            int selected = ((WheelPopup)_itemWheelPopup).SelectedItem;
+            if (selected >= 0 && selected < list.Count)
+                list[selected].SetInput(true); // Use the item
+
             _itemWheelPopup.Hide();
             IsActive = false;
             ((InGameMenu)UIManager.CurrentMenu).SkipAHSSInput = true;
         }
 
-        private List<string> GetItemWheelOptions()
+        private void ScanItemLists()
         {
+            _itemLists.Clear();
             BaseCharacter character = _inGameManager.CurrentCharacter;
-            List<string> items = new List<string>();
-            if (character != null)
+            if (character is not Human human)
+                return;
+
+            var fields = typeof(Human).GetFields(BindingFlags.Public | BindingFlags.Instance);
+            foreach (var field in fields)
             {
-                foreach (var item in character.Items)
-                {
-                    string name = item.Name;
-                    if (item.MaxUses != -1)
-                        name += " (" + item.UsesLeft.ToString() + ")";
-                    else if (item.GetCooldownLeft() > 0f)
-                        name += " (" + ((int)item.GetCooldownLeft()).ToString() + ")";
-                    items.Add(name);
-                }
+                if (field.Name.StartsWith("itemList") && field.FieldType == typeof(List<SimpleUseable>))
+                    _itemLists.Add(field);
             }
-            return items;
+
+            _itemLists.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
+        }
+
+        private IEnumerator UpdateForever(float delay)
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(delay);
+                if (IsActive && _itemLists.Count > 0)
+                    ShowItemWheel(_currentItemWheelIndex);
+            }
         }
     }
 }

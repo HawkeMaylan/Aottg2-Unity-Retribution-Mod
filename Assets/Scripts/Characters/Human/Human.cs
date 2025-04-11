@@ -42,6 +42,8 @@ namespace Characters
         public static LayerMask ClipMask = PhysicsLayer.GetMask(PhysicsLayer.MapObjectAll, PhysicsLayer.MapObjectCharacters,
             PhysicsLayer.MapObjectEntities);
         private Dictionary<Renderer, Material> FPSMaterials = new Dictionary<Renderer, Material>();
+        public Dictionary<string, List<SimpleUseable>> ItemLists = new Dictionary<string, List<SimpleUseable>>();
+
 
         // state
         private HumanState _state = HumanState.Idle;
@@ -2674,21 +2676,23 @@ namespace Characters
             }
         }
 
-        protected void SetupItems()
+        public List<SimpleUseable> itemList0 = new List<SimpleUseable>();
+        public List<SimpleUseable> itemList1 = new List<SimpleUseable>();
+        public List<SimpleUseable> itemList2 = new List<SimpleUseable>();
+        public List<SimpleUseable> itemList3 = new List<SimpleUseable>();
+
+        public void SetupItems()
         {
-            float cooldown = 140f;
-            Items.Clear();
-            Items.Add(new FlareItem(this, "Green", new Color(0f, 1f, 0f, 0.7f), cooldown));
-            Items.Add(new FlareItem(this, "Red", new Color(1f, 0f, 0f, 0.7f), cooldown));
-            Items.Add(new FlareItem(this, "Black", new Color(0f, 0f, 0f, 0.7f), cooldown));
-            Items.Add(new FlareItem(this, "Purple", new Color(153f / 255, 0f, 204f / 255, 0.7f), cooldown));
-            Items.Add(new FlareItem(this, "Blue", new Color(0f, 102f / 255, 204f / 255, 0.7f), cooldown));
-            Items.Add(new FlareItem(this, "Yellow", new Color(1f, 1f, 0f, 0.7f), cooldown));
-            Items.Add(new FlareItem(this, "Cyan", new Color(0f, 255f / 252, 255f / 255, 0.8f), cooldown));
-            Items.Add(new FlareItem1(this, "Light", new Color(1f, 1f, 1f, 1f), cooldown));
-
-
+            itemList0.Add(new FlareItem(this, "Flare Red", Color.red, 60f));
+            itemList1.Add(new FlareItem(this, "Support Flare", Color.blue, 30f));
+            itemList2.Add(new FlareItem(this, "Cheese Flare", Color.white, 40f));
+            itemList3.Add(new FlareItem1(this, "Flash Flare", Color.white, 40f));
         }
+
+
+
+
+
 
         public void SetSpecial(string special)
         {
