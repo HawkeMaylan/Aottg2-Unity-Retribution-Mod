@@ -30,13 +30,11 @@ namespace UI
 
         private void Update()
         {
-            // Spacebar to switch wheels while open
             if (IsActive && Input.GetKeyDown(KeyCode.Space))
             {
                 NextItemWheel();
             }
 
-            // Optional: press Escape to close
             if (IsActive && Input.GetKeyDown(KeyCode.Escape))
             {
                 SetItemWheel(false);
@@ -87,10 +85,15 @@ namespace UI
                 return;
 
             FieldInfo field = _itemLists[index];
-            string wheelName = field.Name;
-            List<SimpleUseable> list = (List<SimpleUseable>)field.GetValue(human);
 
+            // Naming
+            string wheelName = human.ItemListDisplayNames != null && human.ItemListDisplayNames.ContainsKey(field.Name)
+                ? human.ItemListDisplayNames[field.Name]
+                : field.Name;
+
+            List<SimpleUseable> list = (List<SimpleUseable>)field.GetValue(human);
             List<string> itemNames = new List<string>();
+
             foreach (var item in list)
             {
                 string name = item.Name;
@@ -112,7 +115,7 @@ namespace UI
 
             int selected = ((WheelPopup)_itemWheelPopup).SelectedItem;
             if (selected >= 0 && selected < list.Count)
-                list[selected].SetInput(true); // Use the item
+                list[selected].SetInput(true);
 
             _itemWheelPopup.Hide();
             IsActive = false;
