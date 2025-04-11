@@ -1,16 +1,21 @@
 ﻿using Effects;
 using System.Collections;
 using UnityEngine;
+using Characters;
 
 namespace Characters
 {
     class EscapeSpecial : ExtendedUseable
     {
         protected override float ActiveTime => 0.64f;
+        private float _oldGas;
+        private float _currentGas;
+        private Human _human;
 
         public EscapeSpecial(BaseCharacter owner) : base(owner)
         {
             UsesLeft = MaxUses = 1;
+            _human = (Human)owner;
         }
 
         public override bool CanUse()
@@ -21,6 +26,9 @@ namespace Characters
         protected override void Activate()
         {
             ((Human)_owner).CrossFade(HumanAnimations.SpecialJean, 0.1f);
+            _oldGas = _human.Stats.CurrentGas;
+            _currentGas = _oldGas * 0f;
+            _human.Stats.CurrentGas = _currentGas;
         }
 
         protected override void Deactivate()
@@ -33,6 +41,7 @@ namespace Characters
                 human.PlaySound(HumanSounds.BladeHit);
                 human.SpecialActionState(0.5f);
                 human.Cache.Rigidbody.velocity = Vector3.up * 30f;
+
             }
         }
     }
