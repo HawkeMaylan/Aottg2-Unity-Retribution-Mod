@@ -7,7 +7,7 @@ using Photon.Pun;
 
 namespace Characters
 {
-    class Horse: BaseCharacter
+    class Horse : BaseCharacter
     {
         Human _owner;
         HorseComponentCache HorseCache;
@@ -16,11 +16,15 @@ namespace Characters
         private float RunCloseSpeed = 20f;
         private float TeleportTime = 10f;
         protected override Vector3 Gravity => Vector3.down * 30f;
-        private float JumpForce = 30f;
+        private float JumpForce = 5f;
         private float _idleTimeLeft;
         private float _teleportTimeLeft;
         private float _jumpCooldownLeft;
-        
+
+        private bool _isWhistleActive = false;
+        private float _whistleTimer = 0f;
+        private const float WhistleDuration = 15f;
+
         public void Init(Human human)
         {
             base.Init(true, human.Team);
@@ -39,6 +43,16 @@ namespace Characters
                 return;
             Cache.Rigidbody.AddForce(Vector3.up * JumpForce, ForceMode.VelocityChange);
             _jumpCooldownLeft = 0f;
+        }
+
+        public void HorseWhistle()
+        {
+            if (_owner == null || _owner.Dead)
+                return;
+
+            _isWhistleActive = true;
+            _whistleTimer = WhistleDuration;
+            State = HorseState.RunToPoint;
         }
 
         protected override void Awake()
@@ -105,7 +119,7 @@ namespace Characters
             }
             else
             {
-                IdleOneShot(HorseAnimations.Crazy); // <--- Me after listening to these sounds for an hour when testing OTW.
+                IdleOneShot(HorseAnimations.Crazy);
                 if (SettingsManager.SoundSettings.HorseSoundEffect.Value)
                     PlaySound(HorseSounds.Idle3);
             }
@@ -127,38 +141,49 @@ namespace Characters
                     PhotonNetwork.Destroy(gameObject);
                     return;
                 }
+
                 if (_owner.MountState == HumanMountState.Horse)
                 {
                     if (_owner.HasDirection)
                     {
                         Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, _owner.GetTargetRotation(), 5f * Time.deltaTime);
-                        if (_owner.IsWalk)
-                            State = HorseState.ControlledWalk;
-                        else if (!_owner.IsWalk)
-                            State = HorseState.ControlledRun;
+                        State = _owner.IsWalk ? HorseState.ControlledWalk : HorseState.ControlledRun;
                     }
                     else
+                    {
                         State = HorseState.ControlledIdle;
+                    }
                 }
                 else
                 {
                     _teleportTimeLeft -= Time.deltaTime;
                     float distance = Vector3.Distance(_owner.Cache.Transform.position, Cache.Transform.position);
                     float flatDistance = Util.DistanceIgnoreY(_owner.Cache.Transform.position, Cache.Transform.position);
-                    ///if (distance > 20f && _teleportTimeLeft <= 0f)
-                        ///TeleportToHuman();
-                    if (flatDistance < 5f)
+
+                    if (_isWhistleActive)
                     {
-                        State = HorseState.Idle;
-                        ///_teleportTimeLeft = TeleportTime;
+                        _whistleTimer -= Time.deltaTime;
+                        if (_whistleTimer <= 0f && flatDistance < 1000f)
+                        {
+                            _isWhistleActive = false;
+                            State = HorseState.Idle;
+                        }
+                        else
+                        {
+                            State = HorseState.RunToPoint;
+                        }
                     }
-                    else if (flatDistance < 20f)
-                    {
-                        State = HorseState.WalkToPoint;
-                       // _teleportTimeLeft = TeleportTime;
-                    }
+
                     else
-                        State = HorseState.Idle;
+                    {
+                        if (flatDistance < 5f)
+                            State = HorseState.Idle;
+                        else if (flatDistance < 20f)
+                            State = HorseState.WalkToPoint;
+                        else
+                            State = HorseState.Idle;
+                    }
+
                     if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint)
                     {
                         Vector3 direction = (_owner.Cache.Transform.position - Cache.Transform.position);
@@ -176,7 +201,9 @@ namespace Characters
             {
                 if (_owner == null || _owner.Dead)
                     return;
+
                 CheckGround();
+
                 if (Grounded)
                 {
                     if (State == HorseState.ControlledIdle || State == HorseState.Idle)
@@ -189,15 +216,16 @@ namespace Characters
                                 ForceMode.Acceleration);
                         }
                     }
-                    else if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint  || 
-                        State == HorseState.ControlledWalk || State == HorseState.ControlledRun)
+                    else if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint || State == HorseState.ControlledWalk || State == HorseState.ControlledRun)
                     {
                         float speed = _owner.Stats.HorseSpeed;
                         if (State == HorseState.ControlledWalk)
                             speed = WalkSpeed;
                         else if (State == HorseState.WalkToPoint)
                             speed = RunCloseSpeed;
+
                         Cache.Rigidbody.AddForce(Cache.Transform.forward * _owner.Stats.HorseSpeed, ForceMode.Acceleration);
+
                         if (Cache.Rigidbody.velocity.magnitude >= speed)
                         {
                             if (speed == _owner.Stats.HorseSpeed)
@@ -207,6 +235,7 @@ namespace Characters
                         }
                     }
                 }
+
                 Cache.Rigidbody.AddForce(Gravity, ForceMode.Acceleration);
             }
         }
@@ -218,6 +247,7 @@ namespace Characters
             {
                 if (_owner == null || _owner.Dead)
                     return;
+
                 if (Cache.Rigidbody.velocity.magnitude > 8f)
                 {
                     CrossFadeIfNotPlaying(HorseAnimations.Run, 0.1f);
@@ -239,6 +269,7 @@ namespace Characters
                         _owner.CrossFadeIfNotPlaying(HumanAnimations.HorseIdle, 0.1f);
                 }
             }
+
             if (Animation.IsPlaying(HorseAnimations.Run) && Grounded)
             {
                 ToggleDust(true);
@@ -257,8 +288,7 @@ namespace Characters
         {
             RaycastHit hit;
             JustGrounded = false;
-            if (Physics.SphereCast(Cache.Transform.position + Vector3.up * 0.8f, 0.6f, Vector3.down,
-                out hit, 0.8f, GroundMask.value))
+            if (Physics.SphereCast(Cache.Transform.position + Vector3.up * 0.8f, 0.6f, Vector3.down, out hit, 0.8f, GroundMask.value))
             {
                 if (!Grounded)
                     Grounded = JustGrounded = true;
