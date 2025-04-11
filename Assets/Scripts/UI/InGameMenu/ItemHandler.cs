@@ -49,12 +49,6 @@ namespace UI
                 SetItemWheel(false);
             }
 
-            // Quick-use current selected item with item menu key (Q or whatever)
-            if (!IsActive && SettingsManager.InputSettings.Interaction.ItemMenu.GetKeyDown())
-            {
-                TryUseLastSelectedItem();
-            }
-
             // Quick-slot keys (1–8) to activate items in current wheel
             for (int i = 0; i < QuickSlotKeys.Length; i++)
             {
@@ -78,6 +72,7 @@ namespace UI
 
             if (enable)
             {
+                _selectedItemIndex = 0; // Optional: reset selection when opening the wheel
                 if (_itemLists.Count > 0)
                 {
                     ShowItemWheel(_currentItemWheelIndex);
