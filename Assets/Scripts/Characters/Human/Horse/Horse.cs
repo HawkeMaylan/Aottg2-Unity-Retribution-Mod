@@ -50,6 +50,10 @@ namespace Characters
             if (_owner == null || _owner.Dead)
                 return;
 
+            float flatDistance = Util.DistanceIgnoreY(_owner.Cache.Transform.position, Cache.Transform.position);
+            if (flatDistance > 1000f)
+                return; // Horse too far to respond
+
             _isWhistleActive = true;
             _whistleTimer = WhistleDuration;
             State = HorseState.RunToPoint;
@@ -66,11 +70,8 @@ namespace Characters
 
         private void ToggleDust(bool toggle)
         {
-            var emsission = HorseCache.Dust.emission;
-            if (toggle && !emsission.enabled)
-                emsission.enabled = true;
-            else if (!toggle && emsission.enabled)
-                emsission.enabled = false;
+            var emission = HorseCache.Dust.emission;
+            emission.enabled = toggle;
         }
 
         private void TeleportToHuman()
@@ -85,9 +86,7 @@ namespace Characters
         {
             RaycastHit hit;
             if (Physics.Raycast(pt + Vector3.up * 1f, -Vector3.up, out hit, 1000f, GroundMask))
-            {
                 return hit.point.y;
-            }
             return 0f;
         }
 
@@ -96,12 +95,14 @@ namespace Characters
             _idleTimeLeft -= Time.deltaTime;
             if (_idleTimeLeft > 0f)
                 return;
+
             if (!Animation.IsPlaying(HorseAnimations.Idle0))
             {
                 CrossFade(HorseAnimations.Idle0, 0.1f);
                 _idleTimeLeft = UnityEngine.Random.Range(6f, 9f);
                 return;
             }
+
             float choose = UnityEngine.Random.Range(0f, 1f);
             if (choose < 0.25f)
                 IdleOneShot(HorseAnimations.Idle1);
@@ -133,63 +134,63 @@ namespace Characters
 
         private void Update()
         {
-            if (IsMine())
-            {
-                _jumpCooldownLeft -= Time.deltaTime;
-                if (_owner == null || _owner.Dead)
-                {
-                    PhotonNetwork.Destroy(gameObject);
-                    return;
-                }
+            if (!IsMine()) return;
 
-                if (_owner.MountState == HumanMountState.Horse)
+            _jumpCooldownLeft -= Time.deltaTime;
+
+            if (_owner == null || _owner.Dead)
+            {
+                PhotonNetwork.Destroy(gameObject);
+                return;
+            }
+
+            if (_owner.MountState == HumanMountState.Horse)
+            {
+                if (_owner.HasDirection)
                 {
-                    if (_owner.HasDirection)
+                    Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, _owner.GetTargetRotation(), 5f * Time.deltaTime);
+                    State = _owner.IsWalk ? HorseState.ControlledWalk : HorseState.ControlledRun;
+                }
+                else
+                {
+                    State = HorseState.ControlledIdle;
+                }
+            }
+            else
+            {
+                _teleportTimeLeft -= Time.deltaTime;
+
+                float flatDistance = Util.DistanceIgnoreY(_owner.Cache.Transform.position, Cache.Transform.position);
+
+                if (_isWhistleActive)
+                {
+                    _whistleTimer -= Time.deltaTime;
+
+                    if (_whistleTimer <= 0f || flatDistance < 3f)
                     {
-                        Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, _owner.GetTargetRotation(), 5f * Time.deltaTime);
-                        State = _owner.IsWalk ? HorseState.ControlledWalk : HorseState.ControlledRun;
+                        _isWhistleActive = false;
+                        State = HorseState.Idle;
                     }
                     else
                     {
-                        State = HorseState.ControlledIdle;
+                        State = HorseState.RunToPoint;
                     }
                 }
                 else
                 {
-                    _teleportTimeLeft -= Time.deltaTime;
-                    float distance = Vector3.Distance(_owner.Cache.Transform.position, Cache.Transform.position);
-                    float flatDistance = Util.DistanceIgnoreY(_owner.Cache.Transform.position, Cache.Transform.position);
-
-                    if (_isWhistleActive)
-                    {
-                        _whistleTimer -= Time.deltaTime;
-                        if (_whistleTimer <= 0f && flatDistance < 1000f)
-                        {
-                            _isWhistleActive = false;
-                            State = HorseState.Idle;
-                        }
-                        else
-                        {
-                            State = HorseState.RunToPoint;
-                        }
-                    }
-
+                    if (flatDistance < 5f)
+                        State = HorseState.Idle;
+                    else if (flatDistance < 20f)
+                        State = HorseState.WalkToPoint;
                     else
-                    {
-                        if (flatDistance < 5f)
-                            State = HorseState.Idle;
-                        else if (flatDistance < 20f)
-                            State = HorseState.WalkToPoint;
-                        else
-                            State = HorseState.Idle;
-                    }
+                        State = HorseState.Idle;
+                }
 
-                    if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint)
-                    {
-                        Vector3 direction = (_owner.Cache.Transform.position - Cache.Transform.position);
-                        direction.y = 0f;
-                        Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, Quaternion.LookRotation(direction.normalized), 10f * Time.deltaTime);
-                    }
+                if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint)
+                {
+                    Vector3 direction = (_owner.Cache.Transform.position - Cache.Transform.position);
+                    direction.y = 0f;
+                    Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, Quaternion.LookRotation(direction.normalized), 10f * Time.deltaTime);
                 }
             }
         }
@@ -197,77 +198,72 @@ namespace Characters
         protected override void FixedUpdate()
         {
             base.FixedUpdate();
-            if (IsMine())
+
+            if (!IsMine() || _owner == null || _owner.Dead)
+                return;
+
+            CheckGround();
+
+            if (Grounded)
             {
-                if (_owner == null || _owner.Dead)
-                    return;
-
-                CheckGround();
-
-                if (Grounded)
+                if (State == HorseState.ControlledIdle || State == HorseState.Idle)
                 {
-                    if (State == HorseState.ControlledIdle || State == HorseState.Idle)
+                    if (Cache.Rigidbody.velocity.magnitude < 1f)
+                        Cache.Rigidbody.velocity = Vector3.up * Cache.Rigidbody.velocity.y;
+                    else
+                        Cache.Rigidbody.AddForce(-Cache.Rigidbody.velocity.normalized * Mathf.Min(_owner.Stats.HorseSpeed, Cache.Rigidbody.velocity.magnitude * 0.5f),
+                            ForceMode.Acceleration);
+                }
+                else if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint || State == HorseState.ControlledWalk || State == HorseState.ControlledRun)
+                {
+                    float speed = _owner.Stats.HorseSpeed;
+
+                    if (State == HorseState.ControlledWalk)
+                        speed = WalkSpeed;
+                    else if (State == HorseState.WalkToPoint)
+                        speed = RunCloseSpeed;
+
+                    Cache.Rigidbody.AddForce(Cache.Transform.forward * _owner.Stats.HorseSpeed, ForceMode.Acceleration);
+
+                    if (Cache.Rigidbody.velocity.magnitude >= speed)
                     {
-                        if (Cache.Rigidbody.velocity.magnitude < 1f)
-                            Cache.Rigidbody.velocity = Vector3.up * Cache.Rigidbody.velocity.y;
+                        if (speed == _owner.Stats.HorseSpeed)
+                            Cache.Rigidbody.AddForce((speed - Cache.Rigidbody.velocity.magnitude) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
                         else
-                        {
-                            Cache.Rigidbody.AddForce(-Cache.Rigidbody.velocity.normalized * Mathf.Min(_owner.Stats.HorseSpeed, Cache.Rigidbody.velocity.magnitude * 0.5f),
-                                ForceMode.Acceleration);
-                        }
-                    }
-                    else if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint || State == HorseState.ControlledWalk || State == HorseState.ControlledRun)
-                    {
-                        float speed = _owner.Stats.HorseSpeed;
-                        if (State == HorseState.ControlledWalk)
-                            speed = WalkSpeed;
-                        else if (State == HorseState.WalkToPoint)
-                            speed = RunCloseSpeed;
-
-                        Cache.Rigidbody.AddForce(Cache.Transform.forward * _owner.Stats.HorseSpeed, ForceMode.Acceleration);
-
-                        if (Cache.Rigidbody.velocity.magnitude >= speed)
-                        {
-                            if (speed == _owner.Stats.HorseSpeed)
-                                Cache.Rigidbody.AddForce((speed - Cache.Rigidbody.velocity.magnitude) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
-                            else
-                                Cache.Rigidbody.AddForce((Mathf.Max(speed - Cache.Rigidbody.velocity.magnitude, -1f)) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
-                        }
+                            Cache.Rigidbody.AddForce((Mathf.Max(speed - Cache.Rigidbody.velocity.magnitude, -1f)) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
                     }
                 }
-
-                Cache.Rigidbody.AddForce(Gravity, ForceMode.Acceleration);
             }
+
+            Cache.Rigidbody.AddForce(Gravity, ForceMode.Acceleration);
         }
 
         protected override void LateUpdate()
         {
             base.LateUpdate();
-            if (IsMine())
-            {
-                if (_owner == null || _owner.Dead)
-                    return;
 
-                if (Cache.Rigidbody.velocity.magnitude > 8f)
-                {
-                    CrossFadeIfNotPlaying(HorseAnimations.Run, 0.1f);
-                    if (_owner.MountState == HumanMountState.Horse)
-                        _owner.CrossFadeIfNotPlaying(HumanAnimations.HorseRun, 0.1f);
-                    _idleTimeLeft = 0f;
-                }
-                else if (Cache.Rigidbody.velocity.magnitude > 1f)
-                {
-                    CrossFadeIfNotPlaying(HorseAnimations.Walk, 0.1f);
-                    if (_owner.MountState == HumanMountState.Horse)
-                        _owner.CrossFadeIfNotPlaying(HumanAnimations.HorseIdle, 0.1f);
-                    _idleTimeLeft = 0f;
-                }
-                else
-                {
-                    UpdateIdle();
-                    if (_owner.MountState == HumanMountState.Horse)
-                        _owner.CrossFadeIfNotPlaying(HumanAnimations.HorseIdle, 0.1f);
-                }
+            if (!IsMine() || _owner == null || _owner.Dead)
+                return;
+
+            if (Cache.Rigidbody.velocity.magnitude > 8f)
+            {
+                CrossFadeIfNotPlaying(HorseAnimations.Run, 0.1f);
+                if (_owner.MountState == HumanMountState.Horse)
+                    _owner.CrossFadeIfNotPlaying(HumanAnimations.HorseRun, 0.1f);
+                _idleTimeLeft = 0f;
+            }
+            else if (Cache.Rigidbody.velocity.magnitude > 1f)
+            {
+                CrossFadeIfNotPlaying(HorseAnimations.Walk, 0.1f);
+                if (_owner.MountState == HumanMountState.Horse)
+                    _owner.CrossFadeIfNotPlaying(HumanAnimations.HorseIdle, 0.1f);
+                _idleTimeLeft = 0f;
+            }
+            else
+            {
+                UpdateIdle();
+                if (_owner.MountState == HumanMountState.Horse)
+                    _owner.CrossFadeIfNotPlaying(HumanAnimations.HorseIdle, 0.1f);
             }
 
             if (Animation.IsPlaying(HorseAnimations.Run) && Grounded)
@@ -294,7 +290,9 @@ namespace Characters
                     Grounded = JustGrounded = true;
             }
             else
+            {
                 Grounded = false;
+            }
         }
     }
 
