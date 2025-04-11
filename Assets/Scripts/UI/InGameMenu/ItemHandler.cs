@@ -14,8 +14,14 @@ namespace UI
         private BasePopup _itemWheelPopup;
         private List<FieldInfo> _itemLists = new List<FieldInfo>();
         private int _currentItemWheelIndex = 0;
+        private int _selectedItemIndex = 0;
         public bool IsActive;
         private InGameManager _inGameManager;
+
+        private readonly KeyCode[] QuickSlotKeys = {
+            KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4,
+            KeyCode.Alpha5, KeyCode.Alpha6, KeyCode.Alpha7, KeyCode.Alpha8
+        };
 
         private void Awake()
         {
@@ -26,18 +32,37 @@ namespace UI
         private void Start()
         {
             StartCoroutine(UpdateForever(1f));
+            ScanItemLists(); // Ensure item lists are ready early
         }
 
         private void Update()
         {
+            // Switch wheels with spacebar
             if (IsActive && Input.GetKeyDown(KeyCode.Space))
             {
                 NextItemWheel();
             }
 
+            // Close with Escape
             if (IsActive && Input.GetKeyDown(KeyCode.Escape))
             {
                 SetItemWheel(false);
+            }
+
+            // Quick-use current selected item with item menu key (Q or whatever)
+            if (!IsActive && SettingsManager.InputSettings.Interaction.ItemMenu.GetKeyDown())
+            {
+                TryUseLastSelectedItem();
+            }
+
+            // Quick-slot keys (1–8) to activate items in current wheel
+            for (int i = 0; i < QuickSlotKeys.Length; i++)
+            {
+                if (Input.GetKeyDown(QuickSlotKeys[i]))
+                {
+                    TryUseSlot(i);
+                    break;
+                }
             }
         }
 
@@ -86,14 +111,13 @@ namespace UI
 
             FieldInfo field = _itemLists[index];
 
-            // Naming
             string wheelName = human.ItemListDisplayNames != null && human.ItemListDisplayNames.ContainsKey(field.Name)
                 ? human.ItemListDisplayNames[field.Name]
                 : field.Name;
 
             List<SimpleUseable> list = (List<SimpleUseable>)field.GetValue(human);
-            List<string> itemNames = new List<string>();
 
+            List<string> itemNames = new List<string>();
             foreach (var item in list)
             {
                 string name = item.Name;
@@ -113,13 +137,52 @@ namespace UI
             if (character is not Human)
                 return;
 
-            int selected = ((WheelPopup)_itemWheelPopup).SelectedItem;
-            if (selected >= 0 && selected < list.Count)
-                list[selected].SetInput(true);
+            _selectedItemIndex = ((WheelPopup)_itemWheelPopup).SelectedItem;
+
+            if (_selectedItemIndex >= 0 && _selectedItemIndex < list.Count)
+                list[_selectedItemIndex].SetInput(true);
 
             _itemWheelPopup.Hide();
             IsActive = false;
             ((InGameMenu)UIManager.CurrentMenu).SkipAHSSInput = true;
+        }
+
+        private void TryUseLastSelectedItem()
+        {
+            BaseCharacter character = _inGameManager.CurrentCharacter;
+            if (character is not Human human)
+                return;
+
+            if (_itemLists.Count == 0)
+                ScanItemLists();
+
+            if (_currentItemWheelIndex >= _itemLists.Count)
+                return;
+
+            FieldInfo field = _itemLists[_currentItemWheelIndex];
+            List<SimpleUseable> list = (List<SimpleUseable>)field.GetValue(human);
+
+            if (_selectedItemIndex >= 0 && _selectedItemIndex < list.Count)
+                list[_selectedItemIndex].SetInput(true);
+        }
+
+        private void TryUseSlot(int slotIndex)
+        {
+            BaseCharacter character = _inGameManager.CurrentCharacter;
+            if (character is not Human human)
+                return;
+
+            if (_itemLists.Count == 0)
+                ScanItemLists();
+
+            if (_currentItemWheelIndex >= _itemLists.Count)
+                return;
+
+            FieldInfo field = _itemLists[_currentItemWheelIndex];
+            List<SimpleUseable> list = (List<SimpleUseable>)field.GetValue(human);
+
+            if (slotIndex >= 0 && slotIndex < list.Count)
+                list[slotIndex].SetInput(true);
         }
 
         private void ScanItemLists()
