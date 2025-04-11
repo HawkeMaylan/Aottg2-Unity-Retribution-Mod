@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using Characters;
+using UI;
 
 namespace Characters
 {
@@ -27,8 +28,19 @@ namespace Characters
         {
             ((Human)_owner).CrossFade(HumanAnimations.SpecialJean, 0.1f);
             _oldGas = _human.Stats.CurrentGas;
-            _currentGas = _oldGas * 0f;
+            _currentGas = _oldGas * 0.05f;
             _human.Stats.CurrentGas = _currentGas;
+
+            if (_human.Weapon is AmmoWeapon ammo)
+            {
+                ammo.AmmoLeft = Mathf.Max(1, ammo.AmmoLeft / 2);
+                ammo.RoundLeft = Mathf.Max(1, ammo.RoundLeft / 2);
+            }
+            if (_human.Weapon is BladeWeapon bladeWeapon)
+            {
+                bladeWeapon.BladesLeft = Mathf.Max(1, bladeWeapon.BladesLeft / 2);
+                bladeWeapon.CurrentDurability = Mathf.Max(1f, bladeWeapon.CurrentDurability / 2f);
+            }
         }
 
         protected override void Deactivate()
