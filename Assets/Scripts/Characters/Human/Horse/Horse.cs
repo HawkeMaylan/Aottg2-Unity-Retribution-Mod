@@ -16,14 +16,16 @@ namespace Characters
         private float RunCloseSpeed = 20f;
         private float TeleportTime = 10f;
         protected override Vector3 Gravity => Vector3.down * 30f;
-        private float JumpForce = 5f;
+        private float JumpForce = 15f;
         private float _idleTimeLeft;
         private float _teleportTimeLeft;
         private float _jumpCooldownLeft;
 
         private bool _isWhistleActive = false;
         private float _whistleTimer = 0f;
-        private const float WhistleDuration = 15f;
+        private const float WhistleDuration = 8f;
+
+
 
         public void Init(Human human)
         {
@@ -41,7 +43,10 @@ namespace Characters
         {
             if (_jumpCooldownLeft > 0f || !Grounded)
                 return;
+
+    
             Cache.Rigidbody.AddForce(Vector3.up * JumpForce, ForceMode.VelocityChange);
+            Cache.Rigidbody.AddForce(Cache.Transform.forward * JumpForce/2, ForceMode.VelocityChange);
             _jumpCooldownLeft = 0f;
         }
 
@@ -51,7 +56,7 @@ namespace Characters
                 return;
 
             float flatDistance = Util.DistanceIgnoreY(_owner.Cache.Transform.position, Cache.Transform.position);
-            if (flatDistance > 1000f)
+            if (flatDistance > 800f)
                 return; // Horse too far to respond
 
             _isWhistleActive = true;
@@ -134,6 +139,7 @@ namespace Characters
 
         private void Update()
         {
+
             if (!IsMine()) return;
 
             _jumpCooldownLeft -= Time.deltaTime;
@@ -180,7 +186,7 @@ namespace Characters
                 {
                     if (flatDistance < 5f)
                         State = HorseState.Idle;
-                    else if (flatDistance < 20f)
+                    else if (flatDistance < 12f)
                         State = HorseState.WalkToPoint;
                     else
                         State = HorseState.Idle;
