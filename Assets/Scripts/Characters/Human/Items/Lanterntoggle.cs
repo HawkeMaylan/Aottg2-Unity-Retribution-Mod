@@ -6,6 +6,9 @@ namespace Characters
 {
     class Lanterntoggle : SimpleUseable
     {
+        private GameObject _lampInstance;
+        private bool _lampIsOn = false;
+
         public Lanterntoggle(BaseCharacter owner, string name, float cooldown) : base(owner)
         {
             Name = name;
@@ -15,19 +18,26 @@ namespace Characters
         protected override void Activate()
         {
             var human = _owner as Human;
+            if (human == null || !_owner.photonView.IsMine || !PhotonNetwork.InRoom || !PhotonNetwork.IsConnectedAndReady)
+                return;
 
-
-
-
-            try
+            // Destroy the old lamp if it exists
+            if (_lampInstance != null)
             {
-                Vector3 pos = human.Cache.Transform.position + Vector3.up * 1.5f;
-                GameObject LampObj = PhotonNetwork.Instantiate("Buildables/HumanLamp1", pos, Quaternion.identity);
-
-                if (LampObj != null)
-                    LampObj.transform.SetParent(human.transform, true);
+                PhotonNetwork.Destroy(_lampInstance);
+                _lampInstance = null;
             }
-            catch { /* Silently ignore errors if any occur */ }
+
+            // Toggle state
+            _lampIsOn = !_lampIsOn;
+
+            // Choose which prefab to instantiate
+            string lampPrefab = _lampIsOn ? "Buildables/HumanLamp1" : "Buildables/HumanLamp0";
+
+            // Spawn the new lamp
+            Vector3 pos = human.Cache.Transform.position + Vector3.up * 1.5f;
+            _lampInstance = PhotonNetwork.Instantiate(lampPrefab, pos, Quaternion.identity);
+            _lampInstance.transform.SetParent(human.transform, true);
         }
     }
 }
