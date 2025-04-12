@@ -136,6 +136,7 @@
 			"AttackSpeedMultiplier": 0.8
 		},
 		"Normal": {
+			"AttackSpeedMultiplier": 3
 		},
 		"Hard": {
 			"TurnPause": 0.3,
