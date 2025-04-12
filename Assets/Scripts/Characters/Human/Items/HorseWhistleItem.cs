@@ -1,5 +1,6 @@
 ﻿using Characters;
 using UnityEngine;
+using Photon.Pun;
 
 namespace Characters
 {
@@ -14,12 +15,20 @@ namespace Characters
         protected override void Activate()
         {
             var human = _owner as Human;
+            if (human == null || !_owner.photonView.IsMine || !PhotonNetwork.InRoom || !PhotonNetwork.IsConnectedAndReady || human.Horse == null)
+                return;
 
-            if (human != null && human.Horse != null)
+            human.Horse.HorseWhistle();
+
+            try
             {
-                human.Horse.HorseWhistle(); // 
-                human.PlaySound(HumanSounds.FlareLaunch); // Optional sound effect
+                Vector3 pos = human.Cache.Transform.position + Vector3.up * 1.5f;
+                GameObject whistleObj = PhotonNetwork.Instantiate("Buildables/Whistle", pos, Quaternion.identity);
+
+                if (whistleObj != null)
+                    whistleObj.transform.SetParent(human.transform, true);
             }
+            catch { /* Silently ignore errors if any occur */ }
         }
     }
 }
