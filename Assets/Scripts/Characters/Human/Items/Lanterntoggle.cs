@@ -1,6 +1,7 @@
 ﻿using Characters;
 using UnityEngine;
 using Photon.Pun;
+using System.Linq;
 
 namespace Characters
 {
@@ -21,23 +22,35 @@ namespace Characters
             if (human == null || !_owner.photonView.IsMine || !PhotonNetwork.InRoom || !PhotonNetwork.IsConnectedAndReady)
                 return;
 
-            // Destroy the old lamp if it exists
+            // Destroy previous lamp if it exists
             if (_lampInstance != null)
             {
                 PhotonNetwork.Destroy(_lampInstance);
                 _lampInstance = null;
             }
 
-            // Toggle state
+            // Toggle lamp state
             _lampIsOn = !_lampIsOn;
-
-            // Choose which prefab to instantiate
             string lampPrefab = _lampIsOn ? "Buildables/HumanLamp1" : "Buildables/HumanLamp0";
 
-            // Spawn the new lamp
-            Vector3 pos = human.Cache.Transform.position + Vector3.up * 1.5f;
-            _lampInstance = PhotonNetwork.Instantiate(lampPrefab, pos, Quaternion.identity);
-            _lampInstance.transform.SetParent(human.transform, true);
+            // Find target object (like player_uniform_MA)
+            Transform targetParent = human.Cache.Transform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("player_uniform_MA"));
+
+            if (targetParent == null)
+            {
+                Debug.LogWarning("Could not find 'player_uniform_MA' to attach the lamp.");
+                return;
+            }
+
+            // Instantiate the lamp prefab
+            _lampInstance = PhotonNetwork.Instantiate(lampPrefab, targetParent.position, Quaternion.identity);
+
+            // Parent it and apply custom transform values
+            _lampInstance.transform.SetParent(targetParent, worldPositionStays: false);
+            _lampInstance.transform.localPosition = new Vector3(-0.281f, -0.088f, 0.267f);
+            _lampInstance.transform.localRotation = Quaternion.Euler(70.825f, -45.559f, -72.411f);
+            _lampInstance.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         }
     }
 }
