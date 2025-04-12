@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3647327310203594099}
   - component: {fileID: 5578204792425208200}
   - component: {fileID: 4180297297722145861}
+  - component: {fileID: -8934487747631504412}
   m_Layer: 22
   m_Name: MainCamera
   m_TagString: MainCamera
@@ -221,3 +222,37 @@ MonoBehaviour:
   shaderFXAAPreset3: {fileID: 4800000, guid: c182fa94a5a0a4c02870641efcd38cd5, type: 3}
   shaderFXAAII: {fileID: 4800000, guid: cd5b323dcc592457790ff18b528f5e67, type: 3}
   shaderFXAAIII: {fileID: 4800000, guid: c547503fff0e8482ea5793727057041c, type: 3}
+--- !u!114 &-8934487747631504412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 128344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d8597127d51ea9488ce0577bd417bb3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objects:
+  - name: Foundation
+    prefab: {fileID: 8644336022944215821, guid: 8d18cc7f3adc8dd4b91558ffda2b702a, type: 3}
+    preview: {fileID: 8687887938053977925, guid: 63a8590f7dcd9a7469cb5d3fe2a0628f, type: 3}
+    resources: 0
+  - name: Building1
+    prefab: {fileID: 5139746843184834283, guid: 0bb280dcd5f43934a8de377c9a4fc527, type: 3}
+    preview: {fileID: 1853216950271249195, guid: 3bb72c142a0bcde4dbd732845b3aafef, type: 3}
+    resources: 0
+  currentobject:
+    name: 
+    prefab: {fileID: 0}
+    preview: {fileID: 0}
+    resources: 0
+  currentpreview: {fileID: 0}
+  cam: {fileID: 428344}
+  layer:
+    serializedVersion: 2
+    m_Bits: 59768832
+  offset: 1
+  gridSize: 2
+  IsBuilding: 0
