@@ -160,6 +160,10 @@ public class BasicBuildSystem : MonoBehaviour
             PhotonNetwork.Instantiate(photonPath, currentpos, Quaternion.Euler(currentrot));
 
             Destroy(currentpreview.gameObject);
+
+            // Immediately create a new preview so player can keep building
+            GameObject curprev = Instantiate(currentobject.preview, currentpos, Quaternion.Euler(currentrot));
+            currentpreview = curprev.transform;
         }
         else
         {
