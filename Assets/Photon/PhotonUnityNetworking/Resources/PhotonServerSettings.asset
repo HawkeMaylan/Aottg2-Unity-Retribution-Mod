@@ -133,6 +133,8 @@ MonoBehaviour:
   - ConfirmCarryRPC
   - BlowAwayRPC
   - ToggleBladeFireRPC
+  - RPC_SetFollowTarget
+  - RPC_UpdateLampTransform
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
