@@ -102,7 +102,7 @@ MonoBehaviour:
   IsBuildable: 0
   second: 1
   childcol: {fileID: 0}
-  graphics: {fileID: 0}
+  graphics: {fileID: 564358675647995402}
 --- !u!1 &8244194300923202171
 GameObject:
   m_ObjectHideFlags: 0
