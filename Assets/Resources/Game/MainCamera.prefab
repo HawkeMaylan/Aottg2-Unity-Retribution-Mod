@@ -254,5 +254,5 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 59768832
   offset: 1
-  gridSize: 2
+  gridSize: 1
   IsBuilding: 0
