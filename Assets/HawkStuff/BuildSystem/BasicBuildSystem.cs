@@ -18,9 +18,8 @@ public class BasicBuildSystem : MonoBehaviour
     public float gridSize = 1.0f;
 
     public bool IsBuilding;
-    private bool scriptActive = false; // Tracks whether the script is active
+    private bool scriptActive = false;
 
-    // Start is called before the first frame update
     void Start()
     {
         changeCurrentBuilding(0);
@@ -28,35 +27,29 @@ public class BasicBuildSystem : MonoBehaviour
 
     void Update()
     {
-        // Toggle the activation of the script with the backtick key (`).
-        if (Input.GetKeyDown(KeyCode.BackQuote)) // ` key
+        if (Input.GetKeyDown(KeyCode.BackQuote))
         {
             scriptActive = !scriptActive;
-            IsBuilding = false; // Ensure IsBuilding is reset when script is deactivated
-            ToggleCursor(!scriptActive); // Toggle cursor visibility
+            IsBuilding = false;
+            ToggleCursor(!scriptActive);
 
-            // Destroy the preview if the script is deactivated
             if (!scriptActive && currentpreview != null)
             {
                 Destroy(currentpreview.gameObject);
             }
         }
 
-        // If the script is not active, do nothing
         if (!scriptActive) return;
 
-        // Toggle IsBuilding with the K key
         if (Input.GetKeyDown(KeyCode.K))
         {
             IsBuilding = !IsBuilding;
 
-            // Destroy the preview if IsBuilding is set to false
             if (!IsBuilding && currentpreview != null)
             {
                 Destroy(currentpreview.gameObject);
             }
 
-            // Recreate the preview if IsBuilding is set to true
             if (IsBuilding && currentpreview == null)
             {
                 GameObject curprev = Instantiate(currentobject.preview, currentpos, Quaternion.Euler(currentrot));
@@ -64,7 +57,6 @@ public class BasicBuildSystem : MonoBehaviour
             }
         }
 
-        // Building system logic runs only if IsBuilding is true
         if (IsBuilding)
         {
             startPreview();
@@ -72,18 +64,18 @@ public class BasicBuildSystem : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.UpArrow))
                 Build();
 
-            if (Input.GetKeyDown("0") || Input.GetKeyDown("1") || Input.GetKeyDown("2"))
+            if (Input.GetKeyDown(KeyCode.B))
                 switchCurrentBuilding();
         }
     }
 
     public void switchCurrentBuilding()
     {
-        for (int i = 0; i < 3; i++)
-        {
-            if (Input.GetKeyDown("" + i))
-                changeCurrentBuilding(i);
-        }
+        int nextIndex = objects.IndexOf(currentobject) + 1;
+        if (nextIndex >= objects.Count)
+            nextIndex = 0;
+
+        changeCurrentBuilding(nextIndex);
     }
 
     public void changeCurrentBuilding(int cur)
@@ -120,7 +112,7 @@ public class BasicBuildSystem : MonoBehaviour
 
     public void showPreview(RaycastHit hit2)
     {
-        if (currentpreview == null) return; // Prevent using destroyed reference
+        if (currentpreview == null) return;
 
         currentpos = hit2.point;
         currentpos -= Vector3.one * offset;
@@ -162,17 +154,16 @@ public class BasicBuildSystem : MonoBehaviour
                 return;
             }
 
-            // Get the prefab name (must match what's in Resources/Buildables)
             string prefabName = currentobject.prefab.name;
-
-            // Build the full Photon path
             string photonPath = "Buildables/" + prefabName;
 
-            // Instantiate across the network
             PhotonNetwork.Instantiate(photonPath, currentpos, Quaternion.Euler(currentrot));
 
-            // Destroy preview after building
             Destroy(currentpreview.gameObject);
+
+            // Immediately create a new preview so player can keep building
+            GameObject curprev = Instantiate(currentobject.preview, currentpos, Quaternion.Euler(currentrot));
+            currentpreview = curprev.transform;
         }
         else
         {

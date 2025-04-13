@@ -243,6 +243,10 @@ MonoBehaviour:
     prefab: {fileID: 5139746843184834283, guid: 0bb280dcd5f43934a8de377c9a4fc527, type: 3}
     preview: {fileID: 1853216950271249195, guid: 3bb72c142a0bcde4dbd732845b3aafef, type: 3}
     resources: 0
+  - name: Lamp
+    prefab: {fileID: 590150355707167029, guid: ce23ebbbfa2c8db48975a75ee9b644b5, type: 3}
+    preview: {fileID: 590150355707167029, guid: af928091fa034534bb407784a99d2332, type: 3}
+    resources: 0
   currentobject:
     name: 
     prefab: {fileID: 0}
