@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 6282979500238762104}
   - component: {fileID: 6906023112911283900}
   - component: {fileID: 3267913432424093968}
-  - component: {fileID: 3180019387454563910}
+  - component: {fileID: -7375604279902935169}
+  - component: {fileID: 4051025539534051661}
   m_Layer: 0
   m_Name: HumanLamp0
   m_TagString: Untagged
@@ -147,7 +148,7 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
---- !u!114 &3180019387454563910
+--- !u!114 &-7375604279902935169
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -162,10 +163,22 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
+  Synchronization: 1
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents: []
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &4051025539534051661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430772204998882531}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de62ba5359e244a498643bb480f2ae16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
