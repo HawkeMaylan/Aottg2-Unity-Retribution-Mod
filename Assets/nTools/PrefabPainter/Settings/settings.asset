@@ -2687,9 +2687,9 @@ MonoBehaviour:
         brushOverlapCheckLayers:
           serializedVersion: 2
           m_Bits: 0
-        surfaceOffset: 0
+        surfaceOffset: -5
         orientationTransformMode: 0
-        orientationMode: 0
+        orientationMode: 2
         alongBrushStroke: 0
         rotation: {x: 0, y: 0, z: 0}
         randomizeOrientationX: 0
@@ -2989,7 +2989,7 @@ MonoBehaviour:
       - gameObject: {fileID: 0}
       - gameObject: {fileID: 0}
       selectedSlot: 0
-      selected: 0
+      selected: 1
       colorTag: 0
       customPreviewImage: {fileID: 0}
     - name: Pine1Large
@@ -3304,15 +3304,15 @@ MonoBehaviour:
       - gameObject: {fileID: 0}
       - gameObject: {fileID: 0}
       selectedSlot: 0
-      selected: 1
+      selected: 0
       colorTag: 0
       customPreviewImage: {fileID: 0}
     - name: bigtree2_LOD0
       settings:
         brushRadius: 1
         brushSpacing: 0.5
-        brushOverlapCheckMode: 0
-        brushOverlapDistance: 0.5
+        brushOverlapCheckMode: 1
+        brushOverlapDistance: 200
         brushOverlapCheckObjects: 1
         brushOverlapCheckLayers:
           serializedVersion: 2
