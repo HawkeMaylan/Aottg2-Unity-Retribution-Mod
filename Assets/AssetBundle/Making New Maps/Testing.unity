@@ -62287,8 +62287,8 @@ MonoBehaviour:
   opacity: 100
   passIndex: 2
   solver: 0
-  minMax: {x: 0.25, y: 0.25641024}
-  radius: 1
+  minMax: {x: 0.3846154, y: 0.47435924}
+  radius: 6.03
   minFalloff: 0.001
   maxFalloff: 0.001
 --- !u!1001 &1588859882
