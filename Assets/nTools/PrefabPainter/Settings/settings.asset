@@ -2679,7 +2679,7 @@ MonoBehaviour:
       customPreviewImage: {fileID: 0}
     - name: pine1Medium
       settings:
-        brushRadius: 505
+        brushRadius: 202
         brushSpacing: 0.5
         brushOverlapCheckMode: 1
         brushOverlapDistance: 60
