@@ -6,11 +6,12 @@ TerrainLayer:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: layer_Grass01_BigUVd261c09ae55ba1e3
-  m_DiffuseTexture: {fileID: 2800000, guid: 38bb15d6b378aff46b461e248592d1da, type: 3}
-  m_NormalMapTexture: {fileID: 0}
+  m_Name: layer_Cracked Soil Texturefun.com 4k 8_baseColorCracked Soil Texturefun.com
+    4k 8_normal3d3aba195e4d26ee
+  m_DiffuseTexture: {fileID: 2800000, guid: 9cd7ee2f17151bf4b83de33b7b701c3f, type: 3}
+  m_NormalMapTexture: {fileID: 2800000, guid: 87c79712da3d2f04c9f67458f244ff81, type: 3}
   m_MaskMapTexture: {fileID: 0}
-  m_TileSize: {x: 20, y: 20}
+  m_TileSize: {x: 15, y: 15}
   m_TileOffset: {x: 0, y: 0}
   m_Specular: {r: 0, g: 0, b: 0, a: 0}
   m_Metallic: 0
