@@ -16411,6 +16411,8 @@ GameObject:
   - component: {fileID: 11414280}
   - component: {fileID: 3902152229338984631}
   - component: {fileID: 3274944267462614993}
+  - component: {fileID: 2099644246177627274}
+  - component: {fileID: 4723133760165692264}
   m_Layer: 0
   m_Name: HumanPlayer
   m_TagString: Untagged
@@ -16709,6 +16711,8 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 11414280}
   - {fileID: 3274944267462614993}
+  - {fileID: 2099644246177627274}
+  - {fileID: 4723133760165692264}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -16722,6 +16726,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 319d8d071187f77409fa07d22a14859b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2099644246177627274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 101914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b84bb3c2567c6e94fa11fe3f15ddf5cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4723133760165692264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 101914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab42bd719780a18489df5a59c9825f8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &4310715724008364727
@@ -16844,6 +16872,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c5a18491de19501419ec05c43e0522cd, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: c5a18491de19501419ec05c43e0522cd, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: c5a18491de19501419ec05c43e0522cd, type: 3}
@@ -17185,7 +17217,7 @@ SkinnedMeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7590753088907573007}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1

@@ -2698,6 +2698,8 @@ namespace Characters
             itemList3.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
             itemList3.Add(new HorseWhistleItem(this, "Whistle", 5f));
             itemList3.Add(new Lanterntoggle(this, "Lantern On/Off", 1f));
+            itemList3.Add(new CloakToggle(this, "Cape On/Off", 1f));
+            itemList3.Add(new Cloak1Toggle(this, "Hood On/Off", 1f));
 
 
 
