@@ -6,6 +6,14 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     [Header("Offset from horse when attaching")]
     public Vector3 attachOffset = new Vector3(0f, 0f, -2f);
 
+    [Header("FixedJoint Settings")]
+    public float breakForce = Mathf.Infinity;
+    public float breakTorque = Mathf.Infinity;
+    public float massScale = 1f;
+    public float connectedMassScale = 1f;
+    public bool enableCollision = false;
+    public bool enablePreprocessing = true;
+
     private bool isAttached = false;
     private Transform horseRootInContact;
     private Transform attachedHorse;
@@ -65,24 +73,29 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
         Transform horseRoot = horseView.transform;
 
-        // Move wagon to offset position behind horse
         wagon.position = horseRoot.TransformPoint(offset);
         wagon.rotation = horseRoot.rotation;
 
-        // Create and configure joint
         FixedJoint joint = wagon.GetComponent<FixedJoint>();
-        if (joint != null) Destroy(joint); // Clean old joints if needed
+        if (joint != null) Destroy(joint);
 
         joint = wagon.gameObject.AddComponent<FixedJoint>();
         Rigidbody horseRb = horseRoot.GetComponent<Rigidbody>();
+
         if (horseRb != null)
         {
             joint.connectedBody = horseRb;
-            joint.breakForce = Mathf.Infinity;
-            joint.breakTorque = Mathf.Infinity;
         }
 
-        rb.isKinematic = false; // Let physics simulation occur
+        // Apply public settings
+        joint.breakForce = breakForce;
+        joint.breakTorque = breakTorque;
+        joint.massScale = massScale;
+        joint.connectedMassScale = connectedMassScale;
+        joint.enableCollision = enableCollision;
+        joint.enablePreprocessing = enablePreprocessing;
+
+        rb.isKinematic = false;
         isAttached = true;
         attachedHorse = horseRoot;
     }
@@ -91,7 +104,10 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private void RPC_DetachFromHorse()
     {
         FixedJoint joint = wagon.GetComponent<FixedJoint>();
-        if (joint != null) Destroy(joint);
+        if (joint != null)
+        {
+            Destroy(joint);
+        }
 
         if (rb != null)
         {
