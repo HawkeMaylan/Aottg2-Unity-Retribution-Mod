@@ -20,6 +20,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private Rigidbody rb;
     private Transform wagon;
     private PhotonView pv;
+    private int attachedHorseViewID = -1;
 
     private void Start()
     {
@@ -37,14 +38,26 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
             if (!isAttached && horseRootInContact != null)
             {
                 PhotonView horseView = horseRootInContact.GetComponentInParent<PhotonView>();
-                if (horseView != null)
+                if (horseView != null && horseView.Owner == pv.Owner)
                 {
                     pv.RPC("RPC_AttachToHorse", RpcTarget.AllBuffered, horseView.ViewID, attachOffset);
                 }
+                else
+                {
+                    Debug.LogWarning("Cannot attach: horse does not belong to this player.");
+                }
             }
-            else if (isAttached)
+            else if (isAttached && attachedHorseViewID != -1)
             {
-                pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
+                PhotonView horseView = PhotonView.Find(attachedHorseViewID);
+                if (horseView != null && horseView.Owner == pv.Owner)
+                {
+                    pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
+                }
+                else
+                {
+                    Debug.LogWarning("Cannot detach: horse does not belong to this player.");
+                }
             }
         }
     }
@@ -87,7 +100,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
             joint.connectedBody = horseRb;
         }
 
-        // Apply public settings
+        // Apply joint settings
         joint.breakForce = breakForce;
         joint.breakTorque = breakTorque;
         joint.massScale = massScale;
@@ -98,6 +111,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         rb.isKinematic = false;
         isAttached = true;
         attachedHorse = horseRoot;
+        attachedHorseViewID = horseViewID;
     }
 
     [PunRPC]
@@ -116,5 +130,6 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
         isAttached = false;
         attachedHorse = null;
+        attachedHorseViewID = -1;
     }
 }
