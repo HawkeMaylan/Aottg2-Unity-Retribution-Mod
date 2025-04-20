@@ -3,16 +3,24 @@ using Photon.Pun;
 
 public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 {
-    [Header("Offset from horse when attaching")]
+    [Header("Attachment Offset")]
     public Vector3 attachOffset = new Vector3(0f, 0f, -2f);
 
-    [Header("FixedJoint Settings")]
-    public float breakForce = Mathf.Infinity;
-    public float breakTorque = Mathf.Infinity;
-    public float massScale = 1f;
-    public float connectedMassScale = 1f;
+    [Header("Joint Motion Limits")]
+    public float linearLimit = 0.5f;
+
+    [Header("Linear Drive Settings")]
+    public float linearSpring = 100f;
+    public float linearDamper = 5f;
+
+    [Header("Angular Drive Settings")]
+    public float angularSpring = 10f;
+    public float angularDamper = 1f;
+
+    [Header("Joint Break Settings")]
+    public float jointBreakForce = Mathf.Infinity;
+    public float jointBreakTorque = Mathf.Infinity;
     public bool enableCollision = false;
-    public bool enablePreprocessing = true;
 
     private bool isAttached = false;
     private Transform horseRootInContact;
@@ -33,27 +41,17 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     {
         if (Input.GetKeyDown(KeyCode.G))
         {
-            // Try to attach if not attached
             if (!isAttached && horseRootInContact != null)
             {
                 PhotonView horseView = horseRootInContact.GetComponentInParent<PhotonView>();
                 if (horseView != null && horseView.Owner == PhotonNetwork.LocalPlayer)
                 {
-                    // Anyone can request ownership while it's detached
                     if (!pv.IsMine)
-                    {
                         pv.RequestOwnership();
-                    }
 
                     pv.RPC("RPC_AttachToHorse", RpcTarget.AllBuffered, horseView.ViewID, attachOffset);
                 }
-                else
-                {
-                    Debug.LogWarning("Cannot attach: horse is not yours.");
-                }
             }
-
-            // Only the current owner can detach
             else if (isAttached && pv.IsMine)
             {
                 pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
@@ -88,24 +86,53 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         wagon.position = horseRoot.TransformPoint(offset);
         wagon.rotation = horseRoot.rotation;
 
-        FixedJoint joint = wagon.GetComponent<FixedJoint>();
-        if (joint != null) Destroy(joint);
+        // Destroy existing joint if any
+        var existingJoint = wagon.GetComponent<ConfigurableJoint>();
+        if (existingJoint != null) Destroy(existingJoint);
 
-        joint = wagon.gameObject.AddComponent<FixedJoint>();
+        ConfigurableJoint joint = wagon.gameObject.AddComponent<ConfigurableJoint>();
         Rigidbody horseRb = horseRoot.GetComponent<Rigidbody>();
-
         if (horseRb != null)
         {
             joint.connectedBody = horseRb;
         }
 
-        // Apply joint settings
-        joint.breakForce = breakForce;
-        joint.breakTorque = breakTorque;
-        joint.massScale = massScale;
-        joint.connectedMassScale = connectedMassScale;
+        // Joint motion configuration
+        joint.xMotion = ConfigurableJointMotion.Limited;
+        joint.yMotion = ConfigurableJointMotion.Limited;
+        joint.zMotion = ConfigurableJointMotion.Limited;
+        joint.angularXMotion = ConfigurableJointMotion.Free;
+        joint.angularYMotion = ConfigurableJointMotion.Free;
+        joint.angularZMotion = ConfigurableJointMotion.Free;
+
+        // Linear limit
+        SoftJointLimit limit = new SoftJointLimit();
+        limit.limit = linearLimit;
+        joint.linearLimit = limit;
+
+        // Linear spring/damper
+        JointDrive linearDrive = new JointDrive
+        {
+            positionSpring = linearSpring,
+            positionDamper = linearDamper,
+            maximumForce = Mathf.Infinity
+        };
+        joint.xDrive = joint.yDrive = joint.zDrive = linearDrive;
+
+        // Angular drive (optional)
+        JointDrive angularDrive = new JointDrive
+        {
+            positionSpring = angularSpring,
+            positionDamper = angularDamper,
+            maximumForce = Mathf.Infinity
+        };
+        joint.rotationDriveMode = RotationDriveMode.Slerp;
+        joint.slerpDrive = angularDrive;
+
+        // Other joint settings
+        joint.breakForce = jointBreakForce;
+        joint.breakTorque = jointBreakTorque;
         joint.enableCollision = enableCollision;
-        joint.enablePreprocessing = enablePreprocessing;
 
         rb.isKinematic = false;
         isAttached = true;
@@ -116,17 +143,13 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     [PunRPC]
     private void RPC_DetachFromHorse()
     {
-        FixedJoint joint = wagon.GetComponent<FixedJoint>();
+        var joint = wagon.GetComponent<ConfigurableJoint>();
         if (joint != null)
         {
             Destroy(joint);
         }
 
-        if (rb != null)
-        {
-            rb.isKinematic = false;
-        }
-
+        rb.isKinematic = false;
         isAttached = false;
         attachedHorse = null;
         attachedHorseViewID = -1;

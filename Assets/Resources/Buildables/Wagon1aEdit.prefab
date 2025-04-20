@@ -663,12 +663,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attachOffset: {x: -0.03, y: 1.65, z: -3.55}
-  breakForce: 750
-  breakTorque: 750
-  massScale: 3
-  connectedMassScale: 5
+  linearLimit: 10
+  linearSpring: 1000
+  linearDamper: 5
+  angularSpring: 1000
+  angularDamper: 1
+  jointBreakForce: Infinity
+  jointBreakTorque: Infinity
   enableCollision: 1
-  enablePreprocessing: 1
 --- !u!135 &8967567940926374313
 SphereCollider:
   m_ObjectHideFlags: 0
