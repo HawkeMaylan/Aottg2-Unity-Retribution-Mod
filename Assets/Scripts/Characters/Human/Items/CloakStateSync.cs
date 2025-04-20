@@ -4,7 +4,7 @@ using System.Linq;
 
 public class CloakStateSync : MonoBehaviourPun, IPunObservable
 {
-    private bool _cloakIsOn = true;
+    private bool _cloakIsOn = false;
 
     public void Toggle()
     {
