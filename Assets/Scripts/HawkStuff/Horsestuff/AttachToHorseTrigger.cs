@@ -1,6 +1,7 @@
 using UnityEngine;
+using Photon.Pun;
 
-public class AttachToHorseTrigger : MonoBehaviour
+public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 {
     [Header("Offset from horse when attaching")]
     public Vector3 attachOffset = new Vector3(0f, 0f, -2f);
@@ -10,24 +11,32 @@ public class AttachToHorseTrigger : MonoBehaviour
     private Transform attachedHorse;
     private Rigidbody rb;
     private Transform wagon;
+    private PhotonView pv;
 
     private void Start()
     {
         wagon = transform.root;
         rb = wagon.GetComponent<Rigidbody>();
+        pv = wagon.GetComponent<PhotonView>();
     }
 
     private void Update()
     {
+        if (!pv.IsMine) return;
+
         if (Input.GetKeyDown(KeyCode.G))
         {
             if (!isAttached && horseRootInContact != null)
             {
-                AttachToHorse(horseRootInContact);
+                PhotonView horseView = horseRootInContact.GetComponentInParent<PhotonView>();
+                if (horseView != null)
+                {
+                    pv.RPC("RPC_AttachToHorse", RpcTarget.AllBuffered, horseView.ViewID, attachOffset);
+                }
             }
             else if (isAttached)
             {
-                DetachFromHorse();
+                pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
             }
         }
     }
@@ -48,29 +57,41 @@ public class AttachToHorseTrigger : MonoBehaviour
         }
     }
 
-    private void AttachToHorse(Transform horseRoot)
+    [PunRPC]
+    private void RPC_AttachToHorse(int horseViewID, Vector3 offset)
     {
-        if (horseRoot == null) return;
+        PhotonView horseView = PhotonView.Find(horseViewID);
+        if (horseView == null) return;
 
-        wagon.SetParent(horseRoot);
-        wagon.localPosition = attachOffset;
-        wagon.localRotation = Quaternion.identity;
+        Transform horseRoot = horseView.transform;
 
-        if (rb != null)
+        // Move wagon to offset position behind horse
+        wagon.position = horseRoot.TransformPoint(offset);
+        wagon.rotation = horseRoot.rotation;
+
+        // Create and configure joint
+        FixedJoint joint = wagon.GetComponent<FixedJoint>();
+        if (joint != null) Destroy(joint); // Clean old joints if needed
+
+        joint = wagon.gameObject.AddComponent<FixedJoint>();
+        Rigidbody horseRb = horseRoot.GetComponent<Rigidbody>();
+        if (horseRb != null)
         {
-            rb.isKinematic = true;
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+            joint.connectedBody = horseRb;
+            joint.breakForce = Mathf.Infinity;
+            joint.breakTorque = Mathf.Infinity;
         }
 
+        rb.isKinematic = false; // Let physics simulation occur
         isAttached = true;
         attachedHorse = horseRoot;
-        Debug.Log("Wagon attached to horse.");
     }
 
-    private void DetachFromHorse()
+    [PunRPC]
+    private void RPC_DetachFromHorse()
     {
-        wagon.SetParent(null);
+        FixedJoint joint = wagon.GetComponent<FixedJoint>();
+        if (joint != null) Destroy(joint);
 
         if (rb != null)
         {
@@ -79,6 +100,5 @@ public class AttachToHorseTrigger : MonoBehaviour
 
         isAttached = false;
         attachedHorse = null;
-        Debug.Log("Wagon detached from horse.");
     }
 }
