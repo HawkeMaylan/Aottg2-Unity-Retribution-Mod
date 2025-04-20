@@ -54,8 +54,13 @@ namespace UI
                 bool setNameToHighlyVisible = NameOverrideTarget == ShowMode.All || (NameOverrideTarget == ShowMode.Mine && character.IsMine()) ||
                         (NameOverrideTarget == ShowMode.Others && !character.IsMine());
 
-                if (_inGameManager.Restarting || SettingsManager.InGameCurrent.Misc.RealismMode.Value || (character.IsMainCharacter() && camera.GetCameraDistance() <= 0f))
+                float distanceToCamera = Vector3.Distance(character.Cache.Transform.position, camera.Cache.Transform.position);
+
+                if (_inGameManager.Restarting || (SettingsManager.InGameCurrent.Misc.RealismMode.Value && distanceToCamera > 50f) ||
+                    (character.IsMainCharacter() && camera.GetCameraDistance() <= 0f))
+                {
                     toggleName = toggleHealth = false;
+                }
                 if ((!toggleName && !toggleHealth) || inMenu)
                 {
                     popup.HideImmediate();
