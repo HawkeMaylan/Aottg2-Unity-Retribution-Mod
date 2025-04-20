@@ -2697,12 +2697,13 @@ namespace Characters
             itemList2.Add(new FlareItem(this, "Cheese Flare", Color.white, 40f));
             itemList3.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
             itemList3.Add(new HorseWhistleItem(this, "Whistle", 5f));
+            itemList3.Add(new Wagon1Spawn(this, "Wagon1", 5f));
             itemList3.Add(new Lanterntoggle(this, "Lantern On/Off", 1f));
             itemList3.Add(new CloakToggle(this, "Cape On/Off", 1f));
             itemList3.Add(new Cloak1Toggle(this, "Hood On/Off", 1f));
 
 
-
+            
             ItemListDisplayNames["itemList1"] = "Flares";
             ItemListDisplayNames["itemList2"] = "Support";
             ItemListDisplayNames["itemList3"] = "Backup";
