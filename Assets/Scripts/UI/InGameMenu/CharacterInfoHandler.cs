@@ -44,6 +44,7 @@ namespace UI
             {
                 var character = kv.Key;
                 var popup = kv.Value;
+
                 bool showName = (showNameMode == ShowMode.All || (showNameMode == ShowMode.Mine && character.IsMainCharacter()) ||
                     (showNameMode == ShowMode.Others && !character.IsMainCharacter()));
                 bool showHealth = (showHealthMode == ShowMode.All || (showHealthMode == ShowMode.Mine && character.IsMainCharacter()) ||
@@ -56,16 +57,40 @@ namespace UI
 
                 float distanceToCamera = Vector3.Distance(character.Cache.Transform.position, camera.Cache.Transform.position);
 
-                if (_inGameManager.Restarting || (SettingsManager.InGameCurrent.Misc.RealismMode.Value && distanceToCamera > 50f) ||
-                    (character.IsMainCharacter() && camera.GetCameraDistance() <= 0f))
+                //  Check cloak1model state 
+                bool cloak1Active = false;
+                var cloakSync = character.GetComponent<Cloak1StateSync>();
+                if (cloakSync != null && cloakSync.enabled && cloakSync.gameObject.activeInHierarchy)
+                {
+                    Transform[] allTransforms = cloakSync.GetComponentsInChildren<Transform>(true);
+                    foreach (var t in allTransforms)
+                    {
+                        if (t.name == "cloak1model")
+                        {
+                            var r = t.GetComponent<Renderer>();
+                            if (r != null && r.enabled)
+                            {
+                                cloak1Active = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if (_inGameManager.Restarting ||
+                    (SettingsManager.InGameCurrent.Misc.RealismMode.Value && distanceToCamera > 50f) ||
+                    (character.IsMainCharacter() && camera.GetCameraDistance() <= 0f) ||
+                    cloak1Active)
                 {
                     toggleName = toggleHealth = false;
                 }
+
                 if ((!toggleName && !toggleHealth) || inMenu)
                 {
                     popup.HideImmediate();
                     continue;
                 }
+
                 Vector3 worldPosition = character.Cache.Transform.position + popup.Offset;
                 float distance = Vector3.Distance(camera.Cache.Transform.position, worldPosition);
                 if (distance > popup.Range)
@@ -75,17 +100,20 @@ namespace UI
                         popup.transform.position = camera.Camera.WorldToScreenPoint(worldPosition);
                     continue;
                 }
+
                 var direction = (worldPosition - camera.Cache.Transform.position).normalized;
                 if (Vector3.Angle(camera.Cache.Transform.forward, direction) > 90f)
                 {
                     popup.HideImmediate();
                     continue;
                 }
+
                 if (!character.IsMainCharacter() && Physics.Raycast(camera.Cache.Transform.position, direction, distance, CullMask))
                 {
                     popup.HideImmediate();
                     continue;
                 }
+
                 if (toggleHealth)
                 {
                     popup.ToggleHealthbar(true);
@@ -93,21 +121,29 @@ namespace UI
                     popup.SetHealthbar(character.CurrentHealth, character.MaxHealth, color);
                 }
                 else
+                {
                     popup.ToggleHealthbar(false);
+                }
+
                 if (toggleName)
                 {
                     popup.ToggleName(true);
                 }
                 else
+                {
                     popup.ToggleName(false);
+                }
+
                 Vector3 screenPosition = camera.Camera.WorldToScreenPoint(worldPosition);
                 popup.transform.position = screenPosition;
+
                 if (setNameToHighlyVisible)
                     popup.ShowImmediate();
                 else
                     popup.Show();
             }
         }
+
 
         protected CharacterInfoPopup CreateInfoPopup(BaseCharacter character)
         {
