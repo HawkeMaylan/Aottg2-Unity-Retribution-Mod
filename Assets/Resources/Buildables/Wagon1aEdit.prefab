@@ -603,6 +603,7 @@ GameObject:
   - component: {fileID: 8620797078683940926}
   - component: {fileID: 8967567940926374313}
   - component: {fileID: 223773099780766276}
+  - component: {fileID: 4915449211714290812}
   m_Layer: 0
   m_Name: Wagon1aEdit
   m_TagString: Untagged
@@ -644,7 +645,8 @@ MonoBehaviour:
   Synchronization: 1
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 4915449211714290812}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -661,8 +663,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attachOffset: {x: -0.03, y: 1.65, z: -3.55}
-  breakForce: 1000
-  breakTorque: 1000
+  breakForce: 750
+  breakTorque: 750
   massScale: 3
   connectedMassScale: 5
   enableCollision: 1
@@ -696,7 +698,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4432750536981979705}
   serializedVersion: 4
-  m_Mass: 0.2
+  m_Mass: 0.25
   m_Drag: 0.3
   m_AngularDrag: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -715,6 +717,22 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!114 &4915449211714290812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4432750536981979705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizeVelocity: 1
+  m_SynchronizeAngularVelocity: 1
+  m_TeleportEnabled: 0
+  m_TeleportIfDistanceGreaterThan: 3
 --- !u!1 &6774636239029228514
 GameObject:
   m_ObjectHideFlags: 0
