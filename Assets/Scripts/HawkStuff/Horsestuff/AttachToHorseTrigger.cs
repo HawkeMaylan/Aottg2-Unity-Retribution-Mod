@@ -31,33 +31,32 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        if (!pv.IsMine) return;
-
         if (Input.GetKeyDown(KeyCode.G))
         {
+            // Try to attach if not attached
             if (!isAttached && horseRootInContact != null)
             {
                 PhotonView horseView = horseRootInContact.GetComponentInParent<PhotonView>();
-                if (horseView != null && horseView.Owner == pv.Owner)
+                if (horseView != null && horseView.Owner == PhotonNetwork.LocalPlayer)
                 {
+                    // Anyone can request ownership while it's detached
+                    if (!pv.IsMine)
+                    {
+                        pv.RequestOwnership();
+                    }
+
                     pv.RPC("RPC_AttachToHorse", RpcTarget.AllBuffered, horseView.ViewID, attachOffset);
                 }
                 else
                 {
-                    Debug.LogWarning("Cannot attach: horse does not belong to this player.");
+                    Debug.LogWarning("Cannot attach: horse is not yours.");
                 }
             }
-            else if (isAttached && attachedHorseViewID != -1)
+
+            // Only the current owner can detach
+            else if (isAttached && pv.IsMine)
             {
-                PhotonView horseView = PhotonView.Find(attachedHorseViewID);
-                if (horseView != null && horseView.Owner == pv.Owner)
-                {
-                    pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
-                }
-                else
-                {
-                    Debug.LogWarning("Cannot detach: horse does not belong to this player.");
-                }
+                pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
             }
         }
     }
