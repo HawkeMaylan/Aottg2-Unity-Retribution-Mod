@@ -244,7 +244,12 @@ namespace UI
 
         public bool AllowMap()
         {
-            return (!SettingsManager.InGameCurrent.Misc.GlobalMinimapDisable.Value && !SettingsManager.InGameCurrent.Misc.RealismMode.Value);
+            bool minimapDisabled = SettingsManager.InGameCurrent.Misc.GlobalMinimapDisable.Value;
+            bool realismEnabled = SettingsManager.InGameCurrent.Misc.RealismMode.Value;
+
+            // Allow the map if it's not disabled and realism is off,
+            // or if realism is on but this player is the Master Client
+            return !minimapDisabled && (!realismEnabled || Photon.Pun.PhotonNetwork.IsMasterClient);
         }
 
         public static bool InMenu()
