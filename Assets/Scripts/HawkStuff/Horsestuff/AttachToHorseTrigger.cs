@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class AttachToHorseTrigger : MonoBehaviour
 {
+    [Header("Offset from horse when attaching")]
+    public Vector3 attachOffset = new Vector3(0f, 0f, -2f);
+
     private bool isAttached = false;
 
     private void OnTriggerEnter(Collider other)
@@ -18,11 +21,11 @@ public class AttachToHorseTrigger : MonoBehaviour
                 Transform wagon = transform.root;
                 wagon.SetParent(horseRoot);
 
-                // Optional: Set offset relative to the horse
-                wagon.localPosition = new Vector3(0f, 0f, -2f); // Adjust as needed
+                // Use the public offset
+                wagon.localPosition = attachOffset;
                 wagon.localRotation = Quaternion.identity;
 
-                // Optional: Disable wagon physics
+                // Disable wagon physics
                 Rigidbody rb = wagon.GetComponent<Rigidbody>();
                 if (rb != null)
                 {
@@ -32,7 +35,7 @@ public class AttachToHorseTrigger : MonoBehaviour
                 }
 
                 isAttached = true;
-                Debug.Log("Wagon attached to horse via trigger!");
+                Debug.Log("Wagon attached to horse via trigger with offset: " + attachOffset);
             }
         }
     }
