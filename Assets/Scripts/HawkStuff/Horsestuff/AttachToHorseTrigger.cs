@@ -102,7 +102,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         joint.yMotion = ConfigurableJointMotion.Limited;
         joint.zMotion = ConfigurableJointMotion.Limited;
         joint.angularXMotion = ConfigurableJointMotion.Free;
-        joint.angularYMotion = ConfigurableJointMotion.Free;
+        joint.angularYMotion = ConfigurableJointMotion.Limited;
         joint.angularZMotion = ConfigurableJointMotion.Free;
 
         // Linear limit
