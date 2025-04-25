@@ -77,8 +77,8 @@ namespace Characters
         public float ReelOutScrollTimeLeft = 0f;
         public float TargetMagnitude = 0f;
         public bool IsWalk;
-        public const float RealismMaxReel = 220f;
-        public const float RealismDeathVelocity = 2000f;
+        public const float RealismMaxReel = 170f;
+        public const float RealismDeathVelocity = 200f;
         private const float MaxVelocityChange = 10f;
         private float _originalDashSpeed;
         public Quaternion _targetRotation;
