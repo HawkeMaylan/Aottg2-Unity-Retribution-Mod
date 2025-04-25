@@ -25,8 +25,6 @@ namespace Characters
         private float _whistleTimer = 0f;
         private const float WhistleDuration = 8f;
 
-
-
         public void Init(Human human)
         {
             base.Init(true, human.Team);
@@ -44,9 +42,8 @@ namespace Characters
             if (_jumpCooldownLeft > 0f || !Grounded)
                 return;
 
-    
             Cache.Rigidbody.AddForce(Vector3.up * JumpForce, ForceMode.VelocityChange);
-            Cache.Rigidbody.AddForce(Cache.Transform.forward * JumpForce/2, ForceMode.VelocityChange);
+            Cache.Rigidbody.AddForce(Cache.Transform.forward * JumpForce / 2, ForceMode.VelocityChange);
             _jumpCooldownLeft = 0f;
         }
 
@@ -57,7 +54,7 @@ namespace Characters
 
             float flatDistance = Util.DistanceIgnoreY(_owner.Cache.Transform.position, Cache.Transform.position);
             if (flatDistance > 800f)
-                return; // Horse too far to respond
+                return;
 
             _isWhistleActive = true;
             _whistleTimer = WhistleDuration;
@@ -139,7 +136,6 @@ namespace Characters
 
         private void Update()
         {
-
             if (!IsMine()) return;
 
             _jumpCooldownLeft -= Time.deltaTime;
@@ -208,11 +204,12 @@ namespace Characters
             if (!IsMine() || _owner == null || _owner.Dead)
                 return;
 
-            CheckGround();
+            CheckGround(); // 🧹 still checking ground, but we won't block movement if not grounded
 
-            if (Grounded)
+            // ✅ Movement always allowed regardless of Grounded
+            if (State == HorseState.ControlledIdle || State == HorseState.Idle)
             {
-                if (State == HorseState.ControlledIdle || State == HorseState.Idle)
+                if (Grounded) // ✅ Only slow down if touching ground
                 {
                     if (Cache.Rigidbody.velocity.magnitude < 1f)
                         Cache.Rigidbody.velocity = Vector3.up * Cache.Rigidbody.velocity.y;
@@ -220,24 +217,24 @@ namespace Characters
                         Cache.Rigidbody.AddForce(-Cache.Rigidbody.velocity.normalized * Mathf.Min(_owner.Stats.HorseSpeed, Cache.Rigidbody.velocity.magnitude * 0.5f),
                             ForceMode.Acceleration);
                 }
-                else if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint || State == HorseState.ControlledWalk || State == HorseState.ControlledRun)
+            }
+            else if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint || State == HorseState.ControlledWalk || State == HorseState.ControlledRun)
+            {
+                float speed = _owner.Stats.HorseSpeed;
+
+                if (State == HorseState.ControlledWalk)
+                    speed = WalkSpeed;
+                else if (State == HorseState.WalkToPoint)
+                    speed = RunCloseSpeed;
+
+                Cache.Rigidbody.AddForce(Cache.Transform.forward * _owner.Stats.HorseSpeed, ForceMode.Acceleration);
+
+                if (Cache.Rigidbody.velocity.magnitude >= speed)
                 {
-                    float speed = _owner.Stats.HorseSpeed;
-
-                    if (State == HorseState.ControlledWalk)
-                        speed = WalkSpeed;
-                    else if (State == HorseState.WalkToPoint)
-                        speed = RunCloseSpeed;
-
-                    Cache.Rigidbody.AddForce(Cache.Transform.forward * _owner.Stats.HorseSpeed, ForceMode.Acceleration);
-
-                    if (Cache.Rigidbody.velocity.magnitude >= speed)
-                    {
-                        if (speed == _owner.Stats.HorseSpeed)
-                            Cache.Rigidbody.AddForce((speed - Cache.Rigidbody.velocity.magnitude) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
-                        else
-                            Cache.Rigidbody.AddForce((Mathf.Max(speed - Cache.Rigidbody.velocity.magnitude, -1f)) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
-                    }
+                    if (speed == _owner.Stats.HorseSpeed)
+                        Cache.Rigidbody.AddForce((speed - Cache.Rigidbody.velocity.magnitude) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
+                    else
+                        Cache.Rigidbody.AddForce((Mathf.Max(speed - Cache.Rigidbody.velocity.magnitude, -1f)) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
                 }
             }
 
