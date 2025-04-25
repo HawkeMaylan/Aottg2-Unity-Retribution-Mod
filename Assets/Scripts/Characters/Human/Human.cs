@@ -1458,7 +1458,7 @@ namespace Characters
                 if (_hookHuman != null && !_hookHuman.Dead)
                 {
                     Vector3 vector2 = _hookHuman.Cache.Transform.position - Cache.Transform.position;
-                    float magnitude = vector2.magnitude +10;
+                    float magnitude = vector2.magnitude +30;
                     // Temporarily remove until a rework is done as this completely breaks hook physics
                     /*if (magnitude > 2f)
                         Cache.Rigidbody.AddForce((vector2.normalized * Mathf.Pow(magnitude, 0.15f) * 30f) - (Cache.Rigidbody.velocity * 0.95f), ForceMode.VelocityChange);*/
