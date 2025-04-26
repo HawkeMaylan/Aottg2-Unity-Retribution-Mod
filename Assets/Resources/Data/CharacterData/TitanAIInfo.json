@@ -67,7 +67,7 @@
 		"TurnPause": 0.8,
 		"CloseAttackRange": 12,
 		"FarAttackMinRange": 0,
-		"FarAttackMaxRange": 0,
+		"FarAttackMaxRange": 30,
 		"FarAttackCooldown": 4.0,
 		"AttackWait": 0.5,
 		"AttackPause": 0.5,
@@ -84,10 +84,10 @@
 		"FocusRangeMin": 30000,
 		"FocusRangeMax": 60200,
 
-		"FocusTimeMin": 1.0,
+		"FocusTimeMin": 5.0,
 		"FocusTimeMax": 60.0,
 
-		"TurnAngleMin": 30,
+		"TurnAngleMin": 45,
 		"TurnAngleMax": 200,
 
 		"TurnSpeedMin": 1.3,
@@ -96,11 +96,11 @@
 		"TurnPauseMin": 0.01,
 		"TurnPauseMax": 1.2,
 
-		"CloseAttackRangeMin": 2,
+		"CloseAttackRangeMin": 8,
 		"CloseAttackRangeMax": 16,
 
-		"FarAttackMinRangeMin": 0,
-		"FarAttackMinRangeMax": 15,
+		"FarAttackMinRangeMin": 10,
+		"FarAttackMinRangeMax": 20,
 
 		"FarAttackMaxRangeMin": 30,
 		"FarAttackMaxRangeMax": 400,
@@ -117,8 +117,8 @@
 		"ActionPauseMin": 0.1,
 		"ActionPauseMax": 0.3,
 
-		"ChaseAngleMinRangeMin": 45,
-		"ChaseAngleMinRangeMax": 180,
+		"ChaseAngleMinRangeMin": 20,
+		"ChaseAngleMinRangeMax": 60,
 
 
 
