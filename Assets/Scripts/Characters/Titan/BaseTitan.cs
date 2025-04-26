@@ -104,33 +104,81 @@ namespace Characters
             base.Init(ai, team);
             if (data != null)
             {
-                if (data.HasKey("RunSpeedBase"))
-                    RunSpeedBase = data["RunSpeedBase"].AsFloat;
-                if (data.HasKey("RunSpeedPerLevel"))
-                    RunSpeedPerLevel = data["RunSpeedPerLevel"].AsFloat;
-                if (data.HasKey("WalkSpeedBase"))
-                    WalkSpeedBase = data["WalkSpeedBase"].AsFloat;
-                if (data.HasKey("WalkSpeedPerLevel"))
-                    WalkSpeedPerLevel = data["WalkSpeedPerLevel"].AsFloat;
-                if (data.HasKey("JumpForce"))
-                    JumpForce = data["JumpForce"].AsFloat;
-                if (data.HasKey("RotateSpeed"))
-                    RotateSpeed = data["RotateSpeed"].AsFloat;
-                if (data.HasKey("ActionPause"))
-                    ActionPause = data["ActionPause"].AsFloat;
-                if (data.HasKey("TurnPause"))
-                    TurnPause = data["TurnPause"].AsFloat;
-                if (data.HasKey("AttackPause"))
-                    AttackPause = data["AttackPause"].AsFloat;
-                if (data.HasKey("Health"))
+                if (data.HasKey("HealthMin") && data.HasKey("HealthMax"))
+                    SetHealth(UnityEngine.Random.Range(data["HealthMin"].AsInt, data["HealthMax"].AsInt + 1));
+                else if (data.HasKey("Health"))
                     SetHealth(data["Health"].AsInt);
-                if (data.HasKey("AttackSpeedMultiplier"))
+
+                // WalkSpeedBase
+                if (data.HasKey("WalkSpeedBaseMin") && data.HasKey("WalkSpeedBaseMax"))
+                    WalkSpeedBase = UnityEngine.Random.Range(data["WalkSpeedBaseMin"].AsFloat, data["WalkSpeedBaseMax"].AsFloat);
+                else if (data.HasKey("WalkSpeedBase"))
+                    WalkSpeedBase = data["WalkSpeedBase"].AsFloat;
+
+                // WalkSpeedPerLevel
+                if (data.HasKey("WalkSpeedPerLevelMin") && data.HasKey("WalkSpeedPerLevelMax"))
+                    WalkSpeedPerLevel = UnityEngine.Random.Range(data["WalkSpeedPerLevelMin"].AsFloat, data["WalkSpeedPerLevelMax"].AsFloat);
+                else if (data.HasKey("WalkSpeedPerLevel"))
+                    WalkSpeedPerLevel = data["WalkSpeedPerLevel"].AsFloat;
+
+                // RunSpeedBase
+                if (data.HasKey("RunSpeedBaseMin") && data.HasKey("RunSpeedBaseMax"))
+                    RunSpeedBase = UnityEngine.Random.Range(data["RunSpeedBaseMin"].AsFloat, data["RunSpeedBaseMax"].AsFloat);
+                else if (data.HasKey("RunSpeedBase"))
+                    RunSpeedBase = data["RunSpeedBase"].AsFloat;
+
+                // RunSpeedPerLevel
+                if (data.HasKey("RunSpeedPerLevelMin") && data.HasKey("RunSpeedPerLevelMax"))
+                    RunSpeedPerLevel = UnityEngine.Random.Range(data["RunSpeedPerLevelMin"].AsFloat, data["RunSpeedPerLevelMax"].AsFloat);
+                else if (data.HasKey("RunSpeedPerLevel"))
+                    RunSpeedPerLevel = data["RunSpeedPerLevel"].AsFloat;
+
+                // JumpForce
+                if (data.HasKey("JumpForceMin") && data.HasKey("JumpForceMax"))
+                    JumpForce = UnityEngine.Random.Range(data["JumpForceMin"].AsFloat, data["JumpForceMax"].AsFloat);
+                else if (data.HasKey("JumpForce"))
+                    JumpForce = data["JumpForce"].AsFloat;
+
+                // RotateSpeed
+                if (data.HasKey("RotateSpeedMin") && data.HasKey("RotateSpeedMax"))
+                    RotateSpeed = UnityEngine.Random.Range(data["RotateSpeedMin"].AsFloat, data["RotateSpeedMax"].AsFloat);
+                else if (data.HasKey("RotateSpeed"))
+                    RotateSpeed = data["RotateSpeed"].AsFloat;
+
+                // AttackSpeedMultiplier
+                if (data.HasKey("AttackSpeedMultiplierMin") && data.HasKey("AttackSpeedMultiplierMax"))
+                    AttackSpeedMultiplier = UnityEngine.Random.Range(data["AttackSpeedMultiplierMin"].AsFloat, data["AttackSpeedMultiplierMax"].AsFloat);
+                else if (data.HasKey("AttackSpeedMultiplier"))
                     AttackSpeedMultiplier = data["AttackSpeedMultiplier"].AsFloat;
+
+                // ActionPause
+                if (data.HasKey("ActionPauseMin") && data.HasKey("ActionPauseMax"))
+                    ActionPause = UnityEngine.Random.Range(data["ActionPauseMin"].AsFloat, data["ActionPauseMax"].AsFloat);
+                else if (data.HasKey("ActionPause"))
+                    ActionPause = data["ActionPause"].AsFloat;
+
+                // AttackPause
+                if (data.HasKey("AttackPauseMin") && data.HasKey("AttackPauseMax"))
+                    AttackPause = UnityEngine.Random.Range(data["AttackPauseMin"].AsFloat, data["AttackPauseMax"].AsFloat);
+                else if (data.HasKey("AttackPause"))
+                    AttackPause = data["AttackPause"].AsFloat;
+
+                // TurnPause
+                if (data.HasKey("TurnPauseMin") && data.HasKey("TurnPauseMax"))
+                    TurnPause = UnityEngine.Random.Range(data["TurnPauseMin"].AsFloat, data["TurnPauseMax"].AsFloat);
+                else if (data.HasKey("TurnPause"))
+                    TurnPause = data["TurnPause"].AsFloat;
+
+                // OPTIONAL: handle more fields like DetectRange, FocusRange, FocusTime, TurnAngle if you want!
+
+                // OPTIONAL: Handle AttackSpeeds dictionary
                 if (data.HasKey("AttackSpeeds"))
                 {
                     foreach (string attack in data["AttackSpeeds"].Keys)
                         AttackSpeeds.Add(attack, data["AttackSpeeds"][attack].AsFloat);
                 }
+
+                // OPTIONAL: if TurnSpeed separately
                 if (data.HasKey("TurnSpeed"))
                 {
                     TurnSpeed = data["TurnSpeed"].AsFloat;
