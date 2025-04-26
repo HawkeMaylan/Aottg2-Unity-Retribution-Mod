@@ -96,8 +96,8 @@
 		"TurnPauseMin": 0.01,
 		"TurnPauseMax": 1.2,
 
-		"CloseAttackRangeMin": 8,
-		"CloseAttackRangeMax": 16,
+		"CloseAttackRangeMin": 11,
+		"CloseAttackRangeMax": 13,
 
 		"FarAttackMinRangeMin": 10,
 		"FarAttackMinRangeMax": 20,
@@ -105,17 +105,17 @@
 		"FarAttackMaxRangeMin": 30,
 		"FarAttackMaxRangeMax": 400,
 
-		"FarAttackCooldownMin": 5.0,
-		"FarAttackCooldownMax": 20.0,
+		"FarAttackCooldownMin": 1.0,
+		"FarAttackCooldownMax": 6.0,
 
-		"AttackWaitMin": 0.1,
-		"AttackWaitMax": 0.3,
+		"AttackWaitMin": 0.01,
+		"AttackWaitMax": 0.5,
 
-		"AttackPauseMin": 0.1,
-		"AttackPauseMax": 0.3,
+		"AttackPauseMin": 0.01,
+		"AttackPauseMax": 0.5,
 
-		"ActionPauseMin": 0.1,
-		"ActionPauseMax": 0.3,
+		"ActionPauseMin": 0.01,
+		"ActionPauseMax": 0.5,
 
 		"ChaseAngleMinRangeMin": 20,
 		"ChaseAngleMinRangeMax": 60,
@@ -259,7 +259,7 @@
 		"AttackSpeedMultiplier": 1.0,
 
 		"AttackSpeedMultiplierMin": 0.8,
-		"AttackSpeedMultiplierMax": 2.0,
+		"AttackSpeedMultiplierMax": 2.7,
 
 		"AttackSpeeds": {
 
