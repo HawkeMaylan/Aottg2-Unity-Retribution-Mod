@@ -37,22 +37,23 @@ namespace UI
 
         private void Update()
         {
-            // --- Wheel Movement Block (for switching, closing) ---
             if (UIManager.CurrentMenu != null && !(UIManager.CurrentMenu is InGameMenu))
                 return;
 
+            // --- Space (Next item wheel) ---
             if (IsActive && Input.GetKeyDown(KeyCode.Space))
             {
                 NextItemWheel();
             }
 
+            // --- Escape (Close item wheel) ---
             if (IsActive && Input.GetKeyDown(KeyCode.Escape))
             {
                 SetItemWheel(false);
             }
 
-            // --- Keybind Quickslot Fire Block (separate proper block) ---
-            if (!InGameMenu.InMenu())
+            // --- Quickslot keys (1-8) are BLOCKED only if chat/menu is open ---
+            if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
             {
                 for (int i = 0; i < QuickSlotKeys.Length; i++)
                 {
