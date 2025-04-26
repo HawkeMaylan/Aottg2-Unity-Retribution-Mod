@@ -3,7 +3,7 @@
 	"SpawnRates": {
 		"Training": {"Normal": 1.0},
 		"Easy": {"Normal": 0.9, "Abnormal": 0.1},
-		"Normal": {"Normal": 0.74, "Abnormal": 0.15, "Jumper": 0.1, "Crawler": 0.01},
+		"Normal": {"Normal": 0.64, "Abnormal": 0.16, "Jumper": 0.15, "Crawler": 0.05},
 		"Hard": {"Normal": 0.45, "Abnormal": 0.29, "Jumper": 0.14, "Crawler": 0.03, "Punk": 0.06, "Thrower": 0.03},
 		"Abnormal": {"Normal": 0, "Abnormal": 0.38, "Jumper": 0.38, "Crawler": 0.07, "Punk": 0.11, "Thrower": 0.06}
 	},
@@ -56,8 +56,8 @@
 	"Default": {
 		"Name": "Titan",
 		"Health": 1,
-		"HealthMin": 1,
-		"HealthMax": 500,
+		"HealthMin": 250,
+		"HealthMax": 750,
 		"IsCrawler": false,
 		"DetectRange": 200,
 		"FocusRange": 1000,
@@ -78,47 +78,47 @@
 		"ChaseAngleTimeMax": 2.0,
 		"ChaseAngleMinRange": 50,
 
-		"DetectRangeMin": 200,
-		"DetectRangeMax": 250,
+		"DetectRangeMin": 30000,
+		"DetectRangeMax": 60200,
 
-		"FocusRangeMin": 1000,
-		"FocusRangeMax": 1200,
+		"FocusRangeMin": 30000,
+		"FocusRangeMax": 60200,
 
 		"FocusTimeMin": 1.0,
 		"FocusTimeMax": 2.0,
 
-		"TurnAngleMin": 45,
-		"TurnAngleMax": 90,
+		"TurnAngleMin": 30,
+		"TurnAngleMax": 40,
 
 		"TurnSpeedMin": 1.3,
-		"TurnSpeedMax": 2.0,
+		"TurnSpeedMax": 4.0,
 
-		"TurnPauseMin": 0.5,
+		"TurnPauseMin": 0.01,
 		"TurnPauseMax": 1.2,
 
-		"CloseAttackRangeMin": 12,
+		"CloseAttackRangeMin": 2,
 		"CloseAttackRangeMax": 16,
 
 		"FarAttackMinRangeMin": 0,
-		"FarAttackMinRangeMax": 5,
+		"FarAttackMinRangeMax": 15,
 
 		"FarAttackMaxRangeMin": 0,
-		"FarAttackMaxRangeMax": 5,
+		"FarAttackMaxRangeMax": 15,
 
-		"FarAttackCooldownMin": 4.0,
+		"FarAttackCooldownMin": 1.0,
 		"FarAttackCooldownMax": 6.0,
 
-		"AttackWaitMin": 0.5,
-		"AttackWaitMax": 0.7,
+		"AttackWaitMin": 0.1,
+		"AttackWaitMax": 0.3,
 
-		"AttackPauseMin": 0.5,
-		"AttackPauseMax": 0.7,
+		"AttackPauseMin": 0.1,
+		"AttackPauseMax": 0.3,
 
-		"ActionPauseMin": 0.5,
-		"ActionPauseMax": 0.7,
+		"ActionPauseMin": 0.1,
+		"ActionPauseMax": 0.3,
 
-		"ChaseAngleMinRangeMin": 50,
-		"ChaseAngleMinRangeMax": 70,
+		"ChaseAngleMinRangeMin": 90,
+		"ChaseAngleMinRangeMax": 180,
 
 
 
@@ -133,25 +133,25 @@
 		"RotateSpeed": 1.6,
 
 		"RunAnimationMin": 1,
-		"RunAnimationMax": 1,
+		"RunAnimationMax": 2,
 
-		"WalkSpeedBaseMin": 5.0,
-		"WalkSpeedBaseMax": 6.0,
+		"WalkSpeedBaseMin": 20.0,
+		"WalkSpeedBaseMax": 40.0,
 
 		"WalkSpeedPerLevelMin": 1.0,
 		"WalkSpeedPerLevelMax": 2.0,
 
-		"RunSpeedBaseMin": 15.0,
-		"RunSpeedBaseMax": 20.0,
+		"RunSpeedBaseMin": 35.0,
+		"RunSpeedBaseMax": 60.0,
 
 		"RunSpeedPerLevelMin": 5.0,
 		"RunSpeedPerLevelMax": 7.0,
 
 		"JumpForceMin": 150,
-		"JumpForceMax": 180,
+		"JumpForceMax": 300,
 
 		"RotateSpeedMin": 1.6,
-		"RotateSpeedMax": 2.2,
+		"RotateSpeedMax": 4,
 
 
 		"BodyHeadCombos": [
@@ -258,11 +258,11 @@
 		],
 		"AttackSpeedMultiplier": 1.0,
 
-		"AttackSpeedMultiplierMin": 1.0,
-		"AttackSpeedMultiplierMax": 1.5,
+		"AttackSpeedMultiplierMin": 0.8,
+		"AttackSpeedMultiplierMax": 2.0,
 
 		"AttackSpeeds": {
-			"AttackGrabAirL": 0.7,
+
 			"AttackRockThrow": 0.7
 		},
 		"Attacks": {}
@@ -292,7 +292,7 @@
 			"AttackSpeedMultiplier": 0.8
 		},
 		"Normal": {
-			"AttackSpeedMultiplier": 3
+
 		},
 		"Hard": {
 			"TurnPause": 0.3,
@@ -435,7 +435,7 @@
 			"RunSpeedBase": 6
 		},
 		"Normal": {
-			"RunSpeedBase": 10
+
 		},
 		"Hard": {
 			"TurnPause": 0.5,
@@ -529,7 +529,7 @@
 			"AttackSpeedMultiplier": 0.8
 		},
 		"Normal": {
-			"AttackWait": 1.0
+
 		},
 		"Hard": {
 			"TurnPause": 0.3,
