@@ -108,7 +108,7 @@
 		"FarAttackCooldownMin": 1.0,
 		"FarAttackCooldownMax": 6.0,
 
-		"AttackWaitMin": 0.01,
+		"AttackWaitMin": 0.05,
 		"AttackWaitMax": 0.5,
 
 		"AttackPauseMin": 0.01,
@@ -259,7 +259,7 @@
 		"AttackSpeedMultiplier": 1.0,
 
 		"AttackSpeedMultiplierMin": 0.8,
-		"AttackSpeedMultiplierMax": 2.7,
+		"AttackSpeedMultiplierMax": 2.2,
 
 		"AttackSpeeds": {
 
