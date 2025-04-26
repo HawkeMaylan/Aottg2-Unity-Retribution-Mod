@@ -41,7 +41,7 @@ public class CloakStateSync : MonoBehaviourPun, IPunObservable
                 cloth.enabled = _cloakIsOn;
         }
 
-        // Also disable cloak1model if cloak2model is being turned off
+        // If cloak2 is being turned off, also toggle off cloak1 via its own Toggle method
         if (!_cloakIsOn)
         {
             Transform cloak1 = transform.GetComponentsInChildren<Transform>(true)
@@ -50,11 +50,20 @@ public class CloakStateSync : MonoBehaviourPun, IPunObservable
             if (cloak1 != null)
             {
                 var cloak1Renderer = cloak1.GetComponent<MeshRenderer>();
-                if (cloak1Renderer != null)
-                    cloak1Renderer.enabled = false;
+                if (cloak1Renderer != null && cloak1Renderer.enabled)
+                {
+                    var sync = GetComponent<Cloak1StateSync>();
+                    if (sync != null)
+                    {
+                        sync.Toggle(); // Cleanly toggles cloak1 off
+                        Debug.Log("[CloakStateSync] cloak1model was ON — toggling via Cloak1StateSync script.");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[CloakStateSync] Cloak1StateSync script not found on player.");
+                    }
+                }
             }
-
-            Debug.Log("[CloakStateSync] cloak2model OFF — forcing cloak1model OFF as well.");
         }
 
         Debug.Log($"[CloakStateSync] Cloak visibility set to: {_cloakIsOn}");
