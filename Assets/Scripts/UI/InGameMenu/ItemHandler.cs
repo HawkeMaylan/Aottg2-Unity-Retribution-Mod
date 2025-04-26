@@ -32,47 +32,57 @@ namespace UI
         private void Start()
         {
             StartCoroutine(UpdateForever(1f));
-            ScanItemLists(); // Ensure item lists are ready early
+            ScanItemLists();
         }
 
         private void Update()
         {
-            // Switch wheels with spacebar
+            // --- Wheel Movement Block (for switching, closing) ---
+            if (UIManager.CurrentMenu != null && !(UIManager.CurrentMenu is InGameMenu))
+                return;
+
             if (IsActive && Input.GetKeyDown(KeyCode.Space))
             {
                 NextItemWheel();
             }
 
-            // Close with Escape
             if (IsActive && Input.GetKeyDown(KeyCode.Escape))
             {
                 SetItemWheel(false);
             }
 
-            // Quick-slot keys (1–8) to activate items in current wheel
-            for (int i = 0; i < QuickSlotKeys.Length; i++)
+            // --- Keybind Quickslot Fire Block (separate proper block) ---
+            if (!InGameMenu.InMenu())
             {
-                if (Input.GetKeyDown(QuickSlotKeys[i]))
+                for (int i = 0; i < QuickSlotKeys.Length; i++)
                 {
-                    TryUseSlot(i);
-                    break;
+                    if (Input.GetKeyDown(QuickSlotKeys[i]))
+                    {
+                        TryUseSlot(i);
+                        break;
+                    }
                 }
             }
         }
 
         public void ToggleItemWheel()
         {
+            if (UIManager.CurrentMenu != null && !(UIManager.CurrentMenu is InGameMenu))
+                return;
             SetItemWheel(!IsActive);
         }
 
         public void SetItemWheel(bool enable)
         {
+            if (UIManager.CurrentMenu != null && !(UIManager.CurrentMenu is InGameMenu))
+                return;
+
             if (!InGameMenu.InMenu())
                 ScanItemLists();
 
             if (enable)
             {
-                _selectedItemIndex = 0; // Optional: reset selection when opening the wheel
+                _selectedItemIndex = 0;
                 if (_itemLists.Count > 0)
                 {
                     ShowItemWheel(_currentItemWheelIndex);
