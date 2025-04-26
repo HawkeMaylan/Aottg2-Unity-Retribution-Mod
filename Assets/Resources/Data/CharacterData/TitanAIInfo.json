@@ -259,7 +259,7 @@
 		"AttackSpeedMultiplier": 1.0,
 
 		"AttackSpeedMultiplierMin": 0.8,
-		"AttackSpeedMultiplierMax": 2.2,
+		"AttackSpeedMultiplierMax": 2.05,
 
 		"AttackSpeeds": {
 
