@@ -74,21 +74,21 @@
 		"ActionPause": 0.5,
 
 
-		"ChaseAngleTimeMin": 0.75,
-		"ChaseAngleTimeMax": 2.0,
+		"ChaseAngleTimeMin": 0.15,
+		"ChaseAngleTimeMax": 0.50,
 		"ChaseAngleMinRange": 50,
 
-		"DetectRangeMin": 30000,
-		"DetectRangeMax": 60200,
+		"DetectRangeMin": 70000,
+		"DetectRangeMax": 80200,
 
 		"FocusRangeMin": 30000,
 		"FocusRangeMax": 60200,
 
 		"FocusTimeMin": 1.0,
-		"FocusTimeMax": 2.0,
+		"FocusTimeMax": 60.0,
 
 		"TurnAngleMin": 30,
-		"TurnAngleMax": 40,
+		"TurnAngleMax": 100,
 
 		"TurnSpeedMin": 1.3,
 		"TurnSpeedMax": 4.0,
