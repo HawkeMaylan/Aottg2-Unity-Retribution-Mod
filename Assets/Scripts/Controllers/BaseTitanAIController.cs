@@ -493,25 +493,25 @@ namespace Controllers
 
         protected bool HasClearLineOfSight(Vector3 target)
         {
-            if (_usePathfinding == false)
+            //if (_usePathfinding == false)
                 return true;
-            float colliderRadius = _mainCollider.radius * _titan.Cache.Transform.localScale.x * 0.5f;
+            //float colliderRadius = _mainCollider.radius * _titan.Cache.Transform.localScale.x * 0.5f;
             // var start = _titan.Cache.Transform.TransformPoint(_mainCollider.center) + _titan.Cache.Transform.forward * -1 * colliderRadius;
-            var left = _titan.Cache.Transform.TransformPoint(_mainCollider.center) + _titan.Cache.Transform.forward * -1 * colliderRadius + _titan.Cache.Transform.right * -1.1f * colliderRadius;
-            var right = _titan.Cache.Transform.TransformPoint(_mainCollider.center) + _titan.Cache.Transform.forward * -1 * colliderRadius + _titan.Cache.Transform.right * 1.1f * colliderRadius;
-            return HasLineOfSight(left, target) && HasLineOfSight(right, target);
+            //var left = _titan.Cache.Transform.TransformPoint(_mainCollider.center) + _titan.Cache.Transform.forward * -1 * colliderRadius + _titan.Cache.Transform.right * -1.1f * colliderRadius;
+            //var right = _titan.Cache.Transform.TransformPoint(_mainCollider.center) + _titan.Cache.Transform.forward * -1 * colliderRadius + _titan.Cache.Transform.right * 1.1f * colliderRadius;
+            //return HasLineOfSight(left, target) && HasLineOfSight(right, target);
         }
 
         protected bool HasLineOfSight(Vector3 start, Vector3 target)
         {
-            RaycastHit hit;
-            var direction = target - start;
-            var distance = direction.magnitude - 0.2f;
-            if (distance > 1000)
-                return false;
-            direction = direction.normalized;
-            if (Physics.Raycast(start, direction, out hit, distance, _losLayer.value))
-                return false;
+            //RaycastHit hit;
+            //var direction = target - start;
+            //var distance = direction.magnitude - 0.2f;
+            //if (distance > 1000)
+            //    return false;
+            //direction = direction.normalized;
+            //if (Physics.Raycast(start, direction, out hit, distance, _losLayer.value))
+            //   return false;
             return true;
         }
 
