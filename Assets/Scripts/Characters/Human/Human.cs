@@ -2694,10 +2694,9 @@ namespace Characters
             itemList1.Add(new FlareItem(this, "Blue", new Color(0f, 102f / 255, 204f / 255, 0.7f), 220f));
             itemList1.Add(new FlareItem(this, "Yellow", new Color(1f, 1f, 0f, 0.7f), 220f));
             itemList1.Add(new FlareItem(this, "Cyan", new Color(0f, 255f / 252, 255f / 255, 0.8f), 220f));
-            itemList1.Add(new FlareItem(this, "Support Flare", Color.blue, 30f));
-            itemList2.Add(new FlareItem(this, "Cheese Flare", Color.white, 40f));
-            itemList3.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
-            itemList3.Add(new HorseWhistleItem(this, "Whistle", 5f));          
+            itemList1.Add(new FlareItem(this, "Indigo", Color.blue, 30f));
+            itemList2.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
+            itemList2.Add(new HorseWhistleItem(this, "Whistle", 5f));          
             itemList3.Add(new Lanterntoggle(this, "Lantern On/Off", 1f));
             itemList3.Add(new CloakToggle(this, "Cape On/Off", 1f));
             itemList3.Add(new Cloak1Toggle(this, "Hood On/Off", 1f));
@@ -2720,7 +2719,7 @@ namespace Characters
 
             ItemListDisplayNames["itemList1"] = "Flares";
             ItemListDisplayNames["itemList2"] = "Support";
-            ItemListDisplayNames["itemList3"] = "Backup";
+            ItemListDisplayNames["itemList3"] = "Equipment";
 
         }
 
