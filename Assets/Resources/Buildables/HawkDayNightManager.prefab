@@ -237,7 +237,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sun: {fileID: 42349908458179679}
   moon: {fileID: 4745114026488916793}
-  dayDuration: 36
+  dayDuration: 3600
   sunInitialAngle: 180
   rotationDirection: -1
   maxSunIntensity: 0.8
