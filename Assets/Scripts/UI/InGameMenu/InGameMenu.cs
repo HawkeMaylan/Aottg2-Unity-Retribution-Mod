@@ -484,6 +484,21 @@ namespace UI
         {
             if (_gameManager == null)
                 return;
+
+            if (TopLeftHud != null)
+            {
+                bool realismEnabled = SettingsManager.InGameCurrent.Misc.RealismMode.Value;
+                if (realismEnabled && !PhotonNetwork.IsMasterClient)
+                {
+                    if (TopLeftHud.activeSelf)
+                        TopLeftHud.SetActive(false);
+                }
+                else
+                {
+                    if (!TopLeftHud.activeSelf)
+                        TopLeftHud.SetActive(true);
+                }
+            }
             if (_gameManager.GlobalPause)
             {
                 _globalPauseGamePopup.Show();
