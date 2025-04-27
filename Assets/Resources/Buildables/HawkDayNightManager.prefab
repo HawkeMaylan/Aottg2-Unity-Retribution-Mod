@@ -241,7 +241,7 @@ MonoBehaviour:
   sunInitialAngle: 180
   rotationDirection: -1
   maxSunIntensity: 0.8
-  maxMoonIntensity: 0.08
+  maxMoonIntensity: 0.09
   daySkyColorGradient:
     serializedVersion: 2
     key0: {r: 1, g: 0, b: 0.046096325, a: 1}
@@ -305,7 +305,7 @@ MonoBehaviour:
   sunriseSunColor: {r: 1, g: 0.31598812, b: 0.19999999, a: 1}
   middaySunColor: {r: 1, g: 1, b: 1, a: 1}
   sunsetSunColor: {r: 1, g: 0.32425773, b: 0.19999999, a: 1}
-  minimumNightExposure: 0.2
+  minimumNightExposure: 0.23
   sunriseDuration: 0.1
   middayDuration: 0.3
   sunsetDuration: 0.1
