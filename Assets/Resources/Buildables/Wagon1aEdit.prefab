@@ -604,8 +604,6 @@ GameObject:
   - component: {fileID: 8967567940926374313}
   - component: {fileID: 223773099780766276}
   - component: {fileID: 4915449211714290812}
-  - component: {fileID: 5071764586273204314}
-  - component: {fileID: 7947667882890981956}
   m_Layer: 0
   m_Name: Wagon1aEdit
   m_TagString: Untagged
@@ -737,39 +735,6 @@ MonoBehaviour:
   m_SynchronizeAngularVelocity: 1
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
---- !u!114 &5071764586273204314
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4432750536981979705}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a756d50ebe9a3e4458e769bf73aa604d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!65 &7947667882890981956
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4432750536981979705}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 3, y: 2, z: 4}
-  m_Center: {x: 0, y: 1, z: -2}
 --- !u!1 &6774636239029228514
 GameObject:
   m_ObjectHideFlags: 0
