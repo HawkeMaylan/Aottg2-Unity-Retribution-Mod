@@ -286,6 +286,12 @@ namespace UI
 
         public void SetScoreboardMenu(bool enabled, bool fromClick)
         {
+            bool realismEnabled = SettingsManager.InGameCurrent.Misc.RealismMode.Value;
+
+            // Only allow scoreboard if realism is off or player is MasterClient
+            if (realismEnabled && !PhotonNetwork.IsMasterClient)
+                return;
+
             if (enabled && !InMenu())
             {
                 HideAllMenus();
@@ -298,6 +304,7 @@ namespace UI
                     SkipAHSSInput = true;
             }
         }
+
 
         public void ToggleMapMenu()
         {
