@@ -305,6 +305,7 @@ MonoBehaviour:
   sunriseSunColor: {r: 1, g: 0.31598812, b: 0.19999999, a: 1}
   middaySunColor: {r: 1, g: 1, b: 1, a: 1}
   sunsetSunColor: {r: 1, g: 0.32425773, b: 0.19999999, a: 1}
+  minimumNightExposure: 0.2
 --- !u!114 &63078299645148793
 MonoBehaviour:
   m_ObjectHideFlags: 0

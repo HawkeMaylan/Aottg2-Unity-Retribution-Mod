@@ -22,7 +22,10 @@ public class SimpleDayNightCycle : MonoBehaviour
     [Header("Sun Light Color Settings")]
     public Color sunriseSunColor = new Color(1.0f, 0.5f, 0.2f); // Orange/red
     public Color middaySunColor = Color.white; // White
-    public Color sunsetSunColor = new Color(1.0f, 0.5f, 0.2f);  // Orange/red again
+    public Color sunsetSunColor = new Color(1.0f, 0.5f, 0.2f); // Orange/red again
+
+    [Header("Exposure Settings")]
+    public float minimumNightExposure = 0.2f; // Brightness at night peak (midnight)
 
     private Material skyboxMaterial;
     private float timeOfDay;
@@ -99,11 +102,11 @@ public class SimpleDayNightCycle : MonoBehaviour
             sun.intensity = clampedSunHeight * maxSunIntensity;
             moon.intensity = Mathf.Clamp01(-sunHeight) * maxMoonIntensity;
 
-            // Exposure fix
-            float exposure = Mathf.Lerp(0.2f, 1.3f, clampedSunHeight);
+            // Adjust exposure
+            float exposure = CalculateExposure(timeOfDay, clampedSunHeight);
             skyboxMaterial.SetFloat("_Exposure", exposure);
 
-            //  Adjust Sun color based on new timing
+            // Adjust Sun color
             sun.color = CalculateSunColor(timeOfDay);
         }
     }
@@ -112,25 +115,51 @@ public class SimpleDayNightCycle : MonoBehaviour
     {
         if (time < 0.1f)
         {
-            // Sunrise to Midday (orange to white)
             float t = time / 0.1f;
             return Color.Lerp(sunriseSunColor, middaySunColor, t);
         }
         else if (time < 0.4f)
         {
-            // Hold pure midday color
             return middaySunColor;
         }
         else if (time < 0.5f)
         {
-            // Midday to Sunset (white to orange)
             float t = (time - 0.4f) / 0.1f;
             return Color.Lerp(middaySunColor, sunsetSunColor, t);
         }
         else
         {
-            // Hold sunset color at night
             return sunsetSunColor;
+        }
+    }
+
+    private float CalculateExposure(float time, float clampedSunHeight)
+    {
+        if (time < 0.5f)
+        {
+            // Daytime: Exposure based on sun height
+            return Mathf.Lerp(0.2f, 1.3f, clampedSunHeight);
+        }
+        else
+        {
+            // Nighttime: Custom exposure curve
+            if (time >= 0.5f && time <= 0.75f)
+            {
+                // 0.5 to 0.75 : Fade up to minimumNightExposure
+                float t = (time - 0.5f) / 0.25f;
+                return Mathf.Lerp(0.0f, minimumNightExposure, t);
+            }
+            else if (time > 0.75f && time <= 0.9f)
+            {
+                // 0.75 to 0.9 : Fade down back to 0
+                float t = (time - 0.75f) / 0.15f;
+                return Mathf.Lerp(minimumNightExposure, 0.0f, t);
+            }
+            else
+            {
+                // After 0.9, stay at 0 until sunrise
+                return 0.0f;
+            }
         }
     }
 }
