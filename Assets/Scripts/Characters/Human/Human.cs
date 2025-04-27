@@ -2703,7 +2703,7 @@ namespace Characters
             itemList3.Add(new CloakToggle(this, "Cape On/Off", 1f));
             itemList3.Add(new Cloak1Toggle(this, "Hood On/Off", 1f));
             itemList4.Add(new Daycycle(this, "DayCycle", 5f));
-            itemList4.Add(new Daycycle(this, "DeleteDayCycle", 15f));
+            itemList4.Add(new DaycycleDelete(this, "DeleteDayCycle", 15f));
 
 
 

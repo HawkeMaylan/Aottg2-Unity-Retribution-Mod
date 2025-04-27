@@ -20,12 +20,22 @@ public class SimpleDayNightCycle : MonoBehaviour
     public Gradient dayGroundColorGradient;
 
     [Header("Sun Light Color Settings")]
-    public Color sunriseSunColor = new Color(1.0f, 0.5f, 0.2f); // Orange/red
-    public Color middaySunColor = Color.white; // White
-    public Color sunsetSunColor = new Color(1.0f, 0.5f, 0.2f); // Orange/red again
+    public Color sunriseSunColor = new Color(1.0f, 0.5f, 0.2f);
+    public Color middaySunColor = Color.white;
+    public Color sunsetSunColor = new Color(1.0f, 0.5f, 0.2f);
 
     [Header("Exposure Settings")]
-    public float minimumNightExposure = 0.2f; // Brightness at night peak (midnight)
+    public float minimumNightExposure = 0.2f;
+
+    [Header("Time Settings")]
+    public float sunriseDuration = 0.1f;
+    public float middayDuration = 0.3f;
+    public float sunsetDuration = 0.1f;
+    public float nightFadeInDuration = 0.25f;
+    public float nightFadeOutDuration = 0.15f;
+
+    [Header("Night Blackout Settings")]
+    public float nightBlackoutDuration = 0.1f; // New: hold 0 exposure after sunset
 
     private Material skyboxMaterial;
     private float timeOfDay;
@@ -98,33 +108,30 @@ public class SimpleDayNightCycle : MonoBehaviour
             float sunHeight = Vector3.Dot(sun.transform.forward, Vector3.down);
             float clampedSunHeight = Mathf.Clamp01(sunHeight);
 
-            // Adjust Sun and Moon light intensity
             sun.intensity = clampedSunHeight * maxSunIntensity;
             moon.intensity = Mathf.Clamp01(-sunHeight) * maxMoonIntensity;
 
-            // Adjust exposure
             float exposure = CalculateExposure(timeOfDay, clampedSunHeight);
             skyboxMaterial.SetFloat("_Exposure", exposure);
 
-            // Adjust Sun color
             sun.color = CalculateSunColor(timeOfDay);
         }
     }
 
     private Color CalculateSunColor(float time)
     {
-        if (time < 0.1f)
+        if (time < sunriseDuration)
         {
-            float t = time / 0.1f;
+            float t = time / sunriseDuration;
             return Color.Lerp(sunriseSunColor, middaySunColor, t);
         }
-        else if (time < 0.4f)
+        else if (time < sunriseDuration + middayDuration)
         {
             return middaySunColor;
         }
-        else if (time < 0.5f)
+        else if (time < sunriseDuration + middayDuration + sunsetDuration)
         {
-            float t = (time - 0.4f) / 0.1f;
+            float t = (time - (sunriseDuration + middayDuration)) / sunsetDuration;
             return Color.Lerp(middaySunColor, sunsetSunColor, t);
         }
         else
@@ -137,27 +144,32 @@ public class SimpleDayNightCycle : MonoBehaviour
     {
         if (time < 0.5f)
         {
-            // Daytime: Exposure based on sun height
             return Mathf.Lerp(0.2f, 1.3f, clampedSunHeight);
         }
         else
         {
-            // Nighttime: Custom exposure curve
-            if (time >= 0.5f && time <= 0.75f)
+            if (time >= 0.5f && time < (0.5f + nightBlackoutDuration))
             {
-                // 0.5 to 0.75 : Fade up to minimumNightExposure
-                float t = (time - 0.5f) / 0.25f;
+                // Hold exposure at 0 for blackout duration after sunset
+                return 0.0f;
+            }
+
+            float nightStart = 0.5f + nightBlackoutDuration;
+            float nightMid = nightStart + nightFadeInDuration;
+            float nightEnd = nightMid + nightFadeOutDuration;
+
+            if (time >= nightStart && time <= nightMid)
+            {
+                float t = (time - nightStart) / nightFadeInDuration;
                 return Mathf.Lerp(0.0f, minimumNightExposure, t);
             }
-            else if (time > 0.75f && time <= 0.9f)
+            else if (time > nightMid && time <= nightEnd)
             {
-                // 0.75 to 0.9 : Fade down back to 0
-                float t = (time - 0.75f) / 0.15f;
+                float t = (time - nightMid) / nightFadeOutDuration;
                 return Mathf.Lerp(minimumNightExposure, 0.0f, t);
             }
             else
             {
-                // After 0.9, stay at 0 until sunrise
                 return 0.0f;
             }
         }
