@@ -2683,6 +2683,7 @@ namespace Characters
         public List<SimpleUseable> itemList1 = new List<SimpleUseable>();
         public List<SimpleUseable> itemList2 = new List<SimpleUseable>();
         public List<SimpleUseable> itemList3 = new List<SimpleUseable>();
+        public List<SimpleUseable> itemList4 = new List<SimpleUseable>();
 
         public void SetupItems()
         {
@@ -2701,9 +2702,12 @@ namespace Characters
             itemList3.Add(new Lanterntoggle(this, "Lantern On/Off", 1f));
             itemList3.Add(new CloakToggle(this, "Cape On/Off", 1f));
             itemList3.Add(new Cloak1Toggle(this, "Hood On/Off", 1f));
+            itemList4.Add(new Daycycle(this, "DayCycle", 5f));
+            itemList4.Add(new Daycycle(this, "DeleteDayCycle", 15f));
 
 
-            
+
+
             ItemListDisplayNames["itemList1"] = "Flares";
             ItemListDisplayNames["itemList2"] = "Support";
             ItemListDisplayNames["itemList3"] = "Backup";
