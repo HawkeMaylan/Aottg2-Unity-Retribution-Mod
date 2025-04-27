@@ -7,32 +7,29 @@ public class SimpleDayNightCycle : MonoBehaviour
     public Light moon;
 
     [Header("Settings")]
-    public float dayDuration = 120f; // Seconds for full day-night cycle
+    public float dayDuration = 120f; // Seconds for a full day-night cycle
     public float sunInitialAngle = 0f; // Start angle (0 = sunrise)
+    public float rotationDirection = 1f; // 1 = normal, -1 = reverse
 
     [Header("Light Intensity Settings")]
-    public float maxSunIntensity = 1.0f; // Maximum intensity for the sun
-    public float maxMoonIntensity = 0.2f; // Maximum intensity for the moon
+    public float maxSunIntensity = 1.0f;
+    public float maxMoonIntensity = 0.2f;
 
     [Header("Sky Color Settings")]
-    public Color daySkyColor = new Color(0.5f, 0.7f, 1f); // Light blue day sky
-    public Color nightSkyColor = Color.black; // Pitch black night sky
-    public Color dayGroundColor = new Color(0.369f, 0.349f, 0.341f); // Default ground
-    public Color nightGroundColor = Color.black; // Pitch black ground at night
+    public Gradient daySkyColorGradient;
+    public Gradient dayGroundColorGradient;
 
     private Material skyboxMaterial;
-    private float timeOfDay; // 0 to 1 over a full day
+    private float timeOfDay;
 
     private void Start()
     {
-        // If you manually assigned it, use that first
         if (skyboxMaterial != null)
         {
             RenderSettings.skybox = skyboxMaterial;
         }
         else
         {
-            // Otherwise, auto-load it by name from Resources folder
             skyboxMaterial = Resources.Load<Material>("HawkProcedural");
             if (skyboxMaterial != null)
             {
@@ -44,17 +41,15 @@ public class SimpleDayNightCycle : MonoBehaviour
             }
         }
 
-        // Always update lighting environment
         DynamicGI.UpdateEnvironment();
 
-        // Optional: Clear any camera-specific skybox overrides
         var camera = Camera.main;
         if (camera != null)
         {
             var skyboxComponent = camera.GetComponent<Skybox>();
             if (skyboxComponent != null)
             {
-                skyboxComponent.material = null; // clear per-camera override if any
+                skyboxComponent.material = null;
             }
         }
     }
@@ -75,34 +70,34 @@ public class SimpleDayNightCycle : MonoBehaviour
 
     private void UpdateSunAndMoon()
     {
-        float sunAngle = (timeOfDay * 360f) + sunInitialAngle;
+        float sunAngle = (timeOfDay * 360f * rotationDirection) + sunInitialAngle;
         sun.transform.rotation = Quaternion.Euler(sunAngle, 170f, 0f);
-        moon.transform.rotation = Quaternion.Euler(sunAngle + 180f, 170f, 0f);
+
+        float moonAngle = sunAngle + 180f;
+        moon.transform.rotation = Quaternion.Euler(moonAngle, 170f, 0f);
     }
 
     private void UpdateLighting()
     {
-        float sunHeight = Vector3.Dot(sun.transform.forward, Vector3.down);
-        float clampedSunHeight = Mathf.Clamp01(sunHeight);
-
-        // Light intensities
-        sun.intensity = clampedSunHeight * maxSunIntensity;
-        moon.intensity = Mathf.Clamp01(-sunHeight) * maxMoonIntensity;
-
-        // Skybox exposure: 0 at night, 1.3 at daytime
-        float exposure = clampedSunHeight > 0.01f ? Mathf.Lerp(0.0f, 1.3f, clampedSunHeight) : 0f;
-
         if (skyboxMaterial != null)
         {
-            skyboxMaterial.SetFloat("_Exposure", exposure);
+            //  Sky and Ground color purely based on timeOfDay
+            Color currentSkyColor = daySkyColorGradient.Evaluate(timeOfDay);
+            Color currentGroundColor = dayGroundColorGradient.Evaluate(timeOfDay);
 
-            // Sky Tint color based on time
-            Color currentSkyColor = Color.Lerp(nightSkyColor, daySkyColor, clampedSunHeight);
             skyboxMaterial.SetColor("_SkyTint", currentSkyColor);
-
-            // Ground Color based on time
-            Color currentGroundColor = Color.Lerp(nightGroundColor, dayGroundColor, clampedSunHeight);
             skyboxMaterial.SetColor("_GroundColor", currentGroundColor);
+
+            // Optional: if you still want exposure based on lighting, you can remove this if you want pure time
+            float sunHeight = Vector3.Dot(sun.transform.forward, Vector3.down);
+            float clampedSunHeight = Mathf.Clamp01(sunHeight);
+
+            // Still adjusting lighting intensity
+            sun.intensity = clampedSunHeight * maxSunIntensity;
+            moon.intensity = Mathf.Clamp01(-sunHeight) * maxMoonIntensity;
+
+            float exposure = clampedSunHeight > 0.01f ? Mathf.Lerp(0.0f, 1.3f, clampedSunHeight) : 0f;
+            skyboxMaterial.SetFloat("_Exposure", exposure);
         }
     }
 }

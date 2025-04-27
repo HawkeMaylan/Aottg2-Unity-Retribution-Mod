@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2400125468489293104}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.085533775, y: -0.19129826, z: 0.9776548, w: -0.01673644}
+  m_LocalRotation: {x: -0.028722141, y: -0.9405456, z: 0.32829535, w: -0.08228714}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
@@ -43,8 +43,8 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 0.39626622, g: 0.3931559, b: 0.8962264, a: 1}
-  m_Intensity: 0.0037691114
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 0.062228024
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -119,7 +119,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5024347697930700495}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.016736474, y: -0.9776547, z: -0.19129865, w: -0.08553376}
+  m_LocalRotation: {x: 0.08228714, y: -0.3282952, z: -0.9405457, w: -0.028722128}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -137,7 +137,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 0.9740566, b: 0.8443396, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 0
   m_Range: 10
   m_SpotAngle: 30
@@ -215,7 +215,7 @@ Transform:
   m_GameObject: {fileID: 7964297776497880744}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 2615.0403, y: 722, z: -70.99866}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -239,23 +239,54 @@ MonoBehaviour:
   moon: {fileID: 4745114026488916793}
   dayDuration: 30
   sunInitialAngle: 180
+  rotationDirection: -1
   maxSunIntensity: 0.5
-  maxMoonIntensity: 0.05
-  skyColorGradient:
+  maxMoonIntensity: 0.1
+  daySkyColorGradient:
     serializedVersion: 2
-    key0: {r: 1, g: 1, b: 1, a: 1}
+    key0: {r: 0.08035529, g: 0.014818435, b: 0.3490566, a: 1}
+    key1: {r: 1, g: 0, b: 0.046096325, a: 1}
+    key2: {r: 1, g: 0.52469116, b: 0.07075471, a: 1}
+    key3: {r: 0.068574235, g: 0.49907514, b: 0.6320754, a: 1}
+    key4: {r: 0.1579299, g: 0.5774014, b: 0.8584906, a: 0}
+    key5: {r: 1, g: 0.07179487, b: 0, a: 0}
+    key6: {r: 0.036192264, g: 0.0039215684, b: 1, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 1349
+    ctime2: 4241
+    ctime3: 10601
+    ctime4: 27563
+    ctime5: 33346
+    ctime6: 52235
+    ctime7: 65535
+    atime0: 0
+    atime1: 23516
+    atime2: 47417
+    atime3: 65535
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 8
+    m_NumAlphaKeys: 4
+  dayGroundColorGradient:
+    serializedVersion: 2
+    key0: {r: 0.7830189, g: 0.47833815, b: 0.14404595, a: 1}
     key1: {r: 1, g: 1, b: 1, a: 1}
-    key2: {r: 0, g: 0, b: 0, a: 0}
-    key3: {r: 0, g: 0, b: 0, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
+    key2: {r: 0.2516465, g: 0.63121223, b: 0.8207547, a: 0}
+    key3: {r: 0.7395252, g: 0.8716383, b: 0.9376112, a: 0}
+    key4: {r: 0.754717, g: 0.13883947, b: 0.13883947, a: 0}
     key5: {r: 0, g: 0, b: 0, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
     ctime0: 0
-    ctime1: 65535
-    ctime2: 0
-    ctime3: 0
-    ctime4: 0
+    ctime1: 14264
+    ctime2: 30647
+    ctime3: 53585
+    ctime4: 65535
     ctime5: 0
     ctime6: 0
     ctime7: 0
@@ -269,37 +300,7 @@ MonoBehaviour:
     atime7: 0
     m_Mode: 0
     m_ColorSpace: -1
-    m_NumColorKeys: 2
-    m_NumAlphaKeys: 2
-  groundColorGradient:
-    serializedVersion: 2
-    key0: {r: 1, g: 1, b: 1, a: 1}
-    key1: {r: 1, g: 1, b: 1, a: 1}
-    key2: {r: 0, g: 0, b: 0, a: 0}
-    key3: {r: 0, g: 0, b: 0, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 65535
-    ctime2: 0
-    ctime3: 0
-    ctime4: 0
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_ColorSpace: -1
-    m_NumColorKeys: 2
+    m_NumColorKeys: 5
     m_NumAlphaKeys: 2
 --- !u!114 &63078299645148793
 MonoBehaviour:
