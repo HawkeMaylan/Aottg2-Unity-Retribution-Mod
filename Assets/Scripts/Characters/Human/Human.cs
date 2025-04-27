@@ -2705,6 +2705,9 @@ namespace Characters
                 itemList4.Add(new Daycycle(this, "DayCycle", 5f));
                 itemList4.Add(new DaycycleDelete(this, "DeleteDayCycle", 15f));
                 itemList4.Add(new Wagon1Spawn(this, "Wagon1", 5f));
+                itemList4.Add(new LargeWagonSpawn(this, "Wagon2", 1f));
+
+                
 
             }
 
