@@ -20,7 +20,7 @@ public class SimpleDayNightCycle : MonoBehaviour
     public Gradient dayGroundColorGradient;
 
     private Material skyboxMaterial;
-    private float timeOfDay;
+    private float timeOfDay; // 0 to 1 over a full day
 
     private void Start()
     {
@@ -81,22 +81,23 @@ public class SimpleDayNightCycle : MonoBehaviour
     {
         if (skyboxMaterial != null)
         {
-            //  Sky and Ground color purely based on timeOfDay
+            // Sky and ground colors purely based on timeOfDay
             Color currentSkyColor = daySkyColorGradient.Evaluate(timeOfDay);
             Color currentGroundColor = dayGroundColorGradient.Evaluate(timeOfDay);
 
             skyboxMaterial.SetColor("_SkyTint", currentSkyColor);
             skyboxMaterial.SetColor("_GroundColor", currentGroundColor);
 
-            // Optional: if you still want exposure based on lighting, you can remove this if you want pure time
+            // Calculate Sun height
             float sunHeight = Vector3.Dot(sun.transform.forward, Vector3.down);
             float clampedSunHeight = Mathf.Clamp01(sunHeight);
 
-            // Still adjusting lighting intensity
+            // Adjust Sun and Moon light intensity
             sun.intensity = clampedSunHeight * maxSunIntensity;
             moon.intensity = Mathf.Clamp01(-sunHeight) * maxMoonIntensity;
 
-            float exposure = clampedSunHeight > 0.01f ? Mathf.Lerp(0.0f, 1.3f, clampedSunHeight) : 0f;
+            //  Keep minimum night exposure (~0.2) to avoid pitch black
+            float exposure = Mathf.Lerp(0.2f, 1.3f, clampedSunHeight);
             skyboxMaterial.SetFloat("_Exposure", exposure);
         }
     }
