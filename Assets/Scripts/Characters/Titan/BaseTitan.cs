@@ -793,7 +793,7 @@ namespace Characters
                     _currentFallTotalTime = 0f;
                 else
                     _currentFallTotalTime += Time.fixedDeltaTime;
-                if (AI & _currentFallTotalTime >= 10f && Cache.Rigidbody.velocity.y <= Gravity.y * 10f)
+                if (AI & _currentFallTotalTime >= 200f && Cache.Rigidbody.velocity.y <= Gravity.y * 10f)
                 {
                     GetKilledRPC("Gravity");
                 }
