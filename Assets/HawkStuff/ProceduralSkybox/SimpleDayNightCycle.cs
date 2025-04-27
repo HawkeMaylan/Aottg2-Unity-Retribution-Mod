@@ -14,6 +14,12 @@ public class SimpleDayNightCycle : MonoBehaviour
     public float maxSunIntensity = 1.0f; // Maximum intensity for the sun
     public float maxMoonIntensity = 0.2f; // Maximum intensity for the moon
 
+    [Header("Sky Color Settings")]
+    public Color daySkyColor = new Color(0.5f, 0.7f, 1f); // Light blue day sky
+    public Color nightSkyColor = Color.black; // Pitch black night sky
+    public Color dayGroundColor = new Color(0.369f, 0.349f, 0.341f); // Default ground
+    public Color nightGroundColor = Color.black; // Pitch black ground at night
+
     private Material skyboxMaterial;
     private float timeOfDay; // 0 to 1 over a full day
 
@@ -77,12 +83,26 @@ public class SimpleDayNightCycle : MonoBehaviour
     private void UpdateLighting()
     {
         float sunHeight = Vector3.Dot(sun.transform.forward, Vector3.down);
+        float clampedSunHeight = Mathf.Clamp01(sunHeight);
 
-        sun.intensity = Mathf.Clamp01(sunHeight) * maxSunIntensity;
+        // Light intensities
+        sun.intensity = clampedSunHeight * maxSunIntensity;
         moon.intensity = Mathf.Clamp01(-sunHeight) * maxMoonIntensity;
 
-        float exposure = Mathf.Lerp(0.3f, 1.3f, Mathf.Clamp01(sunHeight));
+        // Skybox exposure: 0 at night, 1.3 at daytime
+        float exposure = clampedSunHeight > 0.01f ? Mathf.Lerp(0.0f, 1.3f, clampedSunHeight) : 0f;
+
         if (skyboxMaterial != null)
+        {
             skyboxMaterial.SetFloat("_Exposure", exposure);
+
+            // Sky Tint color based on time
+            Color currentSkyColor = Color.Lerp(nightSkyColor, daySkyColor, clampedSunHeight);
+            skyboxMaterial.SetColor("_SkyTint", currentSkyColor);
+
+            // Ground Color based on time
+            Color currentGroundColor = Color.Lerp(nightGroundColor, dayGroundColor, clampedSunHeight);
+            skyboxMaterial.SetColor("_GroundColor", currentGroundColor);
+        }
     }
 }

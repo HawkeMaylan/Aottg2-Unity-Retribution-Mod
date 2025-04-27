@@ -78,7 +78,7 @@ Light:
   m_Cookie: {fileID: 0}
   m_DrawHalo: 1
   m_Flare: {fileID: 12100000, guid: e034b5c8c28f96646bddec3b6284c6dc, type: 2}
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 0
@@ -137,7 +137,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 0.8773585, g: 0.8421984, b: 0.64146495, a: 1}
+  m_Color: {r: 1, g: 0.9740566, b: 0.8443396, a: 1}
   m_Intensity: 0
   m_Range: 10
   m_SpotAngle: 30
@@ -180,7 +180,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
-  m_BounceIntensity: 2
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -237,6 +237,10 @@ MonoBehaviour:
   sun: {fileID: 42349908458179679}
   moon: {fileID: 4745114026488916793}
   dayDuration: 30
-  sunInitialAngle: 0
+  sunInitialAngle: 180
   maxSunIntensity: 0.5
-  maxMoonIntensity: 0.01
+  maxMoonIntensity: 0.05
+  daySkyColor: {r: 0.5, g: 0.7, b: 1, a: 1}
+  nightSkyColor: {r: 0, g: 0, b: 0, a: 1}
+  dayGroundColor: {r: 0.369, g: 0.349, b: 0.341, a: 1}
+  nightGroundColor: {r: 0, g: 0, b: 0, a: 1}
