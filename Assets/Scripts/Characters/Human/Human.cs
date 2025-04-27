@@ -2705,14 +2705,9 @@ namespace Characters
                 itemList4.Add(new Daycycle(this, "DayCycle", 5f));
                 itemList4.Add(new DaycycleDelete(this, "DeleteDayCycle", 15f));
                 itemList4.Add(new Wagon1Spawn(this, "Wagon1", 5f));
-                ItemListDisplayNames["itemList4"] = "World Control";
+
             }
-            else
-            {
-                // Completely disable itemList4 for non-MC
-                itemList4.Clear();
-                itemList4 = null;
-            }
+
 
 
 
@@ -2720,6 +2715,7 @@ namespace Characters
             ItemListDisplayNames["itemList1"] = "Flares";
             ItemListDisplayNames["itemList2"] = "Support";
             ItemListDisplayNames["itemList3"] = "Equipment";
+            ItemListDisplayNames["itemList4"] = "Master Client Control";
 
         }
 
