@@ -409,7 +409,7 @@
 			"TurnSpeedMax": 9.0,
 
 			"ChaseAngleTimeMin": 0.015,
-			"ChaseAngleTimeMax": 0.050,
+			"ChaseAngleTimeMax": 0.50,
 			"ChaseAngleMinRange": 2
 		},
 		"Hard": {
