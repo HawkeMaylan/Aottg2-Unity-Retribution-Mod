@@ -2697,8 +2697,7 @@ namespace Characters
             itemList1.Add(new FlareItem(this, "Support Flare", Color.blue, 30f));
             itemList2.Add(new FlareItem(this, "Cheese Flare", Color.white, 40f));
             itemList3.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
-            itemList3.Add(new HorseWhistleItem(this, "Whistle", 5f));
-            itemList3.Add(new Wagon1Spawn(this, "Wagon1", 5f));
+            itemList3.Add(new HorseWhistleItem(this, "Whistle", 5f));          
             itemList3.Add(new Lanterntoggle(this, "Lantern On/Off", 1f));
             itemList3.Add(new CloakToggle(this, "Cape On/Off", 1f));
             itemList3.Add(new Cloak1Toggle(this, "Hood On/Off", 1f));
@@ -2706,6 +2705,7 @@ namespace Characters
             {
                 itemList4.Add(new Daycycle(this, "DayCycle", 5f));
                 itemList4.Add(new DaycycleDelete(this, "DeleteDayCycle", 15f));
+                itemList4.Add(new Wagon1Spawn(this, "Wagon1", 5f));
                 ItemListDisplayNames["itemList4"] = "World Control";
             }
             else
