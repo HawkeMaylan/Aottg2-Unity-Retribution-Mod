@@ -241,7 +241,7 @@ MonoBehaviour:
   sunInitialAngle: 180
   rotationDirection: -1
   maxSunIntensity: 0.8
-  maxMoonIntensity: 0.1
+  maxMoonIntensity: 0.08
   daySkyColorGradient:
     serializedVersion: 2
     key0: {r: 1, g: 0, b: 0.046096325, a: 1}
