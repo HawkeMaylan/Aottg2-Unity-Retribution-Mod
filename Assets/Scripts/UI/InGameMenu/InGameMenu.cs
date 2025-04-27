@@ -389,16 +389,23 @@ namespace UI
 
         public void ShowKillFeed(string killer, string victim, int score, string weapon)
         {
+            bool realismEnabled = SettingsManager.InGameCurrent.Misc.RealismMode.Value;
+
+            // Only allow showing kill feed if realism is off or player is MasterClient
+            if (realismEnabled && !PhotonNetwork.IsMasterClient)
+                return;
+
             int feedCount = SettingsManager.UISettings.KillFeedCount.Value;
             if (feedCount <= 0)
                 return;
             if (_killFeedBigPopup.TimeLeft > 0f)
             {
-                ShowKillFeedPushSmall(_killFeedBigPopup.Killer, _killFeedBigPopup.Victim, _killFeedBigPopup.Score, 
+                ShowKillFeedPushSmall(_killFeedBigPopup.Killer, _killFeedBigPopup.Victim, _killFeedBigPopup.Score,
                     _killFeedBigPopup.Weapon, _killFeedBigPopup.TimeLeft, 0);
             }
             _killFeedBigPopup.Show(killer, victim, score, weapon);
         }
+
 
         private void ShowKillFeedPushSmall(string killer, string victim, int score, string weapon, float timeLeft, int index)
         {
