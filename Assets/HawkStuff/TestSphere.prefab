@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 2395348859484087753}
   - component: {fileID: 9127250488322887302}
   - component: {fileID: 3631301171054023492}
-  - component: {fileID: 6858139166293770081}
   m_Layer: 0
   m_Name: TestSphere
   m_TagString: Untagged
@@ -123,34 +122,6 @@ MonoBehaviour:
   mountPoint: {fileID: 1788160713244749821}
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
-  triggerCollider: {fileID: 9127250488322887302}
---- !u!54 &6858139166293770081
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 571672795949329428}
-  serializedVersion: 4
-  m_Mass: 0.0000001
-  m_Drag: 0
-  m_AngularDrag: 0
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1 &5663840240234857108
 GameObject:
   m_ObjectHideFlags: 0
