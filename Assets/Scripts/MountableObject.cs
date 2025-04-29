@@ -11,12 +11,24 @@ public class DirectMount : MonoBehaviour
     private Human humanInTrigger;
     private bool isMounted = false;
 
+    private Rigidbody rb;
+
+    // Backup Rigidbody settings
+    private float originalMass;
+    private float originalDrag;
+    private float originalAngularDrag;
+    private bool originalUseGravity;
+    private RigidbodyInterpolation originalInterpolation;
+    private CollisionDetectionMode originalCollisionMode;
+    private RigidbodyConstraints originalConstraints;
+
     private void OnTriggerEnter(Collider other)
     {
         Human human = other.GetComponentInParent<Human>();
         if (human != null && human.IsMine())
         {
             humanInTrigger = human;
+            rb = human.GetComponent<Rigidbody>();
             Debug.Log("[DirectMount] Human entered: " + human.name);
         }
     }
@@ -44,57 +56,60 @@ public class DirectMount : MonoBehaviour
 
     private void AttachHuman()
     {
-        if (humanInTrigger == null)
-            return;
+        if (humanInTrigger == null || rb == null) return;
 
-        Transform humanRoot = humanInTrigger.transform;
+        Transform root = humanInTrigger.transform;
 
-        // Set parent to mount point
-        humanRoot.SetParent(mountPoint);
+        // Backup Rigidbody settings
+        originalMass = rb.mass;
+        originalDrag = rb.drag;
+        originalAngularDrag = rb.angularDrag;
+        originalUseGravity = rb.useGravity;
+        originalInterpolation = rb.interpolation;
+        originalCollisionMode = rb.collisionDetectionMode;
+        originalConstraints = rb.constraints;
 
-        // Set position and rotation with offsets
-        humanRoot.localPosition = positionOffset;
-        humanRoot.localEulerAngles = rotationOffset;
+        // Apply mounted settings
+        rb.mass = 1e-07f;
+        rb.drag = 0f;
+        rb.angularDrag = 0f;
+        rb.useGravity = false;
+        rb.isKinematic = false;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+        rb.constraints = RigidbodyConstraints.FreezeAll;
 
-        // Freeze movement
-        Rigidbody rb = humanRoot.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-            rb.useGravity = false;
-            rb.isKinematic = true;
-        }
+        // Parent and align
+        root.SetParent(mountPoint);
+        root.localPosition = positionOffset;
+        root.localEulerAngles = rotationOffset;
 
-        // Play mount animation if you want (optional)
         humanInTrigger.PlayAnimation(HumanAnimations.HorseMount);
-
         isMounted = true;
-        Debug.Log("[DirectMount] Human attached to mount point.");
+
+        Debug.Log("[DirectMount] Mounted with Rigidbody override.");
     }
 
     private void DetachHuman()
     {
-        if (humanInTrigger == null)
-            return;
+        if (humanInTrigger == null || rb == null) return;
 
-        Transform humanRoot = humanInTrigger.transform;
+        Transform root = humanInTrigger.transform;
+        root.SetParent(null);
 
-        // Unparent
-        humanRoot.SetParent(null);
+        // Restore original settings and force isKinematic off
+        rb.mass = originalMass;
+        rb.drag = originalDrag;
+        rb.angularDrag = originalAngularDrag;
+        rb.useGravity = originalUseGravity;
+        rb.isKinematic = false; // Force off even if it was true before
+        rb.interpolation = originalInterpolation;
+        rb.collisionDetectionMode = originalCollisionMode;
+        rb.constraints = originalConstraints;
 
-        // Re-enable physics
-        Rigidbody rb = humanRoot.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.useGravity = true;
-            rb.isKinematic = false;
-        }
-
-        // Play idle animation if you want (optional)
-        ///humanInTrigger.PlayAnimation(HumanAnimations.Idle);
-
+        ///humanInTrigger.PlayAnimation(HumanAnimations.armature|horse_idle);
         isMounted = false;
-        Debug.Log("[DirectMount] Human detached from mount point.");
+
+        Debug.Log("[DirectMount] Unmounted and Rigidbody restored with isKinematic OFF.");
     }
 }
