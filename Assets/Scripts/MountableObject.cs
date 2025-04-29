@@ -7,11 +7,10 @@ public class DirectMount : MonoBehaviour
     public Transform mountPoint;
     public Vector3 positionOffset;
     public Vector3 rotationOffset;
-    public float maxDriftDistance = 1.5f; // Safety check if player drifts away
+    public float maxDriftDistance = 1.5f;
 
     private Human humanInTrigger;
     private bool isMounted = false;
-
     private Rigidbody rb;
 
     // Backup Rigidbody settings
@@ -36,11 +35,11 @@ public class DirectMount : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        // Do NOT unmount — just re-align if necessary
         Human human = other.GetComponentInParent<Human>();
         if (human != null && human == humanInTrigger)
         {
-            Debug.Log("[DirectMount] Human exited: " + human.name);
-            humanInTrigger = null;
+            Debug.Log("[DirectMount] Human exited trigger zone — will reattach if needed.");
         }
     }
 
@@ -54,16 +53,17 @@ public class DirectMount : MonoBehaviour
                 DetachHuman();
         }
 
-        // Auto unmount if player drifts too far from mountPoint
         if (isMounted && humanInTrigger != null)
         {
-            Vector3 targetPos = mountPoint.position + mountPoint.TransformVector(positionOffset);
-            float distance = Vector3.Distance(humanInTrigger.transform.position, targetPos);
+            Transform root = humanInTrigger.transform;
+            Vector3 expectedWorldPos = mountPoint.TransformPoint(positionOffset);
+            Quaternion expectedWorldRot = mountPoint.rotation * Quaternion.Euler(rotationOffset);
 
+            float distance = Vector3.Distance(root.position, expectedWorldPos);
             if (distance > maxDriftDistance)
             {
-                Debug.LogWarning("[DirectMount] Auto-unmount: drifted too far from mount.");
-                DetachHuman();
+                Debug.LogWarning("[DirectMount] Drifted — reattaching to mount.");
+                ReMountHuman();
             }
         }
     }
@@ -83,29 +83,42 @@ public class DirectMount : MonoBehaviour
         originalCollisionMode = rb.collisionDetectionMode;
         originalConstraints = rb.constraints;
 
-        // Prep Rigidbody (disable forces before parenting!)
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        rb.isKinematic = true; // prevent fling during parenting
+        rb.isKinematic = true;
 
-        // Parent and snap to mount
         root.SetParent(mountPoint);
         root.localPosition = positionOffset;
         root.localEulerAngles = rotationOffset;
 
-        // Apply visual Rigidbody overrides (you may skip most of these if they’re not needed)
         rb.mass = 1e-07f;
         rb.drag = 0f;
         rb.angularDrag = 0f;
         rb.useGravity = false;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
-        rb.collisionDetectionMode = CollisionDetectionMode.Continuous; // better for mounting
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         rb.constraints = RigidbodyConstraints.FreezeAll;
 
         humanInTrigger.PlayAnimation(HumanAnimations.HorseMount);
         isMounted = true;
 
-        Debug.Log("[DirectMount] Mounted with safer Rigidbody settings.");
+        Debug.Log("[DirectMount] Mounted.");
+    }
+
+    private void ReMountHuman()
+    {
+        if (humanInTrigger == null || rb == null) return;
+
+        Transform root = humanInTrigger.transform;
+
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        root.SetParent(mountPoint);
+        root.localPosition = positionOffset;
+        root.localEulerAngles = rotationOffset;
+
+        Debug.Log("[DirectMount] Re-mounted to correct position.");
     }
 
     private void DetachHuman()
@@ -115,22 +128,18 @@ public class DirectMount : MonoBehaviour
         Transform root = humanInTrigger.transform;
         root.SetParent(null);
 
-        // Restore original Rigidbody settings
         rb.mass = originalMass;
         rb.drag = originalDrag;
         rb.angularDrag = originalAngularDrag;
         rb.useGravity = originalUseGravity;
-        rb.isKinematic = false; // must be explicitly off again
+        rb.isKinematic = false;
         rb.interpolation = originalInterpolation;
         rb.collisionDetectionMode = originalCollisionMode;
         rb.constraints = originalConstraints;
 
-        // Nudge downward slightly to prevent midair "float" bug
         root.position += Vector3.down * 0.05f;
-
-        //humanInTrigger.PlayAnimation(HumanAnimations.Idle);
         isMounted = false;
 
-        Debug.Log("[DirectMount] Unmounted and Rigidbody restored.");
+        Debug.Log("[DirectMount] Unmounted.");
     }
 }
