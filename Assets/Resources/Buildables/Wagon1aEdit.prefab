@@ -1099,6 +1099,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TestSphere
       objectReference: {fileID: 0}
+    - target: {fileID: 3631301171054023492, guid: 00fa8f1388aa0b94f873f98105471d87, type: 3}
+      propertyPath: maxDriftDistance
+      value: 0.8
+      objectReference: {fileID: 0}
     - target: {fileID: 7710548090023071139, guid: 00fa8f1388aa0b94f873f98105471d87, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.0732259

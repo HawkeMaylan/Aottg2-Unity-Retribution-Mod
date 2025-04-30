@@ -1,5 +1,6 @@
 using UnityEngine;
 using Characters;
+using UnityEngine.UI;
 
 public class DirectMount : MonoBehaviour
 {
@@ -9,8 +10,13 @@ public class DirectMount : MonoBehaviour
     public Vector3 rotationOffset;
     public float maxDriftDistance = 1.5f;
 
+    [Header("UI Prompt")]
+    public Text promptText;
+
     private Human humanInTrigger;
     private bool isMounted = false;
+    private bool hasExitedAfterUnmount = false;
+
     private Rigidbody rb;
 
     // Backup Rigidbody settings
@@ -22,6 +28,12 @@ public class DirectMount : MonoBehaviour
     private CollisionDetectionMode originalCollisionMode;
     private RigidbodyConstraints originalConstraints;
 
+    private void Start()
+    {
+        if (promptText != null)
+            promptText.enabled = false;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         Human human = other.GetComponentInParent<Human>();
@@ -29,17 +41,33 @@ public class DirectMount : MonoBehaviour
         {
             humanInTrigger = human;
             rb = human.GetComponent<Rigidbody>();
+            hasExitedAfterUnmount = false;
+
+            if (promptText != null)
+            {
+                promptText.text = "Press G to Mount";
+                promptText.enabled = true;
+            }
+
             Debug.Log("[DirectMount] Human entered: " + human.name);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        // Do NOT unmount — just re-align if necessary
         Human human = other.GetComponentInParent<Human>();
         if (human != null && human == humanInTrigger)
         {
-            Debug.Log("[DirectMount] Human exited trigger zone — will reattach if needed.");
+            if (!isMounted)
+            {
+                hasExitedAfterUnmount = true;
+                humanInTrigger = null;
+            }
+
+            if (promptText != null)
+                promptText.enabled = false;
+
+            Debug.Log("[DirectMount] Human exited trigger.");
         }
     }
 
@@ -47,9 +75,9 @@ public class DirectMount : MonoBehaviour
     {
         if (humanInTrigger != null && Input.GetKeyDown(KeyCode.G))
         {
-            if (!isMounted)
+            if (!isMounted && !hasExitedAfterUnmount)
                 AttachHuman();
-            else
+            else if (isMounted)
                 DetachHuman();
         }
 
@@ -65,6 +93,9 @@ public class DirectMount : MonoBehaviour
                 Debug.LogWarning("[DirectMount] Drifted — reattaching to mount.");
                 ReMountHuman();
             }
+
+            if (promptText != null)
+                promptText.text = "Press G to Unmount";
         }
     }
 
@@ -74,7 +105,6 @@ public class DirectMount : MonoBehaviour
 
         Transform root = humanInTrigger.transform;
 
-        // Backup Rigidbody settings
         originalMass = rb.mass;
         originalDrag = rb.drag;
         originalAngularDrag = rb.angularDrag;
@@ -101,6 +131,9 @@ public class DirectMount : MonoBehaviour
 
         humanInTrigger.PlayAnimation(HumanAnimations.HorseMount);
         isMounted = true;
+
+        if (promptText != null)
+            promptText.text = "Press G to Unmount";
 
         Debug.Log("[DirectMount] Mounted.");
     }
@@ -139,6 +172,12 @@ public class DirectMount : MonoBehaviour
 
         root.position += Vector3.down * 0.05f;
         isMounted = false;
+
+        if (promptText != null)
+        {
+            promptText.text = "";
+            promptText.enabled = false;
+        }
 
         Debug.Log("[DirectMount] Unmounted.");
     }
