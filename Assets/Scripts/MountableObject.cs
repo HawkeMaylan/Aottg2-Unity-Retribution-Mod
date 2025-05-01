@@ -142,7 +142,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
             style.alignment = TextAnchor.MiddleCenter;
             style.normal.textColor = Color.white;
 
-            GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height - 100, 300, 50), currentPrompt, style);
+            GUI.Label(new Rect(Screen.width / 2 - 150, 10, 300, 50), currentPrompt, style);
         }
     }
 
