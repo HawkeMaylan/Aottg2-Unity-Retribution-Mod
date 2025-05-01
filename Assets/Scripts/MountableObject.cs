@@ -1,6 +1,5 @@
 using UnityEngine;
 using Characters;
-using UnityEngine.UI;
 using Photon.Pun;
 
 public class DirectMountBundled : MonoBehaviourPunCallbacks
@@ -10,17 +9,24 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     public Vector3 positionOffset;
     public Vector3 rotationOffset;
 
-    [Header("UI Prompt")]
-    public Text promptText;
+    [Header("Prompt Texts")]
+    public string mountPromptText = "Press G to Mount";
+    public string unmountPromptText = "Press G to Unmount";
+
+    [Header("Unmount Prompt Settings")]
+    public float unmountPromptDuration = 5f; // Seconds the "Unmount" prompt stays
 
     private Human humanInTrigger;
     private bool isMounted = false;
     private bool hasExitedAfterUnmount = false;
 
+    // Prompt system
+    private static string currentPrompt = "";
+    private float unmountPromptTimer = 0f;
+
     private void Start()
     {
-        if (promptText != null)
-            promptText.enabled = false;
+        ClearPrompt();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -31,13 +37,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
             humanInTrigger = human;
             hasExitedAfterUnmount = false;
 
-            if (promptText != null)
-            {
-                promptText.text = "Press G to Mount";
-                promptText.enabled = true;
-            }
-
-            Debug.Log("[DirectMountBundled] Human entered: " + human.name);
+            SetPrompt(mountPromptText);
         }
     }
 
@@ -50,12 +50,8 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
             {
                 hasExitedAfterUnmount = true;
                 humanInTrigger = null;
+                ClearPrompt();
             }
-
-            if (promptText != null)
-                promptText.enabled = false;
-
-            Debug.Log("[DirectMountBundled] Human exited trigger.");
         }
     }
 
@@ -68,13 +64,22 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
             else if (isMounted)
                 DetachHuman();
         }
+
+        // Handle unmount prompt timer
+        if (isMounted && unmountPromptTimer > 0f)
+        {
+            unmountPromptTimer -= Time.deltaTime;
+            if (unmountPromptTimer <= 0f)
+            {
+                ClearPrompt();
+            }
+        }
     }
 
     private void AttachHuman()
     {
         if (humanInTrigger == null || mountPoint == null) return;
 
-        //  DIRECTLY assign mounting properties manually
         humanInTrigger.MountedTransform = mountPoint;
         humanInTrigger.MountedMapObject = null;
         humanInTrigger.MountedPositionOffset = positionOffset;
@@ -85,10 +90,8 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         isMounted = true;
         hasExitedAfterUnmount = false;
 
-        if (promptText != null)
-            promptText.text = "Press G to Unmount";
-
-        Debug.Log("[DirectMountBundled] Mounted manually to: " + mountPoint.name);
+        SetPrompt(unmountPromptText);
+        unmountPromptTimer = unmountPromptDuration;
     }
 
     private void DetachHuman()
@@ -99,12 +102,37 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
 
         isMounted = false;
 
-        if (promptText != null)
+        if (humanInTrigger != null && !hasExitedAfterUnmount)
         {
-            promptText.text = "";
-            promptText.enabled = false;
+            SetPrompt(mountPromptText);
+            unmountPromptTimer = 0f;
         }
+        else
+        {
+            ClearPrompt();
+        }
+    }
 
-        Debug.Log("[DirectMountBundled] Unmounted.");
+    private void OnGUI()
+    {
+        if (!string.IsNullOrEmpty(currentPrompt))
+        {
+            GUIStyle style = new GUIStyle(GUI.skin.label);
+            style.fontSize = 24;
+            style.alignment = TextAnchor.MiddleCenter;
+            style.normal.textColor = Color.white;
+
+            GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height - 100, 300, 50), currentPrompt, style);
+        }
+    }
+
+    private void SetPrompt(string text)
+    {
+        currentPrompt = text;
+    }
+
+    private void ClearPrompt()
+    {
+        currentPrompt = "";
     }
 }
