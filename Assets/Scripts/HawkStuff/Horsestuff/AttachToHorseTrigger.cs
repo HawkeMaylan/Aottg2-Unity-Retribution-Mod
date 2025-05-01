@@ -6,7 +6,7 @@ using ApplicationManagers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using Characters; //  Needed for Horse script access
+using Characters; // Needed for Horse script access
 
 public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 {
@@ -29,6 +29,13 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     public float jointBreakTorque = Mathf.Infinity;
     public bool enableCollision = false;
 
+    [Header("Prompt Texts")]
+    public string attachPromptText = "Press G to Attach";
+    public string detachPromptText = "Press G to Detach";
+
+    [Header("Detach Prompt Settings")]
+    public float detachPromptDuration = 5f;
+
     private bool isAttached = false;
     private Transform horseRootInContact;
     private Transform attachedHorse;
@@ -37,11 +44,16 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private PhotonView pv;
     private int attachedHorseViewID = -1;
 
+    private static string currentPrompt = "";
+    private float detachPromptTimer = 0f;
+
     private void Start()
     {
         wagon = transform.root;
         rb = wagon.GetComponent<Rigidbody>();
         pv = wagon.GetComponent<PhotonView>();
+
+        ClearPrompt();
     }
 
     private void Update()
@@ -58,7 +70,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
                 if (horseView != null && horseComponent != null && horseView.Owner == PhotonNetwork.LocalPlayer)
                 {
-                    if (horseComponent.MountedStatus == 1) //  Only allow attaching if Mounted
+                    if (horseComponent.MountedStatus == 1)
                     {
                         if (!pv.IsMine)
                             pv.RequestOwnership();
@@ -72,11 +84,20 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
                 if (attachedHorse != null)
                 {
                     Horse horseComponent = attachedHorse.GetComponentInParent<Horse>();
-                    if (horseComponent != null && horseComponent.MountedStatus == 1) // Only allow detaching if still Mounted
+                    if (horseComponent != null && horseComponent.MountedStatus == 1)
                     {
                         pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
                     }
                 }
+            }
+        }
+
+        if (isAttached && detachPromptTimer > 0f)
+        {
+            detachPromptTimer -= Time.deltaTime;
+            if (detachPromptTimer <= 0f)
+            {
+                ClearPrompt();
             }
         }
     }
@@ -86,6 +107,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         if (other.name == "HorseTrigger")
         {
             horseRootInContact = other.transform.root;
+            SetPrompt(attachPromptText);
         }
     }
 
@@ -94,6 +116,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         if (other.name == "HorseTrigger" && other.transform.root == horseRootInContact)
         {
             horseRootInContact = null;
+            ClearPrompt();
         }
     }
 
@@ -109,7 +132,8 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         wagon.rotation = horseRoot.rotation;
 
         var existingJoint = wagon.GetComponent<ConfigurableJoint>();
-        if (existingJoint != null) Destroy(existingJoint);
+        if (existingJoint != null)
+            Destroy(existingJoint);
 
         ConfigurableJoint joint = wagon.gameObject.AddComponent<ConfigurableJoint>();
         Rigidbody horseRb = horseRoot.GetComponent<Rigidbody>();
@@ -118,7 +142,6 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
             joint.connectedBody = horseRb;
         }
 
-        // Joint motion configuration
         joint.xMotion = ConfigurableJointMotion.Limited;
         joint.yMotion = ConfigurableJointMotion.Limited;
         joint.zMotion = ConfigurableJointMotion.Limited;
@@ -126,12 +149,10 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         joint.angularYMotion = ConfigurableJointMotion.Limited;
         joint.angularZMotion = ConfigurableJointMotion.Free;
 
-        // Linear limit
         SoftJointLimit limit = new SoftJointLimit();
         limit.limit = linearLimit;
         joint.linearLimit = limit;
 
-        // Linear spring/damper
         JointDrive linearDrive = new JointDrive
         {
             positionSpring = linearSpring,
@@ -140,7 +161,6 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         };
         joint.xDrive = joint.yDrive = joint.zDrive = linearDrive;
 
-        // Angular drive
         JointDrive angularDrive = new JointDrive
         {
             positionSpring = angularSpring,
@@ -150,7 +170,6 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         joint.rotationDriveMode = RotationDriveMode.Slerp;
         joint.slerpDrive = angularDrive;
 
-        // Other joint settings
         joint.breakForce = jointBreakForce;
         joint.breakTorque = jointBreakTorque;
         joint.enableCollision = enableCollision;
@@ -159,6 +178,9 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         isAttached = true;
         attachedHorse = horseRoot;
         attachedHorseViewID = horseViewID;
+
+        SetPrompt(detachPromptText);
+        detachPromptTimer = detachPromptDuration;
     }
 
     [PunRPC]
@@ -174,5 +196,31 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         isAttached = false;
         attachedHorse = null;
         attachedHorseViewID = -1;
+
+        SetPrompt(attachPromptText);
+        detachPromptTimer = 0f;
+    }
+
+    private void OnGUI()
+    {
+        if (!string.IsNullOrEmpty(currentPrompt))
+        {
+            GUIStyle style = new GUIStyle(GUI.skin.label);
+            style.fontSize = 24;
+            style.alignment = TextAnchor.UpperCenter;
+            style.normal.textColor = Color.white;
+
+            GUI.Label(new Rect(Screen.width / 2 - 150, 50, 300, 50), currentPrompt, style);
+        }
+    }
+
+    private void SetPrompt(string text)
+    {
+        currentPrompt = text;
+    }
+
+    private void ClearPrompt()
+    {
+        currentPrompt = "";
     }
 }
