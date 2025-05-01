@@ -668,7 +668,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b763d0e5403b0b147a848dcc9813e507, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attachOffset: {x: -0.03, y: 3, z: -5.55}
+  attachOffset: {x: -0.03, y: 2.5, z: -5.55}
   linearLimit: 10
   linearSpring: 1000
   linearDamper: 5
