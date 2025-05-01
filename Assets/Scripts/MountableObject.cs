@@ -23,6 +23,9 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     [Header("Unmount Prompt Settings")]
     public float unmountPromptDuration = 5f;
 
+    [Header("Mount Animation Settings")]
+    public MountAnimationOption mountAnimation = MountAnimationOption.HorseIdle;
+
     private Human humanInTrigger;
     private bool isMounted = false;
     private bool hasExitedAfterUnmount = false;
@@ -71,7 +74,6 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         if (humanInTrigger == null)
             return;
 
-        //  Exactly like ItemHandler: Only block key input if InMenu or Chat active
         if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
             if (Input.GetKeyDown(KeyCode.G))
@@ -106,6 +108,10 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         humanInTrigger.MountState = HumanMountState.MapObject;
         humanInTrigger.SetInterpolation(false);
 
+        // Play selected mount animation
+        string selectedAnimation = GetSelectedMountAnimation();
+        humanInTrigger.CrossFade(selectedAnimation, 0.2f);
+
         isMounted = true;
         hasExitedAfterUnmount = false;
 
@@ -133,6 +139,19 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         }
     }
 
+    private string GetSelectedMountAnimation()
+    {
+        switch (mountAnimation)
+        {
+            case MountAnimationOption.HorseIdle:
+                return HumanAnimations.HorseIdle;
+            case MountAnimationOption.IdleM:
+                return HumanAnimations.IdleM;
+            default:
+                return HumanAnimations.HorseIdle;
+        }
+    }
+
     private void OnGUI()
     {
         if (!string.IsNullOrEmpty(currentPrompt))
@@ -155,4 +174,10 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     {
         currentPrompt = "";
     }
+}
+
+public enum MountAnimationOption
+{
+    HorseIdle,
+    IdleM
 }
