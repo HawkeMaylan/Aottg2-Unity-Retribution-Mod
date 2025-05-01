@@ -1,16 +1,16 @@
-using ApplicationManagers;
-using Photon.Pun;
-using System;
 using UnityEngine;
-using UnityEngine.UIElements;
-using Utility;
-
+using Photon.Pun;
+using Characters;
 
 namespace Characters
 {
     class HumanMovementSync : BaseMovementSync
     {
-        protected Human _human;
+        private Human _human;
+        private int? _mountedParentViewID = null;
+        private Vector3 _mountedPositionOffset = Vector3.zero;
+        private Vector3 _mountedRotationOffset = Vector3.zero;
+
         protected override void Awake()
         {
             base.Awake();
@@ -19,54 +19,61 @@ namespace Characters
 
         protected override void SendCustomStream(PhotonStream stream)
         {
-            if (_human.LateUpdateHeadRotation.HasValue)
+            if (_human.MountState == HumanMountState.MapObject && _human.MountedTransform != null)
             {
-                var rotation = _human.LateUpdateHeadRotation.Value;
-                stream.SendNext(QuaternionCompression.CompressQuaternion(ref rotation));
+                PhotonView mountedPV = _human.MountedTransform.GetComponent<PhotonView>();
+                if (mountedPV != null)
+                {
+                    stream.SendNext(true); // IsMounted
+                    stream.SendNext(mountedPV.ViewID);
+                    stream.SendNext(_human.MountedPositionOffset);
+                    stream.SendNext(_human.MountedRotationOffset);
+                    return;
+                }
             }
-            else
-                stream.SendNext(null);
+
+            // Not mounted
+            stream.SendNext(false); // IsMounted
         }
 
         protected override void ReceiveCustomStream(PhotonStream stream)
         {
-            int? compressed = (int?)stream.ReceiveNext();
-            if (compressed.HasValue)
+            bool isMounted = (bool)stream.ReceiveNext();
+            if (isMounted)
             {
-                var rotation = Quaternion.identity;
-                QuaternionCompression.DecompressQuaternion(ref rotation, compressed.Value);
-                _human.LateUpdateHeadRotationRecv = rotation;
+                _mountedParentViewID = (int)stream.ReceiveNext();
+                _mountedPositionOffset = (Vector3)stream.ReceiveNext();
+                _mountedRotationOffset = (Vector3)stream.ReceiveNext();
             }
             else
-                _human.LateUpdateHeadRotationRecv = null;
+            {
+                _mountedParentViewID = null;
+            }
         }
 
         protected override void Update()
         {
             if (!Disabled && !_photonView.IsMine)
             {
-                if (_human.MountState == HumanMountState.MapObject && _human.MountedTransform != null)
+                if (_mountedParentViewID.HasValue)
                 {
-                    _transform.position = _human.MountedTransform.TransformPoint(_human.MountedPositionOffset);
-                    _transform.rotation = Quaternion.Euler(_human.MountedTransform.rotation.eulerAngles + _human.MountedRotationOffset);
-                }
-                else if (_human.CarryState == HumanCarryState.Carry && _human.Carrier != null)
-                {
-                    Vector3 offset = _human.Carrier.Cache.Transform.forward * -0.4f + _human.Carrier.Cache.Transform.up * 0.5f;
-                    _transform.position = _human.Carrier.Cache.Transform.position + offset;
-                    _transform.rotation = _human.Carrier.Cache.Transform.rotation;
-                }
-                else
-                {
-                    _transform.position = Vector3.Lerp(_transform.position, _correctPosition, Time.deltaTime * SmoothingDelay);
-                    _transform.rotation = Quaternion.Lerp(_transform.rotation, _correctRotation, Time.deltaTime * SmoothingDelay);
-                    if(_human.BackHuman != null)
-                        _human.CarryVelocity = _correctVelocity;
-                    if (_timeSinceLastMessage < MaxPredictionTime)
+                    PhotonView mountedPV = PhotonView.Find(_mountedParentViewID.Value);
+                    if (mountedPV != null)
                     {
-                        _correctPosition += _correctVelocity * Time.deltaTime;
-                        _timeSinceLastMessage += Time.deltaTime;
+                        _transform.position = mountedPV.transform.TransformPoint(_mountedPositionOffset);
+                        _transform.rotation = Quaternion.Euler(mountedPV.transform.rotation.eulerAngles + _mountedRotationOffset);
+                        return;
                     }
+                }
+
+                // Default interpolation when not mounted
+                _transform.position = Vector3.Lerp(_transform.position, _correctPosition, Time.deltaTime * SmoothingDelay);
+                _transform.rotation = Quaternion.Lerp(_transform.rotation, _correctRotation, Time.deltaTime * SmoothingDelay);
+
+                if (_syncVelocity && _timeSinceLastMessage < MaxPredictionTime)
+                {
+                    _correctPosition += _correctVelocity * Time.deltaTime;
+                    _timeSinceLastMessage += Time.deltaTime;
                 }
             }
         }

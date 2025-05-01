@@ -137,6 +137,9 @@ MonoBehaviour:
   - RPC_UpdateLampTransform
   - RPC_AttachToHorse
   - RPC_DetachFromHorse
+  - NetworkMount
+  - NetworkMountedTransformSync
+  - NetworkUnmount
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

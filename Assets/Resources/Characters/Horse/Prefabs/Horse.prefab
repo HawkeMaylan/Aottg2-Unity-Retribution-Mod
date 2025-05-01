@@ -103,9 +103,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &11456738
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7176,8 +7176,58 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 511011263065945598, guid: 88c44b0e20de16f4ba8fdce3f4d9588f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6027936230836393741}
+    - targetCorrespondingSourceObject: {fileID: 511011263065945598, guid: 88c44b0e20de16f4ba8fdce3f4d9588f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3832026323645695214}
   m_SourcePrefab: {fileID: 100100000, guid: 88c44b0e20de16f4ba8fdce3f4d9588f, type: 3}
+--- !u!1 &2153475148421817682 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 511011263065945598, guid: 88c44b0e20de16f4ba8fdce3f4d9588f, type: 3}
+  m_PrefabInstance: {fileID: 1942692141282398380}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6027936230836393741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2153475148421817682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 1
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents:
+  - {fileID: 3832026323645695214}
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &3832026323645695214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2153475148421817682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
 --- !u!4 &4069547822707845733 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2489404393986964169, guid: 88c44b0e20de16f4ba8fdce3f4d9588f, type: 3}
