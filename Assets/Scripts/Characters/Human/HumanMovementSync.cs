@@ -28,12 +28,22 @@ namespace Characters
                     stream.SendNext(mountedPV.ViewID);
                     stream.SendNext(_human.MountedPositionOffset);
                     stream.SendNext(_human.MountedRotationOffset);
-                    return;
+                }
+                else
+                {
+                    stream.SendNext(false); // Not mounted properly
                 }
             }
+            else
+            {
+                stream.SendNext(false); // Not mounted
+            }
 
-            // Not mounted
-            stream.SendNext(false); // IsMounted
+            //  ADD BACK: Head Rotation sync
+            if (_human.LateUpdateHeadRotation.HasValue)
+                stream.SendNext(_human.LateUpdateHeadRotation.Value);
+            else
+                stream.SendNext(null);
         }
 
         protected override void ReceiveCustomStream(PhotonStream stream)
@@ -49,6 +59,13 @@ namespace Characters
             {
                 _mountedParentViewID = null;
             }
+
+            //  ADD BACK: Head Rotation receive
+            object receivedRotation = stream.ReceiveNext();
+            if (receivedRotation is Quaternion q)
+                _human.LateUpdateHeadRotationRecv = q;
+            else
+                _human.LateUpdateHeadRotationRecv = null;
         }
 
         protected override void Update()
@@ -66,7 +83,6 @@ namespace Characters
                     }
                 }
 
-                // Default interpolation when not mounted
                 _transform.position = Vector3.Lerp(_transform.position, _correctPosition, Time.deltaTime * SmoothingDelay);
                 _transform.rotation = Quaternion.Lerp(_transform.rotation, _correctRotation, Time.deltaTime * SmoothingDelay);
 
