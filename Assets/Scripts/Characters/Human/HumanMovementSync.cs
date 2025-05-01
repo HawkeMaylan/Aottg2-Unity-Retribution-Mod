@@ -1,12 +1,13 @@
-using UnityEngine;
+using ApplicationManagers;
 using Photon.Pun;
-using Characters;
+using UnityEngine;
+using Utility;
 
 namespace Characters
 {
     class HumanMovementSync : BaseMovementSync
     {
-        private Human _human;
+        protected Human _human;
         private int? _mountedParentViewID = null;
         private Vector3 _mountedPositionOffset = Vector3.zero;
         private Vector3 _mountedRotationOffset = Vector3.zero;
@@ -19,29 +20,31 @@ namespace Characters
 
         protected override void SendCustomStream(PhotonStream stream)
         {
-            if (_human.MountState == HumanMountState.MapObject && _human.MountedTransform != null)
+            // Send if mounted (Horse or MapObject)
+            bool isMounted = (_human.MountState == HumanMountState.MapObject || _human.MountState == HumanMountState.Horse) && _human.MountedTransform != null;
+            stream.SendNext(isMounted);
+
+            if (isMounted)
             {
                 PhotonView mountedPV = _human.MountedTransform.GetComponent<PhotonView>();
                 if (mountedPV != null)
                 {
-                    stream.SendNext(true); // IsMounted
                     stream.SendNext(mountedPV.ViewID);
                     stream.SendNext(_human.MountedPositionOffset);
                     stream.SendNext(_human.MountedRotationOffset);
                 }
                 else
                 {
-                    stream.SendNext(false); // Not mounted properly
+                    stream.SendNext(-1); // invalid
                 }
             }
-            else
-            {
-                stream.SendNext(false); // Not mounted
-            }
 
-            //  ADD BACK: Head Rotation sync
+            // Send head rotation
             if (_human.LateUpdateHeadRotation.HasValue)
-                stream.SendNext(_human.LateUpdateHeadRotation.Value);
+            {
+                var rotation = _human.LateUpdateHeadRotation.Value;
+                stream.SendNext(QuaternionCompression.CompressQuaternion(ref rotation));
+            }
             else
                 stream.SendNext(null);
         }
@@ -49,6 +52,7 @@ namespace Characters
         protected override void ReceiveCustomStream(PhotonStream stream)
         {
             bool isMounted = (bool)stream.ReceiveNext();
+
             if (isMounted)
             {
                 _mountedParentViewID = (int)stream.ReceiveNext();
@@ -60,10 +64,14 @@ namespace Characters
                 _mountedParentViewID = null;
             }
 
-            //  ADD BACK: Head Rotation receive
-            object receivedRotation = stream.ReceiveNext();
-            if (receivedRotation is Quaternion q)
-                _human.LateUpdateHeadRotationRecv = q;
+            // Receive head rotation
+            int? compressed = (int?)stream.ReceiveNext();
+            if (compressed.HasValue)
+            {
+                var rotation = Quaternion.identity;
+                QuaternionCompression.DecompressQuaternion(ref rotation, compressed.Value);
+                _human.LateUpdateHeadRotationRecv = rotation;
+            }
             else
                 _human.LateUpdateHeadRotationRecv = null;
         }
@@ -72,6 +80,7 @@ namespace Characters
         {
             if (!Disabled && !_photonView.IsMine)
             {
+                // Check if mounted by ViewID
                 if (_mountedParentViewID.HasValue)
                 {
                     PhotonView mountedPV = PhotonView.Find(_mountedParentViewID.Value);
@@ -83,10 +92,23 @@ namespace Characters
                     }
                 }
 
+                // Carry syncing
+                if (_human.CarryState == HumanCarryState.Carry && _human.Carrier != null)
+                {
+                    Vector3 offset = _human.Carrier.Cache.Transform.forward * -0.4f + _human.Carrier.Cache.Transform.up * 0.5f;
+                    _transform.position = _human.Carrier.Cache.Transform.position + offset;
+                    _transform.rotation = _human.Carrier.Cache.Transform.rotation;
+                    return;
+                }
+
+                // Regular LERP syncing
                 _transform.position = Vector3.Lerp(_transform.position, _correctPosition, Time.deltaTime * SmoothingDelay);
                 _transform.rotation = Quaternion.Lerp(_transform.rotation, _correctRotation, Time.deltaTime * SmoothingDelay);
 
-                if (_syncVelocity && _timeSinceLastMessage < MaxPredictionTime)
+                if (_human.BackHuman != null)
+                    _human.CarryVelocity = _correctVelocity;
+
+                if (_timeSinceLastMessage < MaxPredictionTime)
                 {
                     _correctPosition += _correctVelocity * Time.deltaTime;
                     _timeSinceLastMessage += Time.deltaTime;
