@@ -1,6 +1,13 @@
 using UnityEngine;
 using Characters;
 using Photon.Pun;
+using UI;
+using Settings;
+using GameManagers;
+using ApplicationManagers;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 
 public class DirectMountBundled : MonoBehaviourPunCallbacks
 {
@@ -14,13 +21,12 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     public string unmountPromptText = "Press G to Unmount";
 
     [Header("Unmount Prompt Settings")]
-    public float unmountPromptDuration = 5f; // Seconds the "Unmount" prompt stays
+    public float unmountPromptDuration = 5f;
 
     private Human humanInTrigger;
     private bool isMounted = false;
     private bool hasExitedAfterUnmount = false;
 
-    // Prompt system
     private static string currentPrompt = "";
     private float unmountPromptTimer = 0f;
 
@@ -36,7 +42,6 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         {
             humanInTrigger = human;
             hasExitedAfterUnmount = false;
-
             SetPrompt(mountPromptText);
         }
     }
@@ -57,28 +62,42 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        if (humanInTrigger != null && Input.GetKeyDown(KeyCode.G))
-        {
-            if (!isMounted && !hasExitedAfterUnmount)
-                AttachHuman();
-            else if (isMounted)
-                DetachHuman();
-        }
+        HandleMountInput();
+        HandleUnmountPromptTimer();
+    }
 
-        // Handle unmount prompt timer
+    private void HandleMountInput()
+    {
+        if (humanInTrigger == null)
+            return;
+
+        //  Exactly like ItemHandler: Only block key input if InMenu or Chat active
+        if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
+        {
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                if (!isMounted && !hasExitedAfterUnmount)
+                    AttachHuman();
+                else if (isMounted)
+                    DetachHuman();
+            }
+        }
+    }
+
+    private void HandleUnmountPromptTimer()
+    {
         if (isMounted && unmountPromptTimer > 0f)
         {
             unmountPromptTimer -= Time.deltaTime;
             if (unmountPromptTimer <= 0f)
-            {
                 ClearPrompt();
-            }
         }
     }
 
     private void AttachHuman()
     {
-        if (humanInTrigger == null || mountPoint == null) return;
+        if (humanInTrigger == null || mountPoint == null)
+            return;
 
         humanInTrigger.MountedTransform = mountPoint;
         humanInTrigger.MountedMapObject = null;
@@ -96,7 +115,8 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
 
     private void DetachHuman()
     {
-        if (humanInTrigger == null) return;
+        if (humanInTrigger == null)
+            return;
 
         humanInTrigger.Unmount(true);
 
