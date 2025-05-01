@@ -6,6 +6,7 @@ using ApplicationManagers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using Characters; //  Needed for Horse script access
 
 public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 {
@@ -53,17 +54,29 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
             if (!isAttached && horseRootInContact != null)
             {
                 PhotonView horseView = horseRootInContact.GetComponentInParent<PhotonView>();
-                if (horseView != null && horseView.Owner == PhotonNetwork.LocalPlayer)
-                {
-                    if (!pv.IsMine)
-                        pv.RequestOwnership();
+                Horse horseComponent = horseRootInContact.GetComponentInParent<Horse>();
 
-                    pv.RPC("RPC_AttachToHorse", RpcTarget.AllBuffered, horseView.ViewID, attachOffset);
+                if (horseView != null && horseComponent != null && horseView.Owner == PhotonNetwork.LocalPlayer)
+                {
+                    if (horseComponent.MountedStatus == 1) //  Only allow attaching if Mounted
+                    {
+                        if (!pv.IsMine)
+                            pv.RequestOwnership();
+
+                        pv.RPC("RPC_AttachToHorse", RpcTarget.AllBuffered, horseView.ViewID, attachOffset);
+                    }
                 }
             }
             else if (isAttached && pv.IsMine)
             {
-                pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
+                if (attachedHorse != null)
+                {
+                    Horse horseComponent = attachedHorse.GetComponentInParent<Horse>();
+                    if (horseComponent != null && horseComponent.MountedStatus == 1) // Only allow detaching if still Mounted
+                    {
+                        pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
+                    }
+                }
             }
         }
     }
@@ -95,7 +108,6 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         wagon.position = horseRoot.TransformPoint(offset);
         wagon.rotation = horseRoot.rotation;
 
-        // Destroy existing joint if any
         var existingJoint = wagon.GetComponent<ConfigurableJoint>();
         if (existingJoint != null) Destroy(existingJoint);
 
@@ -128,7 +140,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         };
         joint.xDrive = joint.yDrive = joint.zDrive = linearDrive;
 
-        // Angular drive (optional)
+        // Angular drive
         JointDrive angularDrive = new JointDrive
         {
             positionSpring = angularSpring,

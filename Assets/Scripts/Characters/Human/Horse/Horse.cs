@@ -25,6 +25,9 @@ namespace Characters
         private float _whistleTimer = 0f;
         private const float WhistleDuration = 8f;
 
+        public int MountedStatus = 0; // 0 = No rider, 1 = Rider mounted
+
+
         public void Init(Human human)
         {
             base.Init(true, human.Team);
@@ -146,6 +149,9 @@ namespace Characters
                 return;
             }
 
+            //  Update MountedStatus automatically
+            MountedStatus = (_owner.MountState == HumanMountState.Horse) ? 1 : 0;
+
             if (_owner.MountState == HumanMountState.Horse)
             {
                 if (_owner.HasDirection)
@@ -196,6 +202,7 @@ namespace Characters
                 }
             }
         }
+
 
         protected override void FixedUpdate()
         {
