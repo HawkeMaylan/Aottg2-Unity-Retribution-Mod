@@ -1,5 +1,11 @@
 using UnityEngine;
 using Photon.Pun;
+using Settings;
+using GameManagers;
+using ApplicationManagers;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 
 public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 {
@@ -39,6 +45,9 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
     private void Update()
     {
+        if (ChatManager.IsChatActive())
+            return;
+
         if (Input.GetKeyDown(KeyCode.G))
         {
             if (!isAttached && horseRootInContact != null)
