@@ -24,17 +24,25 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     public float unmountPromptDuration = 5f;
 
     [Header("Animation Settings")]
-    public bool useHorseIdle = true; // True = HorseIdle, False = IdleM
+    public bool useHorseIdle = true;
     public bool enableRunAnimation = true;
     public float runSpeedThreshold = 4f;
 
+    [Header("Rigidbody Settings")]
+    public bool disableGravityOnMount = true;
+    public bool disableMassOnMount = true;
+    public float mountedMass = 0.1f;
+
     private Human humanInTrigger;
+    private Rigidbody humanRigidbody;
     private bool isMounted = false;
     private bool hasExitedAfterUnmount = false;
 
+    private float originalMass;
+    private bool originalUseGravity;
+
     private static string currentPrompt = "";
     private float unmountPromptTimer = 0f;
-
     private Vector3 lastMountedWorldPos = Vector3.zero;
     private bool isCurrentlyRunning = false;
 
@@ -49,6 +57,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         if (human != null && human.IsMine())
         {
             humanInTrigger = human;
+            humanRigidbody = human.GetComponent<Rigidbody>();
             hasExitedAfterUnmount = false;
             SetPrompt(mountPromptText);
         }
@@ -63,6 +72,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
             {
                 hasExitedAfterUnmount = true;
                 humanInTrigger = null;
+                humanRigidbody = null;
                 ClearPrompt();
             }
         }
@@ -144,6 +154,17 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         humanInTrigger.MountState = HumanMountState.MapObject;
         humanInTrigger.SetInterpolation(false);
 
+        if (humanRigidbody != null)
+        {
+            originalMass = humanRigidbody.mass;
+            originalUseGravity = humanRigidbody.useGravity;
+
+            if (disableGravityOnMount)
+                humanRigidbody.useGravity = false;
+            if (disableMassOnMount)
+                humanRigidbody.mass = mountedMass;
+        }
+
         isMounted = true;
         hasExitedAfterUnmount = false;
 
@@ -160,6 +181,12 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
             return;
 
         humanInTrigger.Unmount(true);
+
+        if (humanRigidbody != null)
+        {
+            humanRigidbody.useGravity = originalUseGravity;
+            humanRigidbody.mass = originalMass;
+        }
 
         isMounted = false;
 
