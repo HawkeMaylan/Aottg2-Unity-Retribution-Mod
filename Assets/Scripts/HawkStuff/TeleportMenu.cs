@@ -13,7 +13,6 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     private string inputX = "";
     private string inputY = "";
     private string inputZ = "";
-
     private string searchFilter = "";
 
     private void Update()
@@ -41,7 +40,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         titleStyle.alignment = TextAnchor.UpperCenter;
         titleStyle.normal.textColor = Color.white;
 
-        GUI.Label(new Rect(Screen.width / 2 - 200, 20, 400, 40), "MC Menu", titleStyle);
+        GUI.Label(new Rect(Screen.width / 2 - 200, 20, 400, 40), "Teleport Players", titleStyle);
 
         if (GUI.Button(new Rect(Screen.width - 120, 20, 100, 30), "Close"))
         {
@@ -77,7 +76,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
         if (selectedPlayer != null)
         {
-            GUI.Box(new Rect(Screen.width - 350, 100, 300, 350), "Teleport " + GetPlayerLabel(selectedPlayer));
+            GUI.Box(new Rect(Screen.width - 350, 100, 300, 450), "Teleport " + GetPlayerLabel(selectedPlayer));
 
             GUI.Label(new Rect(Screen.width - 320, 140, 50, 25), "X:");
             inputX = GUI.TextField(new Rect(Screen.width - 270, 140, 140, 25), inputX);
@@ -98,7 +97,16 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 TryTeleportHorseToPlayer();
             }
 
-            // Selected Player Box (top-right)
+            if (GUI.Button(new Rect(Screen.width - 300, 320, 200, 30), "Bring Selected Player to Me"))
+            {
+                BringPlayerToMC();
+            }
+
+            if (GUI.Button(new Rect(Screen.width - 300, 360, 200, 30), "Bring Me to Selected Player"))
+            {
+                BringMCToPlayer();
+            }
+
             GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GetPlayerLabel(selectedPlayer));
         }
     }
@@ -155,6 +163,51 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 break;
             }
         }
+    }
+
+    private void BringPlayerToMC()
+    {
+        Human mc = FindLocalHuman();
+        if (mc == null) return;
+
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human.photonView != null && human.photonView.Owner != null &&
+                human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
+            {
+                if (human.MountState == HumanMountState.Horse)
+                    human.Unmount(true);
+
+                human.StartCoroutine(ForceTeleportCoroutine(human, mc.Cache.Transform.position));
+                break;
+            }
+        }
+    }
+
+    private void BringMCToPlayer()
+    {
+        Human mc = FindLocalHuman();
+        if (mc == null) return;
+
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human.photonView != null && human.photonView.Owner != null &&
+                human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
+            {
+                mc.StartCoroutine(ForceTeleportCoroutine(mc, human.Cache.Transform.position));
+                break;
+            }
+        }
+    }
+
+    private Human FindLocalHuman()
+    {
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human != null && human.IsMine())
+                return human;
+        }
+        return null;
     }
 
     private System.Collections.IEnumerator ForceTeleportCoroutine(Human human, Vector3 targetPos)
