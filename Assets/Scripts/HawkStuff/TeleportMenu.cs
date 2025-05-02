@@ -4,6 +4,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using Characters;
 using UI;
+using GameManagers; // Added for ChatManager access
 
 public class TeleportMenu : MonoBehaviourPunCallbacks
 {
@@ -14,6 +15,9 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     private string inputY = "";
     private string inputZ = "";
     private string searchFilter = "";
+
+    private bool confirmKick = false;
+    private bool confirmBan = false;
 
     private void Update()
     {
@@ -68,6 +72,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             if (GUILayout.Button(playerLabel, buttonStyle, GUILayout.Height(22)))
             {
                 selectedPlayer = player;
+                confirmKick = false;
+                confirmBan = false;
             }
         }
 
@@ -76,7 +82,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
         if (selectedPlayer != null)
         {
-            GUI.Box(new Rect(Screen.width - 350, 100, 300, 450), "Teleport " + GetPlayerLabel(selectedPlayer));
+            GUI.Box(new Rect(Screen.width - 350, 100, 300, 600), "Teleport " + GetPlayerLabel(selectedPlayer));
 
             GUI.Label(new Rect(Screen.width - 320, 140, 50, 25), "X:");
             inputX = GUI.TextField(new Rect(Screen.width - 270, 140, 140, 25), inputX);
@@ -107,6 +113,33 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 BringMCToPlayer();
             }
 
+            if (GUI.Button(new Rect(Screen.width - 300, 400, 200, 30), "Revive Player"))
+            {
+                TryReviveSelectedPlayer();
+            }
+
+            if (GUI.Button(new Rect(Screen.width - 300, 440, 200, 30), confirmKick ? "Are you sure? (Kick)" : "Kick Player"))
+            {
+                if (confirmKick)
+                    ChatManager.KickPlayer(selectedPlayer);
+                else
+                    confirmKick = true;
+            }
+
+            if (GUI.Button(new Rect(Screen.width - 300, 480, 200, 30), confirmBan ? "Are you sure? (Ban)" : "Ban Player"))
+            {
+                if (confirmBan)
+                    ChatManager.KickPlayer(selectedPlayer, ban: true);
+                else
+                    confirmBan = true;
+            }
+
+            if (GUI.Button(new Rect(Screen.width - 300, 520, 200, 30), "Kill Player"))
+            {
+                TryKillSelectedPlayer();
+            }
+
+            // Selected Player Display
             GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GetPlayerLabel(selectedPlayer));
         }
     }
@@ -195,6 +228,31 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
             {
                 mc.StartCoroutine(ForceTeleportCoroutine(mc, human.Cache.Transform.position));
+                break;
+            }
+        }
+    }
+
+    private void TryReviveSelectedPlayer()
+    {
+        if (selectedPlayer != null)
+        {
+            RPCManager.PhotonView.RPC("SpawnPlayerRPC", selectedPlayer, new object[] { false });
+            ChatManager.SendChat("You have been revived by master client.", selectedPlayer, ChatTextColor.System);
+        }
+    }
+
+    private void TryKillSelectedPlayer()
+    {
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human.photonView != null && human.photonView.Owner != null &&
+                human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    human.photonView.RPC("RPC_Die", human.photonView.Owner);
+                }
                 break;
             }
         }
