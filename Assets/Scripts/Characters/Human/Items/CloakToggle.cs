@@ -22,10 +22,7 @@ namespace Characters
             {
                 sync.Toggle();
             }
-            else
-            {
-                Debug.LogWarning("[CloakToggle] CloakStateSync not found on player.");
-            }
+
         }
     }
 }

@@ -56,16 +56,13 @@ public class CloakStateSync : MonoBehaviourPun, IPunObservable
                     if (sync != null)
                     {
                         sync.Toggle(); // Cleanly toggles cloak1 off
-                        Debug.Log("[CloakStateSync] cloak1model was ON — toggling via Cloak1StateSync script.");
+
                     }
-                    else
-                    {
-                        Debug.LogWarning("[CloakStateSync] Cloak1StateSync script not found on player.");
-                    }
+
                 }
             }
         }
 
-        Debug.Log($"[CloakStateSync] Cloak visibility set to: {_cloakIsOn}");
+
     }
 }

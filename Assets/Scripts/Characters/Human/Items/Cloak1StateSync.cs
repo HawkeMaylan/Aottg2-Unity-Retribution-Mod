@@ -16,7 +16,7 @@ public class Cloak1StateSync : MonoBehaviourPun, IPunObservable
 
         if (!cloak2Active && !_cloak1On)
         {
-            Debug.Log("[Cloak1StateSync] Cannot enable cloak1model because cloak2model is off.");
+           
             return;
         }
 
@@ -49,6 +49,6 @@ public class Cloak1StateSync : MonoBehaviourPun, IPunObservable
                 renderer.enabled = _cloak1On;
         }
 
-        Debug.Log($"[Cloak1StateSync] cloak1model renderer set to: {_cloak1On}");
+       
     }
 }
