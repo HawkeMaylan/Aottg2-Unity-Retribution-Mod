@@ -51,6 +51,6 @@ public class LanternStateSync : MonoBehaviourPun, IPunObservable
                 light.enabled = _lampIsOn;
         }
 
-        Debug.Log($"[LanternStateSync] Updated lamps. Lamp is on: {_lampIsOn}");
+
     }
 }

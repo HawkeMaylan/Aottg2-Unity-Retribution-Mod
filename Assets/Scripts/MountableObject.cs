@@ -23,8 +23,10 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     [Header("Unmount Prompt Settings")]
     public float unmountPromptDuration = 5f;
 
-    [Header("Mount Animation Settings")]
-    public MountAnimationOption mountAnimation = MountAnimationOption.HorseIdle;
+    [Header("Animation Settings")]
+    public bool useHorseIdle = true; // True = HorseIdle, False = IdleM
+    public bool enableRunAnimation = true;
+    public float runSpeedThreshold = 4f;
 
     private Human humanInTrigger;
     private bool isMounted = false;
@@ -32,6 +34,9 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
 
     private static string currentPrompt = "";
     private float unmountPromptTimer = 0f;
+
+    private Vector3 lastMountedWorldPos = Vector3.zero;
+    private bool isCurrentlyRunning = false;
 
     private void Start()
     {
@@ -67,6 +72,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     {
         HandleMountInput();
         HandleUnmountPromptTimer();
+        HandleRunAnimation();
     }
 
     private void HandleMountInput()
@@ -96,6 +102,36 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         }
     }
 
+    private void HandleRunAnimation()
+    {
+        if (!isMounted || humanInTrigger == null || !enableRunAnimation)
+            return;
+
+        if (humanInTrigger.MountedTransform == null)
+            return;
+
+        Vector3 currentWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
+        float speed = (currentWorldPos - lastMountedWorldPos).magnitude / Time.deltaTime;
+        lastMountedWorldPos = currentWorldPos;
+
+        if (speed > runSpeedThreshold)
+        {
+            if (!isCurrentlyRunning)
+            {
+                humanInTrigger.CrossFadeIfNotPlaying(HumanAnimations.HorseRun, 0.23f);
+                isCurrentlyRunning = true;
+            }
+        }
+        else
+        {
+            if (isCurrentlyRunning)
+            {
+                humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.1f);
+                isCurrentlyRunning = false;
+            }
+        }
+    }
+
     private void AttachHuman()
     {
         if (humanInTrigger == null || mountPoint == null)
@@ -108,15 +144,14 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         humanInTrigger.MountState = HumanMountState.MapObject;
         humanInTrigger.SetInterpolation(false);
 
-        // Play selected mount animation
-        string selectedAnimation = GetSelectedMountAnimation();
-        humanInTrigger.CrossFade(selectedAnimation, 0.2f);
-
         isMounted = true;
         hasExitedAfterUnmount = false;
 
         SetPrompt(unmountPromptText);
         unmountPromptTimer = unmountPromptDuration;
+
+        lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
+        humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.2f);
     }
 
     private void DetachHuman()
@@ -139,17 +174,9 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         }
     }
 
-    private string GetSelectedMountAnimation()
+    private string GetIdleAnimation()
     {
-        switch (mountAnimation)
-        {
-            case MountAnimationOption.HorseIdle:
-                return HumanAnimations.HorseIdle;
-            case MountAnimationOption.IdleM:
-                return HumanAnimations.IdleM;
-            default:
-                return HumanAnimations.HorseIdle;
-        }
+        return useHorseIdle ? HumanAnimations.HorseIdle : HumanAnimations.IdleM;
     }
 
     private void OnGUI()
@@ -158,7 +185,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         {
             GUIStyle style = new GUIStyle(GUI.skin.label);
             style.fontSize = 24;
-            style.alignment = TextAnchor.MiddleCenter;
+            style.alignment = TextAnchor.UpperCenter;
             style.normal.textColor = Color.white;
 
             GUI.Label(new Rect(Screen.width / 2 - 150, 10, 300, 50), currentPrompt, style);
@@ -174,10 +201,4 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     {
         currentPrompt = "";
     }
-}
-
-public enum MountAnimationOption
-{
-    HorseIdle,
-    IdleM
 }

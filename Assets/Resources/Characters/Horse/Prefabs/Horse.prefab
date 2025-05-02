@@ -7146,6 +7146,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5801033945792118813, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: runSpeedThreshold
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5801033945792118813, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: enableRunAnimation
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7078169958427403154, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: sceneViewId
       value: 0
