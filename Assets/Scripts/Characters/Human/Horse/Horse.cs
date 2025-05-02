@@ -79,7 +79,7 @@ namespace Characters
             emission.enabled = toggle;
         }
 
-        private void TeleportToHuman()
+        public void TeleportToHuman()
         {
             Vector3 position = _owner.Cache.Transform.position + Vector3.right * UnityEngine.Random.Range(-2f, 2f) + Vector3.forward * UnityEngine.Random.Range(-2f, 2f);
             position.y = GetHeight(position) + 1f;
@@ -211,12 +211,12 @@ namespace Characters
             if (!IsMine() || _owner == null || _owner.Dead)
                 return;
 
-            CheckGround(); // 🧹 still checking ground, but we won't block movement if not grounded
+            CheckGround(); //  still checking ground, but we won't block movement if not grounded
 
-            // ✅ Movement always allowed regardless of Grounded
+            //  Movement always allowed regardless of Grounded
             if (State == HorseState.ControlledIdle || State == HorseState.Idle)
             {
-                if (Grounded) // ✅ Only slow down if touching ground
+                if (Grounded) //  Only slow down if touching ground
                 {
                     if (Cache.Rigidbody.velocity.magnitude < 1f)
                         Cache.Rigidbody.velocity = Vector3.up * Cache.Rigidbody.velocity.y;
@@ -304,7 +304,22 @@ namespace Characters
                 Grounded = false;
             }
         }
+
+        [PunRPC]
+        public void RPC_TeleportToHuman()
+        {
+            if (_owner == null) return;
+
+            Vector3 position = _owner.Cache.Transform.position + Vector3.right * UnityEngine.Random.Range(-2f, 2f) + Vector3.forward * UnityEngine.Random.Range(-2f, 2f);
+            position.y = GetHeight(position) + 1f;
+            Cache.Transform.position = position;
+            _teleportTimeLeft = TeleportTime;
+        }
+
     }
+
+
+
 
     enum HorseState
     {

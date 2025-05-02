@@ -16,28 +16,17 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (Input.GetKeyDown(KeyCode.RightControl) && PhotonNetwork.IsMasterClient)
         {
-            if (Input.GetKeyDown(KeyCode.RightControl))
-            {
-                menuOpen = !menuOpen;
-                ToggleCursor(menuOpen);
-            }
+            menuOpen = !menuOpen;
+            ToggleCursor(menuOpen);
         }
     }
 
     private void ToggleCursor(bool enable)
     {
-        if (enable)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
+        Cursor.lockState = enable ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = enable;
     }
 
     private void OnGUI()
@@ -45,12 +34,10 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (!menuOpen)
             return;
 
-        GUIStyle titleStyle = new GUIStyle(GUI.skin.label)
-        {
-            fontSize = 26,
-            alignment = TextAnchor.UpperCenter,
-            normal = { textColor = Color.white }
-        };
+        GUIStyle titleStyle = new GUIStyle(GUI.skin.label);
+        titleStyle.fontSize = 24;
+        titleStyle.alignment = TextAnchor.UpperCenter;
+        titleStyle.normal.textColor = Color.white;
 
         GUI.Label(new Rect(Screen.width / 2 - 200, 20, 400, 40), "Teleport Players", titleStyle);
 
@@ -67,12 +54,12 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         {
             string playerLabel = GetPlayerLabel(player);
 
-            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button) { fontSize = 14 };
+            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
+            buttonStyle.fontSize = 12;
 
-            if (GUILayout.Button(playerLabel, buttonStyle, GUILayout.Height(30)))
+            if (GUILayout.Button(playerLabel, buttonStyle, GUILayout.Height(22)))
             {
                 selectedPlayer = player;
-                // No clearing inputX/Y/Z anymore
             }
         }
 
@@ -81,45 +68,25 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
         if (selectedPlayer != null)
         {
-            GUI.Box(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 120, 300, 250), "Teleport " + GetPlayerLabel(selectedPlayer));
+            GUI.Box(new Rect(Screen.width - 350, 100, 300, 350), "Teleport " + GetPlayerLabel(selectedPlayer));
 
-            GUI.Label(new Rect(Screen.width / 2 - 120, Screen.height / 2 - 80, 50, 25), "X:");
-            inputX = GUI.TextField(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 80, 140, 25), inputX);
+            GUI.Label(new Rect(Screen.width - 320, 140, 50, 25), "X:");
+            inputX = GUI.TextField(new Rect(Screen.width - 270, 140, 140, 25), inputX);
 
-            GUI.Label(new Rect(Screen.width / 2 - 120, Screen.height / 2 - 50, 50, 25), "Y:");
-            inputY = GUI.TextField(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 50, 140, 25), inputY);
+            GUI.Label(new Rect(Screen.width - 320, 170, 50, 25), "Y:");
+            inputY = GUI.TextField(new Rect(Screen.width - 270, 170, 140, 25), inputY);
 
-            GUI.Label(new Rect(Screen.width / 2 - 120, Screen.height / 2 - 20, 50, 25), "Z:");
-            inputZ = GUI.TextField(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 20, 140, 25), inputZ);
+            GUI.Label(new Rect(Screen.width - 320, 200, 50, 25), "Z:");
+            inputZ = GUI.TextField(new Rect(Screen.width - 270, 200, 140, 25), inputZ);
 
-            if (GUI.Button(new Rect(Screen.width / 2 - 50, Screen.height / 2 + 20, 100, 30), "Teleport"))
+            if (GUI.Button(new Rect(Screen.width - 300, 240, 200, 30), "Teleport Player"))
             {
                 TryTeleportSelectedPlayer();
             }
-        }
-    }
 
-    private void TryTeleportSelectedPlayer()
-    {
-        if (float.TryParse(inputX, out float x) &&
-            float.TryParse(inputY, out float y) &&
-            float.TryParse(inputZ, out float z))
-        {
-            foreach (var human in FindObjectsOfType<Human>())
+            if (GUI.Button(new Rect(Screen.width - 300, 280, 200, 30), "Teleport Player's Horse"))
             {
-                if (human.photonView != null && human.photonView.Owner != null &&
-                    human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
-                {
-                    //  1. Unmount the player if mounted
-                    if (human.MountState != HumanMountState.None)
-                    {
-                        human.Unmount(true); // true = immediately unmount
-                    }
-
-                    //  2. Now Teleport
-                    human.photonView.RPC("RPC_Teleport", human.photonView.Owner, new Vector3(x, y, z));
-                    break;
-                }
+                TryTeleportHorseToPlayer();
             }
         }
     }
@@ -133,7 +100,53 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 return human.Name;
             }
         }
-
         return player.NickName + " (Not Spawned)";
+    }
+
+    private void TryTeleportSelectedPlayer()
+    {
+        if (float.TryParse(inputX, out float x) &&
+            float.TryParse(inputY, out float y) &&
+            float.TryParse(inputZ, out float z))
+        {
+            foreach (var human in FindObjectsOfType<Human>())
+            {
+                if (human.photonView != null && human.photonView.Owner != null &&
+                    human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
+                {
+                    if (human.MountState == HumanMountState.Horse)
+                        human.Unmount(true);
+
+                    human.StartCoroutine(ForceTeleportCoroutine(human, new Vector3(x, y, z)));
+                    break;
+                }
+            }
+        }
+    }
+
+    private void TryTeleportHorseToPlayer()
+    {
+        foreach (var horse in FindObjectsOfType<Horse>())
+        {
+            if (horse.photonView != null && horse.photonView.Owner != null &&
+                horse.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
+            {
+                horse.photonView.RPC("RPC_TeleportToHuman", horse.photonView.Owner);
+                break;
+            }
+        }
+    }
+
+    private System.Collections.IEnumerator ForceTeleportCoroutine(Human human, Vector3 targetPos)
+    {
+        float timer = 1.0f;
+        while (timer > 0f)
+        {
+            if (human != null)
+                human.Cache.Transform.position = targetPos;
+
+            timer -= Time.deltaTime;
+            yield return null;
+        }
     }
 }
