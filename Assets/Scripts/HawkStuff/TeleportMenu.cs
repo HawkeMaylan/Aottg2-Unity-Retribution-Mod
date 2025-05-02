@@ -14,6 +14,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     private string inputY = "";
     private string inputZ = "";
 
+    private string searchFilter = "";
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.RightControl) && PhotonNetwork.IsMasterClient)
@@ -39,7 +41,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         titleStyle.alignment = TextAnchor.UpperCenter;
         titleStyle.normal.textColor = Color.white;
 
-        GUI.Label(new Rect(Screen.width / 2 - 200, 20, 400, 40), "Teleport Players", titleStyle);
+        GUI.Label(new Rect(Screen.width / 2 - 200, 20, 400, 40), "MC Menu", titleStyle);
 
         if (GUI.Button(new Rect(Screen.width - 120, 20, 100, 30), "Close"))
         {
@@ -47,12 +49,19 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             ToggleCursor(false);
         }
 
+        // Search Field
+        GUI.Label(new Rect(30, 50, 60, 20), "Search:");
+        searchFilter = GUI.TextField(new Rect(90, 50, 200, 20), searchFilter);
+
         GUILayout.BeginArea(new Rect(30, 80, 300, Screen.height - 150));
         scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
         foreach (var player in PhotonNetwork.PlayerList)
         {
             string playerLabel = GetPlayerLabel(player);
+
+            if (!string.IsNullOrEmpty(searchFilter) && !playerLabel.ToLower().Contains(searchFilter.ToLower()))
+                continue;
 
             GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
             buttonStyle.fontSize = 12;
@@ -88,19 +97,30 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             {
                 TryTeleportHorseToPlayer();
             }
+
+            // Selected Player Box (top-right)
+            GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GetPlayerLabel(selectedPlayer));
         }
     }
 
     private string GetPlayerLabel(Player player)
     {
+        string name = player.NickName;
+
         foreach (var human in FindObjectsOfType<Human>())
         {
             if (human.photonView != null && human.photonView.Owner != null && human.photonView.Owner.ActorNumber == player.ActorNumber)
             {
-                return human.Name;
+                name = human.Name;
+                break;
             }
         }
-        return player.NickName + " (Not Spawned)";
+
+        string label = name;
+        if (player.IsMasterClient)
+            label += " (MC)";
+        label += $" {{{player.ActorNumber}}}";
+        return label;
     }
 
     private void TryTeleportSelectedPlayer()
