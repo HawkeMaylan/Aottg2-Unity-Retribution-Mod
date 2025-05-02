@@ -141,6 +141,7 @@ MonoBehaviour:
   - NetworkMountedTransformSync
   - NetworkUnmount
   - RPC_Teleport
+  - RPC_TeleportToHuman
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
