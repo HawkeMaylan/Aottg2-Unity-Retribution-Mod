@@ -72,7 +72,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             if (GUILayout.Button(playerLabel, buttonStyle, GUILayout.Height(30)))
             {
                 selectedPlayer = player;
-                //  No longer clearing inputX, inputY, inputZ here
+                // No clearing inputX/Y/Z anymore
             }
         }
 
@@ -110,14 +110,18 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 if (human.photonView != null && human.photonView.Owner != null &&
                     human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
                 {
+                    //  1. Unmount the player if mounted
+                    if (human.MountState != HumanMountState.None)
+                    {
+                        human.Unmount(true); // true = immediately unmount
+                    }
+
+                    //  2. Now Teleport
                     human.photonView.RPC("RPC_Teleport", human.photonView.Owner, new Vector3(x, y, z));
                     break;
                 }
             }
         }
-
-        //  No longer clearing selectedPlayer or input fields
-        // selectedPlayer = null;
     }
 
     private string GetPlayerLabel(Player player)
