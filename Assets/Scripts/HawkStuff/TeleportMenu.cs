@@ -44,7 +44,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         titleStyle.alignment = TextAnchor.UpperCenter;
         titleStyle.normal.textColor = Color.white;
 
-        GUI.Label(new Rect(Screen.width / 2 - 200, 20, 400, 40), "Teleport Players", titleStyle);
+        GUI.Label(new Rect(Screen.width / 2 - 200, 20, 400, 40), "MC Menu", titleStyle);
 
         if (GUI.Button(new Rect(Screen.width - 120, 20, 100, 30), "Close"))
         {
@@ -249,14 +249,15 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             if (human.photonView != null && human.photonView.Owner != null &&
                 human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
             {
-                if (PhotonNetwork.IsMasterClient)
+                if (human != null && !human.Dead)
                 {
-                    human.photonView.RPC("RPC_Die", human.photonView.Owner);
+                    human.GetHit("", 400, "MC", ""); // EXACTLY like thunderspear instant kill
                 }
                 break;
             }
         }
     }
+
 
     private Human FindLocalHuman()
     {
