@@ -45,10 +45,12 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (!menuOpen)
             return;
 
-        GUIStyle titleStyle = new GUIStyle(GUI.skin.label);
-        titleStyle.fontSize = 26;
-        titleStyle.alignment = TextAnchor.UpperCenter;
-        titleStyle.normal.textColor = Color.white;
+        GUIStyle titleStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = 26,
+            alignment = TextAnchor.UpperCenter,
+            normal = { textColor = Color.white }
+        };
 
         GUI.Label(new Rect(Screen.width / 2 - 200, 20, 400, 40), "Teleport Players", titleStyle);
 
@@ -65,13 +67,12 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         {
             string playerLabel = GetPlayerLabel(player);
 
-            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
-            buttonStyle.fontSize = 14;
+            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button) { fontSize = 14 };
 
             if (GUILayout.Button(playerLabel, buttonStyle, GUILayout.Height(30)))
             {
                 selectedPlayer = player;
-                inputX = inputY = inputZ = "";
+                //  No longer clearing inputX, inputY, inputZ here
             }
         }
 
@@ -109,14 +110,14 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 if (human.photonView != null && human.photonView.Owner != null &&
                     human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
                 {
-                    //  Send RPC to make THEM teleport themselves
                     human.photonView.RPC("RPC_Teleport", human.photonView.Owner, new Vector3(x, y, z));
                     break;
                 }
             }
         }
 
-        selectedPlayer = null;
+        //  No longer clearing selectedPlayer or input fields
+        // selectedPlayer = null;
     }
 
     private string GetPlayerLabel(Player player)
