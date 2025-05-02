@@ -178,7 +178,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                     if (human.MountState == HumanMountState.Horse)
                         human.Unmount(true);
 
-                    human.StartCoroutine(ForceTeleportCoroutine(human, new Vector3(x, y, z)));
+                    human.photonView.RPC("RPC_Teleport", human.photonView.Owner, new Vector3(x, y, z));
                     break;
                 }
             }
@@ -211,7 +211,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 if (human.MountState == HumanMountState.Horse)
                     human.Unmount(true);
 
-                human.StartCoroutine(ForceTeleportCoroutine(human, mc.Cache.Transform.position));
+                human.photonView.RPC("RPC_Teleport", human.photonView.Owner, mc.Cache.Transform.position);
                 break;
             }
         }
@@ -227,7 +227,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             if (human.photonView != null && human.photonView.Owner != null &&
                 human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
             {
-                mc.StartCoroutine(ForceTeleportCoroutine(mc, human.Cache.Transform.position));
+                mc.photonView.RPC("RPC_Teleport", mc.photonView.Owner, human.Cache.Transform.position);
                 break;
             }
         }
@@ -251,13 +251,12 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             {
                 if (human != null && !human.Dead)
                 {
-                    human.GetHit("", 400, "MC", ""); // EXACTLY like thunderspear instant kill
+                    human.GetHit("Smited", 400, "Thunderspear", ""); // Instant kill same as Thunderspear
                 }
                 break;
             }
         }
     }
-
 
     private Human FindLocalHuman()
     {
@@ -267,18 +266,5 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 return human;
         }
         return null;
-    }
-
-    private System.Collections.IEnumerator ForceTeleportCoroutine(Human human, Vector3 targetPos)
-    {
-        float timer = 1.0f;
-        while (timer > 0f)
-        {
-            if (human != null)
-                human.Cache.Transform.position = targetPos;
-
-            timer -= Time.deltaTime;
-            yield return null;
-        }
     }
 }
