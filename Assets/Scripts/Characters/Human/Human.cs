@@ -3573,6 +3573,25 @@ namespace Characters
             return renderers;
         }
 
+        [PunRPC]
+        public void RPC_Teleport(Vector3 newPosition)
+        {
+            StartCoroutine(ForceTeleportPosition(newPosition));
+        }
+
+        private IEnumerator ForceTeleportPosition(Vector3 targetPosition)
+        {
+            float timer = 1f; // Force for 1 second
+            while (timer > 0f)
+            {
+                Cache.Transform.position = targetPosition;
+                timer -= Time.deltaTime;
+                yield return null; // wait one frame
+            }
+        }
+
+
+
         public HumanState State
         {
             get

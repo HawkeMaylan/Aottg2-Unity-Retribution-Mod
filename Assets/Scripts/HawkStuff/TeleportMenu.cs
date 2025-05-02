@@ -16,10 +16,27 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.RightControl))
+        if (PhotonNetwork.IsMasterClient)
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (Input.GetKeyDown(KeyCode.RightControl))
+            {
                 menuOpen = !menuOpen;
+                ToggleCursor(menuOpen);
+            }
+        }
+    }
+
+    private void ToggleCursor(bool enable)
+    {
+        if (enable)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
     }
 
@@ -38,16 +55,20 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (GUI.Button(new Rect(Screen.width - 120, 20, 100, 30), "Close"))
         {
             menuOpen = false;
+            ToggleCursor(false);
         }
 
-        GUILayout.BeginArea(new Rect(50, 80, Screen.width - 100, Screen.height - 150));
+        GUILayout.BeginArea(new Rect(30, 80, 300, Screen.height - 150));
         scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
         foreach (var player in PhotonNetwork.PlayerList)
         {
             string playerLabel = GetPlayerLabel(player);
 
-            if (GUILayout.Button(playerLabel, GUILayout.Height(40)))
+            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
+            buttonStyle.fontSize = 14;
+
+            if (GUILayout.Button(playerLabel, buttonStyle, GUILayout.Height(30)))
             {
                 selectedPlayer = player;
                 inputX = inputY = inputZ = "";
@@ -59,35 +80,22 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
         if (selectedPlayer != null)
         {
-            GUI.Box(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 100, 300, 220), "Teleport " + GetPlayerLabel(selectedPlayer));
+            GUI.Box(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 120, 300, 250), "Teleport " + GetPlayerLabel(selectedPlayer));
 
-            GUI.Label(new Rect(Screen.width / 2 - 120, Screen.height / 2 - 60, 50, 25), "X:");
-            inputX = GUI.TextField(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 60, 140, 25), inputX);
+            GUI.Label(new Rect(Screen.width / 2 - 120, Screen.height / 2 - 80, 50, 25), "X:");
+            inputX = GUI.TextField(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 80, 140, 25), inputX);
 
-            GUI.Label(new Rect(Screen.width / 2 - 120, Screen.height / 2 - 30, 50, 25), "Y:");
-            inputY = GUI.TextField(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 30, 140, 25), inputY);
+            GUI.Label(new Rect(Screen.width / 2 - 120, Screen.height / 2 - 50, 50, 25), "Y:");
+            inputY = GUI.TextField(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 50, 140, 25), inputY);
 
-            GUI.Label(new Rect(Screen.width / 2 - 120, Screen.height / 2, 50, 25), "Z:");
-            inputZ = GUI.TextField(new Rect(Screen.width / 2 - 70, Screen.height / 2, 140, 25), inputZ);
+            GUI.Label(new Rect(Screen.width / 2 - 120, Screen.height / 2 - 20, 50, 25), "Z:");
+            inputZ = GUI.TextField(new Rect(Screen.width / 2 - 70, Screen.height / 2 - 20, 140, 25), inputZ);
 
-            if (GUI.Button(new Rect(Screen.width / 2 - 50, Screen.height / 2 + 40, 100, 30), "Teleport"))
+            if (GUI.Button(new Rect(Screen.width / 2 - 50, Screen.height / 2 + 20, 100, 30), "Teleport"))
             {
                 TryTeleportSelectedPlayer();
             }
         }
-    }
-
-    private string GetPlayerLabel(Player player)
-    {
-        foreach (var human in FindObjectsOfType<Human>())
-        {
-            if (human.photonView != null && human.photonView.Owner != null && human.photonView.Owner.ActorNumber == player.ActorNumber)
-            {
-                return human.Name;
-            }
-        }
-
-        return player.NickName + " (Not Spawned)";
     }
 
     private void TryTeleportSelectedPlayer()
@@ -101,12 +109,26 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 if (human.photonView != null && human.photonView.Owner != null &&
                     human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
                 {
-                    human.Cache.Transform.position = new Vector3(x, y, z);
+                    //  Send RPC to make THEM teleport themselves
+                    human.photonView.RPC("RPC_Teleport", human.photonView.Owner, new Vector3(x, y, z));
                     break;
                 }
             }
         }
 
         selectedPlayer = null;
+    }
+
+    private string GetPlayerLabel(Player player)
+    {
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human.photonView != null && human.photonView.Owner != null && human.photonView.Owner.ActorNumber == player.ActorNumber)
+            {
+                return human.Name;
+            }
+        }
+
+        return player.NickName + " (Not Spawned)";
     }
 }
