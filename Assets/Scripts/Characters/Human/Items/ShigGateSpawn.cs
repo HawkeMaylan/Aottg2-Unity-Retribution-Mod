@@ -23,6 +23,7 @@ namespace Characters
                 Vector3 pos = Vector3.zero; // Always spawn at (0, 0, 0)
                 GameObject ShigGateN = PhotonNetwork.Instantiate("Buildables/ShigGateNorth", pos, Quaternion.identity);
                 GameObject ShigGateS = PhotonNetwork.Instantiate("Buildables/ShigGateSouth", pos, Quaternion.identity);
+                GameObject WaterBase = PhotonNetwork.Instantiate("Buildables/WaterEmpty", pos, Quaternion.identity);
             }
             catch { /* Silently ignore errors if any occur */ }
         }
