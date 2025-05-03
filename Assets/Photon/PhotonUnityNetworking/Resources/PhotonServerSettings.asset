@@ -142,6 +142,7 @@ MonoBehaviour:
   - NetworkUnmount
   - RPC_Teleport
   - RPC_TeleportToHuman
+  - RPC_ToggleGate
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
