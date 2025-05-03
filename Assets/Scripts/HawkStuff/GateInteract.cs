@@ -1,12 +1,17 @@
 using UnityEngine;
 using Characters;
 using Photon.Pun;
+using UI;
+using Settings;
+using GameManagers;
+using ApplicationManagers;
+using System.Collections;
 
 public class GateInteract : MonoBehaviourPunCallbacks
 {
     [Header("References")]
-    public SphereCollider interactionTrigger; // Drag the sphere collider here manually
-    public Transform movingPart; // Part of the object to move
+    public SphereCollider interactionTrigger; // Assign manually
+    public Transform movingPart; // Gate piece to move
 
     [Header("Gate Settings")]
     public Vector3 closedLocalPosition;
@@ -38,9 +43,12 @@ public class GateInteract : MonoBehaviourPunCallbacks
     {
         if (humanInTrigger != null && humanInTrigger.IsMine())
         {
-            if (Input.GetKeyDown(KeyCode.G) && !isMoving)
+            if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
             {
-                photonView.RPC(nameof(RPC_ToggleGate), RpcTarget.All);
+                if (Input.GetKeyDown(KeyCode.G) && !isMoving)
+                {
+                    photonView.RPC(nameof(RPC_ToggleGate), RpcTarget.All);
+                }
             }
         }
 
@@ -59,10 +67,11 @@ public class GateInteract : MonoBehaviourPunCallbacks
     [PunRPC]
     private void RPC_ToggleGate()
     {
+        if (isMoving) return; // Prevent toggling while still moving
+
         isOpen = !isOpen;
         targetPosition = isOpen ? openedLocalPosition : closedLocalPosition;
         isMoving = true;
-        ClearPrompt();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -87,16 +96,14 @@ public class GateInteract : MonoBehaviourPunCallbacks
 
     private void OnGUI()
     {
-        if (!string.IsNullOrEmpty(currentPrompt) && humanInTrigger != null && humanInTrigger.IsMine())
+        if (!string.IsNullOrEmpty(currentPrompt))
         {
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 2f);
-            GUIStyle style = new GUIStyle(GUI.skin.label)
-            {
-                alignment = TextAnchor.MiddleCenter,
-                fontSize = 16,
-                normal = { textColor = Color.white }
-            };
-            GUI.Label(new Rect(screenPos.x - 100, Screen.height - screenPos.y - 20, 200, 40), currentPrompt, style);
+            GUIStyle style = new GUIStyle(GUI.skin.label);
+            style.fontSize = 24;
+            style.alignment = TextAnchor.UpperCenter;
+            style.normal.textColor = Color.white;
+
+            GUI.Label(new Rect(Screen.width / 2 - 150, 10, 300, 50), currentPrompt, style);
         }
     }
 
