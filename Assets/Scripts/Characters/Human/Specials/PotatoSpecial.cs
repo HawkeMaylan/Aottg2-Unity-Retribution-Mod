@@ -5,20 +5,20 @@ namespace Characters
 {
     class PotatoSpecial : BaseEmoteSpecial
     {
-        protected override float ActiveTime => 10f;
+        protected override float ActiveTime => 15f;
         protected override bool GroundedOnly => false;
         private float _oldSpeed;
         private float _currentSpeed;
 
         public PotatoSpecial(BaseCharacter owner): base(owner)
         {
-            Cooldown = 20f;
+            Cooldown = 45f;
         }
 
         protected override void Activate()
         {
             _oldSpeed = _human.Stats.RunSpeed;
-            _currentSpeed = _oldSpeed + 40f;
+            _currentSpeed = _oldSpeed * 2.8f;
             _human.RunAnimation = HumanAnimations.RunBuffed;
             _human.EmoteAnimation(HumanAnimations.SpecialSasha);
         }

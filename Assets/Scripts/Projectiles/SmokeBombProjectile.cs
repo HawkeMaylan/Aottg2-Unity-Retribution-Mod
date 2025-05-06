@@ -19,7 +19,7 @@ namespace Projectiles
         {
             if (photonView.IsMine && !Disabled)
             {
-                foreach (var collider in Physics.OverlapSphere(transform.position, 4f, PhysicsLayer.GetMask(PhysicsLayer.Hurtbox)))
+                foreach (var collider in Physics.OverlapSphere(transform.position, 10f, PhysicsLayer.GetMask(PhysicsLayer.Hurtbox)))
                 {
                     var root = collider.transform.root.gameObject;
                     var titan = root.GetComponent<BasicTitan>();

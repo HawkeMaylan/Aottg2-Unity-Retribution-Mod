@@ -13,7 +13,7 @@ namespace Characters
         public SupplySpecial(BaseCharacter owner): base(owner)
         {
             UsesLeft = -1;
-            MaxUses = 1;
+            MaxUses = 0;
 
             Cooldown = 300;
             SetCooldownLeft(Cooldown);

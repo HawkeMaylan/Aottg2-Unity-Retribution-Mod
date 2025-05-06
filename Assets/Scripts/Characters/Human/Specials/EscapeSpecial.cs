@@ -28,7 +28,7 @@ namespace Characters
         {
             ((Human)_owner).CrossFade(HumanAnimations.SpecialJean, 0.1f);
             _oldGas = _human.Stats.CurrentGas;
-            _currentGas = _oldGas * 0.05f;
+            _currentGas = _oldGas * 0.20f;
             _human.Stats.CurrentGas = _currentGas;
 
             if (_human.Weapon is AmmoWeapon ammo)
