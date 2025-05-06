@@ -33,7 +33,7 @@ Transform:
   m_LocalScale: {x: 12.062361, y: 12.447405, z: 13.535491}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6628626719037189632}
+  - {fileID: 1623733396865616167}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8021274965258419493
@@ -117,13 +117,13 @@ LODGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2910409178311403812}
   serializedVersion: 2
-  m_LocalReferencePoint: {x: 0.26306677, y: 5.7984557, z: 0.088736534}
-  m_Size: 11.420615
+  m_LocalReferencePoint: {x: 0.26306677, y: 5.3200073, z: 0.088736534}
+  m_Size: 13.53549
   m_FadeMode: 0
   m_AnimateCrossFading: 0
   m_LastLODIsBillboard: 0
   m_LODs:
-  - screenRelativeHeight: 0.14606169
+  - screenRelativeHeight: 0.078734376
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 6106801775882945353}
@@ -133,9 +133,9 @@ LODGroup:
   - screenRelativeHeight: 0.0024997785
     fadeTransitionWidth: 0
     renderers:
-    - renderer: {fileID: 5835206796771354668}
+    - renderer: {fileID: 2121002954645911112}
   m_Enabled: 1
---- !u!1 &4447732918568834707
+--- !u!1 &5772673807731549089
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -143,53 +143,53 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6628626719037189632}
-  - component: {fileID: 1438214185624863098}
-  - component: {fileID: 5835206796771354668}
-  m_Layer: 8
-  m_Name: Pine1TreeLOD02
+  - component: {fileID: 1623733396865616167}
+  - component: {fileID: 6914451504509445686}
+  - component: {fileID: 2121002954645911112}
+  m_Layer: 0
+  m_Name: Pine1TreeLOD
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6628626719037189632
+--- !u!4 &1623733396865616167
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4447732918568834707}
+  m_GameObject: {fileID: 5772673807731549089}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.71493584, y: 0, z: 0, w: 0.69919014}
-  m_LocalPosition: {x: 0, y: 6.51, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_LocalRotation: {x: -0, y: -0.40829656, z: -0, w: 0.91284937}
+  m_LocalPosition: {x: -0.33, y: 5.32, z: -0.33}
+  m_LocalScale: {x: 13.53549, y: 13.53549, z: 13.53549}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 177112814929294784}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &1438214185624863098
+--- !u!33 &6914451504509445686
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4447732918568834707}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &5835206796771354668
+  m_GameObject: {fileID: 5772673807731549089}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &2121002954645911112
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4447732918568834707}
+  m_GameObject: {fileID: 5772673807731549089}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 0
+  m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
