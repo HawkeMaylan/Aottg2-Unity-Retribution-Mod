@@ -3,7 +3,7 @@
 	"SpawnRates": {
 		"Training": {"Normal": 1.0},
 		"Easy": {"Normal": 0.9, "Abnormal": 0.1},
-		"Normal": {"Normal": 0.64, "Abnormal": 0.16, "Jumper": 0.15, "Crawler": 0.05},
+		"Normal": {"Normal": 0.67, "Abnormal": 0.16, "Jumper": 0.15, "Crawler": 0.02},
 		"Hard": {"Normal": 0.45, "Abnormal": 0.29, "Jumper": 0.14, "Crawler": 0.03, "Punk": 0.06, "Thrower": 0.03},
 		"Abnormal": {"Normal": 0, "Abnormal": 0.38, "Jumper": 0.38, "Crawler": 0.07, "Punk": 0.11, "Thrower": 0.06}
 	},
