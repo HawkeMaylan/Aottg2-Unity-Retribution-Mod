@@ -2696,6 +2696,7 @@ namespace Characters
             itemList1.Add(new FlareItem(this, "Cyan", new Color(0f, 255f / 252, 255f / 255, 0.8f), 220f));
             itemList1.Add(new FlareItem(this, "Indigo", Color.blue, 30f));
             itemList2.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
+            itemList2.Add(new FlareItem2(this, "AcousticFlare", Color.black, 1f));
             itemList2.Add(new HorseWhistleItem(this, "Whistle", 5f));          
             itemList3.Add(new Lanterntoggle(this, "Lantern On/Off", 1f));
             itemList3.Add(new CloakToggle(this, "Cape On/Off", 1f));

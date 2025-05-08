@@ -18,6 +18,7 @@
         public static string OldBladeSwing = "OldBladeSwing";
         public static string Dodge = "Dodge";
         public static string FlareLaunch = "FlareLaunch";
+        public static string AcousticFlareSound = "AcousticFlareSound";
         public static string ThunderspearLaunch = "ThunderspearLaunch";
         public static string GasBurst = "GasBurst";
         public static string HookLaunch = "HookLaunch";
