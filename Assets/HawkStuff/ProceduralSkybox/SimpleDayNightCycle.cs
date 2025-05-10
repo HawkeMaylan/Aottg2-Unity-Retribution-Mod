@@ -11,6 +11,10 @@ public class SimpleDayNightCycle : MonoBehaviour
     public float sunInitialAngle = 0f;
     public float rotationDirection = 1f;
 
+    [Header("Sunrise Direction")]
+    [Tooltip("Horizontal direction (in degrees) along the horizon where the sun rises. 0 = North, 90 = East, 180 = South, 270 = West.")]
+    public float sunAzimuth = 170f;
+
     [Header("Light Intensity Settings")]
     public float maxSunIntensity = 1.0f;
     public float maxMoonIntensity = 0.2f;
@@ -35,7 +39,7 @@ public class SimpleDayNightCycle : MonoBehaviour
     public float nightFadeOutDuration = 0.15f;
 
     [Header("Night Blackout Settings")]
-    public float nightBlackoutDuration = 0.1f; // New: hold 0 exposure after sunset
+    public float nightBlackoutDuration = 0.1f; // Hold 0 exposure after sunset
 
     private Material skyboxMaterial;
     private float timeOfDay;
@@ -89,10 +93,10 @@ public class SimpleDayNightCycle : MonoBehaviour
     private void UpdateSunAndMoon()
     {
         float sunAngle = (timeOfDay * 360f * rotationDirection) + sunInitialAngle;
-        sun.transform.rotation = Quaternion.Euler(sunAngle, 170f, 0f);
+        sun.transform.rotation = Quaternion.Euler(sunAngle, sunAzimuth, 0f);
 
         float moonAngle = sunAngle + 180f;
-        moon.transform.rotation = Quaternion.Euler(moonAngle, 170f, 0f);
+        moon.transform.rotation = Quaternion.Euler(moonAngle, sunAzimuth, 0f);
     }
 
     private void UpdateLighting()
@@ -150,7 +154,6 @@ public class SimpleDayNightCycle : MonoBehaviour
         {
             if (time >= 0.5f && time < (0.5f + nightBlackoutDuration))
             {
-                // Hold exposure at 0 for blackout duration after sunset
                 return 0.0f;
             }
 

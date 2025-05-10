@@ -240,6 +240,7 @@ MonoBehaviour:
   dayDuration: 3600
   sunInitialAngle: 0
   rotationDirection: 1
+  sunAzimuth: -90
   maxSunIntensity: 0.8
   maxMoonIntensity: 0.09
   daySkyColorGradient:
