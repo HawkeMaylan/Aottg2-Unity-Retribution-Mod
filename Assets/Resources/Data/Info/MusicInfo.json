@@ -16,20 +16,13 @@
 	],
 
 	"Ambient": [
-		{"Name": "Dakros_The-Ground-Is-Shaking", "Volume": 1},
-		{"Name": "David_Moses", "Volume": 1},
-		{"Name": "Néonin_Sorrowful-Plight", "Volume": 1},
-		{"Name": "Néonin_Uneasy-Respite", "Volume": 1},
-		{"Name": "Mikko_Forgotten-Memory", "Volume": 1},
-		{"Name": "Nadim-Doueiri_Adventure", "Volume": 1},
-		{"Name": "Raivaru_Warm-Breeze", "Volume": 1},
-		{"Name": "Unrelated-Acts_Black-Flares", "Volume": 1},
-		{"Name": "Unrelated-Acts_Fog", "Volume": 1},
-		{"Name": "Unrelated-Acts_KYPRva1", "Volume": 1},
-		{"Name": "Unrelated-Acts_KYPRva2", "Volume": 1},
-		{"Name": "Unrelated-Acts_Legion-Cavalry", "Volume": 1},
-		{"Name": "Unrelated-Acts_Anti-Human", "Volume": 1},
-		{"Name": "Dark-Ovus_Dark-Forest", "Volume": 1}
+		{"Name": "-u01-ots2m2_on_the_walls", "Volume": 1},
+		{"Name": "-u02-titan_invasion__high_quality__hiroyuki_sawano", "Volume": 1},
+		{"Name": "-u03-el", "Volume": 1},
+		{"Name": "-u04-vn-pf20130524", "Volume": 1},
+		{"Name": "-u05-7-b__hiroyuki_sawano", "Volume": 1},
+		{"Name": "-u06-aots3-1000", "Volume": 1},
+		{"Name": "-u07-female_titan_entranceattack_on_titan_season_1_ost", "Volume": 1},
 	],
 
 	"Peaceful": [
