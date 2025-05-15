@@ -1,18 +1,11 @@
 {
 	"Menu": [
-		{"Name": "Blood-God--Dakros_Departure", "Volume": 1},
-		{"Name": "Dakros_Origin", "Volume": 1},
-		{"Name": "Dakros_Tribute", "Volume": 1},
-		{"Name": "Ertinos_Up-There", "Volume": 1},
-		{"Name": "Ertinos_Wandering", "Volume": 1},
-		{"Name": "Meownist_Settings", "Volume": 1},
-		{"Name": "Nadim-Doueiri_Adventure", "Volume": 1},
-		{"Name": "Nadim-Doueiri_Flying", "Volume": 1},
-		{"Name": "Raivaru_Missing", "Volume": 1},
-		{"Name": "Warm-Moist-Beans_Stillness", "Volume": 1},
-		{"Name": "Unrelated-Acts_Scout-Flight", "Volume": 1},
-		{"Name": "Unrelated-Acts_City-Battle", "Volume": 1},
-		{"Name": "Unrelated-Acts_Districts", "Volume": 1}
+		{"Name": "Act-1", "Volume": 1},
+		{"Name": "Act-3", "Volume": 1},
+		{"Name": "Act_2", "Volume": 1},
+		{"Name": "Act_2-2", "Volume": 1}
+
+
 	],
 
 	"Ambient": [
