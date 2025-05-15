@@ -26,23 +26,25 @@
 	],
 
 	"Peaceful": [
-		{"Name": "Blood-God--Dakros_Departure", "Volume": 1},
-		{"Name": "Dakros_Green-Plains", "Volume": 1},
-		{"Name": "Dakros_Origin", "Volume": 1},
-		{"Name": "Ertinos_Up-There", "Volume": 1},
-		{"Name": "Ertinos_Wandering", "Volume": 1},
-		{"Name": "Néonin_Another-Dawn", "Volume": 1},
-		{"Name": "Néonin_Foul-Omens", "Volume": 1},
-		{"Name": "Meownist_Forest", "Volume": 1},
-		{"Name": "Mr-Lego_City", "Volume": 1},
-		{"Name": "Mr-Lego_Peaceful", "Volume": 1},
-		{"Name": "Nadim-Doueiri_Flying", "Volume": 1},
-		{"Name": "Raivaru_Missing", "Volume": 1},
-		{"Name": "Unrelated-Acts_Districts", "Volume": 1},
-		{"Name": "Warm-Moist-Beans_Stillness", "Volume": 1},
-		{"Name": "EPIC_Village", "Volume": 1},
-		{"Name": "Dark-Ovus_Frosten", "Volume": 1}
+		{"Name": "+P01-eye_water__high_quality__hiroyuki_sawano", "Volume": 1},
+		{"Name": "+P02-2_ost_~_call_of_silence__ymir_past_theme", "Volume": 1},
+		{"Name": "+P03-attackd__attack_on_d", "Volume": 1},
+		{"Name": "+P04-aots2m3_her_heart_still_beating", "Volume": 1},
+		{"Name": "+P05-im_back_home", "Volume": 1},
+		{"Name": "+P06-counter_attack_mankind_different_version", "Volume": 1},
+		{"Name": "+P07-Counterattack-Mankind", "Volume": 1},
+		{"Name": "+P08-wings_of_freedom__epic_music__attack_on_titan", "Volume": 1},
+		{"Name": "+P09-thedogs_with_lyrics", "Volume": 1},
+		{"Name": "+P10-so_ist_es_immer", "Volume": 1},
+		{"Name": "+P11-omake-pfadlib_-_attack_on_titan_ost_-_hiroyuki_sawano", "Volume": 1},
+		{"Name": "+P12-vc-pf20130218_-_attack_on_titan_ost_2_-_hiroyuki_sawano", "Volume": 1},
+		{"Name": "+P13-vogel_im_kfig_episode_25_anime_version__attack_on_titan_season_1_ost", "Volume": 1},
+		{"Name": "+P14-vc-pf20130218_anime_versioneren_emerges_from_the_titan__attack_on_titan_season_1_ost", "Volume": 1},
+		{"Name": "+P15-attackd_anime_versionthe_coordinateattack_on_titan_season_3_ost", "Volume": 1},
+		{"Name": "+P16-erenthe_episode_37_anime_version__attack_on_titan_season_2_ost", "Volume": 1},
+		{"Name": "+P17-2volt_episode_40_anime_versionhistorias_pastattack_on_titan_season_3_ost", "Volume": 1}
 
+		
 	],
 	"Battle": [
 		{"Name": "16-son2seaver_pre-episode_31", "Volume": 1},
