@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using Characters;
+using Effects;
 
 [RequireComponent(typeof(Collider))]
 public class GeneralKillScript : MonoBehaviourPun
@@ -27,62 +28,64 @@ public class GeneralKillScript : MonoBehaviourPun
             Destroy(gameObject, destroyAfterSeconds);
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void Update()
     {
-        // Handle human collision
-        Human human = other.GetComponentInParent<Human>();
-        if (damageHumans && human != null && human.IsMine())
+        Collider[] hits = Physics.OverlapBox(transform.position, transform.localScale / 2f, transform.rotation);
+        foreach (var other in hits)
         {
-            human.GetHit("", humanDamage, "Collision", other.name);  // Specify correct overload
-            return;
-        }
-
-        // Handle titan collision
-        BaseTitan titan = other.GetComponentInParent<BaseTitan>();
-        if (titan == null || titan.Dead) return;
-
-        string hitbox = other.name;
-        int localViewId = photonView.ViewID;
-        string attackerName = "Environmental";
-
-        // Cast to BasicTitan for BasicCache access
-        BasicTitan basicTitan = titan as BasicTitan;
-
-        // Nape damage (Kill)
-        if (damageNape && hitbox == titan.BaseTitanCache.NapeHurtbox?.name)
-        {
-            titan.photonView.RPC("GetHitRPC", RpcTarget.All, localViewId, attackerName, titanNapeDamage, "BladeThrow", hitbox);
-        }
-
-        // Disable arms
-        else if (disableArms && basicTitan != null)
-        {
-            if (hitbox == basicTitan.BasicCache.ForearmLHurtbox?.name || hitbox == basicTitan.BasicCache.ForearmRHurtbox?.name)
+            Human human = other.GetComponentInParent<Human>();
+            if (damageHumans && human != null && human.IsMine())
             {
-                titan.photonView.RPC("GetHitRPC", RpcTarget.All, localViewId, attackerName, 0, "BladeThrow", hitbox);
+                human.GetHit("", humanDamage, "Collision", other.name);
+                continue;
             }
-        }
 
-        // Cripple legs
-        else if (crippleLegs && titan.BaseTitanCache.LegLHurtbox != null &&
-            (hitbox == titan.BaseTitanCache.LegLHurtbox.name || hitbox == titan.BaseTitanCache.LegRHurtbox?.name))
-        {
-            titan.photonView.RPC("GetHitRPC", RpcTarget.All, localViewId, attackerName, 0, "BladeThrow", hitbox);
-        }
+            BaseTitan baseTitan = other.GetComponentInParent<BaseTitan>();
+            if (baseTitan == null || baseTitan.Dead || !baseTitan.AI)
+                continue;
 
-        // Blind
-        else if (blindEyes && hitbox == titan.BaseTitanCache.EyesHurtbox?.name)
-        {
-            titan.photonView.RPC("GetHitRPC", RpcTarget.All, localViewId, attackerName, 0, "BladeThrow", hitbox);
-        }
+            BasicTitan titan = baseTitan as BasicTitan;
+            if (titan == null)
+                continue;
 
-        // Directional stun and knockback (applied regardless of hitbox type)
-        if (directionalStun)
-        {
-            Vector3 direction = titan.Cache.Transform.position - transform.position;
-            direction.y = 0f;
-            titan.Cache.Rigidbody.AddForce(direction.normalized * knockbackForce, ForceMode.Impulse);
-            titan.photonView.RPC("GetHitRPC", RpcTarget.All, localViewId, attackerName, 0, "TitanStun", hitbox);
+            string hitboxName = other.name;
+
+            var eyes = titan.BaseTitanCache.EyesHurtbox?.name;
+            var nape = titan.BaseTitanCache.NapeHurtbox?.name;
+            var legL = titan.BaseTitanCache.LegLHurtbox?.name;
+            var legR = titan.BaseTitanCache.LegRHurtbox?.name;
+
+            var armL = titan.BasicCache.ForearmLHurtbox?.name;
+            var armR = titan.BasicCache.ForearmRHurtbox?.name;
+
+            if (blindEyes && hitboxName == eyes)
+            {
+                EffectSpawner.Spawn(EffectPrefabs.CriticalHit, transform.position, Quaternion.Euler(270f, 0f, 0f));
+                titan.GetHit("SmokeBomb", 0, "SmokeBomb", hitboxName);
+            }
+
+            if (damageNape && hitboxName == nape)
+            {
+                titan.GetHit("Blade", titanNapeDamage, "BladeThrow", hitboxName);
+            }
+
+            if (disableArms && (hitboxName == armL || hitboxName == armR))
+            {
+                titan.GetHit("Blade", 0, "BladeThrow", hitboxName);
+            }
+
+            if (crippleLegs && (hitboxName == legL || hitboxName == legR))
+            {
+                titan.GetHit("Blade", 0, "BladeThrow", hitboxName);
+            }
+
+            if (directionalStun)
+            {
+                Vector3 dir = (titan.Cache.Transform.position - transform.position).normalized;
+                dir.y = 0f;
+                titan.Cache.Rigidbody.AddForce(dir * knockbackForce, ForceMode.Impulse);
+                titan.GetHit("Blade", 0, "TitanStun", hitboxName);
+            }
         }
     }
 }

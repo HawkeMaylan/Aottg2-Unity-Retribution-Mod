@@ -122,7 +122,7 @@ MonoBehaviour:
   destroyAfterSeconds: 300
   damageHumans: 1
   humanDamage: 100
-  damageNape: 0
+  damageNape: 1
   titanNapeDamage: 1000
   disableArms: 0
   crippleLegs: 0
