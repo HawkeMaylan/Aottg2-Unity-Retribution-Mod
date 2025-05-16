@@ -120,11 +120,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destroyAfterSeconds: 300
+  killSourceName: Cube
   damageHumans: 1
   humanDamage: 100
   damageNape: 0
   titanNapeDamage: 1000
-  disableArms: 1
+  disableArms: 0
   crippleLegs: 0
   blindEyes: 0
   directionalStun: 0

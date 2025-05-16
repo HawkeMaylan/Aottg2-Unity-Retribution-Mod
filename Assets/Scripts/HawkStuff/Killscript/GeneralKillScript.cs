@@ -8,6 +8,7 @@ public class GeneralKillScript : MonoBehaviourPun
 {
     [Header("General Settings")]
     public float destroyAfterSeconds = 5f;
+    public string killSourceName = "Blade";
 
     [Header("Human Settings")]
     public bool damageHumans = true;
@@ -36,7 +37,7 @@ public class GeneralKillScript : MonoBehaviourPun
             Human human = other.GetComponentInParent<Human>();
             if (damageHumans && human != null && human.IsMine())
             {
-                human.GetHit("", humanDamage, "Collision", other.name);
+                human.GetHit(killSourceName, humanDamage, "Collision", other.name);
                 continue;
             }
 
@@ -66,17 +67,17 @@ public class GeneralKillScript : MonoBehaviourPun
 
             if (damageNape && hitboxName == nape)
             {
-                titan.GetHit("Blade", titanNapeDamage, "BladeThrow", hitboxName);
+                titan.GetHit(killSourceName, titanNapeDamage, "BladeThrow", hitboxName);
             }
 
             if (disableArms && (hitboxName == armL || hitboxName == armR))
             {
-                titan.GetHit("Blade", 0, "BladeThrow", hitboxName);
+                titan.GetHit(killSourceName, 0, "BladeThrow", hitboxName);
             }
 
             if (crippleLegs && (hitboxName == legL || hitboxName == legR))
             {
-                titan.GetHit("Blade", 0, "BladeThrow", hitboxName);
+                titan.GetHit(killSourceName, 0, "BladeThrow", hitboxName);
             }
 
             if (directionalStun)
@@ -84,7 +85,7 @@ public class GeneralKillScript : MonoBehaviourPun
                 Vector3 dir = (titan.Cache.Transform.position - transform.position).normalized;
                 dir.y = 0f;
                 titan.Cache.Rigidbody.AddForce(dir * knockbackForce, ForceMode.Impulse);
-                titan.GetHit("Blade", 0, "TitanStun", hitboxName);
+                titan.GetHit(killSourceName, 0, "TitanStun", hitboxName);
             }
         }
     }
