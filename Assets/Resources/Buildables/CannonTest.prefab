@@ -428,6 +428,9 @@ MonoBehaviour:
   rotationSpeed: 5
   maxHorizontalAngle: 10
   maxVerticalAngle: 30
+  MoveTarget: {fileID: 485101760791666370}
+  moveSpeed: 5
+  turnSpeed: 90
 --- !u!4 &1551013655377393878 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}

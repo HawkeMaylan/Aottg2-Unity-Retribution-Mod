@@ -34,14 +34,15 @@ public class CannonBase : MonoBehaviourPunCallbacks
     public float mountedMass = 0.1f;
 
     [Header("Rotation Settings")]
-    public Transform CannonBarrel; // The part that rotates (was objectToRotate)
-    public float rotationSpeed = 5f; // Rotation speed while mounted
-
-    [Tooltip("Maximum yaw (left/right) from forward direction in degrees")]
+    public Transform CannonBarrel;
+    public float rotationSpeed = 5f;
     public float maxHorizontalAngle = 90f;
-
-    [Tooltip("Maximum pitch (up/down) from forward direction in degrees")]
     public float maxVerticalAngle = 45f;
+
+    [Header("Movement Settings")]
+    public Transform MoveTarget;
+    public float moveSpeed = 5f;
+    public float turnSpeed = 90f;
 
     private Human humanInTrigger;
     private Rigidbody humanRigidbody;
@@ -93,7 +94,8 @@ public class CannonBase : MonoBehaviourPunCallbacks
         HandleMountInput();
         HandleUnmountPromptTimer();
         HandleRunAnimation();
-        RotateTowardsCamera(); // Only runs while mounted
+        RotateTowardsCamera();
+        HandleMovementInput();
     }
 
     private void HandleMountInput()
@@ -222,22 +224,33 @@ public class CannonBase : MonoBehaviourPunCallbacks
         if (!isMounted || CannonBarrel == null || Camera.main == null)
             return;
 
-        // Get the camera's forward direction relative to this object
         Vector3 localForward = transform.InverseTransformDirection(Camera.main.transform.forward);
-
-        // Calculate yaw (horizontal) and pitch (vertical)
         float yaw = Mathf.Atan2(localForward.x, localForward.z) * Mathf.Rad2Deg;
         float pitch = -Mathf.Asin(localForward.y) * Mathf.Rad2Deg;
 
-        // Clamp both angles
         yaw = Mathf.Clamp(yaw, -maxHorizontalAngle, maxHorizontalAngle);
         pitch = Mathf.Clamp(pitch, -maxVerticalAngle, maxVerticalAngle);
 
-        // Create the rotation with clamped pitch and yaw
         Quaternion targetRotation = Quaternion.Euler(pitch, yaw, 0f);
-
-        // Apply it to the local rotation of the cannon barrel smoothly
         CannonBarrel.localRotation = Quaternion.Slerp(CannonBarrel.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
+    }
+
+    private void HandleMovementInput()
+    {
+        if (!isMounted || MoveTarget == null)
+            return;
+
+        float move = 0f;
+        float rotate = 0f;
+
+        if (Input.GetKey(KeyCode.W)) move += 1f;
+        if (Input.GetKey(KeyCode.S)) move -= 1f;
+        if (Input.GetKey(KeyCode.D)) rotate += 1f;
+        if (Input.GetKey(KeyCode.A)) rotate -= 1f;
+
+        Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up) * move * moveSpeed * Time.deltaTime;
+        MoveTarget.position += forwardMovement;
+        MoveTarget.Rotate(0f, rotate * turnSpeed * Time.deltaTime, 0f, Space.Self);
     }
 
     private void OnGUI()
