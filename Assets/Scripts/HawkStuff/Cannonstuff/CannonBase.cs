@@ -37,6 +37,12 @@ public class CannonBase : MonoBehaviourPunCallbacks
     public Transform objectToRotate; // The object (e.g., horse) to rotate
     public float rotationSpeed = 5f; // Rotation speed while mounted
 
+    [Tooltip("Maximum yaw (left/right) from forward direction in degrees")]
+    public float maxHorizontalAngle = 90f;
+
+    [Tooltip("Maximum pitch (up/down) from forward direction in degrees")]
+    public float maxVerticalAngle = 45f;
+
     private Human humanInTrigger;
     private Rigidbody humanRigidbody;
     private bool isMounted = false;
@@ -216,10 +222,24 @@ public class CannonBase : MonoBehaviourPunCallbacks
         if (!isMounted || objectToRotate == null || Camera.main == null)
             return;
 
-        Vector3 targetDirection = Camera.main.transform.forward;
-        Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
-        objectToRotate.rotation = Quaternion.Slerp(objectToRotate.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        // Get the camera's forward direction relative to this object
+        Vector3 localForward = transform.InverseTransformDirection(Camera.main.transform.forward);
+
+        // Calculate yaw (horizontal) and pitch (vertical)
+        float yaw = Mathf.Atan2(localForward.x, localForward.z) * Mathf.Rad2Deg;
+        float pitch = -Mathf.Asin(localForward.y) * Mathf.Rad2Deg;
+
+        // Clamp both angles
+        yaw = Mathf.Clamp(yaw, -maxHorizontalAngle, maxHorizontalAngle);
+        pitch = Mathf.Clamp(pitch, -maxVerticalAngle, maxVerticalAngle);
+
+        // Create the rotation with clamped pitch and yaw
+        Quaternion targetRotation = Quaternion.Euler(pitch, yaw, 0f);
+
+        // Apply it to the local rotation of the object smoothly
+        objectToRotate.localRotation = Quaternion.Slerp(objectToRotate.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
+
 
     private void OnGUI()
     {
