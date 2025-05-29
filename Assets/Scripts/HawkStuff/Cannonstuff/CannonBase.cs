@@ -34,7 +34,7 @@ public class CannonBase : MonoBehaviourPunCallbacks
     public float mountedMass = 0.1f;
 
     [Header("Rotation Settings")]
-    public Transform objectToRotate; // The object (e.g., horse) to rotate
+    public Transform CannonBarrel; // The part that rotates (was objectToRotate)
     public float rotationSpeed = 5f; // Rotation speed while mounted
 
     [Tooltip("Maximum yaw (left/right) from forward direction in degrees")]
@@ -219,7 +219,7 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private void RotateTowardsCamera()
     {
-        if (!isMounted || objectToRotate == null || Camera.main == null)
+        if (!isMounted || CannonBarrel == null || Camera.main == null)
             return;
 
         // Get the camera's forward direction relative to this object
@@ -236,10 +236,9 @@ public class CannonBase : MonoBehaviourPunCallbacks
         // Create the rotation with clamped pitch and yaw
         Quaternion targetRotation = Quaternion.Euler(pitch, yaw, 0f);
 
-        // Apply it to the local rotation of the object smoothly
-        objectToRotate.localRotation = Quaternion.Slerp(objectToRotate.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
+        // Apply it to the local rotation of the cannon barrel smoothly
+        CannonBarrel.localRotation = Quaternion.Slerp(CannonBarrel.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
-
 
     private void OnGUI()
     {
