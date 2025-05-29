@@ -416,8 +416,10 @@ MonoBehaviour:
   disableGravityOnMount: 1
   disableMassOnMount: 1
   mountedMass: 0.1
-  objectToRotate: {fileID: 485101760791666370}
+  objectToRotate: {fileID: 881619391039496635}
   rotationSpeed: 5
+  maxHorizontalAngle: 10
+  maxVerticalAngle: 30
 --- !u!4 &1551013655377393878 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
