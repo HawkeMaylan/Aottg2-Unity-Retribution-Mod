@@ -44,6 +44,7 @@ public class CannonBase : MonoBehaviourPunCallbacks
     public float moveSpeed = 5f;
     public float turnSpeed = 90f;
 
+    private Rigidbody moveRigidbody;
     private Human humanInTrigger;
     private Rigidbody humanRigidbody;
     private bool isMounted = false;
@@ -59,6 +60,10 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        if (MoveTarget != null)
+        {
+            moveRigidbody = MoveTarget.GetComponent<Rigidbody>();
+        }
         ClearPrompt();
     }
 
@@ -95,6 +100,10 @@ public class CannonBase : MonoBehaviourPunCallbacks
         HandleUnmountPromptTimer();
         HandleRunAnimation();
         RotateTowardsCamera();
+    }
+
+    private void FixedUpdate()
+    {
         HandleMovementInput();
     }
 
@@ -237,7 +246,7 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private void HandleMovementInput()
     {
-        if (!isMounted || MoveTarget == null)
+        if (!isMounted || moveRigidbody == null)
             return;
 
         float move = 0f;
@@ -248,9 +257,11 @@ public class CannonBase : MonoBehaviourPunCallbacks
         if (Input.GetKey(KeyCode.D)) rotate += 1f;
         if (Input.GetKey(KeyCode.A)) rotate -= 1f;
 
-        Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up) * move * moveSpeed * Time.deltaTime;
-        MoveTarget.position += forwardMovement;
-        MoveTarget.Rotate(0f, rotate * turnSpeed * Time.deltaTime, 0f, Space.Self);
+        Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up).normalized * move * moveSpeed * Time.fixedDeltaTime;
+        moveRigidbody.MovePosition(moveRigidbody.position + forwardMovement);
+
+        Quaternion deltaRotation = Quaternion.Euler(0f, rotate * turnSpeed * Time.fixedDeltaTime, 0f);
+        moveRigidbody.MoveRotation(moveRigidbody.rotation * deltaRotation);
     }
 
     private void OnGUI()
