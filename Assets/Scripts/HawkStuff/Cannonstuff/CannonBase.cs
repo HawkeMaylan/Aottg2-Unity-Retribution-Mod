@@ -85,6 +85,12 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private Image currentUIImageRenderer;
 
+    private bool hasFlashedReady = false;
+    private Coroutine flashGreenRoutine;
+    private bool isFlashingGreen = false;
+
+
+
     private void Start()
     {
         if (MoveTarget != null)
@@ -116,8 +122,27 @@ public class CannonBase : MonoBehaviourPunCallbacks
             float cooldown = projectileOptions[selectedProjectileIndex].fireCooldown;
             float timeSinceFire = Time.time - (nextFireTime - cooldown);
             float progress = Mathf.Clamp01(timeSinceFire / cooldown);
-            currentUIImageRenderer.color = Color.Lerp(Color.gray, Color.white, progress);
+
+            // Set color based on cooldown progress
+            if (!isFlashingGreen)
+                currentUIImageRenderer.color = Color.Lerp(Color.gray, Color.white, progress);
+
+
+            // Flash green when cooldown ends
+            if (progress >= 1f && !hasFlashedReady)
+            {
+                if (flashGreenRoutine != null)
+                    StopCoroutine(flashGreenRoutine);
+
+                flashGreenRoutine = StartCoroutine(FlashGreen());
+                hasFlashedReady = true;
+            }
+            else if (progress < 1f)
+            {
+                hasFlashedReady = false;
+            }
         }
+
 
     }
 
@@ -463,5 +488,23 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
         img.color = original;
     }
+
+    private IEnumerator FlashGreen()
+    {
+        if (currentUIImageRenderer == null)
+            yield break;
+
+        isFlashingGreen = true;
+
+        Color originalColor = currentUIImageRenderer.color;
+        currentUIImageRenderer.color = Color.green;
+
+        yield return new WaitForSeconds(0.3f);
+
+        currentUIImageRenderer.color = Color.white;
+        isFlashingGreen = false;
+    }
+
+
 
 }
