@@ -15,7 +15,7 @@ public class CannonProjectileOption
     public GameObject prefab;
     public float launchForce = 500f;
     public float upwardForce = 100f;
-    public Sprite sprite; // UI icon for ammo
+    public Sprite sprite;
 }
 
 public class CannonBase : MonoBehaviourPunCallbacks
@@ -58,7 +58,6 @@ public class CannonBase : MonoBehaviourPunCallbacks
     public List<CannonProjectileOption> projectileOptions = new List<CannonProjectileOption>();
 
     [Header("Projectile UI")]
-    public Transform projectileUIContainer;
     public GameObject projectileUIPrefab;
 
     private int selectedProjectileIndex = 0;
@@ -120,16 +119,25 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private void UpdateProjectileUI()
     {
-        if (projectileUIContainer == null || projectileUIPrefab == null) return;
+        if (projectileUIPrefab == null) return;
 
         if (currentUIImage != null)
             Destroy(currentUIImage);
 
-        CannonProjectileOption selected = projectileOptions[selectedProjectileIndex];
-        currentUIImage = Instantiate(projectileUIPrefab, projectileUIContainer);
+        GameObject defaultMenu = GameObject.Find("DefaultMenu(Clone)");
+        if (defaultMenu == null)
+        {
+            Debug.LogWarning("DefaultMenu(Clone) not found in scene.");
+            return;
+        }
+
+        currentUIImage = Instantiate(projectileUIPrefab, defaultMenu.transform);
+        currentUIImage.transform.localPosition = new Vector3(-186.7f, 224.7f, 0f);
+        currentUIImage.GetComponent<RectTransform>().sizeDelta = new Vector2(200f, 200f);
+
         Image img = currentUIImage.GetComponent<Image>();
-        if (img != null && selected.sprite != null)
-            img.sprite = selected.sprite;
+        if (img != null && projectileOptions[selectedProjectileIndex].sprite != null)
+            img.sprite = projectileOptions[selectedProjectileIndex].sprite;
     }
 
     private void FireProjectile()
@@ -264,6 +272,8 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
         lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
         humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.2f);
+
+        UpdateProjectileUI();
     }
 
     private void DetachHuman()
@@ -280,6 +290,12 @@ public class CannonBase : MonoBehaviourPunCallbacks
         }
 
         isMounted = false;
+
+        if (currentUIImage != null)
+        {
+            Destroy(currentUIImage);
+            currentUIImage = null;
+        }
 
         if (humanInTrigger != null && !hasExitedAfterUnmount)
         {

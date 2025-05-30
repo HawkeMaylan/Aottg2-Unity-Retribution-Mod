@@ -498,7 +498,7 @@ MonoBehaviour:
     launchForce: 7000
     upwardForce: 250
     sprite: {fileID: 21300000, guid: 129c5a057f1dfd745a0d04896a566c57, type: 3}
-  - name: HEV Round
+  - name: Cannonball
     prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
     launchForce: 7000
     upwardForce: 250
