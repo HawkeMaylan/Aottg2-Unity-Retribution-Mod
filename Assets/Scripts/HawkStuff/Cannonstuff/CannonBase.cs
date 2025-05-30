@@ -166,7 +166,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void FixedUpdate()
     {
-        if (!photonView.IsMine) return;
+        
         HandleMovementInput();
     }
 
@@ -232,41 +232,34 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     private void RPC_FireProjectile(int index)
     {
+        Debug.Log($"[CannonBase] Firing projectile index {index} by {photonView.Owner} (Mine: {photonView.IsMine})");
+
         var selected = projectileOptions[index];
         if (selected.ammoCount <= 0) return;
 
-        int count = Mathf.Max(1, selected.projectileCount);
-        float spread = selected.spreadAngle;
         string prefabPath = $"Buildables/Projectiles/{selected.prefab.name}";
+        Debug.Log("Attempting to instantiate prefab at: " + prefabPath);
 
-        for (int i = 0; i < count; i++)
+        // Instantiate and add debug checks
+        GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(firePoint.forward));
+        if (projectile == null)
         {
-            Vector3 baseDirection = firePoint.forward;
-            Vector3 spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.up) * baseDirection;
-            spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.right) * spreadDir;
-
-            GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(spreadDir));
-
-            Rigidbody rb = projectile.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                Vector3 force = spreadDir * selected.launchForce + firePoint.up * selected.upwardForce;
-                rb.AddForce(force);
-            }
-
-            if (selected.BarrelRecoil && CannonBarrel != null)
-                StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.barrelRecoilAngle, selected.RecoilSpeed));
-
-            if (selected.Knockback && moveRigidbody != null)
-                moveRigidbody.AddForce(-MoveTarget.forward * selected.knockbackForce, ForceMode.Impulse);
+            Debug.LogError("Failed to instantiate projectile.");
+            return;
         }
 
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        if (rb != null)
+            rb.AddForce(firePoint.forward * selected.launchForce + firePoint.up * selected.upwardForce);
+
+        // Ammo handling
         if (photonView.IsMine)
         {
             selected.ammoCount--;
             UpdateProjectileUI();
         }
     }
+
 
     private void RotateTowardsCamera()
     {
@@ -287,15 +280,18 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void HandleMovementInput()
     {
-        if (!isMounted || moveRigidbody == null) return;
+        if (moveRigidbody == null) return;
 
         float move = 0f;
         float rotate = 0f;
 
-        if (Input.GetKey(KeyCode.W)) move += 1f;
-        if (Input.GetKey(KeyCode.S)) move -= 1f;
-        if (Input.GetKey(KeyCode.D)) rotate += 1f;
-        if (Input.GetKey(KeyCode.A)) rotate -= 1f;
+        if (photonView.IsMine && isMounted)
+        {
+            if (Input.GetKey(KeyCode.W)) move += 1f;
+            if (Input.GetKey(KeyCode.S)) move -= 1f;
+            if (Input.GetKey(KeyCode.D)) rotate += 1f;
+            if (Input.GetKey(KeyCode.A)) rotate -= 1f;
+        }
 
         Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up).normalized * move * moveSpeed * Time.fixedDeltaTime;
         moveRigidbody.MovePosition(moveRigidbody.position + forwardMovement);
@@ -303,6 +299,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         Quaternion deltaRotation = Quaternion.Euler(0f, rotate * turnSpeed * Time.fixedDeltaTime, 0f);
         moveRigidbody.MoveRotation(moveRigidbody.rotation * deltaRotation);
     }
+
 
     private void CheckDistanceOrAliveStatus()
     {

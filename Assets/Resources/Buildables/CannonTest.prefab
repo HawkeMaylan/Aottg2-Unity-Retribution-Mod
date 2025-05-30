@@ -76,7 +76,6 @@ GameObject:
   - component: {fileID: 3220079208113851252}
   - component: {fileID: 5282501006801672838}
   - component: {fileID: 2897443115194336176}
-  - component: {fileID: 4983727411847664905}
   m_Layer: 23
   m_Name: Model
   m_TagString: Untagged
@@ -172,22 +171,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 8196794144788827650, guid: fc274fb81ce41c04497f998f85e2c028, type: 3}
---- !u!114 &4983727411847664905
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4227206833505166677}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 1
 --- !u!1 &4419084986031718017
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,7 +214,6 @@ GameObject:
   - component: {fileID: 2718437460080541748}
   - component: {fileID: 1383546586924775682}
   - component: {fileID: 3507042291727946915}
-  - component: {fileID: 6144694821448063387}
   m_Layer: 23
   m_Name: Ground cannon1
   m_TagString: Untagged
@@ -326,22 +308,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 8962784066277380312, guid: fc274fb81ce41c04497f998f85e2c028, type: 3}
---- !u!114 &6144694821448063387
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7593316246429713359}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 1
 --- !u!1 &9112072042426647835
 GameObject:
   m_ObjectHideFlags: 0
@@ -353,7 +319,7 @@ GameObject:
   - component: {fileID: 485101760791666370}
   - component: {fileID: 3948184505974399640}
   - component: {fileID: 563461578649577}
-  - component: {fileID: 1600992974442010851}
+  - component: {fileID: 4543013416111928623}
   m_Layer: 23
   m_Name: CannonTest
   m_TagString: Untagged
@@ -425,13 +391,12 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 1600992974442010851}
-  - {fileID: 6144694821448063387}
-  - {fileID: 4983727411847664905}
+  - {fileID: 4543013416111928623}
+  - {fileID: 52571603207711340}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &1600992974442010851
+--- !u!114 &4543013416111928623
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -531,12 +496,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 52571603207711340}
-    - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 9163396819158411254}
-    - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 7133801236623314563}
   m_SourcePrefab: {fileID: 100100000, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
 --- !u!1 &772474415712566079 stripped
 GameObject:
@@ -622,46 +581,6 @@ MonoBehaviour:
     Knockback: 1
     knockbackForce: 50
   projectileUIPrefab: {fileID: 3976318980140897857, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
---- !u!114 &9163396819158411254
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 772474415712566079}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 1
---- !u!114 &7133801236623314563
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 772474415712566079}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents:
-  - {fileID: 52571603207711340}
-  - {fileID: 9163396819158411254}
-  sceneViewId: 0
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!4 &1551013655377393878 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
