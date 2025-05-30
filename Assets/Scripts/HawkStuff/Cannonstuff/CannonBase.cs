@@ -20,7 +20,7 @@ public class CannonProjectileOption
 
     public int ammoCount = 5;
     public float fireCooldown = 1f;
-    public int projectileCount = 1;          
+    public int projectileCount = 1;
     public float spreadAngle = 0f;
 
     public bool BarrelRecoil = false;
@@ -32,7 +32,6 @@ public class CannonProjectileOption
     public bool Knockback = false;
     public float knockbackForce = 100f;
 }
-
 
 public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 {
@@ -50,7 +49,11 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
-
+    void Awake()
+    {
+        if (photonView != null)
+            photonView.OwnershipTransfer = OwnershipOption.Takeover;
+    }
 
     [Header("Mount Target")]
     public Transform mountPoint;
@@ -90,8 +93,6 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     public List<CannonProjectileOption> projectileOptions = new List<CannonProjectileOption>();
     private float nextFireTime = 0f;
 
-
-
     [Header("Projectile UI")]
     public GameObject projectileUIPrefab;
 
@@ -112,25 +113,18 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     private GameObject currentUIImage;
 
     private Image currentUIImageRenderer;
-
     private bool hasFlashedReady = false;
     private Coroutine flashGreenRoutine;
     private bool isFlashingGreen = false;
 
     private GameObject nextUIImage;
     private Image nextUIImageRenderer;
-
     private GameObject prevUIImage;
     private RectTransform prevRT, currRT, nextRT;
     private float uiLerpProgress = 1f;
     private int targetIndex = -1;
     private bool isSwapping = false;
-
     private float mountPromptExpireTime = -1f;
-
-
-
-
 
     private void Start()
     {
@@ -141,13 +135,12 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Update()
     {
-
         HandleMountInput();
         HandleUnmountPromptTimer();
         HandleRunAnimation();
-        RotateTowardsCamera();
         CheckDistanceOrAliveStatus();
 
+        if (!photonView.IsMine) return;
 
         if (isMounted && humanInTrigger != null && humanInTrigger.IsMine() && Input.GetMouseButtonDown(0))
         {
@@ -158,10 +151,6 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             }
         }
 
-
-
-
-
         if (isMounted)
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow))
@@ -170,35 +159,59 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
                 SelectProjectile((selectedProjectileIndex + 1) % projectileOptions.Count);
         }
 
-        if (currentUIImageRenderer != null)
+        HandleCooldownUI();
+        HandleProjectileUISwap();
+        RotateTowardsCamera();
+    }
+
+    private void FixedUpdate()
+    {
+        if (!photonView.IsMine) return;
+        HandleMovementInput();
+    }
+
+    public void SelectProjectile(int index)
+    {
+        if (Time.time < nextFireTime || isSwapping || index == selectedProjectileIndex)
+            return;
+
+        int count = projectileOptions.Count;
+        selectedProjectileIndex = (index + count) % count;
+        UpdateProjectileUI();
+        uiLerpProgress = 0f;
+        isSwapping = true;
+        nextFireTime = Time.time + projectileOptions[selectedProjectileIndex].fireCooldown;
+    }
+    private void HandleCooldownUI()
+    {
+        if (currentUIImageRenderer == null) return;
+
+        float cooldown = projectileOptions[selectedProjectileIndex].fireCooldown;
+        float timeSinceFire = Time.time - (nextFireTime - cooldown);
+        float progress = Mathf.Clamp01(timeSinceFire / cooldown);
+
+        if (!isFlashingGreen)
+            currentUIImageRenderer.color = Color.Lerp(Color.gray, Color.white, progress);
+
+        if (progress >= 1f && !hasFlashedReady)
         {
-            float cooldown = projectileOptions[selectedProjectileIndex].fireCooldown;
-            float timeSinceFire = Time.time - (nextFireTime - cooldown);
-            float progress = Mathf.Clamp01(timeSinceFire / cooldown);
+            if (flashGreenRoutine != null)
+                StopCoroutine(flashGreenRoutine);
 
-            // Set color based on cooldown progress
-            if (!isFlashingGreen)
-                currentUIImageRenderer.color = Color.Lerp(Color.gray, Color.white, progress);
-
-
-            // Flash green when cooldown ends
-            if (progress >= 1f && !hasFlashedReady)
-            {
-                if (flashGreenRoutine != null)
-                    StopCoroutine(flashGreenRoutine);
-
-                flashGreenRoutine = StartCoroutine(FlashGreen());
-                hasFlashedReady = true;
-            }
-            else if (progress < 1f)
-            {
-                hasFlashedReady = false;
-            }
+            flashGreenRoutine = StartCoroutine(FlashGreen());
+            hasFlashedReady = true;
         }
+        else if (progress < 1f)
+        {
+            hasFlashedReady = false;
+        }
+    }
 
+    private void HandleProjectileUISwap()
+    {
         if (isSwapping && uiLerpProgress < 1f)
         {
-            uiLerpProgress += Time.deltaTime * 4f; // adjust speed here
+            uiLerpProgress += Time.deltaTime * 4f;
             float t = Mathf.SmoothStep(0, 1, uiLerpProgress);
 
             Vector2 center = new Vector2(-180f, 100f);
@@ -210,206 +223,29 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
             if (uiLerpProgress >= 1f)
             {
-               
                 isSwapping = false;
                 UpdateProjectileUI();
             }
         }
-
-
-
     }
 
-[PunRPC]
-private void RPC_FireProjectile(int index)
-{
-    var selected = projectileOptions[index];
-    if (selected.ammoCount <= 0) return;
-
-    int count = Mathf.Max(1, selected.projectileCount);
-    float spread = selected.spreadAngle;
-    string prefabPath = $"Buildables/Projectiles/{selected.prefab.name}";
-
-    for (int i = 0; i < count; i++)
+    [PunRPC]
+    private void RPC_FireProjectile(int index)
     {
-        Vector3 baseDirection = firePoint.forward;
-        Vector3 spreadDir = baseDirection;
-        spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.up) * spreadDir;
-        spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.right) * spreadDir;
-
-        GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(spreadDir));
-
-        Rigidbody rb = projectile.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            Vector3 force = spreadDir * selected.launchForce + firePoint.up * selected.upwardForce;
-            rb.AddForce(force);
-        }
-
-        if (selected.BarrelRecoil && CannonBarrel != null)
-        {
-            StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.barrelRecoilAngle, selected.RecoilSpeed));
-        }
-
-        if (selected.Knockback && moveRigidbody != null)
-        {
-            Vector3 knockbackDir = -MoveTarget.forward;
-            moveRigidbody.AddForce(knockbackDir * selected.knockbackForce, ForceMode.Impulse);
-        }
-    }
-
-        if (photonView.IsMine)
-        {
-            selected.ammoCount--;
-            UpdateProjectileUI();
-        }
-
-    }
-
-    private void FixedUpdate()
-    {
-        HandleMovementInput();
-    }
-
-    public void SelectProjectile(int index)
-    {
-        if (Time.time < nextFireTime || isSwapping || index == selectedProjectileIndex)
-            return;
-
-        int count = projectileOptions.Count;
-        selectedProjectileIndex = (index + count) % count;
-        UpdateProjectileUI(); // preload all icons now
-        uiLerpProgress = 0f;
-        isSwapping = true;
-
-
-
-        nextFireTime = Time.time + projectileOptions[selectedProjectileIndex].fireCooldown;
-    }
-
-
-
-    private void UpdateProjectileUI()
-    {
-        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
-
-
-        GameObject menu = GameObject.Find("DefaultMenu(Clone)");
-        if (menu == null) return;
-
-        // Clean up
-        if (prevUIImage) Destroy(prevUIImage);
-        if (currentUIImage) Destroy(currentUIImage);
-        if (nextUIImage) Destroy(nextUIImage);
-
-        int count = projectileOptions.Count;
-        int prevIndex = (selectedProjectileIndex - 1 + count) % count;
-        int nextIndex = (selectedProjectileIndex + 1) % count;
-
-        Vector2 center = new Vector2(-180f, 100f);
-        Vector2 offset = new Vector2(90f, 0f);
-
-        // --- Prev Icon ---
-        prevUIImage = Instantiate(projectileUIPrefab, menu.transform);
-        prevRT = prevUIImage.GetComponent<RectTransform>();
-        prevRT.anchoredPosition = center - offset;
-        prevRT.sizeDelta = new Vector2(100f, 100f);
-        prevRT.localScale = Vector3.one * 0.8f;
-        prevRT.anchorMin = prevRT.anchorMax = new Vector2(1f, 0f);
-        prevRT.pivot = new Vector2(0.5f, 0.5f);
-        var prevImg = prevUIImage.GetComponent<Image>();
-        prevImg.sprite = projectileOptions[prevIndex].sprite;
-        prevImg.color = Color.gray;
-
-        // --- Current Icon ---
-        currentUIImage = Instantiate(projectileUIPrefab, menu.transform);
-        currRT = currentUIImage.GetComponent<RectTransform>();
-        currRT.anchoredPosition = center;
-        currRT.sizeDelta = new Vector2(130f, 130f);
-        currRT.localScale = Vector3.one;
-        currRT.anchorMin = currRT.anchorMax = new Vector2(1f, 0f);
-        currRT.pivot = new Vector2(0.5f, 0.5f);
-        currentUIImageRenderer = currentUIImage.GetComponent<Image>();
-        currentUIImageRenderer.sprite = projectileOptions[selectedProjectileIndex].sprite;
-
-        // Ammo count
-        var ammoTextObj = currentUIImage.transform.Find("AmmoText");
-        if (ammoTextObj)
-        {
-            var ammoText = ammoTextObj.GetComponent<Text>();
-            ammoText.text = $"x{projectileOptions[selectedProjectileIndex].ammoCount}";
-        }
-
-        // --- Next Icon ---
-        nextUIImage = Instantiate(projectileUIPrefab, menu.transform);
-        nextRT = nextUIImage.GetComponent<RectTransform>();
-        nextRT.anchoredPosition = center + offset;
-        nextRT.sizeDelta = new Vector2(100f, 100f);
-        nextRT.localScale = Vector3.one * 0.8f;
-        nextRT.anchorMin = nextRT.anchorMax = new Vector2(1f, 0f);
-        nextRT.pivot = new Vector2(0.5f, 0.5f);
-        var nextImg = nextUIImage.GetComponent<Image>();
-        nextImg.sprite = projectileOptions[nextIndex].sprite;
-        nextImg.color = Color.gray;
-    }
-
-
-
-    private void FireProjectile()
-    {
-        if (firePoint == null || projectileOptions.Count == 0)
-            return;
-
-        CannonProjectileOption selected = projectileOptions[selectedProjectileIndex];
-        if (selected.prefab == null)
-            return;
-
-        if (Time.time < nextFireTime)
-            return;
-
-        if (selected.ammoCount <= 0)
-        {
-            if (currentUIImage != null)
-            {
-                StartCoroutine(FlashRed());
-            }
-            return;
-        }
-
-        nextFireTime = Time.time + selected.fireCooldown;
-        selected.ammoCount--;
-        UpdateProjectileUI();
+        var selected = projectileOptions[index];
+        if (selected.ammoCount <= 0) return;
 
         int count = Mathf.Max(1, selected.projectileCount);
         float spread = selected.spreadAngle;
-
         string prefabPath = $"Buildables/Projectiles/{selected.prefab.name}";
 
         for (int i = 0; i < count; i++)
         {
-            // Compute a direction within a cone around forward
             Vector3 baseDirection = firePoint.forward;
-
-            // Randomize within the spread cone
-            Vector3 spreadDir = baseDirection;
-            spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.up) * spreadDir;
+            Vector3 spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.up) * baseDirection;
             spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.right) * spreadDir;
 
-            // Spawn the projectile
             GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(spreadDir));
-            if (selected.BarrelRecoil && CannonBarrel != null)
-            {
-                StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.barrelRecoilAngle, selected.RecoilSpeed));
-            }
-
-            if (selected.Knockback && moveRigidbody != null)
-            {
-                Vector3 knockbackDir = -MoveTarget.forward;
-                moveRigidbody.AddForce(knockbackDir * selected.knockbackForce, ForceMode.Impulse);
-            }
-
-
-
 
             Rigidbody rb = projectile.GetComponent<Rigidbody>();
             if (rb != null)
@@ -417,13 +253,70 @@ private void RPC_FireProjectile(int index)
                 Vector3 force = spreadDir * selected.launchForce + firePoint.up * selected.upwardForce;
                 rb.AddForce(force);
             }
+
+            if (selected.BarrelRecoil && CannonBarrel != null)
+                StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.barrelRecoilAngle, selected.RecoilSpeed));
+
+            if (selected.Knockback && moveRigidbody != null)
+                moveRigidbody.AddForce(-MoveTarget.forward * selected.knockbackForce, ForceMode.Impulse);
+        }
+
+        if (photonView.IsMine)
+        {
+            selected.ammoCount--;
+            UpdateProjectileUI();
         }
     }
 
+    private void RotateTowardsCamera()
+    {
+        if (!photonView.IsMine || humanInTrigger == null || !humanInTrigger.IsMine()) return;
+        if (!isMounted || CannonBarrel == null || Camera.main == null)
+            return;
 
+        Vector3 localForward = transform.InverseTransformDirection(Camera.main.transform.forward);
+        float yaw = Mathf.Atan2(localForward.x, localForward.z) * Mathf.Rad2Deg;
+        float pitch = -Mathf.Asin(localForward.y) * Mathf.Rad2Deg;
 
+        yaw = Mathf.Clamp(yaw, -maxHorizontalAngle, maxHorizontalAngle);
+        pitch = Mathf.Clamp(pitch, -maxVerticalAngle, maxVerticalAngle);
 
+        Quaternion targetRotation = Quaternion.Euler(pitch, yaw, 0f);
+        CannonBarrel.localRotation = Quaternion.Slerp(CannonBarrel.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
+    }
 
+    private void HandleMovementInput()
+    {
+        if (!isMounted || moveRigidbody == null) return;
+
+        float move = 0f;
+        float rotate = 0f;
+
+        if (Input.GetKey(KeyCode.W)) move += 1f;
+        if (Input.GetKey(KeyCode.S)) move -= 1f;
+        if (Input.GetKey(KeyCode.D)) rotate += 1f;
+        if (Input.GetKey(KeyCode.A)) rotate -= 1f;
+
+        Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up).normalized * move * moveSpeed * Time.fixedDeltaTime;
+        moveRigidbody.MovePosition(moveRigidbody.position + forwardMovement);
+
+        Quaternion deltaRotation = Quaternion.Euler(0f, rotate * turnSpeed * Time.fixedDeltaTime, 0f);
+        moveRigidbody.MoveRotation(moveRigidbody.rotation * deltaRotation);
+    }
+
+    private void CheckDistanceOrAliveStatus()
+    {
+        if (!isMounted || humanInTrigger == null) return;
+
+        bool isTooFar = Vector3.Distance(transform.position, humanInTrigger.transform.position) > 40f;
+        bool isDead = humanInTrigger.Dead;
+
+        if (isTooFar || isDead)
+        {
+            DetachHuman();
+            ClearPrompt();
+        }
+    }
     private void OnTriggerEnter(Collider other)
     {
         Human human = other.GetComponentInParent<Human>();
@@ -437,7 +330,6 @@ private void RPC_FireProjectile(int index)
         }
     }
 
-
     private void OnTriggerExit(Collider other)
     {
         Human human = other.GetComponentInParent<Human>();
@@ -447,25 +339,20 @@ private void RPC_FireProjectile(int index)
             humanInTrigger = null;
             humanRigidbody = null;
             ClearPrompt();
-            humanInTrigger = null;
             mountPromptExpireTime = -1f;
-
-
         }
     }
 
     private void HandleMountInput()
     {
-        // Prevent mounting if timer expired
         if (mountPromptExpireTime > 0f && Time.time > mountPromptExpireTime)
         {
             ClearPrompt();
-            mountPromptExpireTime = -1f; 
+            mountPromptExpireTime = -1f;
             return;
         }
 
-        if (humanInTrigger == null)
-            return;
+        if (humanInTrigger == null) return;
 
         if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
@@ -474,9 +361,10 @@ private void RPC_FireProjectile(int index)
                 if (!isMounted && !hasExitedAfterUnmount)
                     AttachHuman();
                 else if (isMounted)
+                {
                     DetachHuman();
                     mountPromptExpireTime = -1f;
-
+                }
             }
         }
     }
@@ -493,11 +381,8 @@ private void RPC_FireProjectile(int index)
 
     private void HandleRunAnimation()
     {
-        if (!isMounted || humanInTrigger == null || !enableRunAnimation)
-            return;
-
-        if (humanInTrigger.MountedTransform == null)
-            return;
+        if (!isMounted || humanInTrigger == null || !enableRunAnimation) return;
+        if (humanInTrigger.MountedTransform == null) return;
 
         Vector3 currentWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
         float speed = (currentWorldPos - lastMountedWorldPos).magnitude / Time.deltaTime;
@@ -511,20 +396,19 @@ private void RPC_FireProjectile(int index)
                 isCurrentlyRunning = true;
             }
         }
-        else
+        else if (isCurrentlyRunning)
         {
-            if (isCurrentlyRunning)
-            {
-                humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.1f);
-                isCurrentlyRunning = false;
-            }
+            humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.1f);
+            isCurrentlyRunning = false;
         }
     }
 
     private void AttachHuman()
     {
-        if (humanInTrigger == null || mountPoint == null)
-            return;
+        if (humanInTrigger == null || mountPoint == null) return;
+
+        if (!photonView.IsMine)
+            photonView.RequestOwnership();
 
         humanInTrigger.MountedTransform = mountPoint;
         humanInTrigger.MountedMapObject = null;
@@ -558,8 +442,7 @@ private void RPC_FireProjectile(int index)
 
     private void DetachHuman()
     {
-        if (humanInTrigger == null)
-            return;
+        if (humanInTrigger == null) return;
 
         humanInTrigger.Unmount(true);
 
@@ -571,30 +454,14 @@ private void RPC_FireProjectile(int index)
 
         isMounted = false;
 
-        
-        if (currentUIImage != null)
-        {
-            Destroy(currentUIImage);
-            currentUIImage = null;
-        }
-
-        if (nextUIImage != null)
-        {
-            Destroy(nextUIImage);
-            nextUIImage = null;
-        }
-
-        if (prevUIImage != null)
-        {
-            Destroy(prevUIImage);
-            prevUIImage = null;
-        }
+        if (currentUIImage != null) Destroy(currentUIImage);
+        if (nextUIImage != null) Destroy(nextUIImage);
+        if (prevUIImage != null) Destroy(prevUIImage);
 
         nextUIImageRenderer = null;
         currentUIImageRenderer = null;
         prevRT = currRT = nextRT = null;
 
-        
         if (humanInTrigger != null && !hasExitedAfterUnmount)
         {
             SetPrompt(mountPromptText);
@@ -606,63 +473,65 @@ private void RPC_FireProjectile(int index)
         }
     }
 
+    private void UpdateProjectileUI()
+    {
+        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
+
+        GameObject menu = GameObject.Find("DefaultMenu(Clone)");
+        if (menu == null) return;
+
+        if (prevUIImage) Destroy(prevUIImage);
+        if (currentUIImage) Destroy(currentUIImage);
+        if (nextUIImage) Destroy(nextUIImage);
+
+        int count = projectileOptions.Count;
+        int prevIndex = (selectedProjectileIndex - 1 + count) % count;
+        int nextIndex = (selectedProjectileIndex + 1) % count;
+
+        Vector2 center = new Vector2(-180f, 100f);
+        Vector2 offset = new Vector2(90f, 0f);
+
+        prevUIImage = Instantiate(projectileUIPrefab, menu.transform);
+        prevRT = prevUIImage.GetComponent<RectTransform>();
+        prevRT.anchoredPosition = center - offset;
+        prevRT.sizeDelta = new Vector2(100f, 100f);
+        prevRT.localScale = Vector3.one * 0.8f;
+        prevRT.anchorMin = prevRT.anchorMax = new Vector2(1f, 0f);
+        prevRT.pivot = new Vector2(0.5f, 0.5f);
+        prevUIImage.GetComponent<Image>().sprite = projectileOptions[prevIndex].sprite;
+        prevUIImage.GetComponent<Image>().color = Color.gray;
+
+        currentUIImage = Instantiate(projectileUIPrefab, menu.transform);
+        currRT = currentUIImage.GetComponent<RectTransform>();
+        currRT.anchoredPosition = center;
+        currRT.sizeDelta = new Vector2(130f, 130f);
+        currRT.localScale = Vector3.one;
+        currRT.anchorMin = currRT.anchorMax = new Vector2(1f, 0f);
+        currRT.pivot = new Vector2(0.5f, 0.5f);
+        currentUIImageRenderer = currentUIImage.GetComponent<Image>();
+        currentUIImageRenderer.sprite = projectileOptions[selectedProjectileIndex].sprite;
+
+        var ammoTextObj = currentUIImage.transform.Find("AmmoText");
+        if (ammoTextObj)
+        {
+            var ammoText = ammoTextObj.GetComponent<Text>();
+            ammoText.text = $"x{projectileOptions[selectedProjectileIndex].ammoCount}";
+        }
+
+        nextUIImage = Instantiate(projectileUIPrefab, menu.transform);
+        nextRT = nextUIImage.GetComponent<RectTransform>();
+        nextRT.anchoredPosition = center + offset;
+        nextRT.sizeDelta = new Vector2(100f, 100f);
+        nextRT.localScale = Vector3.one * 0.8f;
+        nextRT.anchorMin = nextRT.anchorMax = new Vector2(1f, 0f);
+        nextRT.pivot = new Vector2(0.5f, 0.5f);
+        nextUIImage.GetComponent<Image>().sprite = projectileOptions[nextIndex].sprite;
+        nextUIImage.GetComponent<Image>().color = Color.gray;
+    }
 
     private string GetIdleAnimation()
     {
         return useHorseIdle ? HumanAnimations.HorseIdle : HumanAnimations.IdleM;
-    }
-
-    private void RotateTowardsCamera()
-    {
-        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
-
-        if (!isMounted || CannonBarrel == null || Camera.main == null)
-            return;
-
-        Vector3 localForward = transform.InverseTransformDirection(Camera.main.transform.forward);
-        float yaw = Mathf.Atan2(localForward.x, localForward.z) * Mathf.Rad2Deg;
-        float pitch = -Mathf.Asin(localForward.y) * Mathf.Rad2Deg;
-
-        yaw = Mathf.Clamp(yaw, -maxHorizontalAngle, maxHorizontalAngle);
-        pitch = Mathf.Clamp(pitch, -maxVerticalAngle, maxVerticalAngle);
-
-        Quaternion targetRotation = Quaternion.Euler(pitch, yaw, 0f);
-        CannonBarrel.localRotation = Quaternion.Slerp(CannonBarrel.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
-    }
-
-    private void HandleMovementInput()
-    {
-        if (!isMounted || moveRigidbody == null)
-            return;
-
-        float move = 0f;
-        float rotate = 0f;
-
-        if (Input.GetKey(KeyCode.W)) move += 1f;
-        if (Input.GetKey(KeyCode.S)) move -= 1f;
-        if (Input.GetKey(KeyCode.D)) rotate += 1f;
-        if (Input.GetKey(KeyCode.A)) rotate -= 1f;
-
-        Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up).normalized * move * moveSpeed * Time.fixedDeltaTime;
-        moveRigidbody.MovePosition(moveRigidbody.position + forwardMovement);
-
-        Quaternion deltaRotation = Quaternion.Euler(0f, rotate * turnSpeed * Time.fixedDeltaTime, 0f);
-        moveRigidbody.MoveRotation(moveRigidbody.rotation * deltaRotation);
-    }
-
-    private void CheckDistanceOrAliveStatus()
-    {
-        if (!isMounted || humanInTrigger == null)
-            return;
-
-        bool isTooFar = Vector3.Distance(transform.position, humanInTrigger.transform.position) > 40f;
-        bool isDead = humanInTrigger.Dead;
-
-        if (isTooFar || isDead)
-            DetachHuman();
-            ClearPrompt();
-
-
     }
 
     private void OnGUI()
@@ -684,55 +553,46 @@ private void RPC_FireProjectile(int index)
     private void SetPrompt(string text)
     {
         if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
-
         currentPrompt = text;
     }
 
     private void ClearPrompt()
     {
         if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
-
         currentPrompt = "";
     }
+
     private IEnumerator FlashRed()
     {
-    if (!photonView.IsMine) yield break;
+        if (!photonView.IsMine) yield break;
 
-    Image img = currentUIImage?.GetComponent<Image>();
+        Image img = currentUIImage?.GetComponent<Image>();
         if (img == null) yield break;
 
         Color original = img.color;
         img.color = Color.red;
-
         yield return new WaitForSeconds(0.2f);
-
         img.color = original;
     }
 
     private IEnumerator FlashGreen()
     {
-    if (!photonView.IsMine) yield break;
+        if (!photonView.IsMine) yield break;
 
-    if (currentUIImageRenderer == null)
-            yield break;
+        if (currentUIImageRenderer == null) yield break;
 
         isFlashingGreen = true;
-
-        Color originalColor = currentUIImageRenderer.color;
         currentUIImageRenderer.color = Color.green;
-
         yield return new WaitForSeconds(0.3f);
-
         currentUIImageRenderer.color = Color.white;
         isFlashingGreen = false;
     }
 
-
     private IEnumerator BarrelRecoil(Transform barrel, float distance, float angle, float speed)
     {
-    if (!photonView.IsMine) yield break;
+        if (!photonView.IsMine) yield break;
 
-    Vector3 originalPos = barrel.localPosition;
+        Vector3 originalPos = barrel.localPosition;
         Quaternion originalRot = barrel.localRotation;
 
         Vector3 recoilPos = originalPos - Vector3.forward * distance;
@@ -756,10 +616,4 @@ private void RPC_FireProjectile(int index)
             yield return null;
         }
     }
-
-
-
-
-
-
 }
