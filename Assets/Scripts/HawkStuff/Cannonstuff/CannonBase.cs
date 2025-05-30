@@ -63,6 +63,7 @@ public class CannonBase : MonoBehaviourPunCallbacks
     private float nextFireTime = 0f;
 
 
+
     [Header("Projectile UI")]
     public GameObject projectileUIPrefab;
 
@@ -81,6 +82,8 @@ public class CannonBase : MonoBehaviourPunCallbacks
     private Vector3 lastMountedWorldPos = Vector3.zero;
     private bool isCurrentlyRunning = false;
     private GameObject currentUIImage;
+
+    private Image currentUIImageRenderer;
 
     private void Start()
     {
@@ -107,6 +110,15 @@ public class CannonBase : MonoBehaviourPunCallbacks
             else if (Input.GetKeyDown(KeyCode.RightArrow))
                 SelectProjectile((selectedProjectileIndex + 1) % projectileOptions.Count);
         }
+
+        if (currentUIImageRenderer != null)
+        {
+            float cooldown = projectileOptions[selectedProjectileIndex].fireCooldown;
+            float timeSinceFire = Time.time - (nextFireTime - cooldown);
+            float progress = Mathf.Clamp01(timeSinceFire / cooldown);
+            currentUIImageRenderer.color = Color.Lerp(Color.gray, Color.white, progress);
+        }
+
     }
 
     private void FixedUpdate()
@@ -155,9 +167,13 @@ public class CannonBase : MonoBehaviourPunCallbacks
             rt.pivot = new Vector2(0.5f, 0.5f);
         }
 
-        Image img = currentUIImage.GetComponent<Image>();
-        if (img != null && projectileOptions[selectedProjectileIndex].sprite != null)
-            img.sprite = projectileOptions[selectedProjectileIndex].sprite;
+        currentUIImageRenderer = currentUIImage.GetComponent<Image>();
+        if (currentUIImageRenderer != null && projectileOptions[selectedProjectileIndex].sprite != null)
+        {
+            currentUIImageRenderer.sprite = projectileOptions[selectedProjectileIndex].sprite;
+            currentUIImageRenderer.color = Color.gray; // start greyed out until cooldown expires
+        }
+
 
         // Set ammo count below sprite
         Transform ammoTextObj = currentUIImage.transform.Find("AmmoText");
