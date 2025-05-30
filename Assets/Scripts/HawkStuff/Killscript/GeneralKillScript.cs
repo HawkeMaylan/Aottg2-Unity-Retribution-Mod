@@ -15,6 +15,7 @@ public class GeneralKillScript : MonoBehaviourPun
     public AnimationClip collisionAnimation;
     public float animationDelayTime = 0f;
     public bool makeKinematicOnCollision = false;
+    public LayerMask animationCollisionLayers = ~0; // Defaults to "Everything"
 
     [Header("Optional Particle Effect")]
     public bool spawnParticleOnCollision = false;
@@ -73,22 +74,26 @@ public class GeneralKillScript : MonoBehaviourPun
             if (other == selfCollider)
                 continue;
 
-            if (playAnimationOnCollision && !animationPlayed && legacyAnim != null && collisionAnimation != null)
+            // Layer filtering for collision animation
+            if (((1 << other.gameObject.layer) & animationCollisionLayers) != 0)
             {
-                legacyAnim.Play(collisionAnimation.name);
-                animationPlayed = true;
+                if (playAnimationOnCollision && !animationPlayed && legacyAnim != null && collisionAnimation != null)
+                {
+                    legacyAnim.Play(collisionAnimation.name);
+                    animationPlayed = true;
 
-                if (makeKinematicOnCollision && rb != null)
-                    rb.isKinematic = true;
+                    if (makeKinematicOnCollision && rb != null)
+                        rb.isKinematic = true;
 
-                CancelInvoke(nameof(SelfDestruct));
-                Invoke(nameof(SelfDestruct), collisionAnimation.length);
-            }
+                    CancelInvoke(nameof(SelfDestruct));
+                    Invoke(nameof(SelfDestruct), collisionAnimation.length);
+                }
 
-            if (spawnParticleOnCollision && !particleSpawned && collisionParticlePrefab != null)
-            {
-                Instantiate(collisionParticlePrefab, transform.position, Quaternion.identity);
-                particleSpawned = true;
+                if (spawnParticleOnCollision && !particleSpawned && collisionParticlePrefab != null)
+                {
+                    Instantiate(collisionParticlePrefab, transform.position, Quaternion.identity);
+                    particleSpawned = true;
+                }
             }
 
             Human human = other.GetComponentInParent<Human>();

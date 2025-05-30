@@ -126,8 +126,11 @@ MonoBehaviour:
   killSourceName: Cannonball
   playAnimationOnCollision: 1
   collisionAnimation: {fileID: 7400000, guid: 84e9bdb990e1c7248ba9f1b302266a59, type: 2}
-  animationDelayTime: 0.3
+  animationDelayTime: 0.1
   makeKinematicOnCollision: 1
+  animationCollisionLayers:
+    serializedVersion: 2
+    m_Bits: 48246784
   spawnParticleOnCollision: 1
   collisionParticlePrefab: {fileID: 451477915838638354, guid: 6fa95cc41f2c15f428689ba67c484391, type: 3}
   damageHumans: 1
@@ -155,7 +158,7 @@ Rigidbody:
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 1623195648
+    m_Bits: 12582912
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0

@@ -6,8 +6,6 @@ using Settings;
 using GameManagers;
 using ApplicationManagers;
 using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
 
 public class CannonBase : MonoBehaviourPunCallbacks
 {
@@ -67,9 +65,7 @@ public class CannonBase : MonoBehaviourPunCallbacks
     private void Start()
     {
         if (MoveTarget != null)
-        {
             moveRigidbody = MoveTarget.GetComponent<Rigidbody>();
-        }
         ClearPrompt();
     }
 
@@ -106,6 +102,7 @@ public class CannonBase : MonoBehaviourPunCallbacks
         HandleUnmountPromptTimer();
         HandleRunAnimation();
         RotateTowardsCamera();
+        CheckDistanceOrAliveStatus();
 
         if (isMounted && Input.GetKeyDown(KeyCode.F))
         {
@@ -288,6 +285,20 @@ public class CannonBase : MonoBehaviourPunCallbacks
         {
             Vector3 force = firePoint.forward * launchForce + firePoint.up * upwardForce;
             rb.AddForce(force);
+        }
+    }
+
+    private void CheckDistanceOrAliveStatus()
+    {
+        if (!isMounted || humanInTrigger == null)
+            return;
+
+        bool isTooFar = Vector3.Distance(transform.position, humanInTrigger.transform.position) > 40f;
+        bool isDead = humanInTrigger.Dead;
+
+        if (isTooFar || isDead)
+        {
+            DetachHuman();
         }
     }
 
