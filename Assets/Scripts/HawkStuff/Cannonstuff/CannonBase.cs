@@ -18,6 +18,7 @@ public class CannonProjectileOption
     public float upwardForce = 100f;
     public Sprite sprite;
     public int ammoCount = 5;
+    public float fireCooldown = 1f;
 }
 
 
@@ -59,6 +60,8 @@ public class CannonBase : MonoBehaviourPunCallbacks
     [Header("Firing Settings")]
     public Transform firePoint;
     public List<CannonProjectileOption> projectileOptions = new List<CannonProjectileOption>();
+    private float nextFireTime = 0f;
+
 
     [Header("Projectile UI")]
     public GameObject projectileUIPrefab;
@@ -113,12 +116,17 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     public void SelectProjectile(int index)
     {
+        if (Time.time < nextFireTime)
+            return;
+
         if (index >= 0 && index < projectileOptions.Count)
         {
             selectedProjectileIndex = index;
+            nextFireTime = Time.time + projectileOptions[selectedProjectileIndex].fireCooldown;
             UpdateProjectileUI();
         }
     }
+
 
     private void UpdateProjectileUI()
     {
@@ -174,6 +182,9 @@ public class CannonBase : MonoBehaviourPunCallbacks
         if (selected.prefab == null)
             return;
 
+        if (Time.time < nextFireTime)
+            return;
+
         if (selected.ammoCount <= 0)
         {
             if (currentUIImage != null)
@@ -194,8 +205,10 @@ public class CannonBase : MonoBehaviourPunCallbacks
         }
 
         selected.ammoCount--;
+        nextFireTime = Time.time + selected.fireCooldown; // set cooldown
         UpdateProjectileUI();
     }
+
 
 
     private void OnTriggerEnter(Collider other)

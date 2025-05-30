@@ -498,12 +498,15 @@ MonoBehaviour:
     launchForce: 7000
     upwardForce: 250
     sprite: {fileID: 21300000, guid: 129c5a057f1dfd745a0d04896a566c57, type: 3}
+    ammoCount: 15
+    fireCooldown: 5
   - name: Cannonball
     prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
     launchForce: 7000
     upwardForce: 250
     sprite: {fileID: -2108103053, guid: d1813b8d625e311488e78632e3578d19, type: 3}
-  projectileUIContainer: {fileID: 8253868038856573727, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
+    ammoCount: 100
+    fireCooldown: 1
   projectileUIPrefab: {fileID: 3976318980140897857, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
 --- !u!4 &1551013655377393878 stripped
 Transform:
