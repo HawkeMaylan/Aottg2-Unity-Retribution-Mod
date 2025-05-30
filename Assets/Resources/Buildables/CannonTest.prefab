@@ -491,10 +491,20 @@ MonoBehaviour:
   MoveTarget: {fileID: 485101760791666370}
   moveSpeed: 5
   turnSpeed: 90
-  projectilePrefab: {fileID: 1530743120385670784, guid: ce9a789b3a6e05f4d9274ecbe59a82fa, type: 3}
   firePoint: {fileID: 6748738809391093893}
-  launchForce: 7000
-  upwardForce: 250
+  projectileOptions:
+  - name: HEV Round
+    prefab: {fileID: 1530743120385670784, guid: ce9a789b3a6e05f4d9274ecbe59a82fa, type: 3}
+    launchForce: 7000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: 129c5a057f1dfd745a0d04896a566c57, type: 3}
+  - name: HEV Round
+    prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
+    launchForce: 7000
+    upwardForce: 250
+    sprite: {fileID: -2108103053, guid: d1813b8d625e311488e78632e3578d19, type: 3}
+  projectileUIContainer: {fileID: 8253868038856573727, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
+  projectileUIPrefab: {fileID: 3976318980140897857, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
 --- !u!4 &1551013655377393878 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}

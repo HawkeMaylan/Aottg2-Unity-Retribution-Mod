@@ -5,7 +5,18 @@ using UI;
 using Settings;
 using GameManagers;
 using ApplicationManagers;
-using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.UI;
+
+[System.Serializable]
+public class CannonProjectileOption
+{
+    public string name;
+    public GameObject prefab;
+    public float launchForce = 500f;
+    public float upwardForce = 100f;
+    public Sprite sprite; // UI icon for ammo
+}
 
 public class CannonBase : MonoBehaviourPunCallbacks
 {
@@ -43,11 +54,14 @@ public class CannonBase : MonoBehaviourPunCallbacks
     public float turnSpeed = 90f;
 
     [Header("Firing Settings")]
-    public GameObject projectilePrefab;
     public Transform firePoint;
-    public float launchForce = 500f;
-    public float upwardForce = 100f;
+    public List<CannonProjectileOption> projectileOptions = new List<CannonProjectileOption>();
 
+    [Header("Projectile UI")]
+    public Transform projectileUIContainer;
+    public GameObject projectileUIPrefab;
+
+    private int selectedProjectileIndex = 0;
     private Rigidbody moveRigidbody;
     private Human humanInTrigger;
     private Rigidbody humanRigidbody;
@@ -61,12 +75,81 @@ public class CannonBase : MonoBehaviourPunCallbacks
     private float unmountPromptTimer = 0f;
     private Vector3 lastMountedWorldPos = Vector3.zero;
     private bool isCurrentlyRunning = false;
+    private GameObject currentUIImage;
 
     private void Start()
     {
         if (MoveTarget != null)
             moveRigidbody = MoveTarget.GetComponent<Rigidbody>();
         ClearPrompt();
+    }
+
+    private void Update()
+    {
+        HandleMountInput();
+        HandleUnmountPromptTimer();
+        HandleRunAnimation();
+        RotateTowardsCamera();
+        CheckDistanceOrAliveStatus();
+
+        if (isMounted && Input.GetKeyDown(KeyCode.F))
+            FireProjectile();
+
+        if (isMounted)
+        {
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
+                SelectProjectile((selectedProjectileIndex - 1 + projectileOptions.Count) % projectileOptions.Count);
+            else if (Input.GetKeyDown(KeyCode.RightArrow))
+                SelectProjectile((selectedProjectileIndex + 1) % projectileOptions.Count);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        HandleMovementInput();
+    }
+
+    public void SelectProjectile(int index)
+    {
+        if (index >= 0 && index < projectileOptions.Count)
+        {
+            selectedProjectileIndex = index;
+            UpdateProjectileUI();
+        }
+    }
+
+    private void UpdateProjectileUI()
+    {
+        if (projectileUIContainer == null || projectileUIPrefab == null) return;
+
+        if (currentUIImage != null)
+            Destroy(currentUIImage);
+
+        CannonProjectileOption selected = projectileOptions[selectedProjectileIndex];
+        currentUIImage = Instantiate(projectileUIPrefab, projectileUIContainer);
+        Image img = currentUIImage.GetComponent<Image>();
+        if (img != null && selected.sprite != null)
+            img.sprite = selected.sprite;
+    }
+
+    private void FireProjectile()
+    {
+        if (firePoint == null || projectileOptions.Count == 0)
+            return;
+
+        CannonProjectileOption selected = projectileOptions[selectedProjectileIndex];
+        if (selected.prefab == null)
+            return;
+
+        string prefabPath = $"Buildables/Projectiles/{selected.prefab.name}";
+        GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, firePoint.rotation);
+
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            Vector3 force = firePoint.forward * selected.launchForce + firePoint.up * selected.upwardForce;
+            rb.AddForce(force);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -84,35 +167,13 @@ public class CannonBase : MonoBehaviourPunCallbacks
     private void OnTriggerExit(Collider other)
     {
         Human human = other.GetComponentInParent<Human>();
-        if (human != null && human == humanInTrigger)
+        if (human != null && human == humanInTrigger && !isMounted)
         {
-            if (!isMounted)
-            {
-                hasExitedAfterUnmount = true;
-                humanInTrigger = null;
-                humanRigidbody = null;
-                ClearPrompt();
-            }
+            hasExitedAfterUnmount = true;
+            humanInTrigger = null;
+            humanRigidbody = null;
+            ClearPrompt();
         }
-    }
-
-    private void Update()
-    {
-        HandleMountInput();
-        HandleUnmountPromptTimer();
-        HandleRunAnimation();
-        RotateTowardsCamera();
-        CheckDistanceOrAliveStatus();
-
-        if (isMounted && Input.GetKeyDown(KeyCode.F))
-        {
-            FireProjectile();
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        HandleMovementInput();
     }
 
     private void HandleMountInput()
@@ -272,22 +333,6 @@ public class CannonBase : MonoBehaviourPunCallbacks
         moveRigidbody.MoveRotation(moveRigidbody.rotation * deltaRotation);
     }
 
-    private void FireProjectile()
-    {
-        if (projectilePrefab == null || firePoint == null)
-            return;
-
-        string prefabPath = $"Buildables/Projectiles/{projectilePrefab.name}";
-        GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, firePoint.rotation);
-
-        Rigidbody rb = projectile.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            Vector3 force = firePoint.forward * launchForce + firePoint.up * upwardForce;
-            rb.AddForce(force);
-        }
-    }
-
     private void CheckDistanceOrAliveStatus()
     {
         if (!isMounted || humanInTrigger == null)
@@ -297,20 +342,19 @@ public class CannonBase : MonoBehaviourPunCallbacks
         bool isDead = humanInTrigger.Dead;
 
         if (isTooFar || isDead)
-        {
             DetachHuman();
-        }
     }
 
     private void OnGUI()
     {
         if (!string.IsNullOrEmpty(currentPrompt))
         {
-            GUIStyle style = new GUIStyle(GUI.skin.label);
-            style.fontSize = 24;
-            style.alignment = TextAnchor.UpperCenter;
-            style.normal.textColor = Color.white;
-
+            GUIStyle style = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 24,
+                alignment = TextAnchor.UpperCenter,
+                normal = { textColor = Color.white }
+            };
             GUI.Label(new Rect(Screen.width / 2 - 150, 10, 300, 50), currentPrompt, style);
         }
     }
