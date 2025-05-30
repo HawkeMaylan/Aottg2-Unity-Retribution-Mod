@@ -7,6 +7,7 @@ using GameManagers;
 using ApplicationManagers;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Collections;
 
 [System.Serializable]
 public class CannonProjectileOption
@@ -16,7 +17,9 @@ public class CannonProjectileOption
     public float launchForce = 500f;
     public float upwardForce = 100f;
     public Sprite sprite;
+    public int ammoCount = 5;
 }
+
 
 public class CannonBase : MonoBehaviourPunCallbacks
 {
@@ -158,6 +161,15 @@ public class CannonBase : MonoBehaviourPunCallbacks
         if (selected.prefab == null)
             return;
 
+        if (selected.ammoCount <= 0)
+        {
+            if (currentUIImage != null)
+            {
+                StartCoroutine(FlashRed());
+            }
+            return;
+        }
+
         string prefabPath = $"Buildables/Projectiles/{selected.prefab.name}";
         GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, firePoint.rotation);
 
@@ -167,7 +179,11 @@ public class CannonBase : MonoBehaviourPunCallbacks
             Vector3 force = firePoint.forward * selected.launchForce + firePoint.up * selected.upwardForce;
             rb.AddForce(force);
         }
+
+        selected.ammoCount--;
+        UpdateProjectileUI();
     }
+
 
     private void OnTriggerEnter(Collider other)
     {
@@ -393,4 +409,17 @@ public class CannonBase : MonoBehaviourPunCallbacks
     {
         currentPrompt = "";
     }
+    private IEnumerator FlashRed()
+    {
+        Image img = currentUIImage?.GetComponent<Image>();
+        if (img == null) yield break;
+
+        Color original = img.color;
+        img.color = Color.red;
+
+        yield return new WaitForSeconds(0.2f);
+
+        img.color = original;
+    }
+
 }
