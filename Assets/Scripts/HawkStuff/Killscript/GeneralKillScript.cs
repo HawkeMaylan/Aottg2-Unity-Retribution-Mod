@@ -10,6 +10,15 @@ public class GeneralKillScript : MonoBehaviourPun
     public float destroyAfterSeconds = 5f;
     public string killSourceName = "Blade";
 
+    [Header("Optional Collision Animation")]
+    public bool playAnimationOnCollision = false;
+    public AnimationClip collisionAnimation;
+    public float animationDelayTime = 0f;
+
+    private Animation legacyAnim;
+    private bool animationPlayed = false;
+    private float spawnTime;
+
     [Header("Human Settings")]
     public bool damageHumans = true;
     public int humanDamage = 100;
@@ -25,15 +34,37 @@ public class GeneralKillScript : MonoBehaviourPun
 
     private void Start()
     {
+        spawnTime = Time.time;
+
         if (destroyAfterSeconds > 0f)
             Destroy(gameObject, destroyAfterSeconds);
+
+        if (playAnimationOnCollision && collisionAnimation != null)
+        {
+            legacyAnim = GetComponent<Animation>();
+            if (legacyAnim == null)
+                legacyAnim = gameObject.AddComponent<Animation>();
+
+            legacyAnim.playAutomatically = false;
+            if (!legacyAnim.GetClip(collisionAnimation.name))
+                legacyAnim.AddClip(collisionAnimation, collisionAnimation.name);
+        }
     }
 
     private void Update()
     {
+        if (playAnimationOnCollision && Time.time - spawnTime < animationDelayTime)
+            return; // Too early, skip detection
+
         Collider[] hits = Physics.OverlapBox(transform.position, transform.localScale / 2f, transform.rotation);
         foreach (var other in hits)
         {
+            if (playAnimationOnCollision && !animationPlayed && legacyAnim != null && collisionAnimation != null)
+            {
+                legacyAnim.Play(collisionAnimation.name);
+                animationPlayed = true;
+            }
+
             Human human = other.GetComponentInParent<Human>();
             if (damageHumans && human != null && human.IsMine())
             {
@@ -55,7 +86,6 @@ public class GeneralKillScript : MonoBehaviourPun
             var nape = titan.BaseTitanCache.NapeHurtbox?.name;
             var legL = titan.BaseTitanCache.LegLHurtbox?.name;
             var legR = titan.BaseTitanCache.LegRHurtbox?.name;
-
             var armL = titan.BasicCache.ForearmLHurtbox?.name;
             var armR = titan.BasicCache.ForearmRHurtbox?.name;
 
