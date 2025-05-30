@@ -19,6 +19,8 @@ public class CannonProjectileOption
     public Sprite sprite;
     public int ammoCount = 5;
     public float fireCooldown = 1f;
+    public int projectileCount = 1;          
+    public float spreadAngle = 0f;
 }
 
 
@@ -265,7 +267,6 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
 
 
-
     private void FireProjectile()
     {
         if (firePoint == null || projectileOptions.Count == 0)
@@ -287,20 +288,38 @@ public class CannonBase : MonoBehaviourPunCallbacks
             return;
         }
 
-        string prefabPath = $"Buildables/Projectiles/{selected.prefab.name}";
-        GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, firePoint.rotation);
-
-        Rigidbody rb = projectile.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            Vector3 force = firePoint.forward * selected.launchForce + firePoint.up * selected.upwardForce;
-            rb.AddForce(force);
-        }
-
+        nextFireTime = Time.time + selected.fireCooldown;
         selected.ammoCount--;
-        nextFireTime = Time.time + selected.fireCooldown; // set cooldown
         UpdateProjectileUI();
+
+        int count = Mathf.Max(1, selected.projectileCount);
+        float spread = selected.spreadAngle;
+
+        string prefabPath = $"Buildables/Projectiles/{selected.prefab.name}";
+
+        for (int i = 0; i < count; i++)
+        {
+            // Compute a direction within a cone around forward
+            Vector3 baseDirection = firePoint.forward;
+
+            // Randomize within the spread cone
+            Vector3 spreadDir = baseDirection;
+            spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.up) * spreadDir;
+            spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.right) * spreadDir;
+
+            // Spawn the projectile
+            GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(spreadDir));
+
+            Rigidbody rb = projectile.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                Vector3 force = spreadDir * selected.launchForce + firePoint.up * selected.upwardForce;
+                rb.AddForce(force);
+            }
+        }
     }
+
+
 
 
 
@@ -435,30 +454,41 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
         isMounted = false;
 
+        
         if (currentUIImage != null)
         {
             Destroy(currentUIImage);
             currentUIImage = null;
         }
 
-        if (humanInTrigger != null && !hasExitedAfterUnmount)
-        {
-            SetPrompt(mountPromptText);
-            unmountPromptTimer = 0f;
-        }
-
-        else
-        {
-            ClearPrompt();
-        }
         if (nextUIImage != null)
         {
             Destroy(nextUIImage);
             nextUIImage = null;
         }
-        nextUIImageRenderer = null;
 
+        if (prevUIImage != null)
+        {
+            Destroy(prevUIImage);
+            prevUIImage = null;
+        }
+
+        nextUIImageRenderer = null;
+        currentUIImageRenderer = null;
+        prevRT = currRT = nextRT = null;
+
+        
+        if (humanInTrigger != null && !hasExitedAfterUnmount)
+        {
+            SetPrompt(mountPromptText);
+            unmountPromptTimer = 0f;
+        }
+        else
+        {
+            ClearPrompt();
+        }
     }
+
 
     private string GetIdleAnimation()
     {
