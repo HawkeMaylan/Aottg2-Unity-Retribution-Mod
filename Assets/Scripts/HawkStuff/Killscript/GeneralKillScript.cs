@@ -54,11 +54,16 @@ public class GeneralKillScript : MonoBehaviourPun
     private void Update()
     {
         if (playAnimationOnCollision && Time.time - spawnTime < animationDelayTime)
-            return; // Too early, skip detection
+            return;
 
         Collider[] hits = Physics.OverlapBox(transform.position, transform.localScale / 2f, transform.rotation);
         foreach (var other in hits)
         {
+            // Ignore self-collision
+            if (other.transform.root == transform.root)
+                continue;
+
+            // Optional animation play
             if (playAnimationOnCollision && !animationPlayed && legacyAnim != null && collisionAnimation != null)
             {
                 legacyAnim.Play(collisionAnimation.name);
