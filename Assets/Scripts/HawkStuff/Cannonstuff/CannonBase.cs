@@ -25,6 +25,8 @@ public class CannonProjectileOption
 
     public bool BarrelRecoil = false;
     public float RecoilDistance = 0.5f;
+    public float barrelRecoilAngle = 8f;
+
     public float RecoilSpeed = 4f;
 
     public bool Knockback = false;
@@ -319,13 +321,15 @@ public class CannonBase : MonoBehaviourPunCallbacks
             GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(spreadDir));
             if (selected.BarrelRecoil && CannonBarrel != null)
             {
-                StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.RecoilSpeed));
+                StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.barrelRecoilAngle, selected.RecoilSpeed));
             }
+
             if (selected.Knockback && moveRigidbody != null)
             {
                 Vector3 knockbackDir = -MoveTarget.forward;
                 moveRigidbody.AddForce(knockbackDir * selected.knockbackForce, ForceMode.Impulse);
             }
+
 
 
 
@@ -613,16 +617,22 @@ public class CannonBase : MonoBehaviourPunCallbacks
         currentUIImageRenderer.color = Color.white;
         isFlashingGreen = false;
     }
-    private IEnumerator BarrelRecoil(Transform barrel, float distance, float speed)
+
+
+    private IEnumerator BarrelRecoil(Transform barrel, float distance, float angle, float speed)
     {
         Vector3 originalPos = barrel.localPosition;
-        Vector3 targetPos = originalPos - Vector3.forward * distance;
+        Quaternion originalRot = barrel.localRotation;
+
+        Vector3 recoilPos = originalPos - Vector3.forward * distance;
+        Quaternion recoilRot = originalRot * Quaternion.Euler(-angle, 0f, 0f);
 
         float t = 0f;
         while (t < 1f)
         {
             t += Time.deltaTime * speed;
-            barrel.localPosition = Vector3.Lerp(originalPos, targetPos, t);
+            barrel.localPosition = Vector3.Lerp(originalPos, recoilPos, t);
+            barrel.localRotation = Quaternion.Slerp(originalRot, recoilRot, t);
             yield return null;
         }
 
@@ -630,10 +640,13 @@ public class CannonBase : MonoBehaviourPunCallbacks
         while (t < 1f)
         {
             t += Time.deltaTime * speed;
-            barrel.localPosition = Vector3.Lerp(targetPos, originalPos, t);
+            barrel.localPosition = Vector3.Lerp(recoilPos, originalPos, t);
+            barrel.localRotation = Quaternion.Slerp(recoilRot, originalRot, t);
             yield return null;
         }
     }
+
+
 
 
 

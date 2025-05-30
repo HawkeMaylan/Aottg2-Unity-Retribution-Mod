@@ -502,11 +502,12 @@ MonoBehaviour:
     fireCooldown: 5
     projectileCount: 1
     spreadAngle: 0
-    BarrelRecoil: 0
-    RecoilDistance: 0.5
-    RecoilSpeed: 4
-    Knockback: 0
-    knockbackForce: 100
+    BarrelRecoil: 1
+    RecoilDistance: 2
+    barrelRecoilAngle: 8
+    RecoilSpeed: 5
+    Knockback: 1
+    knockbackForce: 400
   - name: Cannonball
     prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
     launchForce: 7000
@@ -516,10 +517,11 @@ MonoBehaviour:
     fireCooldown: 1
     projectileCount: 1
     spreadAngle: 0
-    BarrelRecoil: 0
+    BarrelRecoil: 1
     RecoilDistance: 0.5
-    RecoilSpeed: 4
-    Knockback: 0
+    barrelRecoilAngle: 4
+    RecoilSpeed: 5
+    Knockback: 1
     knockbackForce: 100
   - name: ScatterShot
     prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
@@ -531,10 +533,11 @@ MonoBehaviour:
     projectileCount: 10
     spreadAngle: 8
     BarrelRecoil: 1
-    RecoilDistance: 0.5
-    RecoilSpeed: 4
+    RecoilDistance: 1
+    barrelRecoilAngle: 7
+    RecoilSpeed: 5
     Knockback: 1
-    knockbackForce: 100
+    knockbackForce: 50
   projectileUIPrefab: {fileID: 3976318980140897857, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
 --- !u!4 &1551013655377393878 stripped
 Transform:
