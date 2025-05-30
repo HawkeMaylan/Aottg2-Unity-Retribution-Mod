@@ -126,6 +126,8 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     private int targetIndex = -1;
     private bool isSwapping = false;
 
+    private float mountPromptExpireTime = -1f;
+
 
 
 
@@ -146,11 +148,17 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         RotateTowardsCamera();
         CheckDistanceOrAliveStatus();
 
-        
-            if (isMounted && Input.GetKeyDown(KeyCode.F) && photonView.IsMine)
+
+        if (isMounted && humanInTrigger != null && humanInTrigger.IsMine() && Input.GetMouseButtonDown(0))
+        {
+            if (Time.time >= nextFireTime && projectileOptions.Count > 0)
             {
+                nextFireTime = Time.time + projectileOptions[selectedProjectileIndex].fireCooldown;
                 photonView.RPC("RPC_FireProjectile", RpcTarget.All, selectedProjectileIndex);
             }
+        }
+
+
 
 
 
@@ -283,10 +291,10 @@ private void RPC_FireProjectile(int index)
 
     private void UpdateProjectileUI()
     {
-    if (!photonView.IsMine) return;
+        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
 
 
-    GameObject menu = GameObject.Find("DefaultMenu(Clone)");
+        GameObject menu = GameObject.Find("DefaultMenu(Clone)");
         if (menu == null) return;
 
         // Clean up
@@ -425,8 +433,10 @@ private void RPC_FireProjectile(int index)
             humanRigidbody = human.GetComponent<Rigidbody>();
             hasExitedAfterUnmount = false;
             SetPrompt(mountPromptText);
+            mountPromptExpireTime = Time.time + 10f;
         }
     }
+
 
     private void OnTriggerExit(Collider other)
     {
@@ -437,11 +447,23 @@ private void RPC_FireProjectile(int index)
             humanInTrigger = null;
             humanRigidbody = null;
             ClearPrompt();
+            humanInTrigger = null;
+            mountPromptExpireTime = -1f;
+
+
         }
     }
 
     private void HandleMountInput()
     {
+        // Prevent mounting if timer expired
+        if (mountPromptExpireTime > 0f && Time.time > mountPromptExpireTime)
+        {
+            ClearPrompt();
+            mountPromptExpireTime = -1f; 
+            return;
+        }
+
         if (humanInTrigger == null)
             return;
 
@@ -453,6 +475,8 @@ private void RPC_FireProjectile(int index)
                     AttachHuman();
                 else if (isMounted)
                     DetachHuman();
+                    mountPromptExpireTime = -1f;
+
             }
         }
     }
@@ -590,9 +614,9 @@ private void RPC_FireProjectile(int index)
 
     private void RotateTowardsCamera()
     {
-    if (!photonView.IsMine) return;
+        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
 
-    if (!isMounted || CannonBarrel == null || Camera.main == null)
+        if (!isMounted || CannonBarrel == null || Camera.main == null)
             return;
 
         Vector3 localForward = transform.InverseTransformDirection(Camera.main.transform.forward);
@@ -636,13 +660,16 @@ private void RPC_FireProjectile(int index)
 
         if (isTooFar || isDead)
             DetachHuman();
+            ClearPrompt();
+
+
     }
 
     private void OnGUI()
     {
-    if (!photonView.IsMine) return;
+        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
 
-    if (!string.IsNullOrEmpty(currentPrompt))
+        if (!string.IsNullOrEmpty(currentPrompt))
         {
             GUIStyle style = new GUIStyle(GUI.skin.label)
             {
@@ -656,16 +683,16 @@ private void RPC_FireProjectile(int index)
 
     private void SetPrompt(string text)
     {
-    if (!photonView.IsMine) return;
+        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
 
-    currentPrompt = text;
+        currentPrompt = text;
     }
 
     private void ClearPrompt()
     {
-    if (!photonView.IsMine) return;
+        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
 
-    currentPrompt = "";
+        currentPrompt = "";
     }
     private IEnumerator FlashRed()
     {
