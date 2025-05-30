@@ -89,6 +89,10 @@ public class CannonBase : MonoBehaviourPunCallbacks
     private Coroutine flashGreenRoutine;
     private bool isFlashingGreen = false;
 
+    private GameObject nextUIImage;
+    private Image nextUIImageRenderer;
+
+
 
 
     private void Start()
@@ -169,8 +173,8 @@ public class CannonBase : MonoBehaviourPunCallbacks
     {
         if (projectileUIPrefab == null) return;
 
-        if (currentUIImage != null)
-            Destroy(currentUIImage);
+        if (currentUIImage != null) Destroy(currentUIImage);
+        if (nextUIImage != null) Destroy(nextUIImage);
 
         GameObject menu = GameObject.Find("DefaultMenu(Clone)");
         if (menu == null)
@@ -179,8 +183,10 @@ public class CannonBase : MonoBehaviourPunCallbacks
             return;
         }
 
+        // Current icon
         currentUIImage = Instantiate(projectileUIPrefab, menu.transform);
         RectTransform rt = currentUIImage.GetComponent<RectTransform>();
+        currentUIImageRenderer = currentUIImage.GetComponent<Image>();
 
         if (rt != null)
         {
@@ -192,26 +198,41 @@ public class CannonBase : MonoBehaviourPunCallbacks
             rt.pivot = new Vector2(0.5f, 0.5f);
         }
 
-        currentUIImageRenderer = currentUIImage.GetComponent<Image>();
         if (currentUIImageRenderer != null && projectileOptions[selectedProjectileIndex].sprite != null)
-        {
             currentUIImageRenderer.sprite = projectileOptions[selectedProjectileIndex].sprite;
-            currentUIImageRenderer.color = Color.gray; // start greyed out until cooldown expires
-        }
 
-
-        // Set ammo count below sprite
+        // Set ammo text for current
         Transform ammoTextObj = currentUIImage.transform.Find("AmmoText");
         if (ammoTextObj != null)
         {
             Text ammoText = ammoTextObj.GetComponent<Text>();
             if (ammoText != null)
-            {
                 ammoText.text = $"x{projectileOptions[selectedProjectileIndex].ammoCount}";
-            }
         }
-       
+
+        // Next icon preview
+        int nextIndex = (selectedProjectileIndex + 1) % projectileOptions.Count;
+        nextUIImage = Instantiate(projectileUIPrefab, menu.transform);
+        RectTransform nextRT = nextUIImage.GetComponent<RectTransform>();
+        nextUIImageRenderer = nextUIImage.GetComponent<Image>();
+
+        if (nextRT != null)
+        {
+            nextRT.anchoredPosition = new Vector2(-90f, 90f); // offset right and slightly lower
+            nextRT.sizeDelta = new Vector2(100f, 100f);       // smaller
+            nextRT.localScale = Vector3.one * 0.8f;
+            nextRT.anchorMin = new Vector2(1f, 0f);
+            nextRT.anchorMax = new Vector2(1f, 0f);
+            nextRT.pivot = new Vector2(0.5f, 0.5f);
+        }
+
+        if (nextUIImageRenderer != null && projectileOptions[nextIndex].sprite != null)
+        {
+            nextUIImageRenderer.sprite = projectileOptions[nextIndex].sprite;
+            nextUIImageRenderer.color = Color.gray;
+        }
     }
+
 
 
     private void FireProjectile()
@@ -394,10 +415,18 @@ public class CannonBase : MonoBehaviourPunCallbacks
             SetPrompt(mountPromptText);
             unmountPromptTimer = 0f;
         }
+
         else
         {
             ClearPrompt();
         }
+        if (nextUIImage != null)
+        {
+            Destroy(nextUIImage);
+            nextUIImage = null;
+        }
+        nextUIImageRenderer = null;
+
     }
 
     private string GetIdleAnimation()
