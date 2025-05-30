@@ -2,6 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using Characters;
 using Effects;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Collider))]
 public class GeneralKillScript : MonoBehaviourPun
@@ -40,6 +41,9 @@ public class GeneralKillScript : MonoBehaviourPun
     public bool blindEyes = true;
     public bool directionalStun = true;
     public float knockbackForce = 30f;
+    public int maxKnockbacksPerTitan = 1;
+
+    private Dictionary<BaseTitan, int> titanKnockbackCounts = new Dictionary<BaseTitan, int>();
 
     private void Start()
     {
@@ -141,12 +145,29 @@ public class GeneralKillScript : MonoBehaviourPun
                 titan.GetHit(killSourceName, 0, "BladeThrow", hitboxName);
             }
 
+            // Run knockback *after* other logic
             if (directionalStun)
             {
-                Vector3 dir = (titan.Cache.Transform.position - transform.position).normalized;
-                dir.y = 0f;
-                titan.Cache.Rigidbody.AddForce(dir * knockbackForce, ForceMode.Impulse);
-                titan.GetHit(killSourceName, 0, "TitanStun", hitboxName);
+                if (!titanKnockbackCounts.ContainsKey(baseTitan))
+                    titanKnockbackCounts[baseTitan] = 0;
+
+                if (titanKnockbackCounts[baseTitan] < maxKnockbacksPerTitan)
+                {
+                    Vector3 dir = (titan.Cache.Transform.position - transform.position).normalized;
+                    dir.y = 0f;
+
+                    // Apply stun FIRST to trigger ragdoll
+                    titan.GetHit(killSourceName, 0, "TitanStun", hitboxName);
+
+                    // Ensure Rigidbody is still responsive
+                    titan.Cache.Rigidbody.isKinematic = false;
+
+                    // Apply knockback AFTER ragdoll
+                    titan.Cache.Rigidbody.AddForce(dir * knockbackForce, ForceMode.Impulse);
+
+                    titanKnockbackCounts[baseTitan]++;
+                }
+
             }
         }
     }

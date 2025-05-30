@@ -142,6 +142,7 @@ MonoBehaviour:
   blindEyes: 1
   directionalStun: 0
   knockbackForce: 3000
+  maxKnockbacksPerTitan: 1
 --- !u!54 &8348118042904691061
 Rigidbody:
   m_ObjectHideFlags: 0
