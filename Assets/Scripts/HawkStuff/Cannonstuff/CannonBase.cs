@@ -92,6 +92,13 @@ public class CannonBase : MonoBehaviourPunCallbacks
     private GameObject nextUIImage;
     private Image nextUIImageRenderer;
 
+    private GameObject prevUIImage;
+    private RectTransform prevRT, currRT, nextRT;
+    private float uiLerpProgress = 1f;
+    private int targetIndex = -1;
+    private bool isSwapping = false;
+
+
 
 
 
@@ -147,6 +154,27 @@ public class CannonBase : MonoBehaviourPunCallbacks
             }
         }
 
+        if (isSwapping && uiLerpProgress < 1f)
+        {
+            uiLerpProgress += Time.deltaTime * 4f; // adjust speed here
+            float t = Mathf.SmoothStep(0, 1, uiLerpProgress);
+
+            Vector2 center = new Vector2(-180f, 100f);
+            Vector2 offset = new Vector2(90f, 0f);
+
+            if (prevRT) prevRT.anchoredPosition = Vector2.Lerp(center - offset * 2, center - offset, t);
+            if (currRT) currRT.anchoredPosition = Vector2.Lerp(center, center + (targetIndex > selectedProjectileIndex ? -offset : offset), t);
+            if (nextRT) nextRT.anchoredPosition = Vector2.Lerp(center + offset, center + offset * 2, t);
+
+            if (uiLerpProgress >= 1f)
+            {
+               
+                isSwapping = false;
+                UpdateProjectileUI();
+            }
+        }
+
+
 
     }
 
@@ -157,81 +185,84 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     public void SelectProjectile(int index)
     {
-        if (Time.time < nextFireTime)
+        if (Time.time < nextFireTime || isSwapping || index == selectedProjectileIndex)
             return;
 
-        if (index >= 0 && index < projectileOptions.Count)
-        {
-            selectedProjectileIndex = index;
-            nextFireTime = Time.time + projectileOptions[selectedProjectileIndex].fireCooldown;
-            UpdateProjectileUI();
-        }
+        int count = projectileOptions.Count;
+        selectedProjectileIndex = (index + count) % count;
+        UpdateProjectileUI(); // preload all icons now
+        uiLerpProgress = 0f;
+        isSwapping = true;
+
+        uiLerpProgress = 0f;
+        isSwapping = true;
+
+        nextFireTime = Time.time + projectileOptions[selectedProjectileIndex].fireCooldown;
     }
+
 
 
     private void UpdateProjectileUI()
     {
-        if (projectileUIPrefab == null) return;
-
-        if (currentUIImage != null) Destroy(currentUIImage);
-        if (nextUIImage != null) Destroy(nextUIImage);
-
         GameObject menu = GameObject.Find("DefaultMenu(Clone)");
-        if (menu == null)
-        {
-            Debug.LogWarning("DefaultMenu(Clone) not found.");
-            return;
-        }
+        if (menu == null) return;
 
-        // Current icon
+        // Clean up
+        if (prevUIImage) Destroy(prevUIImage);
+        if (currentUIImage) Destroy(currentUIImage);
+        if (nextUIImage) Destroy(nextUIImage);
+
+        int count = projectileOptions.Count;
+        int prevIndex = (selectedProjectileIndex - 1 + count) % count;
+        int nextIndex = (selectedProjectileIndex + 1) % count;
+
+        Vector2 center = new Vector2(-180f, 100f);
+        Vector2 offset = new Vector2(90f, 0f);
+
+        // --- Prev Icon ---
+        prevUIImage = Instantiate(projectileUIPrefab, menu.transform);
+        prevRT = prevUIImage.GetComponent<RectTransform>();
+        prevRT.anchoredPosition = center - offset;
+        prevRT.sizeDelta = new Vector2(100f, 100f);
+        prevRT.localScale = Vector3.one * 0.8f;
+        prevRT.anchorMin = prevRT.anchorMax = new Vector2(1f, 0f);
+        prevRT.pivot = new Vector2(0.5f, 0.5f);
+        var prevImg = prevUIImage.GetComponent<Image>();
+        prevImg.sprite = projectileOptions[prevIndex].sprite;
+        prevImg.color = Color.gray;
+
+        // --- Current Icon ---
         currentUIImage = Instantiate(projectileUIPrefab, menu.transform);
-        RectTransform rt = currentUIImage.GetComponent<RectTransform>();
+        currRT = currentUIImage.GetComponent<RectTransform>();
+        currRT.anchoredPosition = center;
+        currRT.sizeDelta = new Vector2(130f, 130f);
+        currRT.localScale = Vector3.one;
+        currRT.anchorMin = currRT.anchorMax = new Vector2(1f, 0f);
+        currRT.pivot = new Vector2(0.5f, 0.5f);
         currentUIImageRenderer = currentUIImage.GetComponent<Image>();
+        currentUIImageRenderer.sprite = projectileOptions[selectedProjectileIndex].sprite;
 
-        if (rt != null)
+        // Ammo count
+        var ammoTextObj = currentUIImage.transform.Find("AmmoText");
+        if (ammoTextObj)
         {
-            rt.anchoredPosition = new Vector2(-180f, 100f);
-            rt.sizeDelta = new Vector2(130f, 130f);
-            rt.localScale = Vector3.one;
-            rt.anchorMin = new Vector2(1f, 0f);
-            rt.anchorMax = new Vector2(1f, 0f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
+            var ammoText = ammoTextObj.GetComponent<Text>();
+            ammoText.text = $"x{projectileOptions[selectedProjectileIndex].ammoCount}";
         }
 
-        if (currentUIImageRenderer != null && projectileOptions[selectedProjectileIndex].sprite != null)
-            currentUIImageRenderer.sprite = projectileOptions[selectedProjectileIndex].sprite;
-
-        // Set ammo text for current
-        Transform ammoTextObj = currentUIImage.transform.Find("AmmoText");
-        if (ammoTextObj != null)
-        {
-            Text ammoText = ammoTextObj.GetComponent<Text>();
-            if (ammoText != null)
-                ammoText.text = $"x{projectileOptions[selectedProjectileIndex].ammoCount}";
-        }
-
-        // Next icon preview
-        int nextIndex = (selectedProjectileIndex + 1) % projectileOptions.Count;
+        // --- Next Icon ---
         nextUIImage = Instantiate(projectileUIPrefab, menu.transform);
-        RectTransform nextRT = nextUIImage.GetComponent<RectTransform>();
-        nextUIImageRenderer = nextUIImage.GetComponent<Image>();
-
-        if (nextRT != null)
-        {
-            nextRT.anchoredPosition = new Vector2(-90f, 90f); // offset right and slightly lower
-            nextRT.sizeDelta = new Vector2(100f, 100f);       // smaller
-            nextRT.localScale = Vector3.one * 0.8f;
-            nextRT.anchorMin = new Vector2(1f, 0f);
-            nextRT.anchorMax = new Vector2(1f, 0f);
-            nextRT.pivot = new Vector2(0.5f, 0.5f);
-        }
-
-        if (nextUIImageRenderer != null && projectileOptions[nextIndex].sprite != null)
-        {
-            nextUIImageRenderer.sprite = projectileOptions[nextIndex].sprite;
-            nextUIImageRenderer.color = Color.gray;
-        }
+        nextRT = nextUIImage.GetComponent<RectTransform>();
+        nextRT.anchoredPosition = center + offset;
+        nextRT.sizeDelta = new Vector2(100f, 100f);
+        nextRT.localScale = Vector3.one * 0.8f;
+        nextRT.anchorMin = nextRT.anchorMax = new Vector2(1f, 0f);
+        nextRT.pivot = new Vector2(0.5f, 0.5f);
+        var nextImg = nextUIImage.GetComponent<Image>();
+        nextImg.sprite = projectileOptions[nextIndex].sprite;
+        nextImg.color = Color.gray;
     }
+
 
 
 
