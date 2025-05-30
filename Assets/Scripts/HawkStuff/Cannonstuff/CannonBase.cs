@@ -230,7 +230,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     [PunRPC]
-    private void RPC_FireProjectile(int index)
+    public void RPC_FireProjectile(int index)
     {
         Debug.Log($"[CannonBase] Firing projectile index {index} by {photonView.Owner} (Mine: {photonView.IsMine})");
 
