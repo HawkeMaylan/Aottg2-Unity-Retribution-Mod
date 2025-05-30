@@ -124,16 +124,25 @@ public class CannonBase : MonoBehaviourPunCallbacks
         if (currentUIImage != null)
             Destroy(currentUIImage);
 
-        GameObject defaultMenu = GameObject.Find("DefaultMenu(Clone)");
-        if (defaultMenu == null)
+        GameObject menu = GameObject.Find("DefaultMenu(Clone)");
+        if (menu == null)
         {
-            Debug.LogWarning("DefaultMenu(Clone) not found in scene.");
+            Debug.LogWarning("DefaultMenu(Clone) not found.");
             return;
         }
 
-        currentUIImage = Instantiate(projectileUIPrefab, defaultMenu.transform);
-        currentUIImage.transform.localPosition = new Vector3(-186.7f, 224.7f, 0f);
-        currentUIImage.GetComponent<RectTransform>().sizeDelta = new Vector2(200f, 200f);
+        currentUIImage = Instantiate(projectileUIPrefab, menu.transform);
+        RectTransform rt = currentUIImage.GetComponent<RectTransform>();
+
+        if (rt != null)
+        {
+            rt.anchoredPosition = new Vector2(-180f, 100f);
+            rt.sizeDelta = new Vector2(130f, 130f);
+            rt.localScale = Vector3.one;
+            rt.anchorMin = new Vector2(1f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+        }
 
         Image img = currentUIImage.GetComponent<Image>();
         if (img != null && projectileOptions[selectedProjectileIndex].sprite != null)
