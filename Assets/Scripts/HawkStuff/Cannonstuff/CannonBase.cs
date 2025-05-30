@@ -150,7 +150,20 @@ public class CannonBase : MonoBehaviourPunCallbacks
         Image img = currentUIImage.GetComponent<Image>();
         if (img != null && projectileOptions[selectedProjectileIndex].sprite != null)
             img.sprite = projectileOptions[selectedProjectileIndex].sprite;
+
+        // Set ammo count below sprite
+        Transform ammoTextObj = currentUIImage.transform.Find("AmmoText");
+        if (ammoTextObj != null)
+        {
+            Text ammoText = ammoTextObj.GetComponent<Text>();
+            if (ammoText != null)
+            {
+                ammoText.text = $"x{projectileOptions[selectedProjectileIndex].ammoCount}";
+            }
+        }
+       
     }
+
 
     private void FireProjectile()
     {
