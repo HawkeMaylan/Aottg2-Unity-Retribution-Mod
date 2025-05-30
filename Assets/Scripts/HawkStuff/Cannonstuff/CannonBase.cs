@@ -17,10 +17,18 @@ public class CannonProjectileOption
     public float launchForce = 500f;
     public float upwardForce = 100f;
     public Sprite sprite;
+
     public int ammoCount = 5;
     public float fireCooldown = 1f;
     public int projectileCount = 1;          
     public float spreadAngle = 0f;
+
+    public bool BarrelRecoil = false;
+    public float RecoilDistance = 0.5f;
+    public float RecoilSpeed = 4f;
+
+    public bool Knockback = false;
+    public float knockbackForce = 100f;
 }
 
 
@@ -309,6 +317,17 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
             // Spawn the projectile
             GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(spreadDir));
+            if (selected.BarrelRecoil && CannonBarrel != null)
+            {
+                StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.RecoilSpeed));
+            }
+            if (selected.Knockback && moveRigidbody != null)
+            {
+                Vector3 knockbackDir = -MoveTarget.forward;
+                moveRigidbody.AddForce(knockbackDir * selected.knockbackForce, ForceMode.Impulse);
+            }
+
+
 
             Rigidbody rb = projectile.GetComponent<Rigidbody>();
             if (rb != null)
@@ -594,6 +613,28 @@ public class CannonBase : MonoBehaviourPunCallbacks
         currentUIImageRenderer.color = Color.white;
         isFlashingGreen = false;
     }
+    private IEnumerator BarrelRecoil(Transform barrel, float distance, float speed)
+    {
+        Vector3 originalPos = barrel.localPosition;
+        Vector3 targetPos = originalPos - Vector3.forward * distance;
+
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * speed;
+            barrel.localPosition = Vector3.Lerp(originalPos, targetPos, t);
+            yield return null;
+        }
+
+        t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * speed;
+            barrel.localPosition = Vector3.Lerp(targetPos, originalPos, t);
+            yield return null;
+        }
+    }
+
 
 
 
