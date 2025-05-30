@@ -34,8 +34,24 @@ public class CannonProjectileOption
 }
 
 
-public class CannonBase : MonoBehaviourPunCallbacks
+public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 {
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(isMounted);
+            stream.SendNext(selectedProjectileIndex);
+        }
+        else
+        {
+            isMounted = (bool)stream.ReceiveNext();
+            selectedProjectileIndex = (int)stream.ReceiveNext();
+        }
+    }
+
+
+
     [Header("Mount Target")]
     public Transform mountPoint;
     public Vector3 positionOffset;
@@ -123,14 +139,20 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private void Update()
     {
+
         HandleMountInput();
         HandleUnmountPromptTimer();
         HandleRunAnimation();
         RotateTowardsCamera();
         CheckDistanceOrAliveStatus();
 
-        if (isMounted && Input.GetKeyDown(KeyCode.F))
-            FireProjectile();
+        
+            if (isMounted && Input.GetKeyDown(KeyCode.F) && photonView.IsMine)
+            {
+                photonView.RPC("RPC_FireProjectile", RpcTarget.All, selectedProjectileIndex);
+            }
+
+
 
         if (isMounted)
         {
@@ -190,6 +212,52 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     }
 
+[PunRPC]
+private void RPC_FireProjectile(int index)
+{
+    var selected = projectileOptions[index];
+    if (selected.ammoCount <= 0) return;
+
+    int count = Mathf.Max(1, selected.projectileCount);
+    float spread = selected.spreadAngle;
+    string prefabPath = $"Buildables/Projectiles/{selected.prefab.name}";
+
+    for (int i = 0; i < count; i++)
+    {
+        Vector3 baseDirection = firePoint.forward;
+        Vector3 spreadDir = baseDirection;
+        spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.up) * spreadDir;
+        spreadDir = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.right) * spreadDir;
+
+        GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(spreadDir));
+
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            Vector3 force = spreadDir * selected.launchForce + firePoint.up * selected.upwardForce;
+            rb.AddForce(force);
+        }
+
+        if (selected.BarrelRecoil && CannonBarrel != null)
+        {
+            StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.barrelRecoilAngle, selected.RecoilSpeed));
+        }
+
+        if (selected.Knockback && moveRigidbody != null)
+        {
+            Vector3 knockbackDir = -MoveTarget.forward;
+            moveRigidbody.AddForce(knockbackDir * selected.knockbackForce, ForceMode.Impulse);
+        }
+    }
+
+        if (photonView.IsMine)
+        {
+            selected.ammoCount--;
+            UpdateProjectileUI();
+        }
+
+    }
+
     private void FixedUpdate()
     {
         HandleMovementInput();
@@ -206,8 +274,7 @@ public class CannonBase : MonoBehaviourPunCallbacks
         uiLerpProgress = 0f;
         isSwapping = true;
 
-        uiLerpProgress = 0f;
-        isSwapping = true;
+
 
         nextFireTime = Time.time + projectileOptions[selectedProjectileIndex].fireCooldown;
     }
@@ -216,7 +283,10 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private void UpdateProjectileUI()
     {
-        GameObject menu = GameObject.Find("DefaultMenu(Clone)");
+    if (!photonView.IsMine) return;
+
+
+    GameObject menu = GameObject.Find("DefaultMenu(Clone)");
         if (menu == null) return;
 
         // Clean up
@@ -520,7 +590,9 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private void RotateTowardsCamera()
     {
-        if (!isMounted || CannonBarrel == null || Camera.main == null)
+    if (!photonView.IsMine) return;
+
+    if (!isMounted || CannonBarrel == null || Camera.main == null)
             return;
 
         Vector3 localForward = transform.InverseTransformDirection(Camera.main.transform.forward);
@@ -568,7 +640,9 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private void OnGUI()
     {
-        if (!string.IsNullOrEmpty(currentPrompt))
+    if (!photonView.IsMine) return;
+
+    if (!string.IsNullOrEmpty(currentPrompt))
         {
             GUIStyle style = new GUIStyle(GUI.skin.label)
             {
@@ -582,16 +656,22 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private void SetPrompt(string text)
     {
-        currentPrompt = text;
+    if (!photonView.IsMine) return;
+
+    currentPrompt = text;
     }
 
     private void ClearPrompt()
     {
-        currentPrompt = "";
+    if (!photonView.IsMine) return;
+
+    currentPrompt = "";
     }
     private IEnumerator FlashRed()
     {
-        Image img = currentUIImage?.GetComponent<Image>();
+    if (!photonView.IsMine) yield break;
+
+    Image img = currentUIImage?.GetComponent<Image>();
         if (img == null) yield break;
 
         Color original = img.color;
@@ -604,7 +684,9 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private IEnumerator FlashGreen()
     {
-        if (currentUIImageRenderer == null)
+    if (!photonView.IsMine) yield break;
+
+    if (currentUIImageRenderer == null)
             yield break;
 
         isFlashingGreen = true;
@@ -621,7 +703,9 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
     private IEnumerator BarrelRecoil(Transform barrel, float distance, float angle, float speed)
     {
-        Vector3 originalPos = barrel.localPosition;
+    if (!photonView.IsMine) yield break;
+
+    Vector3 originalPos = barrel.localPosition;
         Quaternion originalRot = barrel.localRotation;
 
         Vector3 recoilPos = originalPos - Vector3.forward * distance;
