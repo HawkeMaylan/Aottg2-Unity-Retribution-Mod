@@ -493,7 +493,7 @@ MonoBehaviour:
   turnSpeed: 90
   projectilePrefab: {fileID: 1530743120385670784, guid: ce9a789b3a6e05f4d9274ecbe59a82fa, type: 3}
   firePoint: {fileID: 6748738809391093893}
-  launchForce: 6000
+  launchForce: 7000
   upwardForce: 250
 --- !u!4 &1551013655377393878 stripped
 Transform:

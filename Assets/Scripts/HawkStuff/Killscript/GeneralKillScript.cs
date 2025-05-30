@@ -14,10 +14,18 @@ public class GeneralKillScript : MonoBehaviourPun
     public bool playAnimationOnCollision = false;
     public AnimationClip collisionAnimation;
     public float animationDelayTime = 0f;
+    public bool makeKinematicOnCollision = false;
+
+    [Header("Optional Particle Effect")]
+    public bool spawnParticleOnCollision = false;
+    public GameObject collisionParticlePrefab;
 
     private Animation legacyAnim;
     private bool animationPlayed = false;
+    private bool particleSpawned = false;
     private float spawnTime;
+    private Rigidbody rb;
+    private Collider selfCollider;
 
     [Header("Human Settings")]
     public bool damageHumans = true;
@@ -37,7 +45,7 @@ public class GeneralKillScript : MonoBehaviourPun
         spawnTime = Time.time;
 
         if (destroyAfterSeconds > 0f)
-            Destroy(gameObject, destroyAfterSeconds);
+            Invoke(nameof(SelfDestruct), destroyAfterSeconds);
 
         if (playAnimationOnCollision && collisionAnimation != null)
         {
@@ -49,6 +57,9 @@ public class GeneralKillScript : MonoBehaviourPun
             if (!legacyAnim.GetClip(collisionAnimation.name))
                 legacyAnim.AddClip(collisionAnimation, collisionAnimation.name);
         }
+
+        rb = GetComponent<Rigidbody>();
+        selfCollider = GetComponent<Collider>();
     }
 
     private void Update()
@@ -59,15 +70,25 @@ public class GeneralKillScript : MonoBehaviourPun
         Collider[] hits = Physics.OverlapBox(transform.position, transform.localScale / 2f, transform.rotation);
         foreach (var other in hits)
         {
-            // Ignore self-collision
-            if (other.transform.root == transform.root)
+            if (other == selfCollider)
                 continue;
 
-            // Optional animation play
             if (playAnimationOnCollision && !animationPlayed && legacyAnim != null && collisionAnimation != null)
             {
                 legacyAnim.Play(collisionAnimation.name);
                 animationPlayed = true;
+
+                if (makeKinematicOnCollision && rb != null)
+                    rb.isKinematic = true;
+
+                CancelInvoke(nameof(SelfDestruct));
+                Invoke(nameof(SelfDestruct), collisionAnimation.length);
+            }
+
+            if (spawnParticleOnCollision && !particleSpawned && collisionParticlePrefab != null)
+            {
+                Instantiate(collisionParticlePrefab, transform.position, Quaternion.identity);
+                particleSpawned = true;
             }
 
             Human human = other.GetComponentInParent<Human>();
@@ -123,5 +144,10 @@ public class GeneralKillScript : MonoBehaviourPun
                 titan.GetHit(killSourceName, 0, "TitanStun", hitboxName);
             }
         }
+    }
+
+    private void SelfDestruct()
+    {
+        Destroy(gameObject);
     }
 }
