@@ -44,6 +44,12 @@ public class CannonBase : MonoBehaviourPunCallbacks
     public float moveSpeed = 5f;
     public float turnSpeed = 90f;
 
+    [Header("Firing Settings")]
+    public GameObject projectilePrefab;
+    public Transform firePoint;
+    public float launchForce = 500f;
+    public float upwardForce = 100f;
+
     private Rigidbody moveRigidbody;
     private Human humanInTrigger;
     private Rigidbody humanRigidbody;
@@ -100,6 +106,11 @@ public class CannonBase : MonoBehaviourPunCallbacks
         HandleUnmountPromptTimer();
         HandleRunAnimation();
         RotateTowardsCamera();
+
+        if (isMounted && Input.GetKeyDown(KeyCode.F))
+        {
+            FireProjectile();
+        }
     }
 
     private void FixedUpdate()
@@ -262,6 +273,22 @@ public class CannonBase : MonoBehaviourPunCallbacks
 
         Quaternion deltaRotation = Quaternion.Euler(0f, rotate * turnSpeed * Time.fixedDeltaTime, 0f);
         moveRigidbody.MoveRotation(moveRigidbody.rotation * deltaRotation);
+    }
+
+    private void FireProjectile()
+    {
+        if (projectilePrefab == null || firePoint == null)
+            return;
+
+        string prefabPath = $"Buildables/Projectiles/{projectilePrefab.name}";
+        GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, firePoint.rotation);
+
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            Vector3 force = firePoint.forward * launchForce + firePoint.up * upwardForce;
+            rb.AddForce(force);
+        }
     }
 
     private void OnGUI()
