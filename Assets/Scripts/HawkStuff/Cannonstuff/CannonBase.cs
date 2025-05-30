@@ -142,7 +142,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         if (!photonView.IsMine) return;
 
-        if (isMounted && humanInTrigger != null && humanInTrigger.IsMine() && Input.GetMouseButtonDown(0))
+        if (photonView.IsMine && isMounted && humanInTrigger != null && humanInTrigger.IsMine() && Input.GetMouseButtonDown(0))
         {
             if (Time.time >= nextFireTime && projectileOptions.Count > 0)
             {
@@ -150,6 +150,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
                 photonView.RPC("RPC_FireProjectile", RpcTarget.All, selectedProjectileIndex);
             }
         }
+
 
         if (isMounted)
         {
@@ -232,6 +233,9 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     public void RPC_FireProjectile(int index)
     {
+        // Ensure only the owner executes the firing logic
+        if (!photonView.IsMine) return;
+
         Debug.Log($"[CannonBase] Firing projectile index {index} by {photonView.Owner} (Mine: {photonView.IsMine})");
 
         var selected = projectileOptions[index];
@@ -240,25 +244,32 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         string prefabPath = $"Buildables/Projectiles/{selected.prefab.name}";
         Debug.Log("Attempting to instantiate prefab at: " + prefabPath);
 
-        // Instantiate and add debug checks
-        GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(firePoint.forward));
-        if (projectile == null)
+        int count = Mathf.Max(1, selected.projectileCount);
+        float spread = selected.spreadAngle;
+
+        for (int i = 0; i < count; i++)
         {
-            Debug.LogError("Failed to instantiate projectile.");
-            return;
+            Vector3 direction = firePoint.forward;
+            direction = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.up) * direction;
+            direction = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.right) * direction;
+
+            GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(direction));
+            if (projectile == null)
+            {
+                Debug.LogError("Failed to instantiate projectile.");
+                continue;
+            }
+
+            Rigidbody rb = projectile.GetComponent<Rigidbody>();
+            if (rb != null)
+                rb.AddForce(direction * selected.launchForce + firePoint.up * selected.upwardForce);
         }
 
-        Rigidbody rb = projectile.GetComponent<Rigidbody>();
-        if (rb != null)
-            rb.AddForce(firePoint.forward * selected.launchForce + firePoint.up * selected.upwardForce);
-
-        // Ammo handling
-        if (photonView.IsMine)
-        {
-            selected.ammoCount--;
-            UpdateProjectileUI();
-        }
+        selected.ammoCount--;
+        UpdateProjectileUI();
     }
+
+
 
 
     private void RotateTowardsCamera()
