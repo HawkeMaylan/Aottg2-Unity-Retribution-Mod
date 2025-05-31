@@ -18,7 +18,6 @@ public class CannonProjectileOption
     public float upwardForce = 100f;
     public Sprite sprite;
 
-    public int ammoCount = 5;
     public float fireCooldown = 1f;
     public int projectileCount = 1;
     public float spreadAngle = 0f;
@@ -26,34 +25,51 @@ public class CannonProjectileOption
     public bool BarrelRecoil = false;
     public float RecoilDistance = 0.5f;
     public float barrelRecoilAngle = 8f;
-
     public float RecoilSpeed = 4f;
 
     public bool Knockback = false;
     public float knockbackForce = 100f;
+
+    public int startingAmmo = 5; // Add this
+
 }
+
 
 public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 {
+
+    private List<int> sharedAmmoCounts = new List<int>();
+
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
         {
             stream.SendNext(isMounted);
             stream.SendNext(selectedProjectileIndex);
+            for (int i = 0; i < sharedAmmoCounts.Count; i++)
+                stream.SendNext(sharedAmmoCounts[i]);
         }
         else
         {
             isMounted = (bool)stream.ReceiveNext();
             selectedProjectileIndex = (int)stream.ReceiveNext();
+            for (int i = 0; i < sharedAmmoCounts.Count; i++)
+                sharedAmmoCounts[i] = (int)stream.ReceiveNext();
         }
     }
+
 
     void Awake()
     {
         if (photonView != null)
             photonView.OwnershipTransfer = OwnershipOption.Takeover;
+
+
     }
+
+
+
+
     [Header("Interaction Settings")]
     public Collider interactionZone;
 
@@ -143,10 +159,19 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Start()
     {
+
         if (MoveTarget != null)
             moveRigidbody = MoveTarget.GetComponent<Rigidbody>();
+
+        // Initialize shared ammo counts from scratch
+        sharedAmmoCounts.Clear();
+        foreach (var option in projectileOptions)
+            sharedAmmoCounts.Add(option.startingAmmo);
+
+
         ClearPrompt();
     }
+
 
     private void Update()
     {
@@ -336,10 +361,16 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     public void RPC_FireProjectile(int index)
     {
         var selected = projectileOptions[index];
-        if (selected.ammoCount <= 0) return;
-
-        // Spawn projectile (only owner)
+    if (sharedAmmoCounts[index] <= 0)
+    {
         if (photonView.IsMine)
+            StartCoroutine(FlashRed());
+        return;
+    }
+
+
+    // Spawn projectile (only owner)
+    if (photonView.IsMine)
         {
             if (muzzleFlashPrefab != null)
             {
@@ -364,12 +395,13 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
                 }
             }
 
-            selected.ammoCount--;
-            UpdateProjectileUI();
-        }
+        sharedAmmoCounts[index]--;
+        UpdateProjectileUI();
+
+    }
 
 
-        if (selected.BarrelRecoil && CannonBarrel != null)
+    if (selected.BarrelRecoil && CannonBarrel != null)
             StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.barrelRecoilAngle, selected.RecoilSpeed));
 
 
@@ -692,10 +724,11 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         if (ammoTextObj)
         {
             var ammoText = ammoTextObj.GetComponent<Text>();
-            ammoText.text = $"x{projectileOptions[selectedProjectileIndex].ammoCount}";
-        }
+            ammoText.text = $"x{sharedAmmoCounts[selectedProjectileIndex]}";
 
-        nextUIImage = Instantiate(projectileUIPrefab, menu.transform);
+         }
+
+    nextUIImage = Instantiate(projectileUIPrefab, menu.transform);
         nextRT = nextUIImage.GetComponent<RectTransform>();
         nextRT.anchoredPosition = center + offset;
         nextRT.sizeDelta = new Vector2(100f, 100f);
