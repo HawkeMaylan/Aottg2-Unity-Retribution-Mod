@@ -336,8 +336,13 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             humanInTrigger = human;
             humanRigidbody = human.GetComponent<Rigidbody>();
             hasExitedAfterUnmount = false;
-            SetPrompt(mountPromptText);
-            mountPromptExpireTime = Time.time + 10f;
+
+            
+            if (!isMounted)
+            {
+                SetPrompt(mountPromptText);
+                mountPromptExpireTime = Time.time + 10f;
+            }
         }
     }
 
@@ -442,7 +447,12 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         isMounted = true;
         hasExitedAfterUnmount = false;
 
+
+        ClearPrompt();
         SetPrompt(unmountPromptText);
+        mountPromptExpireTime = Time.time + unmountPromptDuration;
+
+
         unmountPromptTimer = unmountPromptDuration;
 
         lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
@@ -450,6 +460,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         UpdateProjectileUI();
     }
+
 
     private void DetachHuman()
     {
