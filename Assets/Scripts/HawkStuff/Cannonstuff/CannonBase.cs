@@ -138,6 +138,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     private bool hasFlashedReady = false;
     private Coroutine flashGreenRoutine;
     private bool isFlashingGreen = false;
+    private bool isFlashingRed = false;
 
     private GameObject nextUIImage;
     private Image nextUIImageRenderer;
@@ -312,7 +313,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     }
     private void HandleCooldownUI()
     {
-        if (currentUIImageRenderer == null) return;
+        if (currentUIImageRenderer == null || isFlashingRed) return;
 
         float cooldown = projectileOptions[selectedProjectileIndex].fireCooldown;
         float timeSinceFire = Time.time - (nextFireTime - cooldown);
@@ -334,6 +335,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             hasFlashedReady = false;
         }
     }
+
 
     private void HandleProjectileUISwap()
     {
@@ -775,15 +777,19 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     private IEnumerator FlashRed()
     {
         if (!photonView.IsMine) yield break;
+        if (currentUIImageRenderer == null) yield break;
 
-        Image img = currentUIImage?.GetComponent<Image>();
-        if (img == null) yield break;
+        isFlashingRed = true;
 
-        Color original = img.color;
-        img.color = Color.red;
+        Color original = currentUIImageRenderer.color;
+        currentUIImageRenderer.color = Color.red;
+
         yield return new WaitForSeconds(0.2f);
-        img.color = original;
+
+        currentUIImageRenderer.color = original;
+        isFlashingRed = false;
     }
+
 
     private IEnumerator FlashGreen()
     {
