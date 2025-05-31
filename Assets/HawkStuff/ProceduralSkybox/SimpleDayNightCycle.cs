@@ -29,6 +29,7 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
     [Header("Update Intervals (Seconds)")]
     public float giUpdateInterval = 2f;
     public float materialUpdateInterval = 1f;
+    public float skyboxReapplyInterval = 5f;
 
     [Header("Sun Direction")]
     public float sunAzimuth = 170f;
@@ -48,16 +49,19 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
     private float _lastSyncTime = 0f;
     private float _lastGIUpdate = 0f;
     private float _lastMaterialUpdate = 0f;
+    private float _lastSkyboxCheck = 0f;
 
     private float timeOfDay;
-    private Material skyboxMaterial;
+    [SerializeField] private Material skyboxMaterial;
     private Color lastSkyTint, lastGroundColor;
 
     private void Start()
     {
         NormalizeDurations();
 
-        skyboxMaterial = Resources.Load<Material>("HawkProcedural");
+        if (skyboxMaterial == null)
+            skyboxMaterial = Resources.Load<Material>("HawkProcedural");
+
         if (skyboxMaterial != null)
         {
             RenderSettings.skybox = skyboxMaterial;
@@ -81,6 +85,16 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
         {
             photonView.RPC("SyncLightingToClients", RpcTarget.Others, timeOfDay);
             _lastSyncTime = Time.time;
+        }
+
+        if (skyboxMaterial != null && Time.time - _lastSkyboxCheck >= skyboxReapplyInterval)
+        {
+            if (RenderSettings.skybox != skyboxMaterial)
+            {
+                RenderSettings.skybox = skyboxMaterial;
+                DynamicGI.UpdateEnvironment();
+            }
+            _lastSkyboxCheck = Time.time;
         }
 
         UpdateSunAndMoon();
@@ -155,7 +169,6 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
             _lastGIUpdate = Time.time;
         }
 
-        // Fixed intensity boost logic
         float boostedIntensity = 0f;
 
         if (sunAngle < 15f)

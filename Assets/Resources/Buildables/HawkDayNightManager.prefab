@@ -251,6 +251,7 @@ MonoBehaviour:
   sunriseSunsetSaturationBoost: 0.219
   giUpdateInterval: 1
   materialUpdateInterval: 1
+  skyboxReapplyInterval: 10
   sunAzimuth: -90
   sunInitialAngle: 0
   sunriseSunColor: {r: 1, g: 0.31598812, b: 0.19999999, a: 1}
@@ -317,6 +318,7 @@ MonoBehaviour:
     m_NumColorKeys: 8
     m_NumAlphaKeys: 4
   syncInterval: 45
+  skyboxMaterial: {fileID: 2100000, guid: 802f5d9d0670c424288cb4b3e0f54303, type: 2}
 --- !u!114 &63078299645148793
 MonoBehaviour:
   m_ObjectHideFlags: 0

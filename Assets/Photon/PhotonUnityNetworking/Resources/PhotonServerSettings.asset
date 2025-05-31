@@ -148,6 +148,7 @@ MonoBehaviour:
   - RPC_SetHorseOwner
   - RPC_SetInventoryCounts
   - RPC_SetStats
+  - SyncLightingToClients
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
