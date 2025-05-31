@@ -93,6 +93,10 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     public List<CannonProjectileOption> projectileOptions = new List<CannonProjectileOption>();
     private float nextFireTime = 0f;
 
+    [Header("Firing FX")]
+    public GameObject muzzleFlashPrefab; // Must be in Resources folder
+
+
     [Header("Projectile UI")]
     public GameObject projectileUIPrefab;
 
@@ -233,17 +237,19 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     public void RPC_FireProjectile(int index)
     {
-        // Ensure only the owner executes the firing logic
         if (!photonView.IsMine) return;
-
-        Debug.Log($"[CannonBase] Firing projectile index {index} by {photonView.Owner} (Mine: {photonView.IsMine})");
 
         var selected = projectileOptions[index];
         if (selected.ammoCount <= 0) return;
 
-        string prefabPath = $"Buildables/Projectiles/{selected.prefab.name}";
-        Debug.Log("Attempting to instantiate prefab at: " + prefabPath);
+        // Photon spawn flash for all clients
+        if (muzzleFlashPrefab != null)
+        {
+            string flashPath = $"Buildables/Projectiles/{muzzleFlashPrefab.name}";
+            PhotonNetwork.Instantiate(flashPath, firePoint.position, firePoint.rotation);
+        }
 
+        string projectilePath = $"Buildables/Projectiles/{selected.prefab.name}";
         int count = Mathf.Max(1, selected.projectileCount);
         float spread = selected.spreadAngle;
 
@@ -253,21 +259,18 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             direction = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.up) * direction;
             direction = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.right) * direction;
 
-            GameObject projectile = PhotonNetwork.Instantiate(prefabPath, firePoint.position, Quaternion.LookRotation(direction));
-            if (projectile == null)
+            GameObject projectile = PhotonNetwork.Instantiate(projectilePath, firePoint.position, Quaternion.LookRotation(direction));
+            if (projectile.TryGetComponent<Rigidbody>(out var rb))
             {
-                Debug.LogError("Failed to instantiate projectile.");
-                continue;
-            }
-
-            Rigidbody rb = projectile.GetComponent<Rigidbody>();
-            if (rb != null)
                 rb.AddForce(direction * selected.launchForce + firePoint.up * selected.upwardForce);
+            }
         }
 
         selected.ammoCount--;
         UpdateProjectileUI();
     }
+
+
 
 
 
@@ -624,4 +627,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             yield return null;
         }
     }
+
+
+
 }
