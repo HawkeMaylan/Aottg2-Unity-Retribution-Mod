@@ -4,20 +4,22 @@ using Photon.Pun;
 using Photon.Realtime;
 using Characters;
 using UI;
-using GameManagers; // Added for ChatManager access
+using GameManagers;
 
 public class TeleportMenu : MonoBehaviourPunCallbacks
 {
     private bool menuOpen = false;
     private Vector2 scrollPosition;
     private Player selectedPlayer;
-    private string inputX = "";
-    private string inputY = "";
-    private string inputZ = "";
-    private string searchFilter = "";
+    private string inputX = "", inputY = "", inputZ = "", searchFilter = "";
 
     private bool confirmKick = false;
     private bool confirmBan = false;
+
+    private List<Player> _cachedPlayers = new List<Player>();
+    private Dictionary<int, string> _playerLabels = new Dictionary<int, string>();
+    private Dictionary<int, string> _cachedNames = new Dictionary<int, string>();
+    private Dictionary<int, bool> _cachedDeathStatus = new Dictionary<int, bool>();
 
     private void Update()
     {
@@ -25,6 +27,9 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         {
             menuOpen = !menuOpen;
             ToggleCursor(menuOpen);
+
+            if (menuOpen)
+                RefreshPlayerList();
         }
     }
 
@@ -34,15 +39,40 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         Cursor.visible = enable;
     }
 
+    private void RefreshPlayerList()
+    {
+        _cachedPlayers = new List<Player>(PhotonNetwork.PlayerList);
+        _playerLabels.Clear();
+        _cachedNames.Clear();
+        _cachedDeathStatus.Clear();
+
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human.photonView?.Owner != null)
+            {
+                int actorId = human.photonView.Owner.ActorNumber;
+                _cachedNames[actorId] = human.Name;
+                _cachedDeathStatus[actorId] = human.Dead;
+            }
+        }
+
+        foreach (var player in _cachedPlayers)
+        {
+            _playerLabels[player.ActorNumber] = GeneratePlayerLabel(player);
+        }
+    }
+
     private void OnGUI()
     {
         if (!menuOpen)
             return;
 
-        GUIStyle titleStyle = new GUIStyle(GUI.skin.label);
-        titleStyle.fontSize = 24;
-        titleStyle.alignment = TextAnchor.UpperCenter;
-        titleStyle.normal.textColor = Color.white;
+        GUIStyle titleStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = 24,
+            alignment = TextAnchor.UpperCenter,
+            normal = { textColor = Color.white }
+        };
 
         GUI.Label(new Rect(Screen.width / 2 - 200, 20, 400, 40), "MC Menu", titleStyle);
 
@@ -50,26 +80,31 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         {
             menuOpen = false;
             ToggleCursor(false);
+            return;
         }
 
-        // Search Field
         GUI.Label(new Rect(30, 50, 60, 20), "Search:");
-        searchFilter = GUI.TextField(new Rect(90, 50, 200, 20), searchFilter);
+        string newSearch = GUI.TextField(new Rect(90, 50, 200, 20), searchFilter);
+        if (newSearch != searchFilter)
+        {
+            searchFilter = newSearch;
+            RefreshPlayerList();
+        }
 
         GUILayout.BeginArea(new Rect(30, 80, 300, Screen.height - 150));
         scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-        foreach (var player in PhotonNetwork.PlayerList)
+        foreach (var player in _cachedPlayers)
         {
-            string playerLabel = GetPlayerLabel(player);
+            if (!_playerLabels.TryGetValue(player.ActorNumber, out string label))
+                label = GeneratePlayerLabel(player);
 
-            if (!string.IsNullOrEmpty(searchFilter) && !playerLabel.ToLower().Contains(searchFilter.ToLower()))
+            if (!string.IsNullOrEmpty(searchFilter) && !label.ToLower().Contains(searchFilter.ToLower()))
                 continue;
 
-            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
-            buttonStyle.fontSize = 12;
+            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button) { fontSize = 12 };
 
-            if (GUILayout.Button(playerLabel, buttonStyle, GUILayout.Height(22)))
+            if (GUILayout.Button(label, buttonStyle, GUILayout.Height(22)))
             {
                 selectedPlayer = player;
                 confirmKick = false;
@@ -80,86 +115,70 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         GUILayout.EndScrollView();
         GUILayout.EndArea();
 
-        if (selectedPlayer != null)
+        if (GUI.Button(new Rect(30, Screen.height - 60, 100, 30), "Refresh"))
         {
-            GUI.Box(new Rect(Screen.width - 350, 100, 300, 600), "Teleport " + GetPlayerLabel(selectedPlayer));
-
-            GUI.Label(new Rect(Screen.width - 320, 140, 50, 25), "X:");
-            inputX = GUI.TextField(new Rect(Screen.width - 270, 140, 140, 25), inputX);
-
-            GUI.Label(new Rect(Screen.width - 320, 170, 50, 25), "Y:");
-            inputY = GUI.TextField(new Rect(Screen.width - 270, 170, 140, 25), inputY);
-
-            GUI.Label(new Rect(Screen.width - 320, 200, 50, 25), "Z:");
-            inputZ = GUI.TextField(new Rect(Screen.width - 270, 200, 140, 25), inputZ);
-
-            if (GUI.Button(new Rect(Screen.width - 300, 240, 200, 30), "Teleport Player"))
-            {
-                TryTeleportSelectedPlayer();
-            }
-
-            if (GUI.Button(new Rect(Screen.width - 300, 280, 200, 30), "Teleport Player's Horse"))
-            {
-                TryTeleportHorseToPlayer();
-            }
-
-            if (GUI.Button(new Rect(Screen.width - 300, 320, 200, 30), "Bring Selected Player to Me"))
-            {
-                BringPlayerToMC();
-            }
-
-            if (GUI.Button(new Rect(Screen.width - 300, 360, 200, 30), "Bring Me to Selected Player"))
-            {
-                BringMCToPlayer();
-            }
-
-            if (GUI.Button(new Rect(Screen.width - 300, 400, 200, 30), "Revive Player"))
-            {
-                TryReviveSelectedPlayer();
-            }
-
-            if (GUI.Button(new Rect(Screen.width - 300, 440, 200, 30), confirmKick ? "Are you sure? (Kick)" : "Kick Player"))
-            {
-                if (confirmKick)
-                    ChatManager.KickPlayer(selectedPlayer);
-                else
-                    confirmKick = true;
-            }
-
-            if (GUI.Button(new Rect(Screen.width - 300, 480, 200, 30), confirmBan ? "Are you sure? (Ban)" : "Ban Player"))
-            {
-                if (confirmBan)
-                    ChatManager.KickPlayer(selectedPlayer, ban: true);
-                else
-                    confirmBan = true;
-            }
-
-            if (GUI.Button(new Rect(Screen.width - 300, 520, 200, 30), "Kill Player"))
-            {
-                TryKillSelectedPlayer();
-            }
-
-            // Selected Player Display
-            GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GetPlayerLabel(selectedPlayer));
+            RefreshPlayerList();
         }
+
+        DrawPlayerPanel();
     }
 
-    private string GetPlayerLabel(Player player)
+    private void DrawPlayerPanel()
     {
-        string name = player.NickName;
+        if (selectedPlayer == null) return;
 
-        foreach (var human in FindObjectsOfType<Human>())
+        GUI.Box(new Rect(Screen.width - 350, 100, 300, 600), "Teleport " + GeneratePlayerLabel(selectedPlayer));
+
+        GUI.Label(new Rect(Screen.width - 320, 140, 50, 25), "X:");
+        inputX = GUI.TextField(new Rect(Screen.width - 270, 140, 140, 25), inputX);
+
+        GUI.Label(new Rect(Screen.width - 320, 170, 50, 25), "Y:");
+        inputY = GUI.TextField(new Rect(Screen.width - 270, 170, 140, 25), inputY);
+
+        GUI.Label(new Rect(Screen.width - 320, 200, 50, 25), "Z:");
+        inputZ = GUI.TextField(new Rect(Screen.width - 270, 200, 140, 25), inputZ);
+
+        if (GUI.Button(new Rect(Screen.width - 300, 240, 200, 30), "Teleport Player")) TryTeleportSelectedPlayer();
+        if (GUI.Button(new Rect(Screen.width - 300, 280, 200, 30), "Teleport Player's Horse")) TryTeleportHorseToPlayer();
+        if (GUI.Button(new Rect(Screen.width - 300, 320, 200, 30), "Bring Selected Player to Me")) BringPlayerToMC();
+        if (GUI.Button(new Rect(Screen.width - 300, 360, 200, 30), "Bring Me to Selected Player")) BringMCToPlayer();
+        if (GUI.Button(new Rect(Screen.width - 300, 400, 200, 30), "Revive Player")) TryReviveSelectedPlayer();
+
+        if (GUI.Button(new Rect(Screen.width - 300, 440, 200, 30), confirmKick ? "Are you sure? (Kick)" : "Kick Player"))
         {
-            if (human.photonView != null && human.photonView.Owner != null && human.photonView.Owner.ActorNumber == player.ActorNumber)
-            {
-                name = human.Name;
-                break;
-            }
+            if (confirmKick)
+                ChatManager.KickPlayer(selectedPlayer);
+            else
+                confirmKick = true;
         }
 
-        string label = name;
+        if (GUI.Button(new Rect(Screen.width - 300, 480, 200, 30), confirmBan ? "Are you sure? (Ban)" : "Ban Player"))
+        {
+            if (confirmBan)
+                ChatManager.KickPlayer(selectedPlayer, ban: true);
+            else
+                confirmBan = true;
+        }
+
+        if (GUI.Button(new Rect(Screen.width - 300, 520, 200, 30), "Kill Player")) TryKillSelectedPlayer();
+
+        GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GeneratePlayerLabel(selectedPlayer));
+    }
+
+    private string GeneratePlayerLabel(Player player)
+    {
+        string name = _cachedNames.TryGetValue(player.ActorNumber, out var val) ? val : player.NickName;
+        bool isDead = _cachedDeathStatus.TryGetValue(player.ActorNumber, out var dead) && dead;
+
+        string label = "";
+        if (isDead)
+            label += "{X} ";
+
+        label += name;
+
         if (player.IsMasterClient)
             label += " (MC)";
+
         label += $" {{{player.ActorNumber}}}";
         return label;
     }
@@ -249,10 +268,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             if (human.photonView != null && human.photonView.Owner != null &&
                 human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
             {
-                if (human != null && !human.Dead)
-                {
-                    human.GetHit("Smited", 400, "Thunderspear", ""); // Instant kill same as Thunderspear
-                }
+                if (!human.Dead)
+                    human.GetHit("Smited", 400, "Thunderspear", "");
                 break;
             }
         }
