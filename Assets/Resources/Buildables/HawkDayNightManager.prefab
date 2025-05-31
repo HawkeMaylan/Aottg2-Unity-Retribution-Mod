@@ -238,12 +238,25 @@ MonoBehaviour:
   sun: {fileID: 42349908458179679}
   moon: {fileID: 4745114026488916793}
   dayDuration: 3600
-  sunInitialAngle: 0
-  rotationDirection: 1
-  sunAzimuth: -90
+  sunriseDuration: 0.1
+  middayDuration: 0.5
+  sunsetDuration: 0.1
+  nightDuration: 0.3
   maxSunIntensity: 0.8
   maxMoonIntensity: 0.09
-  daySkyColorGradient:
+  minimumNightExposure: 0.23
+  maximumDayExposure: 1.3
+  sunriseIntensityMultiplier: 1.2
+  sunsetIntensityMultiplier: 1.2
+  sunriseSunsetSaturationBoost: 0.219
+  giUpdateInterval: 1
+  materialUpdateInterval: 1
+  sunAzimuth: -90
+  sunInitialAngle: 0
+  sunriseSunColor: {r: 1, g: 0.31598812, b: 0.19999999, a: 1}
+  middaySunColor: {r: 1, g: 1, b: 1, a: 1}
+  sunsetSunColor: {r: 1, g: 0.32425773, b: 0.19999999, a: 1}
+  skyColorByAngle:
     serializedVersion: 2
     key0: {r: 1, g: 0, b: 0.046096325, a: 1}
     key1: {r: 1, g: 0.52469116, b: 0.07075471, a: 1}
@@ -273,46 +286,37 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 8
     m_NumAlphaKeys: 4
-  dayGroundColorGradient:
+  groundColorByAngle:
     serializedVersion: 2
-    key0: {r: 0.7830189, g: 0.47833815, b: 0.14404595, a: 1}
-    key1: {r: 1, g: 1, b: 1, a: 1}
-    key2: {r: 0.2516465, g: 0.63121223, b: 0.8207547, a: 0}
-    key3: {r: 0.7395252, g: 0.8716383, b: 0.9376112, a: 0}
-    key4: {r: 0.754717, g: 0.13883947, b: 0.13883947, a: 0}
+    key0: {r: 1, g: 0, b: 0.046096325, a: 1}
+    key1: {r: 1, g: 0.52469116, b: 0.07075471, a: 1}
+    key2: {r: 0.068574235, g: 0.49907514, b: 0.6320754, a: 1}
+    key3: {r: 0.1579299, g: 0.5774014, b: 0.8584906, a: 1}
+    key4: {r: 1, g: 0.07179487, b: 0, a: 0}
     key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0.060377352, g: 0, b: 0.3207547, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
     ctime0: 0
-    ctime1: 14264
-    ctime2: 30647
-    ctime3: 53585
-    ctime4: 65535
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
+    ctime1: 4241
+    ctime2: 10601
+    ctime3: 27563
+    ctime4: 33346
+    ctime5: 35273
+    ctime6: 49730
+    ctime7: 65535
     atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
+    atime1: 23516
+    atime2: 47417
+    atime3: 65535
     atime4: 0
     atime5: 0
     atime6: 0
     atime7: 0
     m_Mode: 0
     m_ColorSpace: -1
-    m_NumColorKeys: 5
-    m_NumAlphaKeys: 2
-  sunriseSunColor: {r: 1, g: 0.31598812, b: 0.19999999, a: 1}
-  middaySunColor: {r: 1, g: 1, b: 1, a: 1}
-  sunsetSunColor: {r: 1, g: 0.32425773, b: 0.19999999, a: 1}
-  minimumNightExposure: 0.23
-  sunriseDuration: 0.1
-  middayDuration: 0.3
-  sunsetDuration: 0.1
-  nightFadeInDuration: 0.35
-  nightFadeOutDuration: 0.15
-  nightBlackoutDuration: 0.1
+    m_NumColorKeys: 8
+    m_NumAlphaKeys: 4
+  syncInterval: 45
 --- !u!114 &63078299645148793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -331,7 +335,8 @@ MonoBehaviour:
   Synchronization: 1
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 2560877162783728931}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
