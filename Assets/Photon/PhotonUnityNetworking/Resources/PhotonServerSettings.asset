@@ -144,6 +144,7 @@ MonoBehaviour:
   - RPC_TeleportToHuman
   - RPC_ToggleGate
   - RPC_FireProjectile
+  - RPC_FlipCannonUpright
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
