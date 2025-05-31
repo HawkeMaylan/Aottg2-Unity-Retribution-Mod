@@ -21,6 +21,12 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     private Dictionary<int, string> _cachedNames = new Dictionary<int, string>();
     private Dictionary<int, bool> _cachedDeathStatus = new Dictionary<int, bool>();
 
+    private bool showInventoryPanel = false;
+    private string newCannonCount = "0";
+    private string newWagon1Count = "0";
+    private string newWagon2Count = "0";
+
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.RightControl) && PhotonNetwork.IsMasterClient)
@@ -165,7 +171,51 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (GUI.Button(new Rect(Screen.width - 300, 600, 200, 30), "Kill Player")) TryKillSelectedPlayer();
 
         GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GeneratePlayerLabel(selectedPlayer));
+
+        // Inventory Management Button
+        if (GUI.Button(new Rect(Screen.width - 300, 640, 200, 30), "Manage Inventory"))
+        {
+            showInventoryPanel = !showInventoryPanel;
+        }
+
+        // Inventory Panel
+        if (showInventoryPanel)
+        {
+            Human selectedHuman = FindHumanByPlayer(selectedPlayer);
+            if (selectedHuman != null)
+            {
+                var inv = selectedHuman.GetComponent<HumanInventory>();
+                if (inv != null)
+                {
+                    GUI.Box(new Rect(Screen.width - 370, 680, 340, 180), "Inventory");
+
+                    GUI.Label(new Rect(Screen.width - 360, 710, 90, 20), $"Cannons: {inv.cannonCount}");
+                    newCannonCount = GUI.TextField(new Rect(Screen.width - 270, 710, 50, 20), newCannonCount);
+                    if (GUI.Button(new Rect(Screen.width - 210, 710, 60, 20), "Set"))
+                        inv.cannonCount = ParseSafe(newCannonCount);
+
+                    GUI.Label(new Rect(Screen.width - 360, 740, 90, 20), $"Wagon1: {inv.wagon1Count}");
+                    newWagon1Count = GUI.TextField(new Rect(Screen.width - 270, 740, 50, 20), newWagon1Count);
+                    if (GUI.Button(new Rect(Screen.width - 210, 740, 60, 20), "Set"))
+                        inv.wagon1Count = ParseSafe(newWagon1Count);
+
+                    GUI.Label(new Rect(Screen.width - 360, 770, 90, 20), $"Wagon2: {inv.wagon2Count}");
+                    newWagon2Count = GUI.TextField(new Rect(Screen.width - 270, 770, 50, 20), newWagon2Count);
+                    if (GUI.Button(new Rect(Screen.width - 210, 770, 60, 20), "Set"))
+                        inv.wagon2Count = ParseSafe(newWagon2Count);
+                }
+                else
+                {
+                    GUI.Label(new Rect(Screen.width - 300, 710, 200, 20), "Inventory not found on player.");
+                }
+            }
+            else
+            {
+                GUI.Label(new Rect(Screen.width - 300, 710, 200, 20), "Could not find human for player.");
+            }
+        }
     }
+
 
     private void TryKillHorse()
     {
@@ -339,5 +389,21 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (horse != null && owner != null)
             horse.Init(owner); // This links the horse to the human
     }
+
+    private int ParseSafe(string input)
+    {
+        return int.TryParse(input, out int val) ? Mathf.Max(0, val) : 0;
+    }
+
+    private Human FindHumanByPlayer(Player player)
+    {
+        foreach (var h in FindObjectsOfType<Human>())
+        {
+            if (h.photonView != null && h.photonView.Owner == player)
+                return h;
+        }
+        return null;
+    }
+
 
 }

@@ -2700,13 +2700,14 @@ namespace Characters
             itemList3.Add(new Lanterntoggle(this, "Lantern On/Off", 1f));
             itemList3.Add(new CloakToggle(this, "Cape On/Off", 1f));
             itemList3.Add(new Cloak1Toggle(this, "Hood On/Off", 1f));
+            itemList3.Add(new Wagon1Spawn(this, "Support Wagon", 5f));
+            itemList3.Add(new LargeWagonSpawn(this, "Resupply Wagon", 5f));
+            itemList3.Add(new CannonTestSpawn(this, "Cannon", 5f));
             if (PhotonNetwork.IsMasterClient)
             {
                 itemList4.Add(new Daycycle(this, "DayCycle", 5f));
                 itemList4.Add(new DaycycleDelete(this, "DeleteDayCycle", 15f));
-                itemList4.Add(new Wagon1Spawn(this, "Wagon1", 5f));
-                itemList4.Add(new LargeWagonSpawn(this, "Wagon2", 1f));
-                itemList4.Add(new CannonTestSpawn(this, "Cannon", 1f));
+
                 itemList4.Add(new ShigGateSpawn(this, "ShigGateSpawn", 1f));
 
                 

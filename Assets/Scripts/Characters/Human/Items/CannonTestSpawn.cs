@@ -18,16 +18,25 @@ namespace Characters
             if (human == null || !_owner.photonView.IsMine || !PhotonNetwork.InRoom || !PhotonNetwork.IsConnectedAndReady)
                 return;
 
-
+            var inventory = human.GetComponent<HumanInventory>();
+            if (inventory == null || inventory.cannonCount <= 0)
+            {
+                Debug.Log("Not enough cannon count to spawn.");
+                return;
+            }
 
             try
             {
                 Vector3 pos = human.Cache.Transform.position + human.Cache.Transform.forward * 3f;
-                GameObject WagonObj = PhotonNetwork.Instantiate("Buildables/CannonTest", pos, Quaternion.identity);
+                GameObject CannonObj = PhotonNetwork.Instantiate("Buildables/CannonTest", pos, Quaternion.identity);
 
-
+                // successful spawn inventory drop
+                inventory.cannonCount--;
             }
-            catch { /* Silently ignore errors if any occur */ }
+            catch
+            {
+                Debug.LogWarning("Cannon spawn failed.");
+            }
         }
     }
 }
