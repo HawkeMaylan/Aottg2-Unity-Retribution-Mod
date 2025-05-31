@@ -4,6 +4,7 @@ using GameManagers;
 using Utility;
 using Settings;
 using Photon.Pun;
+using Photon.Realtime;
 
 namespace Characters
 {
@@ -201,6 +202,30 @@ namespace Characters
                     Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, Quaternion.LookRotation(direction.normalized), 10f * Time.deltaTime);
                 }
             }
+        }
+
+        [PunRPC]
+        public void RPC_SetHorseOwner(int actorNumber)
+        {
+            Player targetPlayer = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
+
+            // Only run this on the client who owns the horse
+            if (!photonView.IsMine)
+                return;
+
+            foreach (Human h in FindObjectsOfType<Human>())
+            {
+                if (h.photonView.Owner == targetPlayer)
+                {
+                    Init(h);        // 
+                    h.Horse = this; // Optional reference for reverse lookup
+                    return;
+                }
+            }
+
+            // If no matching human found, destroy this horse to prevent zombie objects
+            Debug.LogWarning("Horse could not find its human owner.");
+            PhotonNetwork.Destroy(gameObject);
         }
 
 

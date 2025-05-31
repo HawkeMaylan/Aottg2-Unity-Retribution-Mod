@@ -140,11 +140,13 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
         if (GUI.Button(new Rect(Screen.width - 300, 240, 200, 30), "Teleport Player")) TryTeleportSelectedPlayer();
         if (GUI.Button(new Rect(Screen.width - 300, 280, 200, 30), "Teleport Player's Horse")) TryTeleportHorseToPlayer();
-        if (GUI.Button(new Rect(Screen.width - 300, 320, 200, 30), "Bring Selected Player to Me")) BringPlayerToMC();
-        if (GUI.Button(new Rect(Screen.width - 300, 360, 200, 30), "Bring Me to Selected Player")) BringMCToPlayer();
-        if (GUI.Button(new Rect(Screen.width - 300, 400, 200, 30), "Revive Player")) TryReviveSelectedPlayer();
+        if (GUI.Button(new Rect(Screen.width - 300, 320, 200, 30), "Kill Player's Horse")) TryKillHorse();
+        if (GUI.Button(new Rect(Screen.width - 300, 360, 200, 30), "Respawn Player's Horse")) TryRespawnHorse();
+        if (GUI.Button(new Rect(Screen.width - 300, 400, 200, 30), "Bring Selected Player to Me")) BringPlayerToMC();
+        if (GUI.Button(new Rect(Screen.width - 300, 440, 200, 30), "Bring Me to Selected Player")) BringMCToPlayer();
+        if (GUI.Button(new Rect(Screen.width - 300, 480, 200, 30), "Revive Player")) TryReviveSelectedPlayer();
 
-        if (GUI.Button(new Rect(Screen.width - 300, 440, 200, 30), confirmKick ? "Are you sure? (Kick)" : "Kick Player"))
+        if (GUI.Button(new Rect(Screen.width - 300, 520, 200, 30), confirmKick ? "Are you sure? (Kick)" : "Kick Player"))
         {
             if (confirmKick)
                 ChatManager.KickPlayer(selectedPlayer);
@@ -152,7 +154,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 confirmKick = true;
         }
 
-        if (GUI.Button(new Rect(Screen.width - 300, 480, 200, 30), confirmBan ? "Are you sure? (Ban)" : "Ban Player"))
+        if (GUI.Button(new Rect(Screen.width - 300, 560, 200, 30), confirmBan ? "Are you sure? (Ban)" : "Ban Player"))
         {
             if (confirmBan)
                 ChatManager.KickPlayer(selectedPlayer, ban: true);
@@ -160,10 +162,56 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 confirmBan = true;
         }
 
-        if (GUI.Button(new Rect(Screen.width - 300, 520, 200, 30), "Kill Player")) TryKillSelectedPlayer();
+        if (GUI.Button(new Rect(Screen.width - 300, 600, 200, 30), "Kill Player")) TryKillSelectedPlayer();
 
         GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GeneratePlayerLabel(selectedPlayer));
     }
+
+    private void TryKillHorse()
+    {
+        foreach (var horse in FindObjectsOfType<Horse>())
+        {
+            if (horse.photonView != null && horse.photonView.Owner != null &&
+                horse.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
+            {
+                PhotonNetwork.Destroy(horse.gameObject);
+                break;
+            }
+        }
+    }
+
+    private void TryRespawnHorse()
+    {
+        if (selectedPlayer == null || !PhotonNetwork.IsMasterClient)
+            return;
+
+        Vector3 spawnPosition = Vector3.zero;
+        Human humanOwner = null;
+
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human.photonView != null && human.photonView.Owner != null &&
+                human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
+            {
+                spawnPosition = human.Cache.Transform.position + Vector3.right * 2f;
+                humanOwner = human;
+                break;
+            }
+        }
+
+        TryKillHorse();
+
+        GameObject newHorse = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
+        PhotonView horseView = newHorse.GetComponent<PhotonView>();
+
+        // Transfer ownership to target player
+        horseView.TransferOwnership(selectedPlayer);
+
+        // Call RPC to link on the owner's machine
+        horseView.RPC("RPC_SetHorseOwner", selectedPlayer, selectedPlayer.ActorNumber);
+    }
+
+
 
     private string GeneratePlayerLabel(Player player)
     {
@@ -182,6 +230,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         label += $" {{{player.ActorNumber}}}";
         return label;
     }
+
 
     private void TryTeleportSelectedPlayer()
     {
@@ -284,4 +333,11 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         }
         return null;
     }
+    private System.Collections.IEnumerator InitHorseAfterDelay(Horse horse, Human owner)
+    {
+        yield return new WaitForSeconds(0.1f); // Wait for Awake
+        if (horse != null && owner != null)
+            horse.Init(owner); // This links the horse to the human
+    }
+
 }
