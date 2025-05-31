@@ -461,7 +461,7 @@ MonoBehaviour:
     RecoilSpeed: 5
     Knockback: 1
     knockbackForce: 400
-    startingAmmo: 1
+    startingAmmo: 15
   - name: Cannonball
     prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
     launchForce: 7000
