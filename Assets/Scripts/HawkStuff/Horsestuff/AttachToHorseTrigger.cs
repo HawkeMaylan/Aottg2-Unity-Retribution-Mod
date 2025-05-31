@@ -4,9 +4,7 @@ using Settings;
 using GameManagers;
 using ApplicationManagers;
 using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
-using Characters; // Needed for Horse script access
+using Characters;
 
 public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 {
@@ -36,6 +34,9 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     [Header("Detach Prompt Settings")]
     public float detachPromptDuration = 5f;
 
+    [Header("Auto Detach Settings")]
+    public float autoDetachRange = 10f;
+
     private bool isAttached = false;
     private Transform horseRootInContact;
     private Transform attachedHorse;
@@ -46,6 +47,8 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
     private static string currentPrompt = "";
     private float detachPromptTimer = 0f;
+
+    private Coroutine detachCheckCoroutine;
 
     private void Start()
     {
@@ -181,6 +184,9 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
         SetPrompt(detachPromptText);
         detachPromptTimer = detachPromptDuration;
+
+        if (detachCheckCoroutine != null) StopCoroutine(detachCheckCoroutine);
+        detachCheckCoroutine = StartCoroutine(AutoDetachCheck());
     }
 
     [PunRPC]
@@ -197,8 +203,38 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         attachedHorse = null;
         attachedHorseViewID = -1;
 
+        if (detachCheckCoroutine != null)
+        {
+            StopCoroutine(detachCheckCoroutine);
+            detachCheckCoroutine = null;
+        }
+
         SetPrompt(attachPromptText);
         detachPromptTimer = 0f;
+    }
+
+    private IEnumerator AutoDetachCheck()
+    {
+        WaitForSeconds wait = new WaitForSeconds(1f);
+        while (isAttached)
+        {
+            if (attachedHorse == null)
+            {
+                if (pv.IsMine)
+                    pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
+                yield break;
+            }
+
+            float distance = Vector3.Distance(wagon.position, attachedHorse.position);
+            if (distance > autoDetachRange)
+            {
+                if (pv.IsMine)
+                    pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
+                yield break;
+            }
+
+            yield return wait;
+        }
     }
 
     private void OnGUI()
