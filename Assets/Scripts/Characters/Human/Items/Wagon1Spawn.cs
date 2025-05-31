@@ -18,7 +18,6 @@ namespace Characters
             if (human == null || !_owner.photonView.IsMine || !PhotonNetwork.InRoom || !PhotonNetwork.IsConnectedAndReady || human.Horse == null)
                 return;
 
-            // Get the inventory
             var inventory = human.GetComponent<HumanInventory>();
             if (inventory == null || inventory.wagon1Count <= 0)
             {
@@ -29,14 +28,23 @@ namespace Characters
             try
             {
                 Vector3 pos = human.Cache.Transform.position + Vector3.up * 1.5f;
-                GameObject WagonObj = PhotonNetwork.Instantiate("Buildables/Wagon1aEdit", pos, Quaternion.identity);
+                GameObject wagonObj = PhotonNetwork.Instantiate("Buildables/Wagon1aEdit", pos, Quaternion.identity);
 
-                
-                inventory.wagon1Count--;
+                // Sync inventory change
+                PhotonView view = inventory.GetComponent<PhotonView>();
+                if (view != null)
+                {
+                    int newCannonCount = inventory.cannonCount;
+                    int newWagon1Count = Mathf.Max(0, inventory.wagon1Count - 1);
+                    int newWagon2Count = inventory.wagon2Count;
+
+                    view.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer,
+                        newCannonCount, newWagon1Count, newWagon2Count);
+                }
             }
             catch
             {
-                Debug.LogWarning("Wagon spawn failed.");
+                Debug.LogWarning("Wagon1 spawn failed.");
             }
         }
     }

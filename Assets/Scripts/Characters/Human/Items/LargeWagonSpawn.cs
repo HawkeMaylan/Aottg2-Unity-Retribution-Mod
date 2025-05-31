@@ -30,8 +30,17 @@ namespace Characters
                 Vector3 pos = human.Cache.Transform.position + Vector3.up * 1.5f;
                 GameObject WagonObj = PhotonNetwork.Instantiate("Buildables/LargeWagon", pos, Quaternion.identity);
 
-                //  Decrement after spawn
-                inventory.wagon2Count--;
+                // Use RPC to update inventory on all clients
+                PhotonView view = inventory.GetComponent<PhotonView>();
+                if (view != null)
+                {
+                    int newCannonCount = inventory.cannonCount;
+                    int newWagon1Count = inventory.wagon1Count;
+                    int newWagon2Count = Mathf.Max(0, inventory.wagon2Count - 1);
+
+                    view.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer,
+                        newCannonCount, newWagon1Count, newWagon2Count);
+                }
             }
             catch
             {
