@@ -425,6 +425,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4c72495fac2f9a429d2ce37acd4796c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactionZone: {fileID: 8357587957815744941}
   mountPoint: {fileID: 1551013655377393878}
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
@@ -493,6 +494,8 @@ MonoBehaviour:
     knockbackForce: 50
   muzzleFlashPrefab: {fileID: 5235915867927116546, guid: b5a419a416d428e49babef468d99702e, type: 3}
   projectileUIPrefab: {fileID: 3976318980140897857, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
+  flipHoldTime: 1.5
+  flipSpeed: 5
 --- !u!1001 &8048790762546070642
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -587,5 +590,10 @@ Transform:
 --- !u!4 &7374576910944950920 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 712921334650953466, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+  m_PrefabInstance: {fileID: 8048790762546070642}
+  m_PrefabAsset: {fileID: 0}
+--- !u!135 &8357587957815744941 stripped
+SphereCollider:
+  m_CorrespondingSourceObject: {fileID: 2039868374014598623, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
   m_PrefabInstance: {fileID: 8048790762546070642}
   m_PrefabAsset: {fileID: 0}
