@@ -676,8 +676,8 @@ MonoBehaviour:
   linearDamper: 3
   angularSpring: 600
   angularDamper: 3
-  jointBreakForce: Infinity
-  jointBreakTorque: Infinity
+  jointBreakForce: 600
+  jointBreakTorque: 600
   enableCollision: 1
   maxAllowedHorseTurnAngle: 40
   autoDetachRange: 10

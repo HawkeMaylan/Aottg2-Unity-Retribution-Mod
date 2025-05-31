@@ -678,7 +678,8 @@ MonoBehaviour:
   jointBreakForce: 600
   jointBreakTorque: 600
   enableCollision: 1
-  maxAllowedHorseTurnAngle: 45
+  maxAllowedHorseTurnAngle: 40
+  autoDetachRange: 10
 --- !u!135 &8967567940926374313
 SphereCollider:
   m_ObjectHideFlags: 0
