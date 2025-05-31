@@ -147,6 +147,7 @@ MonoBehaviour:
   - RPC_FlipCannonUpright
   - RPC_SetHorseOwner
   - RPC_SetInventoryCounts
+  - RPC_SetStats
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
