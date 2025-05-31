@@ -143,7 +143,7 @@ namespace Characters
             _nodes.Clear();
             _currentLiveTime = 0f;
             _nodes.Add(_hookPosition);
-            _renderer.startWidth = _renderer.endWidth = 0.1f;
+            _renderer.startWidth = _renderer.endWidth = 0.05f;
             if (SettingsManager.SoundSettings.OldHookEffect.Value)
                 _owner.PlaySoundRPC(HumanSounds.OldHookLaunch, Util.CreateLocalPhotonInfo());
             else
@@ -194,7 +194,7 @@ namespace Characters
                 /// }
             }
             _currentLiveTime = 0f;
-            _renderer.startWidth = _renderer.endWidth = 0.1f;
+            _renderer.startWidth = _renderer.endWidth = 0.05f;
             if (SettingsManager.SoundSettings.HookImpactEffect.Value)
             {
                 if (HookCharacter != null && HookCharacter is Human)

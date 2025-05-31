@@ -33,6 +33,7 @@ namespace UI
                 ElementFactory.CreateToggleSetting(DoublePanelRight, style, SettingsManager.InputSettings.Human.AutoUseGas,
                 UIManager.GetLocale(cat, "Keybinds.Human", "AutoUseGas"), tooltip: UIManager.GetLocale(cat, "Keybinds.Human", "AutoUseGasTooltip"));
 
+
                 ElementFactory.CreateToggleSetting(DoublePanelRight, style, SettingsManager.InputSettings.Human.DoubleHookPan,
                 UIManager.GetLocale(cat, "Keybinds.Human", "DoubleHookPan"));
 

@@ -18,7 +18,7 @@ namespace Characters
         public HookUseable(BaseCharacter owner, bool left, bool gun) : base(owner)
         {
             _left = left;
-            _hookSpeed = 3f;
+            _hookSpeed = 3.5f;
             float maxLiveTime = 2.4f / _hookSpeed;
             for (int i = 0; i < 3; i++)
                 Hooks.Add(Hook.CreateHook((Human)owner, left, i, maxLiveTime, gun));
