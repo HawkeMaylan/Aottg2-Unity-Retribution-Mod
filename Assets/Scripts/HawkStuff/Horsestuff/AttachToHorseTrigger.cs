@@ -29,6 +29,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
     [Header("Horse Turn Constraint")]
     public float maxAllowedHorseTurnAngle = 45f;
+    public float autoDetachRange = 10f;
 
     private bool isAttached = false;
     private Transform horseRootInContact;
@@ -39,7 +40,6 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private int attachedHorseViewID = -1;
 
     private static string currentPrompt = "";
-    private float detachPromptTimer = 0f;
     private Coroutine detachCheckCoroutine;
     private Coroutine attachPromptCoroutine;
 
@@ -85,20 +85,12 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
                 }
             }
         }
-
-        if (isAttached && detachPromptTimer > 0f)
-        {
-            detachPromptTimer -= Time.deltaTime;
-            if (detachPromptTimer <= 0f)
-                ClearPrompt();
-        }
     }
 
     public bool IsAttachedToThisHorse(Component horse)
     {
         return isAttached && attachedHorse == horse.transform;
     }
-
 
     public bool IsHorseRotationAllowed(Transform horse)
     {
@@ -221,12 +213,21 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         WaitForSeconds wait = new WaitForSeconds(1f);
         while (isAttached)
         {
-            if (attachedHorse == null || Vector3.Distance(wagon.position, attachedHorse.position) > 10f)
+            if (attachedHorse == null || Vector3.Distance(wagon.position, attachedHorse.position) > autoDetachRange)
             {
                 if (pv.IsMine)
                     pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
                 yield break;
             }
+
+            float angle = Vector3.Angle(wagon.forward, attachedHorse.forward);
+            if (angle > maxAllowedHorseTurnAngle)
+            {
+                if (pv.IsMine)
+                    pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
+                yield break;
+            }
+
             yield return wait;
         }
     }
