@@ -1,4 +1,5 @@
 using UnityEngine;
+using Photon.Pun;
 
 namespace Characters
 {
@@ -18,5 +19,17 @@ namespace Characters
 
         public void AddWagon2() => wagon2Count++;
         public void RemoveWagon2() => wagon2Count = Mathf.Max(0, wagon2Count - 1);
+
+
+        [PunRPC]
+        public void RPC_SetInventoryCounts(int newCannon, int newWagon1, int newWagon2)
+        {
+            cannonCount = newCannon;
+            wagon1Count = newWagon1;
+            wagon2Count = newWagon2;
+        }
     }
-}
+
+    
+
+ }

@@ -145,6 +145,8 @@ MonoBehaviour:
   - RPC_ToggleGate
   - RPC_FireProjectile
   - RPC_FlipCannonUpright
+  - RPC_SetHorseOwner
+  - RPC_SetInventoryCounts
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

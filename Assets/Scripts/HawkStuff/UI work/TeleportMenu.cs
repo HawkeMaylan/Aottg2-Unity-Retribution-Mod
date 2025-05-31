@@ -5,6 +5,7 @@ using Photon.Realtime;
 using Characters;
 using UI;
 using GameManagers;
+using Photon.Pun;
 
 public class TeleportMenu : MonoBehaviourPunCallbacks
 {
@@ -192,17 +193,38 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                     GUI.Label(new Rect(Screen.width - 360, 710, 90, 20), $"Cannons: {inv.cannonCount}");
                     newCannonCount = GUI.TextField(new Rect(Screen.width - 270, 710, 50, 20), newCannonCount);
                     if (GUI.Button(new Rect(Screen.width - 210, 710, 60, 20), "Set"))
-                        inv.cannonCount = ParseSafe(newCannonCount);
+                    {
+                        PhotonView view = inv.GetComponent<PhotonView>();
+                        if (view != null)
+                        {
+                            view.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer,
+                                ParseSafe(newCannonCount), inv.wagon1Count, inv.wagon2Count);
+                        }
+                    }
 
                     GUI.Label(new Rect(Screen.width - 360, 740, 90, 20), $"Wagon1: {inv.wagon1Count}");
                     newWagon1Count = GUI.TextField(new Rect(Screen.width - 270, 740, 50, 20), newWagon1Count);
                     if (GUI.Button(new Rect(Screen.width - 210, 740, 60, 20), "Set"))
-                        inv.wagon1Count = ParseSafe(newWagon1Count);
+                    {
+                        PhotonView view = inv.GetComponent<PhotonView>();
+                        if (view != null)
+                        {
+                            view.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer,
+                                inv.cannonCount, ParseSafe(newWagon1Count), inv.wagon2Count);
+                        }
+                    }
 
                     GUI.Label(new Rect(Screen.width - 360, 770, 90, 20), $"Wagon2: {inv.wagon2Count}");
                     newWagon2Count = GUI.TextField(new Rect(Screen.width - 270, 770, 50, 20), newWagon2Count);
                     if (GUI.Button(new Rect(Screen.width - 210, 770, 60, 20), "Set"))
-                        inv.wagon2Count = ParseSafe(newWagon2Count);
+                    {
+                        PhotonView view = inv.GetComponent<PhotonView>();
+                        if (view != null)
+                        {
+                            view.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer,
+                                inv.cannonCount, inv.wagon1Count, ParseSafe(newWagon2Count));
+                        }
+                    }
                 }
                 else
                 {
@@ -215,6 +237,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             }
         }
     }
+
 
 
     private void TryKillHorse()
