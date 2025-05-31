@@ -237,38 +237,53 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     public void RPC_FireProjectile(int index)
     {
-        if (!photonView.IsMine) return;
-
         var selected = projectileOptions[index];
         if (selected.ammoCount <= 0) return;
 
-        // Photon spawn flash for all clients
-        if (muzzleFlashPrefab != null)
+        // Spawn projectile (only owner)
+        if (photonView.IsMine)
         {
-            string flashPath = $"Buildables/Projectiles/{muzzleFlashPrefab.name}";
-            PhotonNetwork.Instantiate(flashPath, firePoint.position, firePoint.rotation);
-        }
-
-        string projectilePath = $"Buildables/Projectiles/{selected.prefab.name}";
-        int count = Mathf.Max(1, selected.projectileCount);
-        float spread = selected.spreadAngle;
-
-        for (int i = 0; i < count; i++)
-        {
-            Vector3 direction = firePoint.forward;
-            direction = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.up) * direction;
-            direction = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.right) * direction;
-
-            GameObject projectile = PhotonNetwork.Instantiate(projectilePath, firePoint.position, Quaternion.LookRotation(direction));
-            if (projectile.TryGetComponent<Rigidbody>(out var rb))
+            if (muzzleFlashPrefab != null)
             {
-                rb.AddForce(direction * selected.launchForce + firePoint.up * selected.upwardForce);
+                string flashPath = $"Buildables/Projectiles/{muzzleFlashPrefab.name}";
+                PhotonNetwork.Instantiate(flashPath, firePoint.position, firePoint.rotation);
             }
+
+            string projectilePath = $"Buildables/Projectiles/{selected.prefab.name}";
+            int count = Mathf.Max(1, selected.projectileCount);
+            float spread = selected.spreadAngle;
+
+            for (int i = 0; i < count; i++)
+            {
+                Vector3 direction = firePoint.forward;
+                direction = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.up) * direction;
+                direction = Quaternion.AngleAxis(Random.Range(-spread, spread), firePoint.right) * direction;
+
+                GameObject projectile = PhotonNetwork.Instantiate(projectilePath, firePoint.position, Quaternion.LookRotation(direction));
+                if (projectile.TryGetComponent<Rigidbody>(out var rb))
+                {
+                    rb.AddForce(direction * selected.launchForce + firePoint.up * selected.upwardForce);
+                }
+            }
+
+            selected.ammoCount--;
+            UpdateProjectileUI();
         }
 
-        selected.ammoCount--;
-        UpdateProjectileUI();
+        
+        if (selected.BarrelRecoil && CannonBarrel != null)
+            StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.barrelRecoilAngle, selected.RecoilSpeed));
+
+        
+        if (selected.Knockback && moveRigidbody != null)
+        {
+            Vector3 backwardForce = -firePoint.forward * selected.knockbackForce;
+            moveRigidbody.AddForce(backwardForce, ForceMode.Impulse);
+        }
     }
+
+
+
 
 
 
@@ -330,6 +345,8 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     }
     private void OnTriggerEnter(Collider other)
     {
+        if (isMounted) return; 
+
         Human human = other.GetComponentInParent<Human>();
         if (human != null && human.IsMine())
         {
@@ -337,14 +354,11 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             humanRigidbody = human.GetComponent<Rigidbody>();
             hasExitedAfterUnmount = false;
 
-            
-            if (!isMounted)
-            {
-                SetPrompt(mountPromptText);
-                mountPromptExpireTime = Time.time + 10f;
-            }
+            SetPrompt(mountPromptText);
+            mountPromptExpireTime = Time.time + 10f;
         }
     }
+
 
     private void OnTriggerExit(Collider other)
     {
@@ -370,13 +384,17 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         if (humanInTrigger == null) return;
 
+        
+        if (isMounted && humanInTrigger.MountedTransform != mountPoint)
+            return;
+
         if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
                 if (!isMounted && !hasExitedAfterUnmount)
                     AttachHuman();
-                else if (isMounted)
+                else if (isMounted && humanInTrigger.MountedTransform == mountPoint)
                 {
                     DetachHuman();
                     mountPromptExpireTime = -1f;
@@ -384,6 +402,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             }
         }
     }
+
 
     private void HandleUnmountPromptTimer()
     {
@@ -421,8 +440,11 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void AttachHuman()
     {
-        if (humanInTrigger == null || mountPoint == null) return;
+        // Prevent mounting if already mounted (local or synced)
+        if (humanInTrigger == null || mountPoint == null || isMounted)
+            return;
 
+        // Double-check across the network to avoid race conditions
         if (!photonView.IsMine)
             photonView.RequestOwnership();
 
@@ -447,11 +469,9 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         isMounted = true;
         hasExitedAfterUnmount = false;
 
-
         ClearPrompt();
         SetPrompt(unmountPromptText);
         mountPromptExpireTime = Time.time + unmountPromptDuration;
-
 
         unmountPromptTimer = unmountPromptDuration;
 
@@ -460,6 +480,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         UpdateProjectileUI();
     }
+
 
 
     private void DetachHuman()
