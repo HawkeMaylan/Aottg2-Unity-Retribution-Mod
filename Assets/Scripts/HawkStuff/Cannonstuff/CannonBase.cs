@@ -133,12 +133,13 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     private float mountPromptExpireTime = -1f;
 
     [Header("Flip Settings")]
-    public float flipHoldTime = 1.5f;
-    public float flipSpeed = 5f;
+    public float flipHoldTime = 3f;
+    public float flipSpeed = 1f;
 
     private float gHoldTimer = 0f;
     private bool isFlipping = false;
-    private Quaternion targetRotation;
+    private Coroutine flipRoutine;
+
 
     private void Start()
     {
@@ -156,7 +157,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         if (!photonView.IsMine) return;
 
-        // 
+        // Detect nearby human using interactionZone
         bool playerFound = false;
 
         if (!isMounted && humanInTrigger == null && interactionZone != null)
@@ -182,7 +183,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             }
         }
 
-        // 
+        // Clear if player leaves zone
         if (!playerFound && humanInTrigger != null)
         {
             float dist = Vector3.Distance(humanInTrigger.transform.position, transform.position);
@@ -195,39 +196,50 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             }
         }
 
-        // 
+        // Handle flipping by holding G in range for 3 seconds
         if (!isMounted && humanInTrigger != null && humanInTrigger.IsMine())
         {
             if (Input.GetKey(KeyCode.G))
             {
-                gHoldTimer += Time.deltaTime;
-                if (gHoldTimer >= flipHoldTime && !isFlipping)
+                if (interactionZone.bounds.Contains(humanInTrigger.transform.position))
                 {
-                    if (!photonView.IsMine)
-                        photonView.RequestOwnership();
+                    gHoldTimer += Time.deltaTime;
 
-                    photonView.RPC("RPC_FlipCannonUpright", RpcTarget.All);
-                    isFlipping = true;
+                    if (gHoldTimer >= flipHoldTime && !isFlipping)
+                    {
+                        if (!photonView.IsMine)
+                            photonView.RequestOwnership();
+
+                        photonView.RPC("RPC_FlipCannonUpright", RpcTarget.All);
+                        gHoldTimer = 0f;
+                    }
+                }
+                else
+                {
+                    CancelFlipHold();
                 }
             }
             else
             {
-                gHoldTimer = 0f;
+                CancelFlipHold();
             }
         }
 
-        // 
-        if (isFlipping)
+        // Auto-dismount if cannon tips over while mounted
+        if (isMounted && humanInTrigger != null)
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * flipSpeed);
-            if (Quaternion.Angle(transform.rotation, targetRotation) < 1f)
+            Vector3 euler = transform.rotation.eulerAngles;
+            float x = NormalizeAngle(euler.x);
+            float z = NormalizeAngle(euler.z);
+
+            if (Mathf.Abs(x) > 90f || Mathf.Abs(z) > 90f)
             {
-                transform.rotation = targetRotation;
-                isFlipping = false;
+                DetachHuman();
+                ClearPrompt();
             }
         }
 
-        //
+        // Fire cannon
         if (isMounted && humanInTrigger != null && humanInTrigger.IsMine() && Input.GetMouseButtonDown(0))
         {
             if (Time.time >= nextFireTime && projectileOptions.Count > 0)
@@ -237,7 +249,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             }
         }
 
-        // 
+        // Switch projectile selection
         if (isMounted)
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow))
@@ -246,11 +258,12 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
                 SelectProjectile((selectedProjectileIndex + 1) % projectileOptions.Count);
         }
 
-
         HandleCooldownUI();
         HandleProjectileUISwap();
         RotateTowardsCamera();
     }
+
+
 
 
 
@@ -783,10 +796,35 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     public void RPC_FlipCannonUpright()
     {
-        targetRotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
-        isFlipping = true;
+        if (flipRoutine != null)
+            StopCoroutine(flipRoutine);
+
+        flipRoutine = StartCoroutine(FlipCannonOverTime(3f));
     }
 
+    private IEnumerator FlipCannonOverTime(float duration)
+    {
+        isFlipping = true;
+        Quaternion startRot = transform.rotation;
+        Quaternion endRot = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
+
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            transform.rotation = Quaternion.Slerp(startRot, endRot, t / duration);
+            yield return null;
+        }
+
+        transform.rotation = endRot;
+        isFlipping = false;
+    }
+
+
+    private void CancelFlipHold()
+    {
+        gHoldTimer = 0f;
+    }
 
 
 }
