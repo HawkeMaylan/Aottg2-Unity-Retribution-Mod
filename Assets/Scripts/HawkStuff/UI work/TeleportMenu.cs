@@ -27,6 +27,15 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     private string newWagon1Count = "0";
     private string newWagon2Count = "0";
 
+    private bool showStatsPanel = false;
+    private string newHP = "100";
+    private string newMaxGas = "1000";
+    private string newMaxBlades = "5";
+    private string newAcceleration = "20";
+    private string newSpeed = "14";
+    private string newHorseSpeed = "20";
+
+
 
     private void Update()
     {
@@ -156,28 +165,36 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (GUI.Button(new Rect(Screen.width - 300, 520, 200, 30), confirmKick ? "Are you sure? (Kick)" : "Kick Player"))
         {
             if (confirmKick)
+            {
                 ChatManager.KickPlayer(selectedPlayer);
-            else
-                confirmKick = true;
+                confirmKick = false;
+            }
+            else confirmKick = true;
         }
 
         if (GUI.Button(new Rect(Screen.width - 300, 560, 200, 30), confirmBan ? "Are you sure? (Ban)" : "Ban Player"))
         {
             if (confirmBan)
+            {
                 ChatManager.KickPlayer(selectedPlayer, ban: true);
-            else
-                confirmBan = true;
+                confirmBan = false;
+            }
+            else confirmBan = true;
         }
 
         if (GUI.Button(new Rect(Screen.width - 300, 600, 200, 30), "Kill Player")) TryKillSelectedPlayer();
 
         GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GeneratePlayerLabel(selectedPlayer));
 
-        // Inventory Management Button
         if (GUI.Button(new Rect(Screen.width - 300, 640, 200, 30), "Manage Inventory"))
-        {
             showInventoryPanel = !showInventoryPanel;
-        }
+
+        if (GUI.Button(new Rect(Screen.width - 300, 680, 200, 30), "Manage Stats"))
+            showStatsPanel = !showStatsPanel;
+
+        float leftX = Screen.width - 540;
+        float inventoryY = 520;  // moved up from 580
+        float statsY = 660;      // moved up from 720
 
         // Inventory Panel
         if (showInventoryPanel)
@@ -188,55 +205,92 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 var inv = selectedHuman.GetComponent<HumanInventory>();
                 if (inv != null)
                 {
-                    GUI.Box(new Rect(Screen.width - 370, 680, 340, 180), "Inventory");
+                    GUI.Box(new Rect(leftX, inventoryY, 230, 120), "Inventory");
 
-                    GUI.Label(new Rect(Screen.width - 360, 710, 90, 20), $"Cannons: {inv.cannonCount}");
-                    newCannonCount = GUI.TextField(new Rect(Screen.width - 270, 710, 50, 20), newCannonCount);
-                    if (GUI.Button(new Rect(Screen.width - 210, 710, 60, 20), "Set"))
-                    {
-                        PhotonView view = inv.GetComponent<PhotonView>();
-                        if (view != null)
-                        {
-                            view.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer,
-                                ParseSafe(newCannonCount), inv.wagon1Count, inv.wagon2Count);
-                        }
-                    }
+                    GUI.Label(new Rect(leftX + 10, inventoryY + 25, 90, 20), $"Cannons: {inv.cannonCount}");
+                    newCannonCount = GUI.TextField(new Rect(leftX + 100, inventoryY + 25, 50, 20), newCannonCount);
+                    if (GUI.Button(new Rect(leftX + 160, inventoryY + 25, 60, 20), "Set"))
+                        inv.photonView?.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer, ParseSafe(newCannonCount), inv.wagon1Count, inv.wagon2Count);
 
-                    GUI.Label(new Rect(Screen.width - 360, 740, 90, 20), $"Wagon1: {inv.wagon1Count}");
-                    newWagon1Count = GUI.TextField(new Rect(Screen.width - 270, 740, 50, 20), newWagon1Count);
-                    if (GUI.Button(new Rect(Screen.width - 210, 740, 60, 20), "Set"))
-                    {
-                        PhotonView view = inv.GetComponent<PhotonView>();
-                        if (view != null)
-                        {
-                            view.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer,
-                                inv.cannonCount, ParseSafe(newWagon1Count), inv.wagon2Count);
-                        }
-                    }
+                    GUI.Label(new Rect(leftX + 10, inventoryY + 50, 90, 20), $"Wagon1: {inv.wagon1Count}");
+                    newWagon1Count = GUI.TextField(new Rect(leftX + 100, inventoryY + 50, 50, 20), newWagon1Count);
+                    if (GUI.Button(new Rect(leftX + 160, inventoryY + 50, 60, 20), "Set"))
+                        inv.photonView?.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer, inv.cannonCount, ParseSafe(newWagon1Count), inv.wagon2Count);
 
-                    GUI.Label(new Rect(Screen.width - 360, 770, 90, 20), $"Wagon2: {inv.wagon2Count}");
-                    newWagon2Count = GUI.TextField(new Rect(Screen.width - 270, 770, 50, 20), newWagon2Count);
-                    if (GUI.Button(new Rect(Screen.width - 210, 770, 60, 20), "Set"))
-                    {
-                        PhotonView view = inv.GetComponent<PhotonView>();
-                        if (view != null)
-                        {
-                            view.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer,
-                                inv.cannonCount, inv.wagon1Count, ParseSafe(newWagon2Count));
-                        }
-                    }
+                    GUI.Label(new Rect(leftX + 10, inventoryY + 75, 90, 20), $"Wagon2: {inv.wagon2Count}");
+                    newWagon2Count = GUI.TextField(new Rect(leftX + 100, inventoryY + 75, 50, 20), newWagon2Count);
+                    if (GUI.Button(new Rect(leftX + 160, inventoryY + 75, 60, 20), "Set"))
+                        inv.photonView?.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer, inv.cannonCount, inv.wagon1Count, ParseSafe(newWagon2Count));
                 }
                 else
+                    GUI.Label(new Rect(leftX, inventoryY + 105, 200, 20), "Inventory not found.");
+            }
+        }
+
+        // Stats Panel
+        // Stats Panel
+        if (showStatsPanel)
+        {
+            Human selectedHuman = FindHumanByPlayer(selectedPlayer);
+            if (selectedHuman != null)
+            {
+                var stats = selectedHuman.Stats;
+                GUI.Box(new Rect(leftX, statsY, 230, 200), "Stats");
+
+                GUI.Label(new Rect(leftX + 10, statsY + 25, 100, 20), $"Speed: {stats.Speed}");
+                newSpeed = GUI.TextField(new Rect(leftX + 110, statsY + 25, 50, 20), newSpeed);
+                if (GUI.Button(new Rect(leftX + 165, statsY + 25, 50, 20), "Set"))
                 {
-                    GUI.Label(new Rect(Screen.width - 300, 710, 200, 20), "Inventory not found on player.");
+                    selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
+                        int.Parse(newSpeed), stats.Gas, stats.Ammunition, stats.Acceleration, stats.HorseSpeed);
+                }
+
+                GUI.Label(new Rect(leftX + 10, statsY + 50, 100, 20), $"Gas: {stats.Gas}");
+                newMaxGas = GUI.TextField(new Rect(leftX + 110, statsY + 50, 50, 20), newMaxGas);
+                if (GUI.Button(new Rect(leftX + 165, statsY + 50, 50, 20), "Set"))
+                {
+                    selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
+                        stats.Speed, int.Parse(newMaxGas), stats.Ammunition, stats.Acceleration, stats.HorseSpeed);
+                }
+
+                GUI.Label(new Rect(leftX + 10, statsY + 75, 100, 20), $"Ammo: {stats.Ammunition}");
+                newMaxBlades = GUI.TextField(new Rect(leftX + 110, statsY + 75, 50, 20), newMaxBlades);
+                if (GUI.Button(new Rect(leftX + 165, statsY + 75, 50, 20), "Set"))
+                {
+                    selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
+                        stats.Speed, stats.Gas, int.Parse(newMaxBlades), stats.Acceleration, stats.HorseSpeed);
+                }
+
+                GUI.Label(new Rect(leftX + 10, statsY + 100, 100, 20), $"Accel: {stats.Acceleration}");
+                newAcceleration = GUI.TextField(new Rect(leftX + 110, statsY + 100, 50, 20), newAcceleration);
+                if (GUI.Button(new Rect(leftX + 165, statsY + 100, 50, 20), "Set"))
+                {
+                    selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
+                        stats.Speed, stats.Gas, stats.Ammunition, int.Parse(newAcceleration), stats.HorseSpeed);
+                }
+
+                GUI.Label(new Rect(leftX + 10, statsY + 125, 100, 20), $"HSpeed: {stats.HorseSpeed}");
+                newHorseSpeed = GUI.TextField(new Rect(leftX + 110, statsY + 125, 50, 20), newHorseSpeed);
+                if (GUI.Button(new Rect(leftX + 165, statsY + 125, 50, 20), "Set"))
+                {
+                    selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
+                        stats.Speed, stats.Gas, stats.Ammunition, stats.Acceleration, float.Parse(newHorseSpeed));
                 }
             }
             else
             {
-                GUI.Label(new Rect(Screen.width - 300, 710, 200, 20), "Could not find human for player.");
+                GUI.Label(new Rect(leftX, statsY, 200, 20), "Stats not found.");
             }
         }
+
     }
+
+
+
+
+
+
+
 
 
 
@@ -427,6 +481,9 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         }
         return null;
     }
+
+
+
 
 
 }
