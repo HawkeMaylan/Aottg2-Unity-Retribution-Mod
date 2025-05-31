@@ -49,6 +49,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private float detachPromptTimer = 0f;
 
     private Coroutine detachCheckCoroutine;
+    private Coroutine attachPromptCoroutine;
 
     private void Start()
     {
@@ -109,8 +110,16 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     {
         if (other.name == "HorseTrigger")
         {
-            horseRootInContact = other.transform.root;
-            SetPrompt(attachPromptText);
+            Transform horseRoot = other.transform.root;
+            PhotonView horseView = horseRoot.GetComponentInParent<PhotonView>();
+            Horse horseComponent = horseRoot.GetComponentInParent<Horse>();
+
+            if (horseView != null && horseComponent != null &&
+                horseView.Owner == PhotonNetwork.LocalPlayer && horseComponent.MountedStatus == 1)
+            {
+                horseRootInContact = horseRoot;
+                SetPrompt(attachPromptText);
+            }
         }
     }
 
@@ -253,6 +262,19 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private void SetPrompt(string text)
     {
         currentPrompt = text;
+
+        if (attachPromptCoroutine != null)
+            StopCoroutine(attachPromptCoroutine);
+
+        if (text == attachPromptText)
+            attachPromptCoroutine = StartCoroutine(AttachPromptTimer());
+    }
+
+    private IEnumerator AttachPromptTimer()
+    {
+        yield return new WaitForSeconds(3f);
+        ClearPrompt();
+        attachPromptCoroutine = null;
     }
 
     private void ClearPrompt()
