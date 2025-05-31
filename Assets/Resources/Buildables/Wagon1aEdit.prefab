@@ -671,16 +671,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attachOffset: {x: -0.03, y: 2.5, z: -5.55}
   linearLimit: 10
-  linearSpring: 1000
-  linearDamper: 5
-  angularSpring: 1000
-  angularDamper: 1
-  jointBreakForce: Infinity
-  jointBreakTorque: Infinity
+  linearSpring: 600
+  linearDamper: 3
+  angularSpring: 600
+  angularDamper: 3
+  jointBreakForce: 600
+  jointBreakTorque: 600
   enableCollision: 1
-  attachPromptText: Press G to Attach
-  detachPromptText: Press G to Detach
-  detachPromptDuration: 5
+  maxAllowedHorseTurnAngle: 45
 --- !u!135 &8967567940926374313
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -710,9 +708,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4432750536981979705}
   serializedVersion: 4
-  m_Mass: 1.5
+  m_Mass: 1
   m_Drag: 0.3
-  m_AngularDrag: 1
+  m_AngularDrag: 2
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}

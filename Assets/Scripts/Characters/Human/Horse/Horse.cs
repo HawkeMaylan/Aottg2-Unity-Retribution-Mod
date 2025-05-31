@@ -157,9 +157,10 @@ namespace Characters
             {
                 if (_owner.HasDirection)
                 {
-                    Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, _owner.GetTargetRotation(), 5f * Time.deltaTime);
                     State = _owner.IsWalk ? HorseState.ControlledWalk : HorseState.ControlledRun;
+                    // No rotation here — handled physically in FixedUpdate
                 }
+
                 else
                 {
                     State = HorseState.ControlledIdle;
@@ -236,42 +237,75 @@ namespace Characters
             if (!IsMine() || _owner == null || _owner.Dead)
                 return;
 
-            CheckGround(); //  still checking ground, but we won't block movement if not grounded
+            CheckGround();
 
-            //  Movement always allowed regardless of Grounded
-            if (State == HorseState.ControlledIdle || State == HorseState.Idle)
+            //  Check if horse is attached to a wagon
+            AttachToHorseTrigger wagon = GetComponentInChildren<AttachToHorseTrigger>();
+            bool isAttachedToWagon = wagon != null && wagon.IsAttachedToThisHorse(this);
+
+            if (isAttachedToWagon)
             {
-                if (Grounded) //  Only slow down if touching ground
+                float speedTarget = (State == HorseState.ControlledRun || State == HorseState.RunToPoint) ? _owner.Stats.HorseSpeed :
+                                    (State == HorseState.ControlledWalk || State == HorseState.WalkToPoint) ? WalkSpeed : 0f;
+
+                if (speedTarget > 0f)
                 {
-                    if (Cache.Rigidbody.velocity.magnitude < 1f)
-                        Cache.Rigidbody.velocity = Vector3.up * Cache.Rigidbody.velocity.y;
-                    else
-                        Cache.Rigidbody.AddForce(-Cache.Rigidbody.velocity.normalized * Mathf.Min(_owner.Stats.HorseSpeed, Cache.Rigidbody.velocity.magnitude * 0.5f),
-                            ForceMode.Acceleration);
+                    if (_owner.HasDirection)
+                    {
+                        Quaternion targetRot = _owner.GetTargetRotation();
+                        Cache.Transform.rotation = Quaternion.Slerp(Cache.Transform.rotation, targetRot, 1f * Time.fixedDeltaTime);
+                    }
+
+                    Cache.Rigidbody.AddForce(Cache.Transform.forward * speedTarget, ForceMode.Force);
                 }
             }
-            else if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint || State == HorseState.ControlledWalk || State == HorseState.ControlledRun)
+
+            else
             {
-                float speed = _owner.Stats.HorseSpeed;
-
-                if (State == HorseState.ControlledWalk)
-                    speed = WalkSpeed;
-                else if (State == HorseState.WalkToPoint)
-                    speed = RunCloseSpeed;
-
-                Cache.Rigidbody.AddForce(Cache.Transform.forward * _owner.Stats.HorseSpeed, ForceMode.Acceleration);
-
-                if (Cache.Rigidbody.velocity.magnitude >= speed)
+                //  Restore manual turning when not attached
+                if (_owner.HasDirection)
                 {
-                    if (speed == _owner.Stats.HorseSpeed)
-                        Cache.Rigidbody.AddForce((speed - Cache.Rigidbody.velocity.magnitude) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
-                    else
+                    Quaternion targetRot = _owner.GetTargetRotation();
+                    Quaternion newRot = Quaternion.Slerp(Cache.Transform.rotation, targetRot, 5f * Time.fixedDeltaTime);
+                    Cache.Transform.rotation = newRot;
+                }
+
+                //  Standard acceleration logic
+                if (State == HorseState.ControlledIdle || State == HorseState.Idle)
+                {
+                    if (Grounded)
+                    {
+                        if (Cache.Rigidbody.velocity.magnitude < 1f)
+                            Cache.Rigidbody.velocity = Vector3.up * Cache.Rigidbody.velocity.y;
+                        else
+                            Cache.Rigidbody.AddForce(-Cache.Rigidbody.velocity.normalized * Mathf.Min(_owner.Stats.HorseSpeed, Cache.Rigidbody.velocity.magnitude * 0.5f),
+                                ForceMode.Acceleration);
+                    }
+                }
+                else if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint || State == HorseState.ControlledWalk || State == HorseState.ControlledRun)
+                {
+                    float speed = _owner.Stats.HorseSpeed;
+                    if (State == HorseState.ControlledWalk)
+                        speed = WalkSpeed;
+                    else if (State == HorseState.WalkToPoint)
+                        speed = RunCloseSpeed;
+
+                    Cache.Rigidbody.AddForce(Cache.Transform.forward * speed, ForceMode.Acceleration);
+
+                    if (Cache.Rigidbody.velocity.magnitude >= speed)
+                    {
                         Cache.Rigidbody.AddForce((Mathf.Max(speed - Cache.Rigidbody.velocity.magnitude, -1f)) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
+                    }
                 }
             }
 
+            //  Gravity always applied
             Cache.Rigidbody.AddForce(Gravity, ForceMode.Acceleration);
         }
+
+
+
+
 
         protected override void LateUpdate()
         {

@@ -12,30 +12,23 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     public Vector3 attachOffset = new Vector3(0f, 0f, -2f);
 
     [Header("Joint Motion Limits")]
-    public float linearLimit = 0.5f;
+    public float linearLimit = 2f;
 
     [Header("Linear Drive Settings")]
-    public float linearSpring = 100f;
-    public float linearDamper = 5f;
+    public float linearSpring = 50f;
+    public float linearDamper = 20f;
 
     [Header("Angular Drive Settings")]
-    public float angularSpring = 10f;
-    public float angularDamper = 1f;
+    public float angularSpring = 0f;
+    public float angularDamper = 0f;
 
     [Header("Joint Break Settings")]
     public float jointBreakForce = Mathf.Infinity;
     public float jointBreakTorque = Mathf.Infinity;
     public bool enableCollision = false;
 
-    [Header("Prompt Texts")]
-    public string attachPromptText = "Press G to Attach";
-    public string detachPromptText = "Press G to Detach";
-
-    [Header("Detach Prompt Settings")]
-    public float detachPromptDuration = 5f;
-
-    [Header("Auto Detach Settings")]
-    public float autoDetachRange = 10f;
+    [Header("Horse Turn Constraint")]
+    public float maxAllowedHorseTurnAngle = 45f;
 
     private bool isAttached = false;
     private Transform horseRootInContact;
@@ -47,7 +40,6 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
     private static string currentPrompt = "";
     private float detachPromptTimer = 0f;
-
     private Coroutine detachCheckCoroutine;
     private Coroutine attachPromptCoroutine;
 
@@ -56,14 +48,12 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         wagon = transform.root;
         rb = wagon.GetComponent<Rigidbody>();
         pv = wagon.GetComponent<PhotonView>();
-
         ClearPrompt();
     }
 
     private void Update()
     {
-        if (ChatManager.IsChatActive())
-            return;
+        if (ChatManager.IsChatActive()) return;
 
         if (Input.GetKeyDown(KeyCode.G))
         {
@@ -100,10 +90,22 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         {
             detachPromptTimer -= Time.deltaTime;
             if (detachPromptTimer <= 0f)
-            {
                 ClearPrompt();
-            }
         }
+    }
+
+    public bool IsAttachedToThisHorse(Component horse)
+    {
+        return isAttached && attachedHorse == horse.transform;
+    }
+
+
+    public bool IsHorseRotationAllowed(Transform horse)
+    {
+        if (!isAttached || attachedHorse != horse) return true;
+
+        float angle = Vector3.Angle(wagon.forward, horse.forward);
+        return angle <= maxAllowedHorseTurnAngle;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -118,7 +120,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
                 horseView.Owner == PhotonNetwork.LocalPlayer && horseComponent.MountedStatus == 1)
             {
                 horseRootInContact = horseRoot;
-                SetPrompt(attachPromptText);
+                SetPrompt("Press G to Attach", 3f);
             }
         }
     }
@@ -150,19 +152,16 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         ConfigurableJoint joint = wagon.gameObject.AddComponent<ConfigurableJoint>();
         Rigidbody horseRb = horseRoot.GetComponent<Rigidbody>();
         if (horseRb != null)
-        {
             joint.connectedBody = horseRb;
-        }
 
-        joint.xMotion = ConfigurableJointMotion.Limited;
+        joint.xMotion = ConfigurableJointMotion.Locked;
         joint.yMotion = ConfigurableJointMotion.Limited;
         joint.zMotion = ConfigurableJointMotion.Limited;
         joint.angularXMotion = ConfigurableJointMotion.Free;
-        joint.angularYMotion = ConfigurableJointMotion.Limited;
+        joint.angularYMotion = ConfigurableJointMotion.Free;
         joint.angularZMotion = ConfigurableJointMotion.Free;
 
-        SoftJointLimit limit = new SoftJointLimit();
-        limit.limit = linearLimit;
+        SoftJointLimit limit = new SoftJointLimit { limit = linearLimit };
         joint.linearLimit = limit;
 
         JointDrive linearDrive = new JointDrive
@@ -173,14 +172,13 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         };
         joint.xDrive = joint.yDrive = joint.zDrive = linearDrive;
 
-        JointDrive angularDrive = new JointDrive
+        joint.rotationDriveMode = RotationDriveMode.Slerp;
+        joint.slerpDrive = new JointDrive
         {
             positionSpring = angularSpring,
             positionDamper = angularDamper,
             maximumForce = Mathf.Infinity
         };
-        joint.rotationDriveMode = RotationDriveMode.Slerp;
-        joint.slerpDrive = angularDrive;
 
         joint.breakForce = jointBreakForce;
         joint.breakTorque = jointBreakTorque;
@@ -191,8 +189,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         attachedHorse = horseRoot;
         attachedHorseViewID = horseViewID;
 
-        SetPrompt(detachPromptText);
-        detachPromptTimer = detachPromptDuration;
+        SetPrompt("Press G to Detach", 5f);
 
         if (detachCheckCoroutine != null) StopCoroutine(detachCheckCoroutine);
         detachCheckCoroutine = StartCoroutine(AutoDetachCheck());
@@ -203,9 +200,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     {
         var joint = wagon.GetComponent<ConfigurableJoint>();
         if (joint != null)
-        {
             Destroy(joint);
-        }
 
         rb.isKinematic = false;
         isAttached = false;
@@ -218,8 +213,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
             detachCheckCoroutine = null;
         }
 
-        SetPrompt(attachPromptText);
-        detachPromptTimer = 0f;
+        SetPrompt("Press G to Attach", 3f);
     }
 
     private IEnumerator AutoDetachCheck()
@@ -227,52 +221,26 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         WaitForSeconds wait = new WaitForSeconds(1f);
         while (isAttached)
         {
-            if (attachedHorse == null)
+            if (attachedHorse == null || Vector3.Distance(wagon.position, attachedHorse.position) > 10f)
             {
                 if (pv.IsMine)
                     pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
                 yield break;
             }
-
-            float distance = Vector3.Distance(wagon.position, attachedHorse.position);
-            if (distance > autoDetachRange)
-            {
-                if (pv.IsMine)
-                    pv.RPC("RPC_DetachFromHorse", RpcTarget.AllBuffered);
-                yield break;
-            }
-
             yield return wait;
         }
     }
 
-    private void OnGUI()
-    {
-        if (!string.IsNullOrEmpty(currentPrompt))
-        {
-            GUIStyle style = new GUIStyle(GUI.skin.label);
-            style.fontSize = 24;
-            style.alignment = TextAnchor.UpperCenter;
-            style.normal.textColor = Color.white;
-
-            GUI.Label(new Rect(Screen.width / 2 - 150, 50, 300, 50), currentPrompt, style);
-        }
-    }
-
-    private void SetPrompt(string text)
+    private void SetPrompt(string text, float duration)
     {
         currentPrompt = text;
-
-        if (attachPromptCoroutine != null)
-            StopCoroutine(attachPromptCoroutine);
-
-        if (text == attachPromptText)
-            attachPromptCoroutine = StartCoroutine(AttachPromptTimer());
+        if (attachPromptCoroutine != null) StopCoroutine(attachPromptCoroutine);
+        attachPromptCoroutine = StartCoroutine(ClearPromptAfterDelay(duration));
     }
 
-    private IEnumerator AttachPromptTimer()
+    private IEnumerator ClearPromptAfterDelay(float time)
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(time);
         ClearPrompt();
         attachPromptCoroutine = null;
     }
@@ -280,5 +248,20 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private void ClearPrompt()
     {
         currentPrompt = "";
+    }
+
+    private void OnGUI()
+    {
+        if (!string.IsNullOrEmpty(currentPrompt))
+        {
+            GUIStyle style = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 24,
+                alignment = TextAnchor.UpperCenter,
+                normal = { textColor = Color.white }
+            };
+
+            GUI.Label(new Rect(Screen.width / 2 - 150, 50, 300, 50), currentPrompt, style);
+        }
     }
 }

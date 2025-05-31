@@ -672,16 +672,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attachOffset: {x: -0.03, y: 3.4, z: -5.55}
   linearLimit: 10
-  linearSpring: 1000
-  linearDamper: 5
-  angularSpring: 1000
-  angularDamper: 5
+  linearSpring: 600
+  linearDamper: 3
+  angularSpring: 600
+  angularDamper: 3
   jointBreakForce: Infinity
   jointBreakTorque: Infinity
   enableCollision: 1
-  attachPromptText: Press G to Attach Wagon
-  detachPromptText: Press G to Detach Wagon
-  detachPromptDuration: 5
+  maxAllowedHorseTurnAngle: 45
 --- !u!135 &8967567940926374313
 SphereCollider:
   m_ObjectHideFlags: 0
