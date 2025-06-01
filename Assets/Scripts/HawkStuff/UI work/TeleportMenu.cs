@@ -139,6 +139,10 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         DrawPlayerPanel();
     }
 
+
+    private Dictionary<string, string> inventoryInputs = new Dictionary<string, string>();
+
+
     private void DrawPlayerPanel()
     {
         if (selectedPlayer == null) return;
@@ -205,27 +209,37 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 var inv = selectedHuman.GetComponent<HumanInventory>();
                 if (inv != null)
                 {
-                    GUI.Box(new Rect(leftX, inventoryY, 230, 120), "Inventory");
+                    var itemTypes = inv.GetItemTypes();
+                    int boxHeight = 40 + itemTypes.Count * 30;
+                    GUI.Box(new Rect(leftX, inventoryY, 230, boxHeight), "Inventory");
 
-                    GUI.Label(new Rect(leftX + 10, inventoryY + 25, 90, 20), $"Cannons: {inv.cannonCount}");
-                    newCannonCount = GUI.TextField(new Rect(leftX + 100, inventoryY + 25, 50, 20), newCannonCount);
-                    if (GUI.Button(new Rect(leftX + 160, inventoryY + 25, 60, 20), "Set"))
-                        inv.photonView?.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer, ParseSafe(newCannonCount), inv.wagon1Count, inv.wagon2Count);
+                    for (int i = 0; i < itemTypes.Count; i++)
+                    {
+                        string type = itemTypes[i];
+                        int current = inv.GetItemCount(type);
+                        float y = inventoryY + 25 + i * 25;
 
-                    GUI.Label(new Rect(leftX + 10, inventoryY + 50, 90, 20), $"Wagon1: {inv.wagon1Count}");
-                    newWagon1Count = GUI.TextField(new Rect(leftX + 100, inventoryY + 50, 50, 20), newWagon1Count);
-                    if (GUI.Button(new Rect(leftX + 160, inventoryY + 50, 60, 20), "Set"))
-                        inv.photonView?.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer, inv.cannonCount, ParseSafe(newWagon1Count), inv.wagon2Count);
+                        GUI.Label(new Rect(leftX + 10, y, 90, 20), $"{type}: {current}");
 
-                    GUI.Label(new Rect(leftX + 10, inventoryY + 75, 90, 20), $"Wagon2: {inv.wagon2Count}");
-                    newWagon2Count = GUI.TextField(new Rect(leftX + 100, inventoryY + 75, 50, 20), newWagon2Count);
-                    if (GUI.Button(new Rect(leftX + 160, inventoryY + 75, 60, 20), "Set"))
-                        inv.photonView?.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer, inv.cannonCount, inv.wagon1Count, ParseSafe(newWagon2Count));
+                        if (!inventoryInputs.ContainsKey(type))
+                            inventoryInputs[type] = current.ToString();
+
+                        inventoryInputs[type] = GUI.TextField(new Rect(leftX + 100, y, 50, 20), inventoryInputs[type]);
+
+                        if (GUI.Button(new Rect(leftX + 160, y, 60, 20), "Set"))
+                        {
+                            int newVal = ParseSafe(inventoryInputs[type]);
+                            inv.photonView?.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, type, newVal);
+                        }
+                    }
                 }
                 else
+                {
                     GUI.Label(new Rect(leftX, inventoryY + 105, 200, 20), "Inventory not found.");
+                }
             }
         }
+
 
         // Stats Panel
         // Stats Panel

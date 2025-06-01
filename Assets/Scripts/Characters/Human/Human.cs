@@ -2703,6 +2703,8 @@ namespace Characters
             itemList3.Add(new Wagon1Spawn(this, "Support Wagon", 5f));
             itemList3.Add(new LargeWagonSpawn(this, "Resupply Wagon", 5f));
             itemList3.Add(new CannonTestSpawn(this, "Cannon", 5f));
+            itemList3.Add(new WallCannonSpawn(this, "Wall Cannon", 5f));
+            
             if (PhotonNetwork.IsMasterClient)
             {
                 itemList4.Add(new Daycycle(this, "DayCycle", 5f));

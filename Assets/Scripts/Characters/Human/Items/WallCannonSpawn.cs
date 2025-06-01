@@ -4,9 +4,9 @@ using Photon.Pun;
 
 namespace Characters
 {
-    class Wagon1Spawn : SimpleUseable
+    class WallCannonSpawn : SimpleUseable
     {
-        public Wagon1Spawn(BaseCharacter owner, string name, float cooldown) : base(owner)
+        public WallCannonSpawn(BaseCharacter owner, string name, float cooldown) : base(owner)
         {
             Name = name;
             Cooldown = cooldown;
@@ -19,7 +19,7 @@ namespace Characters
                 return;
 
             var inventory = human.GetComponent<HumanInventory>();
-            if (inventory == null || inventory.GetItemCount("Wagon1") <= 0)
+            if (inventory == null || inventory.GetItemCount("WallCannon") <= 0)
             {
                 Debug.Log("Not enough Wagon1 count to spawn.");
                 return;
@@ -28,11 +28,11 @@ namespace Characters
             try
             {
                 Vector3 pos = human.Cache.Transform.position + Vector3.up * 1.5f;
-                GameObject wagonObj = PhotonNetwork.Instantiate("Buildables/Wagon1aEdit", pos, Quaternion.identity);
+                GameObject wagonObj = PhotonNetwork.Instantiate("Buildables/WallCannon", pos, Quaternion.identity);
 
                 // Deduct Wagon1 using modular inventory system
-                int newWagon1Count = Mathf.Max(0, inventory.GetItemCount("Wagon1") - 1);
-                inventory.photonView?.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, "Wagon1", newWagon1Count);
+                int newWallCannonCount = Mathf.Max(0, inventory.GetItemCount("WallCannon") - 1);
+                inventory.photonView?.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, "WallCannon", newWallCannonCount);
             }
             catch
             {

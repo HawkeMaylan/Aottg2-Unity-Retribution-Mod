@@ -19,7 +19,7 @@ namespace Characters
                 return;
 
             var inventory = human.GetComponent<HumanInventory>();
-            if (inventory == null || inventory.cannonCount <= 0)
+            if (inventory == null || inventory.GetItemCount("Cannon") <= 0)
             {
                 Debug.Log("Not enough Cannon count to spawn.");
                 return;
@@ -30,17 +30,9 @@ namespace Characters
                 Vector3 pos = human.Cache.Transform.position + human.Cache.Transform.forward * 3f;
                 GameObject cannonObj = PhotonNetwork.Instantiate("Buildables/CannonTest", pos, Quaternion.identity);
 
-                // Sync inventory change
-                PhotonView view = inventory.GetComponent<PhotonView>();
-                if (view != null)
-                {
-                    int newCannonCount = Mathf.Max(0, inventory.cannonCount - 1);
-                    int newWagon1Count = inventory.wagon1Count;
-                    int newWagon2Count = inventory.wagon2Count;
-
-                    view.RPC("RPC_SetInventoryCounts", RpcTarget.AllBufferedViaServer,
-                        newCannonCount, newWagon1Count, newWagon2Count);
-                }
+                // Sync inventory 
+                int newCannonCount = Mathf.Max(0, inventory.GetItemCount("Cannon") - 1);
+                inventory.photonView?.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, "Cannon", newCannonCount);
             }
             catch
             {

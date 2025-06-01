@@ -1,5 +1,6 @@
 using UnityEngine;
 using Characters;
+using System.Collections.Generic;
 
 public class InventoryDisplay : MonoBehaviour
 {
@@ -33,20 +34,33 @@ public class InventoryDisplay : MonoBehaviour
         if (!_showInventory || _inventory == null || _stats == null)
             return;
 
-        // Inventory Box
-        GUI.Box(new Rect(20, 20, 220, 100), "Inventory");
-        GUI.Label(new Rect(30, 50, 200, 20), $"Cannons: {_inventory.cannonCount}");
-        GUI.Label(new Rect(30, 70, 200, 20), $"Wagon1: {_inventory.wagon1Count}");
-        GUI.Label(new Rect(30, 90, 200, 20), $"Wagon2: {_inventory.wagon2Count}");
+        // First, draw the stats panel (top fixed)
+        float topX = 20f;
+        float topY = 20f;
+        float boxWidth = 220f;
+        float statsBoxHeight = 130f;
 
-        // Stats Box (~10 lines lower)
-        float offsetY = 140;
-        GUI.Box(new Rect(20, offsetY, 220, 130), "Stats");
-        GUI.Label(new Rect(30, offsetY + 30, 200, 20), $"Speed: {_stats.Speed}");
-        GUI.Label(new Rect(30, offsetY + 50, 200, 20), $"Gas: {_stats.Gas}");
-        GUI.Label(new Rect(30, offsetY + 70, 200, 20), $"Ammo: {_stats.Ammunition}");
-        GUI.Label(new Rect(30, offsetY + 90, 200, 20), $"Accel: {_stats.Acceleration}");
-        GUI.Label(new Rect(30, offsetY + 110, 200, 20), $"HorseSpeed: {_stats.HorseSpeed}");
+        GUI.Box(new Rect(topX, topY, boxWidth, statsBoxHeight), "Stats");
+        GUI.Label(new Rect(topX + 10, topY + 30, 200, 20), $"Speed: {_stats.Speed}");
+        GUI.Label(new Rect(topX + 10, topY + 50, 200, 20), $"Gas: {_stats.Gas}");
+        GUI.Label(new Rect(topX + 10, topY + 70, 200, 20), $"Ammo: {_stats.Ammunition}");
+        GUI.Label(new Rect(topX + 10, topY + 90, 200, 20), $"Accel: {_stats.Acceleration}");
+        GUI.Label(new Rect(topX + 10, topY + 110, 200, 20), $"HorseSpeed: {_stats.HorseSpeed}");
+
+        // Then, draw the inventory panel below it
+        List<string> items = _inventory.GetItemTypes();
+        int itemCount = items.Count;
+        int inventoryHeight = 30 + itemCount * 20;
+
+        float inventoryY = topY + statsBoxHeight + 20;
+        GUI.Box(new Rect(topX, inventoryY, boxWidth, inventoryHeight), "Inventory");
+
+        for (int i = 0; i < itemCount; i++)
+        {
+            string item = items[i];
+            int count = _inventory.GetItemCount(item);
+            GUI.Label(new Rect(topX + 10, inventoryY + 20 + i * 20, 200, 20), $"{item}: {count}");
+        }
     }
 
     private Human FindLocalHuman()

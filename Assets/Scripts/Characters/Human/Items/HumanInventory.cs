@@ -1,30 +1,109 @@
 using UnityEngine;
 using Photon.Pun;
+using System.Collections.Generic;
 
 namespace Characters
 {
     public class HumanInventory : MonoBehaviourPunCallbacks
     {
-        [Header("Deployable Counts")]
-        public int cannonCount = 0;
-        public int wagon1Count = 0;
-        public int wagon2Count = 0;
+        [Header("Deployable Types")]
+        [SerializeField]
+        private List<string> defaultDeployables = new List<string>
+        {
+            ///ADD NEW AS NEEDED MAKE SURE TO ADD AT BOTTOM
+            "Cannon",
+            "Wagon1",
+            "Wagon2",
+            "WallCannon"
+        };
 
-        public void AddCannon() => photonView.RPC("RPC_SetInventoryCounts", RpcTarget.AllBuffered, cannonCount + 1, wagon1Count, wagon2Count);
-        public void RemoveCannon() => photonView.RPC("RPC_SetInventoryCounts", RpcTarget.AllBuffered, Mathf.Max(0, cannonCount - 1), wagon1Count, wagon2Count);
+        [Header("Inventory Counts")]
+        public Dictionary<string, int> inventoryCounts = new Dictionary<string, int>();
 
-        public void AddWagon1() => photonView.RPC("RPC_SetInventoryCounts", RpcTarget.AllBuffered, cannonCount, wagon1Count + 1, wagon2Count);
-        public void RemoveWagon1() => photonView.RPC("RPC_SetInventoryCounts", RpcTarget.AllBuffered, cannonCount, Mathf.Max(0, wagon1Count - 1), wagon2Count);
+        private void Awake()
+        {
+            foreach (var type in defaultDeployables)
+            {
+                if (!inventoryCounts.ContainsKey(type))
+                    inventoryCounts[type] = 0;
+            }
+        }
 
-        public void AddWagon2() => photonView.RPC("RPC_SetInventoryCounts", RpcTarget.AllBuffered, cannonCount, wagon1Count, wagon2Count + 1);
-        public void RemoveWagon2() => photonView.RPC("RPC_SetInventoryCounts", RpcTarget.AllBuffered, cannonCount, wagon1Count, Mathf.Max(0, wagon2Count - 1));
+        public void AddItem(string type)
+        {
+            EnsureItemType(type);
+            int newCount = inventoryCounts[type] + 1;
+            photonView.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, type, newCount);
+        }
+
+        public void RemoveItem(string type)
+        {
+            EnsureItemType(type);
+            int newCount = Mathf.Max(0, inventoryCounts[type] - 1);
+            photonView.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, type, newCount);
+        }
+
+        public void SetItemCount(string type, int count)
+        {
+            EnsureItemType(type);
+            photonView.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, type, Mathf.Max(0, count));
+        }
+
+        public int GetItemCount(string type)
+        {
+            return inventoryCounts.TryGetValue(type, out int count) ? count : 0;
+        }
 
         [PunRPC]
-        public void RPC_SetInventoryCounts(int newCannon, int newWagon1, int newWagon2)
+        public void RPC_SetItemCount(string type, int count)
         {
-            cannonCount = newCannon;
-            wagon1Count = newWagon1;
-            wagon2Count = newWagon2;
+            EnsureItemType(type);
+            inventoryCounts[type] = Mathf.Max(0, count);
         }
+
+        public List<string> GetItemTypes()
+        {
+            return new List<string>(inventoryCounts.Keys);
+        }
+
+        private void EnsureItemType(string type)
+        {
+            if (!inventoryCounts.ContainsKey(type))
+                inventoryCounts[type] = 0;
+        }
+
+
+
+
+
+
+
+        // ADD NEW BELOW AS WELL
+        public int cannonCount
+        {
+            get => GetItemCount("Cannon");
+            set => SetItemCount("Cannon", value);
+        }
+
+        public int wagon1Count
+        {
+            get => GetItemCount("Wagon1");
+            set => SetItemCount("Wagon1", value);
+        }
+
+        public int wagon2Count
+        {
+            get => GetItemCount("Wagon2");
+            set => SetItemCount("Wagon2", value);
+        }
+
+        public int wallCannonCount
+        {
+            get => GetItemCount("WallCannon");
+            set => SetItemCount("WallCannon", value);
+        }
+
     }
+
+
 }
