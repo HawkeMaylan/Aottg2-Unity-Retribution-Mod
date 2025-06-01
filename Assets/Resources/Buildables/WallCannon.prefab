@@ -272,6 +272,21 @@ MonoBehaviour:
     Knockback: 0
     knockbackForce: 0
     startingAmmo: 150
+  - name: Fletchette
+    prefab: {fileID: 1530743120385670784, guid: 5a3466af44dadde47b6be3dd6d723eeb, type: 3}
+    launchForce: 5000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: e4b40a4f2fcbae6428abc383fd308620, type: 3}
+    fireCooldown: 2
+    projectileCount: 30
+    spreadAngle: 15
+    BarrelRecoil: 1
+    RecoilDistance: 0.5
+    barrelRecoilAngle: 20
+    RecoilSpeed: 5
+    Knockback: 0
+    knockbackForce: 0
+    startingAmmo: 1500
   - name: Cannonball
     prefab: {fileID: 128184, guid: 08b657946733b824d840d78c67ede72c, type: 3}
     launchForce: 10000
