@@ -21,7 +21,7 @@ namespace Characters
             var inventory = human.GetComponent<HumanInventory>();
             if (inventory == null || inventory.GetItemCount("WallCannon") <= 0)
             {
-                Debug.Log("Not enough Wagon1 count to spawn.");
+                Debug.Log("Not enough WallCannon count to spawn.");
                 return;
             }
 
@@ -30,13 +30,13 @@ namespace Characters
                 Vector3 pos = human.Cache.Transform.position + human.Cache.Transform.forward * 3f;
                 GameObject wagonObj = PhotonNetwork.Instantiate("Buildables/WallCannon", pos, Quaternion.identity);
 
-                // Deduct Wagon1 using modular inventory system
+                // Deduct Cannon using modular inventory system
                 int newWallCannonCount = Mathf.Max(0, inventory.GetItemCount("WallCannon") - 1);
                 inventory.photonView?.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, "WallCannon", newWallCannonCount);
             }
             catch
             {
-                Debug.LogWarning("Wagon1 spawn failed.");
+                Debug.LogWarning("WallCannon spawn failed.");
             }
         }
     }

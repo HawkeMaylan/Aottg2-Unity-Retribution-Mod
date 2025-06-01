@@ -6,6 +6,7 @@ using Characters;
 using UI;
 using GameManagers;
 using Photon.Pun;
+using System.Collections;
 
 public class TeleportMenu : MonoBehaviourPunCallbacks
 {
@@ -147,7 +148,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     {
         if (selectedPlayer == null) return;
 
-        GUI.Box(new Rect(Screen.width - 350, 100, 300, 600), "Teleport " + GeneratePlayerLabel(selectedPlayer));
+        GUI.Box(new Rect(Screen.width - 550, 100, 500, 700), "Teleport " + GeneratePlayerLabel(selectedPlayer));
 
         GUI.Label(new Rect(Screen.width - 320, 140, 50, 25), "X:");
         inputX = GUI.TextField(new Rect(Screen.width - 270, 140, 140, 25), inputX);
@@ -164,7 +165,13 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (GUI.Button(new Rect(Screen.width - 300, 360, 200, 30), "Respawn Player's Horse")) TryRespawnHorse();
         if (GUI.Button(new Rect(Screen.width - 300, 400, 200, 30), "Bring Selected Player to Me")) BringPlayerToMC();
         if (GUI.Button(new Rect(Screen.width - 300, 440, 200, 30), "Bring Me to Selected Player")) BringMCToPlayer();
-        if (GUI.Button(new Rect(Screen.width - 300, 480, 200, 30), "Revive Player")) TryReviveSelectedPlayer();
+        if (GUI.Button(new Rect(Screen.width - 500, 240, 200, 30), "Revive Player")) TryReviveSelectedPlayer();
+
+        
+        if (GUI.Button(new Rect(Screen.width - 500, 320, 200, 30), "Full Relocate + Respawn"))
+        {
+            TryFullRelocateAndRespawn();
+        }
 
         if (GUI.Button(new Rect(Screen.width - 300, 520, 200, 30), confirmKick ? "Are you sure? (Kick)" : "Kick Player"))
         {
@@ -186,7 +193,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             else confirmBan = true;
         }
 
-        if (GUI.Button(new Rect(Screen.width - 300, 600, 200, 30), "Kill Player")) TryKillSelectedPlayer();
+        if (GUI.Button(new Rect(Screen.width - 500, 280, 200, 30), "Kill Player")) TryKillSelectedPlayer();
 
         GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GeneratePlayerLabel(selectedPlayer));
 
@@ -196,9 +203,9 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (GUI.Button(new Rect(Screen.width - 300, 680, 200, 30), "Manage Stats"))
             showStatsPanel = !showStatsPanel;
 
-        float leftX = Screen.width - 540;
-        float inventoryY = 520;  // moved up from 580
-        float statsY = 660;      // moved up from 720
+        float leftX = Screen.width - 540 - 240;
+        float inventoryY = 100; 
+        float statsY = 240;
 
         // Inventory Panel
         if (showInventoryPanel)
@@ -240,8 +247,6 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             }
         }
 
-
-        // Stats Panel
         // Stats Panel
         if (showStatsPanel)
         {
@@ -296,8 +301,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 GUI.Label(new Rect(leftX, statsY, 200, 20), "Stats not found.");
             }
         }
-
     }
+
 
 
 
@@ -326,31 +331,21 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (selectedPlayer == null || !PhotonNetwork.IsMasterClient)
             return;
 
-        Vector3 spawnPosition = Vector3.zero;
-        Human humanOwner = null;
+        Human humanOwner = FindHumanByPlayer(selectedPlayer);
+        if (humanOwner == null)
+            return;
 
-        foreach (var human in FindObjectsOfType<Human>())
-        {
-            if (human.photonView != null && human.photonView.Owner != null &&
-                human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
-            {
-                spawnPosition = human.Cache.Transform.position + Vector3.right * 2f;
-                humanOwner = human;
-                break;
-            }
-        }
+        Vector3 spawnPosition = humanOwner.Cache.Transform.position + Vector3.right * 2f;
 
-        TryKillHorse();
+        TryKillHorse(); // Clean up old horse
 
-        GameObject newHorse = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
-        PhotonView horseView = newHorse.GetComponent<PhotonView>();
+        GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
+        PhotonView horseView = horseObj.GetComponent<PhotonView>();
 
-        // Transfer ownership to target player
         horseView.TransferOwnership(selectedPlayer);
-
-        // Call RPC to link on the owner's machine
-        horseView.RPC("RPC_SetHorseOwner", selectedPlayer, selectedPlayer.ActorNumber);
+        StartCoroutine(EnsureHorseOwnershipAndLink(horseView, selectedPlayer.ActorNumber));
     }
+
 
 
 
@@ -379,33 +374,65 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             float.TryParse(inputY, out float y) &&
             float.TryParse(inputZ, out float z))
         {
+            StartCoroutine(RepeatTeleportOverTime(new Vector3(x, y, z), selectedPlayer.ActorNumber));
+        }
+    }
+
+    private IEnumerator RepeatTeleportOverTime(Vector3 targetPosition, int targetActor)
+    {
+        float duration = 3f;
+        float interval = 0.1f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
             foreach (var human in FindObjectsOfType<Human>())
             {
                 if (human.photonView != null && human.photonView.Owner != null &&
-                    human.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
+                    human.photonView.Owner.ActorNumber == targetActor)
                 {
                     if (human.MountState == HumanMountState.Horse)
                         human.Unmount(true);
 
-                    human.photonView.RPC("RPC_Teleport", human.photonView.Owner, new Vector3(x, y, z));
-                    break;
+                    human.photonView.RPC("RPC_Teleport", human.photonView.Owner, targetPosition);
+                    break; // only teleport one matching human
                 }
             }
+
+            yield return new WaitForSeconds(interval);
+            elapsed += interval;
         }
     }
 
+
     private void TryTeleportHorseToPlayer()
     {
-        foreach (var horse in FindObjectsOfType<Horse>())
+        StartCoroutine(RepeatHorseTeleportOverTime(selectedPlayer.ActorNumber));
+    }
+
+    private IEnumerator RepeatHorseTeleportOverTime(int targetActor)
+    {
+        float duration = 3f;
+        float interval = 0.1f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
         {
-            if (horse.photonView != null && horse.photonView.Owner != null &&
-                horse.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
+            foreach (var horse in FindObjectsOfType<Horse>())
             {
-                horse.photonView.RPC("RPC_TeleportToHuman", horse.photonView.Owner);
-                break;
+                if (horse.photonView != null && horse.photonView.Owner != null &&
+                    horse.photonView.Owner.ActorNumber == targetActor)
+                {
+                    horse.photonView.RPC("RPC_TeleportToHuman", horse.photonView.Owner);
+                    break; // Only teleport one matching horse
+                }
             }
+
+            yield return new WaitForSeconds(interval);
+            elapsed += interval;
         }
     }
+
 
     private void BringPlayerToMC()
     {
@@ -464,6 +491,62 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             }
         }
     }
+    private void TryFullRelocateAndRespawn()
+    {
+        if (selectedPlayer == null)
+            return;
+
+        if (!float.TryParse(inputX, out float x) ||
+            !float.TryParse(inputY, out float y) ||
+            !float.TryParse(inputZ, out float z))
+            return;
+
+        Vector3 targetPos = new Vector3(x, y, z);
+
+        // 1. Kill human if alive
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human.photonView != null && human.photonView.Owner == selectedPlayer)
+            {
+                if (!human.Dead)
+                    human.GetHit("MCReset", 9999, "Thunderspear", "");
+                break;
+            }
+        }
+
+        // 2. Kill horse
+        TryKillHorse();
+
+        // 3. Revive human after a short delay
+        StartCoroutine(DelayedRelocateRevive(selectedPlayer, targetPos));
+    }
+
+    private IEnumerator DelayedRelocateRevive(Player targetPlayer, Vector3 targetPos)
+    {
+        yield return new WaitForSeconds(0.2f); // Let death register
+
+        // Revive player
+        RPCManager.PhotonView.RPC("SpawnPlayerRPC", targetPlayer, new object[] { false });
+        ChatManager.SendChat("You have been fully relocated by master client.", targetPlayer, ChatTextColor.System);
+
+        // Wait a bit for the player to respawn
+        yield return new WaitForSeconds(0.5f);
+
+        // Teleport player multiple times for sync
+        StartCoroutine(RepeatTeleportOverTime(targetPos, targetPlayer.ActorNumber));
+
+        // Respawn horse
+        Human humanOwner = FindHumanByPlayer(targetPlayer);
+        if (humanOwner != null)
+        {
+            Vector3 spawnPosition = targetPos + Vector3.right * 2f;
+            GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
+            PhotonView horseView = horseObj.GetComponent<PhotonView>();
+            horseView.TransferOwnership(targetPlayer);
+            StartCoroutine(EnsureHorseOwnershipAndLink(horseView, targetPlayer.ActorNumber));
+        }
+    }
+
 
     private Human FindLocalHuman()
     {
@@ -495,6 +578,43 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         }
         return null;
     }
+    private IEnumerator EnsureHorseOwnershipAndLink(PhotonView horseView, int targetActor)
+    {
+        float timeout = 2f;
+        float elapsed = 0f;
+        bool linked = false;
+
+        while (elapsed < timeout)
+        {
+            if (horseView != null)
+            {
+                if (horseView.Owner != null && horseView.Owner.ActorNumber == targetActor)
+                {
+                    horseView.RPC("RPC_SetHorseOwner", horseView.Owner, targetActor);
+                    linked = true;
+                    break;
+                }
+                else
+                {
+                    horseView.TransferOwnership(targetActor);
+                }
+            }
+
+            elapsed += 0.2f;
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        if (!linked)
+        {
+            Debug.LogWarning($"[HorseRevive] Failed to link horse to player {targetActor} after timeout.");
+        }
+        else
+        {
+            Debug.Log($"[HorseRevive] Successfully linked horse to player {targetActor}.");
+        }
+    }
+
+
 
 
 
