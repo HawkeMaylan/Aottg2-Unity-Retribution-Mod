@@ -157,9 +157,43 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     private bool isFlipping = false;
     private Coroutine flipRoutine;
 
+    [Header("Audio Clips")]
+    public AudioClip cooldownSound;
+    public AudioClip movementSound;
+
+    private AudioSource audioSource;
+
+    private AudioSource cooldownAudioSource;
+    private AudioSource movementLoopAudioSource;
+
+
+
+
+
 
     private void Start()
     {
+        cooldownAudioSource = gameObject.AddComponent<AudioSource>();
+        cooldownAudioSource.loop = true;
+        cooldownAudioSource.playOnAwake = false;
+        cooldownAudioSource.spatialBlend = 1f;
+        cooldownAudioSource.rolloffMode = AudioRolloffMode.Linear;
+        cooldownAudioSource.minDistance = 5f;
+        cooldownAudioSource.maxDistance = 40f;
+
+
+        movementLoopAudioSource = gameObject.AddComponent<AudioSource>();
+        movementLoopAudioSource.loop = true;
+        movementLoopAudioSource.playOnAwake = false;
+        movementLoopAudioSource.spatialBlend = 1f;
+        movementLoopAudioSource.rolloffMode = AudioRolloffMode.Linear;
+        movementLoopAudioSource.minDistance = 5f;
+        movementLoopAudioSource.maxDistance = 40f;
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+
 
         if (MoveTarget != null)
             moveRigidbody = MoveTarget.GetComponent<Rigidbody>();
@@ -273,7 +307,12 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
                 nextFireTime = Time.time + projectileOptions[selectedProjectileIndex].fireCooldown;
                 photonView.RPC("RPC_FireProjectile", RpcTarget.All, selectedProjectileIndex);
             }
+            else if (cooldownSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(cooldownSound);
+            }
         }
+
 
         // Switch projectile selection
         if (isMounted)
@@ -329,12 +368,22 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
             flashGreenRoutine = StartCoroutine(FlashGreen());
             hasFlashedReady = true;
+
+            if (cooldownAudioSource.isPlaying)
+                cooldownAudioSource.Stop();
         }
         else if (progress < 1f)
         {
             hasFlashedReady = false;
+
+            if (!cooldownAudioSource.isPlaying && cooldownSound != null)
+            {
+                cooldownAudioSource.clip = cooldownSound;
+                cooldownAudioSource.Play();
+            }
         }
     }
+
 
 
     private void HandleProjectileUISwap()
@@ -452,6 +501,24 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             if (Input.GetKey(KeyCode.S)) move -= 1f;
             if (Input.GetKey(KeyCode.D)) rotate += 1f;
             if (Input.GetKey(KeyCode.A)) rotate -= 1f;
+
+            bool isMoving = Mathf.Abs(move) > 0f;
+            if (isMoving)
+            {
+                if (!movementLoopAudioSource.isPlaying && movementSound != null)
+                {
+                    movementLoopAudioSource.clip = movementSound;
+                    movementLoopAudioSource.Play();
+                }
+            }
+            else if (movementLoopAudioSource.isPlaying)
+            {
+                movementLoopAudioSource.Stop();
+            }
+        }
+        else if (movementLoopAudioSource.isPlaying)
+        {
+            movementLoopAudioSource.Stop();
         }
 
         Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up).normalized * move * moveSpeed * Time.fixedDeltaTime;
@@ -460,6 +527,8 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         Quaternion deltaRotation = Quaternion.Euler(0f, rotate * turnSpeed * Time.fixedDeltaTime, 0f);
         moveRigidbody.MoveRotation(moveRigidbody.rotation * deltaRotation);
     }
+
+
 
 
     private void CheckDistanceOrAliveStatus()

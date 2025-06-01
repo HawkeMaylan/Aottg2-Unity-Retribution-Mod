@@ -496,6 +496,8 @@ MonoBehaviour:
   projectileUIPrefab: {fileID: 3976318980140897857, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
   flipHoldTime: 1.5
   flipSpeed: 5
+  cooldownSound: {fileID: 8300000, guid: 74cd0d8dab1107e4385aa43b2d2d4875, type: 3}
+  movementSound: {fileID: 8300000, guid: 3ccf53bacc5133d4fa8470397644db38, type: 3}
 --- !u!1001 &8048790762546070642
 PrefabInstance:
   m_ObjectHideFlags: 0
