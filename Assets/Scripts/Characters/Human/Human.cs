@@ -2704,6 +2704,7 @@ namespace Characters
             itemList3.Add(new LargeWagonSpawn(this, "Resupply Wagon", 5f));
             itemList3.Add(new CannonTestSpawn(this, "Cannon", 5f));
             itemList3.Add(new WallCannonSpawn(this, "Wall Cannon", 5f));
+            itemList3.Add(new CannonGroundSpawn(this, "Ground Cannon", 5f));
             
             if (PhotonNetwork.IsMasterClient)
             {

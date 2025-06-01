@@ -15,6 +15,7 @@ namespace Characters
             "Wagon1",
             "Wagon2",
             "WallCannon"
+
         };
 
         [Header("Inventory Counts")]
