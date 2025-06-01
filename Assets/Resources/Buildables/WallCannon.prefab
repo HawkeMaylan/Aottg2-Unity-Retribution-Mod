@@ -261,7 +261,7 @@ MonoBehaviour:
     prefab: {fileID: 1530743120385670784, guid: 2311c22ae51d3f7459162f439561be04, type: 3}
     launchForce: 10000
     upwardForce: 250
-    sprite: {fileID: 21300000, guid: 1346a755a2bce3e40bcc49ba7a11d95e, type: 3}
+    sprite: {fileID: 21300000, guid: 653d78db20fc46c4f882c304f181bcb5, type: 3}
     fireCooldown: 2
     projectileCount: 16
     spreadAngle: 8
@@ -280,6 +280,21 @@ MonoBehaviour:
     fireCooldown: 2
     projectileCount: 30
     spreadAngle: 15
+    BarrelRecoil: 1
+    RecoilDistance: 0.5
+    barrelRecoilAngle: 20
+    RecoilSpeed: 5
+    Knockback: 0
+    knockbackForce: 0
+    startingAmmo: 1500
+  - name: Incendiary
+    prefab: {fileID: 1530743120385670784, guid: 150fb050d130a9348b23bb69ee086949, type: 3}
+    launchForce: 10000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: 40397bc5f86659644b305a0e0a3ea797, type: 3}
+    fireCooldown: 1
+    projectileCount: 1
+    spreadAngle: 0
     BarrelRecoil: 1
     RecoilDistance: 0.5
     barrelRecoilAngle: 20
