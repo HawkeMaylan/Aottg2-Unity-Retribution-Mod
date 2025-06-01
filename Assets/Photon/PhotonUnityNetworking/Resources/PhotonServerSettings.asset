@@ -149,6 +149,7 @@ MonoBehaviour:
   - RPC_SetInventoryCounts
   - RPC_SetStats
   - SyncLightingToClients
+  - RPC_SetItemCount
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

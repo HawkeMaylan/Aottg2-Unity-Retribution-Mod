@@ -27,7 +27,7 @@ namespace Characters
 
             try
             {
-                Vector3 pos = human.Cache.Transform.position + Vector3.up * 1.5f;
+                Vector3 pos = human.Cache.Transform.position + human.Cache.Transform.forward * 3f;
                 GameObject wagonObj = PhotonNetwork.Instantiate("Buildables/WallCannon", pos, Quaternion.identity);
 
                 // Deduct Wagon1 using modular inventory system

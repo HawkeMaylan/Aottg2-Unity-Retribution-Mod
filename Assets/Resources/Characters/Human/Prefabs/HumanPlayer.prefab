@@ -16766,9 +16766,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef7ee0099209d904593f098d8e948199, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cannonCount: 0
-  wagon1Count: 0
-  wagon2Count: 0
+  defaultDeployables:
+  - Cannon
+  - Wagon1
+  - Wagon2
+  - WallCannon
 --- !u!1 &4310715724008364727
 GameObject:
   m_ObjectHideFlags: 0

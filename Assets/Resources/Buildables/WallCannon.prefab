@@ -245,7 +245,7 @@ MonoBehaviour:
   - name: HEV
     prefab: {fileID: 1530743120385670784, guid: ce9a789b3a6e05f4d9274ecbe59a82fa, type: 3}
     launchForce: 12000
-    upwardForce: 100
+    upwardForce: 250
     sprite: {fileID: 21300000, guid: 767baf0b056438247ad07c329aef9c38, type: 3}
     fireCooldown: 2
     projectileCount: 1
@@ -259,12 +259,12 @@ MonoBehaviour:
     startingAmmo: 150
   - name: Scatter
     prefab: {fileID: 1530743120385670784, guid: 2311c22ae51d3f7459162f439561be04, type: 3}
-    launchForce: 12000
-    upwardForce: 100
+    launchForce: 10000
+    upwardForce: 250
     sprite: {fileID: 21300000, guid: 1346a755a2bce3e40bcc49ba7a11d95e, type: 3}
     fireCooldown: 2
-    projectileCount: 12
-    spreadAngle: 10
+    projectileCount: 16
+    spreadAngle: 8
     BarrelRecoil: 1
     RecoilDistance: 0.5
     barrelRecoilAngle: 20
@@ -274,10 +274,10 @@ MonoBehaviour:
     startingAmmo: 150
   - name: Cannonball
     prefab: {fileID: 128184, guid: 08b657946733b824d840d78c67ede72c, type: 3}
-    launchForce: 12000
-    upwardForce: 100
+    launchForce: 10000
+    upwardForce: 250
     sprite: {fileID: 21300000, guid: 653d78db20fc46c4f882c304f181bcb5, type: 3}
-    fireCooldown: 0.3
+    fireCooldown: 1
     projectileCount: 1
     spreadAngle: 0
     BarrelRecoil: 1
