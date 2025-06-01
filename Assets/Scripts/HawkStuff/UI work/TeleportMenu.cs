@@ -7,6 +7,8 @@ using UI;
 using GameManagers;
 using Photon.Pun;
 using System.Collections;
+using System.IO;
+
 
 public class TeleportMenu : MonoBehaviourPunCallbacks
 {
@@ -36,8 +38,36 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     private string newSpeed = "14";
     private string newHorseSpeed = "20";
 
+    private List<SavedLocation> savedLocations = new List<SavedLocation>();
+    private string newTitle = "";
+    private string searchQuery = "";
+    private string deleteConfirmTitle = null;
+    private Vector2 savedScroll;
+
+    private bool showSavedLocationPanel = false;
 
 
+
+    [System.Serializable]
+    public class SavedLocation
+    {
+        public string Title;
+        public float X, Y, Z;
+    }
+
+    [System.Serializable]
+    public class SavedLocationList
+    {
+        public List<SavedLocation> Locations = new List<SavedLocation>();
+    }
+
+
+
+
+    private void Start()
+    {
+        LoadLocations();
+    }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.RightControl) && PhotonNetwork.IsMasterClient)
@@ -100,6 +130,12 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             return;
         }
 
+        // Show/Hide Saved Locations Button
+        if (GUI.Button(new Rect(Screen.width - 240, 60, 180, 30), showSavedLocationPanel ? "Hide Saved Locations" : "Show Saved Locations"))
+        {
+            showSavedLocationPanel = !showSavedLocationPanel;
+        }
+
         GUI.Label(new Rect(30, 50, 60, 20), "Search:");
         string newSearch = GUI.TextField(new Rect(90, 50, 200, 20), searchFilter);
         if (newSearch != searchFilter)
@@ -138,7 +174,14 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         }
 
         DrawPlayerPanel();
+
+        // Draw saved location panel if toggled
+        if (showSavedLocationPanel)
+        {
+            DrawSavedLocationPanel();
+        }
     }
+
 
 
     private Dictionary<string, string> inventoryInputs = new Dictionary<string, string>();
@@ -166,12 +209,10 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (GUI.Button(new Rect(Screen.width - 300, 400, 200, 30), "Bring Selected Player to Me")) BringPlayerToMC();
         if (GUI.Button(new Rect(Screen.width - 300, 440, 200, 30), "Bring Me to Selected Player")) BringMCToPlayer();
         if (GUI.Button(new Rect(Screen.width - 500, 240, 200, 30), "Revive Player")) TryReviveSelectedPlayer();
+        if (GUI.Button(new Rect(Screen.width - 500, 280, 200, 30), "Kill Player")) TryKillSelectedPlayer();
+        if (GUI.Button(new Rect(Screen.width - 500, 320, 200, 30), "Full Relocate + Respawn")) TryFullRelocateAndRespawn();
 
-        
-        if (GUI.Button(new Rect(Screen.width - 500, 320, 200, 30), "Full Relocate + Respawn"))
-        {
-            TryFullRelocateAndRespawn();
-        }
+        GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GeneratePlayerLabel(selectedPlayer));
 
         if (GUI.Button(new Rect(Screen.width - 300, 520, 200, 30), confirmKick ? "Are you sure? (Kick)" : "Kick Player"))
         {
@@ -193,10 +234,6 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             else confirmBan = true;
         }
 
-        if (GUI.Button(new Rect(Screen.width - 500, 280, 200, 30), "Kill Player")) TryKillSelectedPlayer();
-
-        GUI.Box(new Rect(Screen.width - 260, 70, 250, 25), "Selected: " + GeneratePlayerLabel(selectedPlayer));
-
         if (GUI.Button(new Rect(Screen.width - 300, 640, 200, 30), "Manage Inventory"))
             showInventoryPanel = !showInventoryPanel;
 
@@ -204,7 +241,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             showStatsPanel = !showStatsPanel;
 
         float leftX = Screen.width - 540 - 240;
-        float inventoryY = 100; 
+        float inventoryY = 100;
         float statsY = 240;
 
         // Inventory Panel
@@ -259,42 +296,32 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 GUI.Label(new Rect(leftX + 10, statsY + 25, 100, 20), $"Speed: {stats.Speed}");
                 newSpeed = GUI.TextField(new Rect(leftX + 110, statsY + 25, 50, 20), newSpeed);
                 if (GUI.Button(new Rect(leftX + 165, statsY + 25, 50, 20), "Set"))
-                {
                     selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
                         int.Parse(newSpeed), stats.Gas, stats.Ammunition, stats.Acceleration, stats.HorseSpeed);
-                }
 
                 GUI.Label(new Rect(leftX + 10, statsY + 50, 100, 20), $"Gas: {stats.Gas}");
                 newMaxGas = GUI.TextField(new Rect(leftX + 110, statsY + 50, 50, 20), newMaxGas);
                 if (GUI.Button(new Rect(leftX + 165, statsY + 50, 50, 20), "Set"))
-                {
                     selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
                         stats.Speed, int.Parse(newMaxGas), stats.Ammunition, stats.Acceleration, stats.HorseSpeed);
-                }
 
                 GUI.Label(new Rect(leftX + 10, statsY + 75, 100, 20), $"Ammo: {stats.Ammunition}");
                 newMaxBlades = GUI.TextField(new Rect(leftX + 110, statsY + 75, 50, 20), newMaxBlades);
                 if (GUI.Button(new Rect(leftX + 165, statsY + 75, 50, 20), "Set"))
-                {
                     selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
                         stats.Speed, stats.Gas, int.Parse(newMaxBlades), stats.Acceleration, stats.HorseSpeed);
-                }
 
                 GUI.Label(new Rect(leftX + 10, statsY + 100, 100, 20), $"Accel: {stats.Acceleration}");
                 newAcceleration = GUI.TextField(new Rect(leftX + 110, statsY + 100, 50, 20), newAcceleration);
                 if (GUI.Button(new Rect(leftX + 165, statsY + 100, 50, 20), "Set"))
-                {
                     selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
                         stats.Speed, stats.Gas, stats.Ammunition, int.Parse(newAcceleration), stats.HorseSpeed);
-                }
 
                 GUI.Label(new Rect(leftX + 10, statsY + 125, 100, 20), $"HSpeed: {stats.HorseSpeed}");
                 newHorseSpeed = GUI.TextField(new Rect(leftX + 110, statsY + 125, 50, 20), newHorseSpeed);
                 if (GUI.Button(new Rect(leftX + 165, statsY + 125, 50, 20), "Set"))
-                {
                     selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
                         stats.Speed, stats.Gas, stats.Ammunition, stats.Acceleration, float.Parse(newHorseSpeed));
-                }
             }
             else
             {
@@ -302,6 +329,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             }
         }
     }
+
 
 
 
@@ -613,6 +641,89 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             Debug.Log($"[HorseRevive] Successfully linked horse to player {targetActor}.");
         }
     }
+
+    private string SaveFilePath => Path.Combine(Application.persistentDataPath, "saved_locations.json");
+
+    private void SaveLocations()
+    {
+        var container = new SavedLocationList { Locations = savedLocations };
+        string json = JsonUtility.ToJson(container, true);
+        File.WriteAllText(SaveFilePath, json);
+    }
+
+    private void LoadLocations()
+    {
+        if (File.Exists(SaveFilePath))
+        {
+            string json = File.ReadAllText(SaveFilePath);
+            var container = JsonUtility.FromJson<SavedLocationList>(json);
+            savedLocations = container?.Locations ?? new List<SavedLocation>();
+        }
+    }
+
+    private void DrawSavedLocationPanel()
+    {
+        GUI.Box(new Rect(350, 80, 320, 520), "Saved Locations");
+
+        GUI.Label(new Rect(360, 110, 50, 20), "Title:");
+        newTitle = GUI.TextField(new Rect(410, 110, 180, 20), newTitle);
+
+        if (GUI.Button(new Rect(600, 110, 20, 20), "+"))
+        {
+            if (float.TryParse(inputX, out float x) &&
+                float.TryParse(inputY, out float y) &&
+                float.TryParse(inputZ, out float z) &&
+                !string.IsNullOrWhiteSpace(newTitle))
+            {
+                savedLocations.Add(new SavedLocation { Title = newTitle, X = x, Y = y, Z = z });
+                SaveLocations();
+                newTitle = "";
+            }
+        }
+
+        GUI.Label(new Rect(360, 140, 60, 20), "Search:");
+        searchQuery = GUI.TextField(new Rect(420, 140, 180, 20), searchQuery);
+
+        savedScroll = GUI.BeginScrollView(new Rect(360, 170, 270, 400), savedScroll, new Rect(0, 0, 250, savedLocations.Count * 30));
+
+        int yOffset = 0;
+        foreach (var loc in savedLocations)
+        {
+            if (!string.IsNullOrEmpty(searchQuery) && !loc.Title.ToLower().Contains(searchQuery.ToLower()))
+                continue;
+
+            if (GUI.Button(new Rect(0, yOffset, 180, 25), loc.Title))
+            {
+                inputX = loc.X.ToString();
+                inputY = loc.Y.ToString();
+                inputZ = loc.Z.ToString();
+            }
+
+            if (deleteConfirmTitle == loc.Title)
+            {
+                if (GUI.Button(new Rect(185, yOffset, 60, 25), "Sure?"))
+                {
+                    savedLocations.Remove(loc);
+                    SaveLocations();
+                    deleteConfirmTitle = null;
+                    break;
+                }
+            }
+            else
+            {
+                if (GUI.Button(new Rect(185, yOffset, 60, 25), "X"))
+                {
+                    deleteConfirmTitle = loc.Title;
+                }
+            }
+
+            yOffset += 30;
+        }
+
+        GUI.EndScrollView();
+    }
+
+
 
 
 
