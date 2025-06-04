@@ -29,5 +29,6 @@ namespace Settings
         public BoolSetting TapScoreboard = new BoolSetting(true);
         public BoolSetting TapMap = new BoolSetting(true);
         public KeybindSetting HideUI = new KeybindSetting(new string[] { "F6", "None" });
+        public KeybindSetting MCMenu = new KeybindSetting(new string[] { "RightControl", "None" });
     }
 }

@@ -8,6 +8,7 @@ using GameManagers;
 using Photon.Pun;
 using System.Collections;
 using System.IO;
+using Settings;
 
 
 public class TeleportMenu : MonoBehaviourPunCallbacks
@@ -70,7 +71,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.RightControl) && PhotonNetwork.IsMasterClient)
+        if (SettingsManager.InputSettings.General.MCMenu.GetKeyDown() && PhotonNetwork.IsMasterClient)
+
         {
             menuOpen = !menuOpen;
             ToggleCursor(menuOpen);
