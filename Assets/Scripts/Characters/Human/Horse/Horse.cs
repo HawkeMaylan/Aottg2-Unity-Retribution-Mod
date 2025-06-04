@@ -196,12 +196,17 @@ namespace Characters
                         State = HorseState.Idle;
                 }
 
-                if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint)
+                // Only apply rotation if not mounted and actively walking/running toward player
+                if (_owner.MountState != HumanMountState.Horse &&
+                    (State == HorseState.WalkToPoint || State == HorseState.RunToPoint))
                 {
                     Vector3 direction = (_owner.Cache.Transform.position - Cache.Transform.position);
                     direction.y = 0f;
-                    Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, Quaternion.LookRotation(direction.normalized), 10f * Time.deltaTime);
+
+                    if (direction != Vector3.zero)
+                        Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, Quaternion.LookRotation(direction.normalized), 10f * Time.deltaTime);
                 }
+
             }
         }
 
@@ -239,7 +244,7 @@ namespace Characters
 
             CheckGround();
 
-            //  Check if horse is attached to a wagon
+            // Check if horse is attached to a wagon
             AttachToHorseTrigger wagon = GetComponentInChildren<AttachToHorseTrigger>();
             bool isAttachedToWagon = wagon != null && wagon.IsAttachedToThisHorse(this);
 
@@ -250,7 +255,7 @@ namespace Characters
 
                 if (speedTarget > 0f)
                 {
-                    if (_owner.HasDirection)
+                    if (_owner.HasDirection && _owner.MountState == HumanMountState.Horse)
                     {
                         Quaternion targetRot = _owner.GetTargetRotation();
                         Cache.Transform.rotation = Quaternion.Slerp(Cache.Transform.rotation, targetRot, 1f * Time.fixedDeltaTime);
@@ -259,18 +264,17 @@ namespace Characters
                     Cache.Rigidbody.AddForce(Cache.Transform.forward * speedTarget, ForceMode.Force);
                 }
             }
-
             else
             {
-                //  Restore manual turning when not attached
-                if (_owner.HasDirection)
+                // Restore manual turning when not attached, only if mounted
+                if (_owner.MountState == HumanMountState.Horse && _owner.HasDirection)
                 {
                     Quaternion targetRot = _owner.GetTargetRotation();
                     Quaternion newRot = Quaternion.Slerp(Cache.Transform.rotation, targetRot, 5f * Time.fixedDeltaTime);
                     Cache.Transform.rotation = newRot;
                 }
 
-                //  Standard acceleration logic
+                // Standard acceleration logic
                 if (State == HorseState.ControlledIdle || State == HorseState.Idle)
                 {
                     if (Grounded)
@@ -299,9 +303,10 @@ namespace Characters
                 }
             }
 
-            //  Gravity always applied
+            // Gravity always applied
             Cache.Rigidbody.AddForce(Gravity, ForceMode.Acceleration);
         }
+
 
 
 
