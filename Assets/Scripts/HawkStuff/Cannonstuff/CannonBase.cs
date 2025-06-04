@@ -66,8 +66,10 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
 
     }
-
-
+   
+    private string MountPromptText;
+    private string UnmountPromptText;
+    private string _lastCachedKey = "";
 
 
     [Header("Interaction Settings")]
@@ -78,9 +80,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     public Vector3 positionOffset;
     public Vector3 rotationOffset;
 
-    [Header("Prompt Texts")]
-    public string mountPromptText = "Press G to Mount";
-    public string unmountPromptText = "Press G to Unmount";
+    
 
     [Header("Unmount Prompt Settings")]
     public float unmountPromptDuration = 5f;
@@ -173,6 +173,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Start()
     {
+        UpdatePromptTexts();
         cooldownAudioSource = gameObject.AddComponent<AudioSource>();
         cooldownAudioSource.loop = true;
         cooldownAudioSource.playOnAwake = false;
@@ -210,6 +211,16 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Update()
     {
+        string currentKey = SettingsManager.InputSettings.Interaction.Interact.ToString();
+        if (_lastCachedKey != currentKey)
+        {
+            _lastCachedKey = currentKey;
+            UpdatePromptTexts();
+            if (!isMounted)
+                SetPrompt(MountPromptText);
+            else
+                SetPrompt(UnmountPromptText);
+        }
         HandleMountInput();
         HandleUnmountPromptTimer();
         HandleRunAnimation();
@@ -236,7 +247,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
                 {
                     humanInTrigger = h;
                     humanRigidbody = h.GetComponent<Rigidbody>();
-                    SetPrompt(mountPromptText);
+                    SetPrompt(MountPromptText);
                     mountPromptExpireTime = Time.time + 10f;
                     playerFound = true;
                     break;
@@ -500,10 +511,11 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         float move = 0f;
         float rotate = 0f;
 
-        if (SettingsManager.InputSettings.General.Forward.GetKeyDown()) move += 1f;
-        if (SettingsManager.InputSettings.General.Back.GetKeyDown()) move -= 1f;
-        if (SettingsManager.InputSettings.General.Right.GetKeyDown()) rotate += 1f;
-        if (SettingsManager.InputSettings.General.Left.GetKeyDown()) rotate -= 1f;
+        if (SettingsManager.InputSettings.General.Forward.GetKey()) move += 1f;
+        if (SettingsManager.InputSettings.General.Back.GetKey()) move -= 1f;
+        if (SettingsManager.InputSettings.General.Right.GetKey()) rotate += 1f;
+        if (SettingsManager.InputSettings.General.Left.GetKey()) rotate -= 1f;
+
 
         Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up).normalized * move * moveSpeed * Time.fixedDeltaTime;
         moveRigidbody.MovePosition(moveRigidbody.position + forwardMovement);
@@ -555,7 +567,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             humanRigidbody = human.GetComponent<Rigidbody>();
             hasExitedAfterUnmount = false;
 
-            SetPrompt(mountPromptText);
+            SetPrompt(MountPromptText);
             mountPromptExpireTime = Time.time + 10f;
         }
     }
@@ -592,7 +604,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
-            if (Input.GetKeyDown(KeyCode.G))
+            if (SettingsManager.InputSettings.Interaction.Interact.GetKeyDown())
             {
                 // Normalize X/Z angles and check if tipped
                 Vector3 euler = transform.rotation.eulerAngles;
@@ -729,7 +741,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         Debug.Log("CannonBase: Human mounted successfully.");
 
         ClearPrompt();
-        SetPrompt(unmountPromptText);
+        SetPrompt(UnmountPromptText);
         mountPromptExpireTime = Time.time + unmountPromptDuration;
         unmountPromptTimer = unmountPromptDuration;
         lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
@@ -781,7 +793,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         if (humanInTrigger != null && !hasExitedAfterUnmount)
         {
-            SetPrompt(mountPromptText);
+            SetPrompt(MountPromptText);
             unmountPromptTimer = 0f;
         }
         else
@@ -993,6 +1005,12 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             return false;
 
         return true;
+    }
+    private void UpdatePromptTexts()
+    {
+        string key = SettingsManager.InputSettings.Interaction.Interact.ToString().Replace("Alpha", "");
+        MountPromptText = $"Press {key} to Mount";
+        UnmountPromptText = $"Press {key} to Unmount";
     }
 
 
