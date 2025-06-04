@@ -215,7 +215,8 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         HandleRunAnimation();
         CheckDistanceOrAliveStatus();
 
-        if (!photonView.IsMine) return;
+        if (!photonView.IsMine || !ValidateHumanInTrigger()) return;
+
 
         // Detect nearby human using interactionZone
         bool playerFound = false;
@@ -334,7 +335,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void FixedUpdate()
     {
-
+        if (!ValidateHumanInTrigger()) return;
         HandleMovementInput();
     }
 
@@ -411,6 +412,8 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     public void RPC_FireProjectile(int index)
     {
+        if (!ValidateHumanInTrigger()) return;
+
         var selected = projectileOptions[index];
     if (sharedAmmoCounts[index] <= 0)
     {
@@ -473,10 +476,9 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void RotateTowardsCamera()
     {
-        if (!photonView.IsMine || humanInTrigger == null || !humanInTrigger.IsMine()) return;
-        if (!isMounted || CannonBarrel == null || Camera.main == null)
+        if (!photonView.IsMine || !ValidateHumanInTrigger() || !isMounted || CannonBarrel == null || Camera.main == null)
             return;
-
+       
         Vector3 localForward = transform.InverseTransformDirection(Camera.main.transform.forward);
         float yaw = Mathf.Atan2(localForward.x, localForward.z) * Mathf.Rad2Deg;
         float pitch = -Mathf.Asin(localForward.y) * Mathf.Rad2Deg;
@@ -492,41 +494,39 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (moveRigidbody == null) return;
 
+        // Block movement unless local player owns it
+        if (!photonView.IsMine || !isMounted) return;
+
         float move = 0f;
         float rotate = 0f;
 
-        if (photonView.IsMine && isMounted)
-        {
-            if (Input.GetKey(KeyCode.W)) move += 1f;
-            if (Input.GetKey(KeyCode.S)) move -= 1f;
-            if (Input.GetKey(KeyCode.D)) rotate += 1f;
-            if (Input.GetKey(KeyCode.A)) rotate -= 1f;
-
-            bool isMoving = Mathf.Abs(move) > 0f;
-            if (isMoving)
-            {
-                if (!movementLoopAudioSource.isPlaying && movementSound != null)
-                {
-                    movementLoopAudioSource.clip = movementSound;
-                    movementLoopAudioSource.Play();
-                }
-            }
-            else if (movementLoopAudioSource.isPlaying)
-            {
-                movementLoopAudioSource.Stop();
-            }
-        }
-        else if (movementLoopAudioSource.isPlaying)
-        {
-            movementLoopAudioSource.Stop();
-        }
+        if (Input.GetKey(KeyCode.W)) move += 1f;
+        if (Input.GetKey(KeyCode.S)) move -= 1f;
+        if (Input.GetKey(KeyCode.D)) rotate += 1f;
+        if (Input.GetKey(KeyCode.A)) rotate -= 1f;
 
         Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up).normalized * move * moveSpeed * Time.fixedDeltaTime;
         moveRigidbody.MovePosition(moveRigidbody.position + forwardMovement);
 
         Quaternion deltaRotation = Quaternion.Euler(0f, rotate * turnSpeed * Time.fixedDeltaTime, 0f);
         moveRigidbody.MoveRotation(moveRigidbody.rotation * deltaRotation);
+
+        // Movement sound
+        bool isMoving = Mathf.Abs(move) > 0f;
+        if (isMoving)
+        {
+            if (!movementLoopAudioSource.isPlaying && movementSound != null)
+            {
+                movementLoopAudioSource.clip = movementSound;
+                movementLoopAudioSource.Play();
+            }
+        }
+        else if (movementLoopAudioSource.isPlaying)
+        {
+            movementLoopAudioSource.Stop();
+        }
     }
+
 
 
 
@@ -676,15 +676,37 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     private void AttachHuman()
+
     {
-        // Prevent mounting if already mounted (local or synced)
+        if (!ValidateHumanInTrigger()) return;
+
         if (humanInTrigger == null || mountPoint == null || isMounted)
+        {
+            Debug.LogWarning("CannonBase: Invalid mount attempt – missing human or already mounted.");
             return;
+        }
 
-        // Double-check across the network to avoid race conditions
         if (!photonView.IsMine)
+        {
+            Debug.Log("Requesting ownership before mounting.");
             photonView.RequestOwnership();
+        }
 
+        // Confirm human isn't already mounted to something else
+        if (humanInTrigger.MountState != HumanMountState.None && humanInTrigger.MountedTransform != mountPoint)
+        {
+            Debug.LogWarning("CannonBase: Human is already mounted elsewhere.");
+            return;
+        }
+
+        // Double-check MoveTarget is valid
+        if (MoveTarget == null || moveRigidbody == null)
+        {
+            Debug.LogError("CannonBase: MoveTarget or Rigidbody is null – cannot mount.");
+            return;
+        }
+
+        // Sync mount
         humanInTrigger.MountedTransform = mountPoint;
         humanInTrigger.MountedMapObject = null;
         humanInTrigger.MountedPositionOffset = positionOffset;
@@ -697,31 +719,34 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             originalMass = humanRigidbody.mass;
             originalUseGravity = humanRigidbody.useGravity;
 
-            if (disableGravityOnMount)
-                humanRigidbody.useGravity = false;
-            if (disableMassOnMount)
-                humanRigidbody.mass = mountedMass;
+            if (disableGravityOnMount) humanRigidbody.useGravity = false;
+            if (disableMassOnMount) humanRigidbody.mass = mountedMass;
         }
 
         isMounted = true;
         hasExitedAfterUnmount = false;
 
+        Debug.Log("CannonBase: Human mounted successfully.");
+
         ClearPrompt();
         SetPrompt(unmountPromptText);
         mountPromptExpireTime = Time.time + unmountPromptDuration;
-
         unmountPromptTimer = unmountPromptDuration;
-
         lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
-        humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.2f);
 
+        humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.2f);
         UpdateProjectileUI();
     }
 
 
 
+
     private void DetachHuman()
     {
+        
+
+        if (!ValidateHumanInTrigger()) return;
+
         if (humanInTrigger == null) return;
 
         humanInTrigger.Unmount(true);
@@ -751,6 +776,9 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         {
             ClearPrompt();
         }
+        isMounted = false;
+        humanInTrigger = null;  
+        humanRigidbody = null;  
     }
 
     private void UpdateProjectileUI()
@@ -932,6 +960,26 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
     private void CancelFlipHold()
     {
         gHoldTimer = 0f;
+    }
+
+    private bool ValidateHumanInTrigger()
+    {
+        if (humanInTrigger == null)
+            return false;
+
+        if (!humanInTrigger.gameObject.activeInHierarchy || humanInTrigger.Dead)
+        {
+            Debug.LogWarning("CannonBase: Detected stale humanInTrigger. Clearing.");
+            humanInTrigger = null;
+            humanRigidbody = null;
+            ClearPrompt();
+            return false;
+        }
+
+        if (!humanInTrigger.IsMine())
+            return false;
+
+        return true;
     }
 
 
