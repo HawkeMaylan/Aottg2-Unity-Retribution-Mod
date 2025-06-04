@@ -532,6 +532,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         Vector3 targetPos = new Vector3(x, y, z);
 
         // 1. Kill human if alive
+        TryKillHorse();
         foreach (var human in FindObjectsOfType<Human>())
         {
             if (human.photonView != null && human.photonView.Owner == selectedPlayer)
@@ -547,6 +548,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
         // 3. Revive human after a short delay
         StartCoroutine(DelayedRelocateRevive(selectedPlayer, targetPos));
+        TryKillHorse();
     }
 
     private IEnumerator DelayedRelocateRevive(Player targetPlayer, Vector3 targetPos)
@@ -563,17 +565,22 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         // Teleport player multiple times for sync
         StartCoroutine(RepeatTeleportOverTime(targetPos, targetPlayer.ActorNumber));
 
-        // Respawn horse
+        // === Match RespawnHorse ===
         Human humanOwner = FindHumanByPlayer(targetPlayer);
-        if (humanOwner != null)
-        {
-            Vector3 spawnPosition = targetPos + Vector3.right * 2f;
-            GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
-            PhotonView horseView = horseObj.GetComponent<PhotonView>();
-            horseView.TransferOwnership(targetPlayer);
-            StartCoroutine(EnsureHorseOwnershipAndLink(horseView, targetPlayer.ActorNumber));
-        }
+        if (humanOwner == null)
+            yield break;
+
+        Vector3 spawnPosition = targetPos + Vector3.right * 2f;
+
+        TryKillHorse(); // Clean up any lingering horse
+
+        GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
+        PhotonView horseView = horseObj.GetComponent<PhotonView>();
+
+        horseView.TransferOwnership(targetPlayer);
+        StartCoroutine(EnsureHorseOwnershipAndLink(horseView, targetPlayer.ActorNumber));
     }
+
 
 
     private Human FindLocalHuman()
