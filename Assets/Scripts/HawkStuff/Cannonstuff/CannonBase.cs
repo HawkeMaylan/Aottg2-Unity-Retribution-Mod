@@ -743,9 +743,28 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void DetachHuman()
     {
-        
 
-        if (!ValidateHumanInTrigger()) return;
+
+        if (humanInTrigger == null) return;
+
+        // Always destroy UI 
+        if (currentUIImage != null) Destroy(currentUIImage);
+        if (nextUIImage != null) Destroy(nextUIImage);
+        if (prevUIImage != null) Destroy(prevUIImage);
+
+        nextUIImageRenderer = null;
+        currentUIImageRenderer = null;
+        prevRT = currRT = nextRT = null;
+
+       
+        if (!ValidateHumanInTrigger())
+        {
+            humanInTrigger = null;
+            humanRigidbody = null;
+            isMounted = false;
+            return;
+        }
+
 
         if (humanInTrigger == null) return;
 
