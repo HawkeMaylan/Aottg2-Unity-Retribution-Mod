@@ -429,6 +429,7 @@
 		"Keybinds.Human.SwapTSAttackSpecial": "Swap TS attacks",
 		"Keybinds.Human.SwapTSAttackSpecialTooltip": "Swap attack and special keybinds when using thunderspears.",
 		"Keybinds.Human.AutoRefillGas": "Auto refill gas",
+		"Keybinds.Human.DoubleHookPan": "EM Double Hook",
 		"Keybinds.Human.ReelInHolding": "Reel in holding",
 		"Keybinds.Human.ReelInHoldingTooltip": "If enabled, will continue to reel in while key is held down.",
 		"Keybinds.Titan.CoverNape": "Cover nape",
