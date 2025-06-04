@@ -301,7 +301,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         }
 
         // Fire cannon
-        if (isMounted && humanInTrigger != null && humanInTrigger.IsMine() && Input.GetMouseButtonDown(0))
+        if (isMounted && humanInTrigger != null && humanInTrigger.IsMine() && (SettingsManager.InputSettings.Human.FireCannon.GetKeyDown()))
         {
             if (Time.time >= nextFireTime && projectileOptions.Count > 0)
             {
@@ -318,9 +318,9 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         // Switch projectile selection
         if (isMounted)
         {
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            if (SettingsManager.InputSettings.Human.ChangeAmmoL.GetKeyDown())
                 SelectProjectile((selectedProjectileIndex - 1 + projectileOptions.Count) % projectileOptions.Count);
-            else if (Input.GetKeyDown(KeyCode.RightArrow))
+            else if (SettingsManager.InputSettings.Human.ChangeAmmoR.GetKeyDown())
                 SelectProjectile((selectedProjectileIndex + 1) % projectileOptions.Count);
         }
 

@@ -18,6 +18,9 @@
         public KeybindSetting HorseWalk = new KeybindSetting(new string[] { "LeftShift", "None" });
         public KeybindSetting HorseJump = new KeybindSetting(new string[] { "Space", "None" });
         public KeybindSetting NapeLock = new KeybindSetting(new string[] { "None", "None" });
+        public KeybindSetting FireCannon = new KeybindSetting(new string[] { "Mouse0", "None" });
+        public KeybindSetting ChangeAmmoL = new KeybindSetting(new string[] { "LeftArrow", "None" });
+        public KeybindSetting ChangeAmmoR = new KeybindSetting(new string[] { "RightArrow", "None" });
         public BoolSetting DoubleHookPan = new BoolSetting(false);
         public BoolSetting DashDoubleTap = new BoolSetting(true);
         public BoolSetting WallSlideDash = new BoolSetting(true);
