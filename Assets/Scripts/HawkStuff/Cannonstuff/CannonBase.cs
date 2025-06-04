@@ -341,7 +341,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     public void SelectProjectile(int index)
     {
-        if (Time.time < nextFireTime || isSwapping || index == selectedProjectileIndex)
+        if (isSwapping || index == selectedProjectileIndex)
             return;
 
         int count = projectileOptions.Count;
@@ -743,8 +743,6 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
     private void DetachHuman()
     {
-
-
         if (humanInTrigger == null) return;
 
         // Always destroy UI 
@@ -756,7 +754,13 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         currentUIImageRenderer = null;
         prevRT = currRT = nextRT = null;
 
-       
+        // Stop movement and cooldown sounds
+        if (movementLoopAudioSource.isPlaying)
+            movementLoopAudioSource.Stop();
+
+        if (cooldownAudioSource.isPlaying)
+            cooldownAudioSource.Stop();
+
         if (!ValidateHumanInTrigger())
         {
             humanInTrigger = null;
@@ -764,9 +768,6 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             isMounted = false;
             return;
         }
-
-
-        if (humanInTrigger == null) return;
 
         humanInTrigger.Unmount(true);
 
@@ -778,14 +779,6 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         isMounted = false;
 
-        if (currentUIImage != null) Destroy(currentUIImage);
-        if (nextUIImage != null) Destroy(nextUIImage);
-        if (prevUIImage != null) Destroy(prevUIImage);
-
-        nextUIImageRenderer = null;
-        currentUIImageRenderer = null;
-        prevRT = currRT = nextRT = null;
-
         if (humanInTrigger != null && !hasExitedAfterUnmount)
         {
             SetPrompt(mountPromptText);
@@ -795,10 +788,11 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         {
             ClearPrompt();
         }
-        isMounted = false;
-        humanInTrigger = null;  
-        humanRigidbody = null;  
+
+        humanInTrigger = null;
+        humanRigidbody = null;
     }
+
 
     private void UpdateProjectileUI()
     {
