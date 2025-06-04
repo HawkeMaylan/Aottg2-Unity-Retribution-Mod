@@ -190,7 +190,7 @@ namespace Characters
                 {
                     if (flatDistance < 5f)
                         State = HorseState.Idle;
-                    else if (flatDistance < 12f)
+                    else if (flatDistance < 25f)
                         State = HorseState.WalkToPoint;
                     else
                         State = HorseState.Idle;
@@ -266,7 +266,7 @@ namespace Characters
             }
             else
             {
-                // Restore manual turning when not attached, only if mounted
+                // Restore manual turning when mounted
                 if (_owner.MountState == HumanMountState.Horse && _owner.HasDirection)
                 {
                     Quaternion targetRot = _owner.GetTargetRotation();
@@ -274,7 +274,7 @@ namespace Characters
                     Cache.Transform.rotation = newRot;
                 }
 
-                // Standard acceleration logic
+                // Movement and following logic
                 if (State == HorseState.ControlledIdle || State == HorseState.Idle)
                 {
                     if (Grounded)
@@ -282,7 +282,8 @@ namespace Characters
                         if (Cache.Rigidbody.velocity.magnitude < 1f)
                             Cache.Rigidbody.velocity = Vector3.up * Cache.Rigidbody.velocity.y;
                         else
-                            Cache.Rigidbody.AddForce(-Cache.Rigidbody.velocity.normalized * Mathf.Min(_owner.Stats.HorseSpeed, Cache.Rigidbody.velocity.magnitude * 0.5f),
+                            Cache.Rigidbody.AddForce(
+                                -Cache.Rigidbody.velocity.normalized * Mathf.Min(_owner.Stats.HorseSpeed, Cache.Rigidbody.velocity.magnitude * 0.5f),
                                 ForceMode.Acceleration);
                     }
                 }
@@ -294,6 +295,19 @@ namespace Characters
                     else if (State == HorseState.WalkToPoint)
                         speed = RunCloseSpeed;
 
+                    // If following player and not mounted, rotate toward them
+                    if (_owner.MountState != HumanMountState.Horse &&
+                        (State == HorseState.WalkToPoint || State == HorseState.RunToPoint))
+                    {
+                        Vector3 moveDir = _owner.Cache.Transform.position - Cache.Transform.position;
+                        moveDir.y = 0f;
+                        if (moveDir != Vector3.zero)
+                        {
+                            Quaternion targetRot = Quaternion.LookRotation(moveDir.normalized);
+                            Cache.Transform.rotation = Quaternion.Slerp(Cache.Transform.rotation, targetRot, 5f * Time.fixedDeltaTime);
+                        }
+                    }
+
                     Cache.Rigidbody.AddForce(Cache.Transform.forward * speed, ForceMode.Acceleration);
 
                     if (Cache.Rigidbody.velocity.magnitude >= speed)
@@ -303,9 +317,10 @@ namespace Characters
                 }
             }
 
-            // Gravity always applied
+            // Always apply gravity
             Cache.Rigidbody.AddForce(Gravity, ForceMode.Acceleration);
         }
+
 
 
 
