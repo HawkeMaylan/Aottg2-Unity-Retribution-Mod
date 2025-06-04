@@ -500,10 +500,10 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         float move = 0f;
         float rotate = 0f;
 
-        if (Input.GetKey(KeyCode.W)) move += 1f;
-        if (Input.GetKey(KeyCode.S)) move -= 1f;
-        if (Input.GetKey(KeyCode.D)) rotate += 1f;
-        if (Input.GetKey(KeyCode.A)) rotate -= 1f;
+        if (SettingsManager.InputSettings.General.Forward.GetKeyDown()) move += 1f;
+        if (SettingsManager.InputSettings.General.Back.GetKeyDown()) move -= 1f;
+        if (SettingsManager.InputSettings.General.Right.GetKeyDown()) rotate += 1f;
+        if (SettingsManager.InputSettings.General.Left.GetKeyDown()) rotate -= 1f;
 
         Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up).normalized * move * moveSpeed * Time.fixedDeltaTime;
         moveRigidbody.MovePosition(moveRigidbody.position + forwardMovement);
