@@ -48,7 +48,15 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        UpdatePromptTexts();
         ClearPrompt();
+    }
+
+    private void UpdatePromptTexts()
+    {
+        string key = SettingsManager.InputSettings.Interaction.Interact.ToString();
+        mountPromptText = $"Press {key} to Mount";
+        unmountPromptText = $"Press {key} to Unmount";
     }
 
     private void OnTriggerEnter(Collider other)
@@ -92,7 +100,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
 
         if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
-            if (Input.GetKeyDown(KeyCode.G))
+            if (SettingsManager.InputSettings.Interaction.Interact.GetKeyDown())
             {
                 if (!isMounted && !hasExitedAfterUnmount)
                     AttachHuman();
@@ -215,9 +223,11 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
             style.alignment = TextAnchor.UpperCenter;
             style.normal.textColor = Color.white;
 
-            GUI.Label(new Rect(Screen.width / 2 - 150, 10, 300, 50), currentPrompt, style);
+           
+            GUI.Label(new Rect(Screen.width / 2 - 200, 10, 400, 50), currentPrompt, style);
         }
     }
+
 
     private void SetPrompt(string text)
     {
