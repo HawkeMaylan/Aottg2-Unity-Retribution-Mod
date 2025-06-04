@@ -44,8 +44,16 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     private string UnmountPromptText;
     private string _lastCachedKey = "";
 
+    private Collider _triggerCollider;
+    private const float MaxDistanceBuffer = 1.5f;
+
+    [Header("Trigger Validation")]
+public float maxTriggerDistance = 2.5f; // Adjustable distance to validate trigger stay
+
+
     private void Start()
     {
+        _triggerCollider = GetComponent<Collider>();
         UpdatePromptTexts();
         ClearPrompt();
     }
@@ -90,6 +98,8 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     {
         if (humanInTrigger != null)
         {
+            CheckIfStillInsideCollider();
+
             string currentKey = SettingsManager.InputSettings.Interaction.Interact.ToString();
             if (_lastCachedKey != currentKey)
             {
@@ -106,6 +116,22 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         HandleMountInput();
         HandleUnmountPromptTimer();
         HandleRunAnimation();
+    }
+
+    private void CheckIfStillInsideCollider()
+    {
+        if (humanInTrigger == null || _triggerCollider == null)
+            return;
+
+        Vector3 closest = _triggerCollider.ClosestPoint(humanInTrigger.transform.position);
+        float dist = Vector3.Distance(humanInTrigger.transform.position, closest);
+
+        if (dist > MaxDistanceBuffer)
+        {
+            humanInTrigger = null;
+            humanRigidbody = null;
+            ClearPrompt();
+        }
     }
 
     private void HandleMountInput()
