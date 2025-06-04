@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace Characters
 {
-    class FlareItem : SimpleUseable
+    class FlareItem3 : SimpleUseable
     {
         Color _color;
-        float Speed = 450f;
-        Vector3 Gravity = Vector3.down * 20f;
+        float Speed = 200f;
+        Vector3 Gravity = Vector3.down * 2f;
 
-        public FlareItem(BaseCharacter owner, string name, Color color, float cooldown): base(owner)
+        public FlareItem3(BaseCharacter owner, string name, Color color, float cooldown): base(owner)
         {
             Name = name;
             _color = color;
@@ -23,7 +23,7 @@ namespace Characters
             Vector3 target = human.GetAimPoint();
             Vector3 start = human.Cache.Transform.position + human.Cache.Transform.up * 5f;
             Vector3 direction = (target - start).normalized;
-            ProjectileSpawner.Spawn(ProjectilePrefabs.Flare, start, Quaternion.identity, direction * Speed, Gravity, 6.5f, _owner.Cache.PhotonView.ViewID,
+            ProjectileSpawner.Spawn(ProjectilePrefabs.FlareAcoustic, start, Quaternion.identity, direction * Speed, Gravity, 6.5f, _owner.Cache.PhotonView.ViewID,
                 "", new object[] { _color });
             human.PlaySound(HumanSounds.FlareLaunch);
         }

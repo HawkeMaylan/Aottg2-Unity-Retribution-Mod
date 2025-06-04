@@ -9,5 +9,6 @@
         public static string SmokeBomb = "SmokeBomb";
         public static string Rock1 = "Rock1";
         public static string FlareLight = "FlareLight";
+        public static string FlareAcoustic = "FlareAcoustic";
     }
 }
