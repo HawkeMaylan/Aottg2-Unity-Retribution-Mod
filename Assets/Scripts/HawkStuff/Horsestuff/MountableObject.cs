@@ -40,7 +40,6 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     private Vector3 lastMountedWorldPos = Vector3.zero;
     private bool isCurrentlyRunning = false;
 
-    // Replaced readonly properties with fields
     private string MountPromptText;
     private string UnmountPromptText;
     private string _lastCachedKey = "";
@@ -66,6 +65,8 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
             humanInTrigger = human;
             humanRigidbody = human.GetComponent<Rigidbody>();
             hasExitedAfterUnmount = false;
+
+            UpdatePromptTexts();
             SetPrompt(MountPromptText);
         }
     }
@@ -87,16 +88,19 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        // Update prompt text if keybind changed
-        string currentKey = SettingsManager.InputSettings.Interaction.Interact.ToString();
-        if (_lastCachedKey != currentKey)
+        if (humanInTrigger != null)
         {
-            _lastCachedKey = currentKey;
-            UpdatePromptTexts();
-            if (!isMounted)
-                SetPrompt(MountPromptText);
-            else
-                SetPrompt(UnmountPromptText);
+            string currentKey = SettingsManager.InputSettings.Interaction.Interact.ToString();
+            if (_lastCachedKey != currentKey)
+            {
+                _lastCachedKey = currentKey;
+                UpdatePromptTexts();
+
+                if (!isMounted)
+                    SetPrompt(MountPromptText);
+                else
+                    SetPrompt(UnmountPromptText);
+            }
         }
 
         HandleMountInput();
@@ -123,7 +127,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
 
     private void HandleUnmountPromptTimer()
     {
-        if (isMounted && unmountPromptTimer > 0f)
+        if (!string.IsNullOrEmpty(currentPrompt))
         {
             unmountPromptTimer -= Time.deltaTime;
             if (unmountPromptTimer <= 0f)
@@ -188,8 +192,6 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         hasExitedAfterUnmount = false;
 
         SetPrompt(UnmountPromptText);
-        unmountPromptTimer = unmountPromptDuration;
-
         lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
         humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.2f);
     }
@@ -212,7 +214,6 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
         if (humanInTrigger != null && !hasExitedAfterUnmount)
         {
             SetPrompt(MountPromptText);
-            unmountPromptTimer = 0f;
         }
         else
         {
@@ -241,6 +242,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     private void SetPrompt(string text)
     {
         currentPrompt = text;
+        unmountPromptTimer = unmountPromptDuration;
     }
 
     private void ClearPrompt()
