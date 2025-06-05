@@ -10,7 +10,6 @@ using System.Collections.Generic;
 
 public class ItemGrantZone : MonoBehaviourPunCallbacks
 {
-
     [System.Serializable]
     public struct GrantItem
     {
@@ -18,13 +17,15 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks
         public int amount;
     }
 
-
     [Header("Grant Settings")]
     public Collider triggerZone;
     public List<GrantItem> itemsToGrant = new List<GrantItem>();
-
     public float cooldownDuration = 10f;
     public int maxGrants = 3;
+
+    [Header("Object Cleanup")]
+    public bool destroyWhenEmpty = false;
+    public float shrinkAndDestroyTime = 1.5f;
 
     [Header("UI Prompt")]
     public float promptDuration = 3f;
@@ -39,15 +40,14 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks
     private bool isInside = false;
 
     Dictionary<string, string> friendlyNames = new Dictionary<string, string>
-{
-    { "Wagon1", "Support Wagon" },
-    { "Wagon2", "Resupply Wagon" },
-    { "Cannon", "Cannon" },
-    { "WallCannon", "Wall Cannon" },
-    { "CannonGround", "Field Cannon" },
-    //Add new item names as need be
-};
-
+    {
+        { "Wagon1", "Support Wagon" },
+        { "Wagon2", "Resupply Wagon" },
+        { "Cannon", "Cannon" },
+        { "WallCannon", "Wall Cannon" },
+        { "CannonGround", "Field Cannon" },
+        // Add new item names as needed
+    };
 
     private void Update()
     {
@@ -91,15 +91,13 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks
             else
             {
                 string itemList = string.Join(", ", itemsToGrant.ConvertAll(
-    entry =>
-    {
-        string name = friendlyNames.TryGetValue(entry.itemType, out var display) ? display : entry.itemType;
-        return $"{name} x{entry.amount}";
-    }));
+                    entry =>
+                    {
+                        string name = friendlyNames.TryGetValue(entry.itemType, out var display) ? display : entry.itemType;
+                        return $"{name} x{entry.amount}";
+                    }));
+
                 currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Pick Up: {itemList}";
-
-
-
 
                 if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
                 {
@@ -118,12 +116,37 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks
                         }
                     }
 
+                    if (grantsUsed >= maxGrants && destroyWhenEmpty)
+                    {
+                        StartCoroutine(ShrinkAndDestroy());
+                    }
 
                     ClearPrompt();
                     isInside = false;
                 }
             }
         }
+    }
+
+    private IEnumerator ShrinkAndDestroy()
+    {
+        Vector3 originalScale = transform.localScale;
+        float timer = 0f;
+
+        while (timer < shrinkAndDestroyTime)
+        {
+            float t = timer / shrinkAndDestroyTime;
+            transform.localScale = Vector3.Lerp(originalScale, Vector3.zero, t);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.localScale = Vector3.zero;
+
+        if (photonView != null && photonView.IsMine)
+            PhotonNetwork.Destroy(gameObject);
+        else
+            Destroy(gameObject);
     }
 
     private Human FindLocalHumanInZone()

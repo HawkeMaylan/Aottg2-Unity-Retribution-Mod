@@ -156,7 +156,9 @@ MonoBehaviour:
   - itemType: CannonGround
     amount: 3
   cooldownDuration: 10
-  maxGrants: 15
+  maxGrants: 1
+  destroyWhenEmpty: 1
+  shrinkAndDestroyTime: 0.4
   promptDuration: 3
 --- !u!1 &7629647849373700749
 GameObject:
