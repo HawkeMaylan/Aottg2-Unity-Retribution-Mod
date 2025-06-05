@@ -55,7 +55,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     {
         if (ChatManager.IsChatActive()) return;
 
-        if (Input.GetKeyDown(KeyCode.G))
+        if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
         {
             if (!isAttached && horseRootInContact != null)
             {
@@ -112,7 +112,9 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
                 horseView.Owner == PhotonNetwork.LocalPlayer && horseComponent.MountedStatus == 1)
             {
                 horseRootInContact = horseRoot;
-                SetPrompt("Press G to Attach", 3f);
+                SetPrompt($"Press {SettingsManager.InputSettings.Interaction.Interact2.ToString()} to Attach", 3f);
+
+
             }
         }
     }
@@ -181,7 +183,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         attachedHorse = horseRoot;
         attachedHorseViewID = horseViewID;
 
-        SetPrompt("Press G to Detach", 5f);
+        SetPrompt($"Press {SettingsManager.InputSettings.Interaction.Interact2.ToString()} to Detach", 3f);
 
         if (detachCheckCoroutine != null) StopCoroutine(detachCheckCoroutine);
         detachCheckCoroutine = StartCoroutine(AutoDetachCheck());
@@ -205,7 +207,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
             detachCheckCoroutine = null;
         }
 
-        SetPrompt("Press G to Attach", 3f);
+        SetPrompt($"Press {SettingsManager.InputSettings.Interaction.Interact2.ToString()} to Attach", 3f);
     }
 
     private IEnumerator AutoDetachCheck()

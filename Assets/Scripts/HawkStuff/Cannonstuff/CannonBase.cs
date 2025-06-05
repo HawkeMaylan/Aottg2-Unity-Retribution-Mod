@@ -271,7 +271,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         // Handle flipping by holding G in range for 3 seconds
         if (!isMounted && humanInTrigger != null && humanInTrigger.IsMine())
         {
-            if (Input.GetKey(KeyCode.G) && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
+            if (SettingsManager.InputSettings.Interaction.Interact.GetKeyDown() && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
             {
                 if (interactionZone.bounds.Contains(humanInTrigger.transform.position))
                 {
