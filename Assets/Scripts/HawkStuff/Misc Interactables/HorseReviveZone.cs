@@ -7,7 +7,7 @@ using GameManagers;
 using ApplicationManagers;
 using System.Collections;
 
-public class HorseRespawnZone : MonoBehaviourPunCallbacks
+public class HorseReviveZone : MonoBehaviourPunCallbacks
 {
     public Collider triggerZone; // 
     public Vector3 spawnOffset = new Vector3(2f, 0f, 0f);
