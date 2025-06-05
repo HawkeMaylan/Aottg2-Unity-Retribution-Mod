@@ -18,6 +18,10 @@ public class HorseRespawnZone : MonoBehaviourPunCallbacks
     private static string currentPrompt = "";
     private bool isInside = false;
 
+    private float lastRespawnTime = -999f;
+    public float cooldownDuration = 10f;
+
+
     private void Update()
     {
         if (ChatManager.IsChatActive()) return;
@@ -28,7 +32,6 @@ public class HorseRespawnZone : MonoBehaviourPunCallbacks
             if (checkHuman != null)
             {
                 localHuman = checkHuman;
-                SetPrompt($"Press {SettingsManager.InputSettings.Interaction.Interact2} to Respawn Horse", promptDuration);
                 isInside = true;
             }
         }
@@ -39,17 +42,35 @@ public class HorseRespawnZone : MonoBehaviourPunCallbacks
             localHuman = null;
         }
 
-        if (isInside && localHuman != null && SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
+        if (isInside && localHuman != null)
         {
-            if (PhotonNetwork.IsMasterClient)
-                TryRespawnHorse(localHuman.photonView.Owner);
-            else
-                photonView.RPC(nameof(RPC_RequestHorseRespawn), RpcTarget.MasterClient, localHuman.photonView.OwnerActorNr);
+            float timeSinceLast = Time.time - lastRespawnTime;
 
-            ClearPrompt();
-            isInside = false;
+            if (timeSinceLast < cooldownDuration)
+            {
+                float timeLeft = Mathf.Ceil(cooldownDuration - timeSinceLast);
+                currentPrompt = $"Respawn on cooldown ({timeLeft}s)";
+            }
+            else
+            {
+                currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Respawn Horse";
+
+                if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
+                {
+                    lastRespawnTime = Time.time;
+
+                    if (PhotonNetwork.IsMasterClient)
+                        TryRespawnHorse(localHuman.photonView.Owner);
+                    else
+                        photonView.RPC(nameof(RPC_RequestHorseRespawn), RpcTarget.MasterClient, localHuman.photonView.OwnerActorNr);
+
+                    ClearPrompt();
+                    isInside = false;
+                }
+            }
         }
     }
+
 
     private Human FindLocalHumanInZone()
     {
@@ -142,13 +163,23 @@ public class HorseRespawnZone : MonoBehaviourPunCallbacks
         return null;
     }
 
-    private void SetPrompt(string text, float duration)
+    private void SetPrompt(string baseText, float duration)
     {
-        currentPrompt = text;
+        if (Time.time - lastRespawnTime < cooldownDuration)
+        {
+            float timeLeft = Mathf.Ceil(cooldownDuration - (Time.time - lastRespawnTime));
+            currentPrompt = $"Respawn on cooldown ({timeLeft}s)";
+        }
+        else
+        {
+            currentPrompt = baseText;
+        }
+
         if (promptCoroutine != null)
             StopCoroutine(promptCoroutine);
         promptCoroutine = StartCoroutine(ClearPromptAfterDelay(duration));
     }
+
 
     private void ClearPrompt()
     {
