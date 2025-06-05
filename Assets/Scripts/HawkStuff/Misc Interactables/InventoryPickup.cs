@@ -10,9 +10,19 @@ using System.Collections.Generic;
 
 public class ItemGrantZone : MonoBehaviourPunCallbacks
 {
+
+    [System.Serializable]
+    public struct GrantItem
+    {
+        public string itemType;
+        public int amount;
+    }
+
+
     [Header("Grant Settings")]
     public Collider triggerZone;
-    public List<string> itemTypesToGrant = new List<string>();
+    public List<GrantItem> itemsToGrant = new List<GrantItem>();
+
     public float cooldownDuration = 10f;
     public int maxGrants = 3;
 
@@ -65,23 +75,29 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks
 
             if (remaining <= 0)
             {
-                currentPrompt = "No grants remaining";
+                currentPrompt = "No Items remaining";
                 extraPrompt = "";
                 return;
             }
 
-            extraPrompt = $"Grants left: {remaining}";
+            extraPrompt = $"Items left: {remaining}";
 
             float timeSinceLast = Time.time - lastGrantTime;
             if (timeSinceLast < cooldownDuration)
             {
                 float timeLeft = Mathf.Ceil(cooldownDuration - timeSinceLast);
-                currentPrompt = $"Grant on cooldown ({timeLeft}s)";
+                currentPrompt = $"Pickup on cooldown ({timeLeft}s)";
             }
             else
             {
-                string itemList = string.Join(", ", itemTypesToGrant.ConvertAll(t => friendlyNames.TryGetValue(t, out var name) ? name : t));
+                string itemList = string.Join(", ", itemsToGrant.ConvertAll(
+    entry =>
+    {
+        string name = friendlyNames.TryGetValue(entry.itemType, out var display) ? display : entry.itemType;
+        return $"{name} x{entry.amount}";
+    }));
                 currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Pick Up: {itemList}";
+
 
 
 
@@ -90,12 +106,18 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks
                     lastGrantTime = Time.time;
                     grantsUsed++;
 
-                    foreach (string type in itemTypesToGrant)
+                    var inventory = localHuman.GetComponent<HumanInventory>();
+                    if (inventory != null)
                     {
-                        var inventory = localHuman.GetComponent<HumanInventory>();
-                        if (inventory != null)
-                            inventory.AddItem(type);
+                        foreach (var entry in itemsToGrant)
+                        {
+                            for (int i = 0; i < entry.amount; i++)
+                            {
+                                inventory.AddItem(entry.itemType);
+                            }
+                        }
                     }
+
 
                     ClearPrompt();
                     isInside = false;

@@ -152,8 +152,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   triggerZone: {fileID: 7743933337918135811}
-  itemTypesToGrant:
-  - CannonGround
+  itemsToGrant:
+  - itemType: CannonGround
+    amount: 3
   cooldownDuration: 10
   maxGrants: 15
   promptDuration: 3
