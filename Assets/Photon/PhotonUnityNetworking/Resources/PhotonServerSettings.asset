@@ -150,6 +150,7 @@ MonoBehaviour:
   - RPC_SetStats
   - SyncLightingToClients
   - RPC_SetItemCount
+  - RPC_RequestHorseRespawn
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
