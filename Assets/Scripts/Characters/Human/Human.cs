@@ -2715,8 +2715,10 @@ namespace Characters
                 itemList4.Add(new DaycycleDelete(this, "DeleteDayCycle", 15f));
 
                 itemList4.Add(new ShigGateSpawn(this, "ShigGateSpawn", 1f));
+                itemList4.Add(new PickupGroundCannon(this, "Field Cannon Item", 1f));
 
-                
+
+
 
 
 

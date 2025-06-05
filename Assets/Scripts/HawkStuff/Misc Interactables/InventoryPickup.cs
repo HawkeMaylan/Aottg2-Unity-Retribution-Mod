@@ -8,7 +8,7 @@ using ApplicationManagers;
 using System.Collections;
 using System.Collections.Generic;
 
-public class ItemGrantZone : MonoBehaviourPunCallbacks
+public class ItemGrantZone : MonoBehaviourPunCallbacks, IPunObservable
 {
     [System.Serializable]
     public struct GrantItem
@@ -35,23 +35,38 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks
     private static string currentPrompt = "";
     private static string extraPrompt = "";
 
+    [SerializeField]
     private float lastGrantTime = -999f;
     private int grantsUsed = 0;
     private bool isInside = false;
+    private bool isShrinking = false;
 
-    Dictionary<string, string> friendlyNames = new Dictionary<string, string>
+    private Dictionary<string, string> friendlyNames = new Dictionary<string, string>
     {
         { "Wagon1", "Support Wagon" },
         { "Wagon2", "Resupply Wagon" },
         { "Cannon", "Cannon" },
         { "WallCannon", "Wall Cannon" },
         { "CannonGround", "Field Cannon" },
-        // Add new item names as needed
     };
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(grantsUsed);
+            stream.SendNext(lastGrantTime);
+        }
+        else
+        {
+            grantsUsed = (int)stream.ReceiveNext();
+            lastGrantTime = (float)stream.ReceiveNext();
+        }
+    }
 
     private void Update()
     {
-        if (ChatManager.IsChatActive()) return;
+        if (ChatManager.IsChatActive() || isShrinking) return;
 
         if (!isInside)
         {
@@ -90,46 +105,68 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks
             }
             else
             {
-                string itemList = string.Join(", ", itemsToGrant.ConvertAll(
-                    entry =>
-                    {
-                        string name = friendlyNames.TryGetValue(entry.itemType, out var display) ? display : entry.itemType;
-                        return $"{name} x{entry.amount}";
-                    }));
+                string itemList = string.Join(", ", itemsToGrant.ConvertAll(entry =>
+                {
+                    string name = friendlyNames.TryGetValue(entry.itemType, out var display) ? display : entry.itemType;
+                    return $"{name} x{entry.amount}";
+                }));
 
                 currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Pick Up: {itemList}";
 
                 if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
                 {
-                    lastGrantTime = Time.time;
-                    grantsUsed++;
-
-                    var inventory = localHuman.GetComponent<HumanInventory>();
-                    if (inventory != null)
-                    {
-                        foreach (var entry in itemsToGrant)
-                        {
-                            for (int i = 0; i < entry.amount; i++)
-                            {
-                                inventory.AddItem(entry.itemType);
-                            }
-                        }
-                    }
-
-                    if (grantsUsed >= maxGrants && destroyWhenEmpty)
-                    {
-                        StartCoroutine(ShrinkAndDestroy());
-                    }
-
-                    ClearPrompt();
-                    isInside = false;
+                    photonView.RPC("RPC_TryGrant", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber);
                 }
             }
         }
     }
 
+    [PunRPC]
+    private void RPC_TryGrant(int actorId, PhotonMessageInfo info)
+    {
+        if (!PhotonNetwork.IsMasterClient || isShrinking) return;
+
+        if (grantsUsed >= maxGrants || (Time.time - lastGrantTime) < cooldownDuration)
+            return;
+
+        grantsUsed++;
+        lastGrantTime = Time.time;
+
+        photonView.RPC("RPC_SyncGrant", RpcTarget.All, grantsUsed, lastGrantTime);
+
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human.photonView != null && human.photonView.OwnerActorNr == actorId)
+            {
+                var inventory = human.GetComponent<HumanInventory>();
+                if (inventory != null)
+                {
+                    foreach (var entry in itemsToGrant)
+                    {
+                        for (int i = 0; i < entry.amount; i++)
+                        {
+                            inventory.AddItem(entry.itemType);
+                        }
+                    }
+                }
+                break;
+            }
+        }
+
+        if (grantsUsed >= maxGrants && destroyWhenEmpty)
+            StartCoroutine(ShrinkAndDestroy());
+    }
+
+    [PunRPC]
+    private void RPC_SyncGrant(int used, float lastTime)
+    {
+        grantsUsed = used;
+        lastGrantTime = lastTime;
+    }
+
     private IEnumerator ShrinkAndDestroy()
     {
+        isShrinking = true;
         Vector3 originalScale = transform.localScale;
         float timer = 0f;
 

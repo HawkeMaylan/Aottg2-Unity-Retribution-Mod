@@ -151,6 +151,11 @@ MonoBehaviour:
   - SyncLightingToClients
   - RPC_SetItemCount
   - RPC_RequestHorseRespawn
+  - RPC_GrantItems
+  - RPC_IncrementGrantsUsed
+  - RPC_GrantConfirmed
+  - RPC_SyncGrant
+  - RPC_TryGrant
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
