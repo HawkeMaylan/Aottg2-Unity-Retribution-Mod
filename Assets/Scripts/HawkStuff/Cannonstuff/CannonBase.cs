@@ -271,7 +271,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         // Handle flipping by holding G in range for 3 seconds
         if (!isMounted && humanInTrigger != null && humanInTrigger.IsMine())
         {
-            if (Input.GetKey(KeyCode.G))
+            if (Input.GetKey(KeyCode.G) && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
             {
                 if (interactionZone.bounds.Contains(humanInTrigger.transform.position))
                 {
@@ -312,7 +312,7 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         }
 
         // Fire cannon
-        if (isMounted && humanInTrigger != null && humanInTrigger.IsMine() && (SettingsManager.InputSettings.Human.FireCannon.GetKeyDown()))
+        if (isMounted && humanInTrigger != null && humanInTrigger.IsMine() && (SettingsManager.InputSettings.Human.FireCannon.GetKeyDown()) && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
             if (Time.time >= nextFireTime && projectileOptions.Count > 0)
             {
@@ -329,9 +329,9 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         // Switch projectile selection
         if (isMounted)
         {
-            if (SettingsManager.InputSettings.Human.ChangeAmmoL.GetKeyDown())
+            if (SettingsManager.InputSettings.Human.ChangeAmmoL.GetKeyDown() && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
                 SelectProjectile((selectedProjectileIndex - 1 + projectileOptions.Count) % projectileOptions.Count);
-            else if (SettingsManager.InputSettings.Human.ChangeAmmoR.GetKeyDown())
+            else if (SettingsManager.InputSettings.Human.ChangeAmmoR.GetKeyDown() && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
                 SelectProjectile((selectedProjectileIndex + 1) % projectileOptions.Count);
         }
 
@@ -511,10 +511,10 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         float move = 0f;
         float rotate = 0f;
 
-        if (SettingsManager.InputSettings.General.Forward.GetKey()) move += 1f;
-        if (SettingsManager.InputSettings.General.Back.GetKey()) move -= 1f;
-        if (SettingsManager.InputSettings.General.Right.GetKey()) rotate += 1f;
-        if (SettingsManager.InputSettings.General.Left.GetKey()) rotate -= 1f;
+        if (SettingsManager.InputSettings.General.Forward.GetKey() && !InGameMenu.InMenu() && !ChatManager.IsChatActive()) move += 1f;
+        if (SettingsManager.InputSettings.General.Back.GetKey() && !InGameMenu.InMenu() && !ChatManager.IsChatActive()) move -= 1f;
+        if (SettingsManager.InputSettings.General.Right.GetKey() && !InGameMenu.InMenu() && !ChatManager.IsChatActive()) rotate += 1f;
+        if (SettingsManager.InputSettings.General.Left.GetKey() && !InGameMenu.InMenu() && !ChatManager.IsChatActive()) rotate -= 1f;
 
 
         Vector3 forwardMovement = Vector3.ProjectOnPlane(MoveTarget.forward, Vector3.up).normalized * move * moveSpeed * Time.fixedDeltaTime;
