@@ -5,6 +5,7 @@ using GameManagers;
 using ApplicationManagers;
 using System.Collections;
 using Characters;
+using UI;
 
 public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 {
@@ -55,7 +56,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     {
         if (ChatManager.IsChatActive()) return;
 
-        if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
+        if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown() && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
             if (!isAttached && horseRootInContact != null)
             {
@@ -102,6 +103,8 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
+        if (isAttached) return; 
+
         if (other.name == "HorseTrigger")
         {
             Transform horseRoot = other.transform.root;
@@ -113,11 +116,10 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
             {
                 horseRootInContact = horseRoot;
                 SetPrompt($"Press {SettingsManager.InputSettings.Interaction.Interact2.ToString()} to Attach", 3f);
-
-
             }
         }
     }
+
 
     private void OnTriggerExit(Collider other)
     {
