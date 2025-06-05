@@ -5,7 +5,7 @@ using Effects;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Collider))]
-public class GeneralKillScript : MonoBehaviourPun
+public class GeneralKillScript : MonoBehaviourPunCallbacks
 {
     [Header("General Settings")]
     public float destroyAfterSeconds = 5f;
@@ -16,7 +16,7 @@ public class GeneralKillScript : MonoBehaviourPun
     public AnimationClip collisionAnimation;
     public float animationDelayTime = 0f;
     public bool makeKinematicOnCollision = false;
-    public LayerMask animationCollisionLayers = ~0; // Defaults to "Everything"
+    public LayerMask animationCollisionLayers = ~0;
 
     [Header("Optional Particle Effect")]
     public bool spawnParticleOnCollision = false;
@@ -52,20 +52,30 @@ public class GeneralKillScript : MonoBehaviourPun
         if (destroyAfterSeconds > 0f)
             Invoke(nameof(SelfDestruct), destroyAfterSeconds);
 
-        if (playAnimationOnCollision && collisionAnimation != null)
+        
+        if (playAnimationOnCollision)
         {
-            legacyAnim = GetComponent<Animation>();
-            if (legacyAnim == null)
-                legacyAnim = gameObject.AddComponent<Animation>();
+            if (collisionAnimation != null)
+            {
+                legacyAnim = GetComponent<Animation>();
+                if (legacyAnim == null)
+                    legacyAnim = gameObject.AddComponent<Animation>();
 
-            legacyAnim.playAutomatically = false;
-            if (!legacyAnim.GetClip(collisionAnimation.name))
-                legacyAnim.AddClip(collisionAnimation, collisionAnimation.name);
+                legacyAnim.playAutomatically = false;
+
+                if (!legacyAnim.GetClip(collisionAnimation.name))
+                    legacyAnim.AddClip(collisionAnimation, collisionAnimation.name);
+            }
+            else
+            {
+                Debug.LogWarning($"[GeneralKillScript] playAnimationOnCollision is enabled, but no animation clip is assigned on {gameObject.name}");
+            }
         }
 
         rb = GetComponent<Rigidbody>();
         selfCollider = GetComponent<Collider>();
     }
+
 
     private void Update()
     {
@@ -78,27 +88,20 @@ public class GeneralKillScript : MonoBehaviourPun
             if (other == selfCollider)
                 continue;
 
-            // Layer filtering for collision animation
-            if (((1 << other.gameObject.layer) & animationCollisionLayers) != 0)
+            if (((1 << other.gameObject.layer) & animationCollisionLayers) != 0 && !animationPlayed)
             {
-                if (playAnimationOnCollision && !animationPlayed && legacyAnim != null && collisionAnimation != null)
-                {
-                    legacyAnim.Play(collisionAnimation.name);
-                    animationPlayed = true;
-
-                    if (makeKinematicOnCollision && rb != null)
-                        rb.isKinematic = true;
-
-                    CancelInvoke(nameof(SelfDestruct));
-                    Invoke(nameof(SelfDestruct), collisionAnimation.length);
-                }
-
-                if (spawnParticleOnCollision && !particleSpawned && collisionParticlePrefab != null)
-                {
-                    Instantiate(collisionParticlePrefab, transform.position, Quaternion.identity);
-                    particleSpawned = true;
-                }
+                photonView.RPC("RPC_PlayCollisionAnimation", RpcTarget.All);
+                animationPlayed = true;
             }
+
+            if (spawnParticleOnCollision && !particleSpawned && collisionParticlePrefab != null)
+            {
+                photonView.RPC("RPC_SpawnParticle", RpcTarget.All, transform.position);
+                particleSpawned = true;
+            }
+
+            if (!PhotonNetwork.IsMasterClient)
+                continue;
 
             Human human = other.GetComponentInParent<Human>();
             if (damageHumans && human != null && human.IsMine())
@@ -112,40 +115,29 @@ public class GeneralKillScript : MonoBehaviourPun
                 continue;
 
             BasicTitan titan = baseTitan as BasicTitan;
-            if (titan == null)
-                continue;
+            if (titan == null) continue;
 
             string hitboxName = other.name;
 
-            var eyes = titan.BaseTitanCache.EyesHurtbox?.name;
-            var nape = titan.BaseTitanCache.NapeHurtbox?.name;
-            var legL = titan.BaseTitanCache.LegLHurtbox?.name;
-            var legR = titan.BaseTitanCache.LegRHurtbox?.name;
-            var armL = titan.BasicCache.ForearmLHurtbox?.name;
-            var armR = titan.BasicCache.ForearmRHurtbox?.name;
-
-            if (blindEyes && hitboxName == eyes)
+            var cache = titan.BaseTitanCache;
+            if (blindEyes && hitboxName == cache.EyesHurtbox?.name)
             {
                 EffectSpawner.Spawn(EffectPrefabs.CriticalHit, transform.position, Quaternion.Euler(270f, 0f, 0f));
                 titan.GetHit("SmokeBomb", 0, "SmokeBomb", hitboxName);
             }
-
-            if (damageNape && hitboxName == nape)
+            if (damageNape && hitboxName == cache.NapeHurtbox?.name)
             {
                 titan.GetHit(killSourceName, titanNapeDamage, "BladeThrow", hitboxName);
             }
-
-            if (disableArms && (hitboxName == armL || hitboxName == armR))
+            if (disableArms && (hitboxName == titan.BasicCache.ForearmLHurtbox?.name || hitboxName == titan.BasicCache.ForearmRHurtbox?.name))
+            {
+                titan.GetHit(killSourceName, 0, "BladeThrow", hitboxName);
+            }
+            if (crippleLegs && (hitboxName == cache.LegLHurtbox?.name || hitboxName == cache.LegRHurtbox?.name))
             {
                 titan.GetHit(killSourceName, 0, "BladeThrow", hitboxName);
             }
 
-            if (crippleLegs && (hitboxName == legL || hitboxName == legR))
-            {
-                titan.GetHit(killSourceName, 0, "BladeThrow", hitboxName);
-            }
-
-            // Run knockback *after* other logic
             if (directionalStun)
             {
                 if (!titanKnockbackCounts.ContainsKey(baseTitan))
@@ -156,26 +148,36 @@ public class GeneralKillScript : MonoBehaviourPun
                     Vector3 dir = (titan.Cache.Transform.position - transform.position).normalized;
                     dir.y = 0f;
 
-                    // Apply stun FIRST to trigger ragdoll
                     titan.GetHit(killSourceName, 0, "TitanStun", hitboxName);
-
-                    // Ensure Rigidbody is still responsive
                     titan.Cache.Rigidbody.isKinematic = false;
-
-                    // Apply knockback AFTER ragdoll
                     titan.Cache.Rigidbody.AddForce(dir * knockbackForce, ForceMode.Impulse);
-
                     titanKnockbackCounts[baseTitan]++;
                 }
-
             }
         }
+    }
+
+    [PunRPC]
+    private void RPC_PlayCollisionAnimation()
+    {
+        if (legacyAnim != null && collisionAnimation != null)
+        {
+            legacyAnim.Play(collisionAnimation.name);
+            if (makeKinematicOnCollision && rb != null)
+                rb.isKinematic = true;
+        }
+    }
+
+    [PunRPC]
+    private void RPC_SpawnParticle(Vector3 position)
+    {
+        if (collisionParticlePrefab != null)
+            Instantiate(collisionParticlePrefab, position, Quaternion.identity);
     }
 
     private void SelfDestruct()
     {
         if (photonView.IsMine)
             PhotonNetwork.Destroy(gameObject);
-
     }
 }
