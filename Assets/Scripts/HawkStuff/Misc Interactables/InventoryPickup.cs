@@ -167,6 +167,15 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks, IPunObservable
     private IEnumerator ShrinkAndDestroy()
     {
         isShrinking = true;
+
+        
+        if (localHuman != null && localHuman.photonView.IsMine)
+        {
+            ClearPrompt();
+            isInside = false;
+            localHuman = null;
+        }
+
         Vector3 originalScale = transform.localScale;
         float timer = 0f;
 
@@ -185,6 +194,7 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks, IPunObservable
         else
             Destroy(gameObject);
     }
+
 
     private Human FindLocalHumanInZone()
     {

@@ -157,7 +157,7 @@ MonoBehaviour:
   triggerZone: {fileID: 7743933337918135811}
   itemsToGrant:
   - itemType: CannonGround
-    amount: 3
+    amount: 1
   cooldownDuration: 10
   maxGrants: 1
   destroyWhenEmpty: 1
