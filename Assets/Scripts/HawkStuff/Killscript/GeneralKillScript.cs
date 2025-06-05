@@ -174,6 +174,8 @@ public class GeneralKillScript : MonoBehaviourPun
 
     private void SelfDestruct()
     {
-        Destroy(gameObject);
+        if (photonView.IsMine)
+            PhotonNetwork.Destroy(gameObject);
+
     }
 }
