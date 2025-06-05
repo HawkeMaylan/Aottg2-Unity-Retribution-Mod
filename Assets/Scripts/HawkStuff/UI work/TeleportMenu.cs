@@ -243,8 +243,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             showStatsPanel = !showStatsPanel;
 
         float leftX = Screen.width - 540 - 240;
-        float inventoryY = 100;
-        float statsY = 240;
+        float inventoryY = 280;
+        float statsY = 80;
 
         // Inventory Panel
         if (showInventoryPanel)
