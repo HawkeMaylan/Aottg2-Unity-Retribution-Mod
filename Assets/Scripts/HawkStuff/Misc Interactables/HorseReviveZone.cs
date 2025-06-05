@@ -21,6 +21,11 @@ public class HorseRespawnZone : MonoBehaviourPunCallbacks
     private float lastRespawnTime = -999f;
     public float cooldownDuration = 10f;
 
+    public int maxRespawns = 3; 
+    private int respawnsUsed = 0;
+    private static string extraPrompt = ""; 
+
+
 
     private void Update()
     {
@@ -45,19 +50,30 @@ public class HorseRespawnZone : MonoBehaviourPunCallbacks
         if (isInside && localHuman != null)
         {
             float timeSinceLast = Time.time - lastRespawnTime;
+            int remaining = maxRespawns - respawnsUsed;
+
+            if (remaining <= 0)
+            {
+                currentPrompt = "No Horses Remaining";
+                extraPrompt = "";
+                return;
+            }
+
+            extraPrompt = $"Horses Left: {remaining}";
 
             if (timeSinceLast < cooldownDuration)
             {
                 float timeLeft = Mathf.Ceil(cooldownDuration - timeSinceLast);
-                currentPrompt = $"Respawn on cooldown ({timeLeft}s)";
+                currentPrompt = $"New Horse Being Prepared ({timeLeft}s)";
             }
             else
             {
-                currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Respawn Horse";
+                currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} To Get A New Horse";
 
                 if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
                 {
                     lastRespawnTime = Time.time;
+                    respawnsUsed++;
 
                     if (PhotonNetwork.IsMasterClient)
                         TryRespawnHorse(localHuman.photonView.Owner);
@@ -69,6 +85,7 @@ public class HorseRespawnZone : MonoBehaviourPunCallbacks
                 }
             }
         }
+
     }
 
 
@@ -184,12 +201,14 @@ public class HorseRespawnZone : MonoBehaviourPunCallbacks
     private void ClearPrompt()
     {
         currentPrompt = "";
+        extraPrompt = "";
         if (promptCoroutine != null)
         {
             StopCoroutine(promptCoroutine);
             promptCoroutine = null;
         }
     }
+
 
     private IEnumerator ClearPromptAfterDelay(float time)
     {
@@ -205,16 +224,20 @@ public class HorseRespawnZone : MonoBehaviourPunCallbacks
             {
                 fontSize = 24,
                 alignment = TextAnchor.UpperCenter,
-                wordWrap = false, // 
+                wordWrap = false,
                 normal = { textColor = Color.white }
             };
 
-            float labelWidth = 600f; // 
+            float labelWidth = 800f;
             float labelHeight = 50f;
             float labelX = Screen.width / 2 - labelWidth / 2;
 
             GUI.Label(new Rect(labelX, 50, labelWidth, labelHeight), currentPrompt, style);
+
+            if (!string.IsNullOrEmpty(extraPrompt))
+                GUI.Label(new Rect(labelX, 85, labelWidth, labelHeight), extraPrompt, style);
         }
     }
+
 
 }
