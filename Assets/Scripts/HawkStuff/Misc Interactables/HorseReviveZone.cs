@@ -174,10 +174,16 @@ public class HorseRespawnZone : MonoBehaviourPunCallbacks
             {
                 fontSize = 24,
                 alignment = TextAnchor.UpperCenter,
+                wordWrap = false, // 
                 normal = { textColor = Color.white }
             };
 
-            GUI.Label(new Rect(Screen.width / 2 - 150, 50, 300, 50), currentPrompt, style);
+            float labelWidth = 600f; // 
+            float labelHeight = 50f;
+            float labelX = Screen.width / 2 - labelWidth / 2;
+
+            GUI.Label(new Rect(labelX, 50, labelWidth, labelHeight), currentPrompt, style);
         }
     }
+
 }
