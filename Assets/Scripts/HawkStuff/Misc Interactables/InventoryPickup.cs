@@ -28,6 +28,17 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks
     private int grantsUsed = 0;
     private bool isInside = false;
 
+    Dictionary<string, string> friendlyNames = new Dictionary<string, string>
+{
+    { "Wagon1", "Support Wagon" },
+    { "Wagon2", "Resupply Wagon" },
+    { "Cannon", "Cannon" },
+    { "WallCannon", "Wall Cannon" },
+    { "CannonGround", "Field Cannon" },
+    //Add new item names as need be
+};
+
+
     private void Update()
     {
         if (ChatManager.IsChatActive()) return;
@@ -69,7 +80,10 @@ public class ItemGrantZone : MonoBehaviourPunCallbacks
             }
             else
             {
-                currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Receive Item";
+                string itemList = string.Join(", ", itemTypesToGrant.ConvertAll(t => friendlyNames.TryGetValue(t, out var name) ? name : t));
+                currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Pick Up: {itemList}";
+
+
 
                 if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
                 {
