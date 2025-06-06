@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using System.Collections.Generic;
+using UI; // Add this if your ItemPopupManager is in a UI namespace
 
 namespace Characters
 {
@@ -10,12 +11,11 @@ namespace Characters
         [SerializeField]
         private List<string> defaultDeployables = new List<string>
         {
-            ///ADD NEW AS NEEDED MAKE SURE TO ADD AT BOTTOM
+            // ADD NEW AS NEEDED - MAKE SURE TO ADD AT BOTTOM
             "Cannon",
             "Wagon1",
             "Wagon2",
             "WallCannon"
-
         };
 
         [Header("Inventory Counts")]
@@ -59,7 +59,16 @@ namespace Characters
         public void RPC_SetItemCount(string type, int count)
         {
             EnsureItemType(type);
-            inventoryCounts[type] = Mathf.Max(0, count);
+            int oldCount = inventoryCounts[type];
+            int newCount = Mathf.Max(0, count);
+            inventoryCounts[type] = newCount;
+
+            if (photonView.IsMine && newCount != oldCount)
+            {
+                int delta = newCount - oldCount;
+                string change = delta > 0 ? $"+{delta}" : $"{delta}";
+                ItemPopupManager.Instance?.ShowPopup($"{type} {change}");
+            }
         }
 
         public List<string> GetItemTypes()
@@ -73,13 +82,7 @@ namespace Characters
                 inventoryCounts[type] = 0;
         }
 
-
-
-
-
-
-
-        // ADD NEW BELOW AS WELL
+        // Quick Access Properties
         public int cannonCount
         {
             get => GetItemCount("Cannon");
@@ -103,8 +106,5 @@ namespace Characters
             get => GetItemCount("WallCannon");
             set => SetItemCount("WallCannon", value);
         }
-
     }
-
-
 }
