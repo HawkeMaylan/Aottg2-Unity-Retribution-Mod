@@ -6,6 +6,7 @@ using Settings;
 using Characters;
 using GameManagers;
 using ApplicationManagers;
+using UnityEngine.UI;
 
 namespace UI
 {
@@ -40,19 +41,12 @@ namespace UI
             if (UIManager.CurrentMenu != null && !(UIManager.CurrentMenu is InGameMenu))
                 return;
 
-            // --- Space (Next item wheel) ---
             if (IsActive && Input.GetKeyDown(KeyCode.Space))
-            {
                 NextItemWheel();
-            }
 
-            // --- Escape (Close item wheel) ---
             if (IsActive && Input.GetKeyDown(KeyCode.Escape))
-            {
                 SetItemWheel(false);
-            }
 
-            // --- Quickslot keys (1-8) are BLOCKED only if chat/menu is open ---
             if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
             {
                 for (int i = 0; i < QuickSlotKeys.Length; i++)
@@ -102,10 +96,7 @@ namespace UI
             if (!_itemWheelPopup.gameObject.activeSelf || !IsActive || _itemLists.Count == 0)
                 return;
 
-            _currentItemWheelIndex++;
-            if (_currentItemWheelIndex >= _itemLists.Count)
-                _currentItemWheelIndex = 0;
-
+            _currentItemWheelIndex = (_currentItemWheelIndex + 1) % _itemLists.Count;
             ShowItemWheel(_currentItemWheelIndex);
         }
 
@@ -116,7 +107,6 @@ namespace UI
                 return;
 
             FieldInfo field = _itemLists[index];
-
             string wheelName = human.ItemListDisplayNames != null && human.ItemListDisplayNames.ContainsKey(field.Name)
                 ? human.ItemListDisplayNames[field.Name]
                 : field.Name;
@@ -135,6 +125,42 @@ namespace UI
             }
 
             ((WheelPopup)_itemWheelPopup).Show(wheelName, itemNames, () => OnItemSelect(list));
+
+            //  Inject sprites after show
+            Transform buttonParent = ((WheelPopup)_itemWheelPopup).transform.Find("Panel/Buttons");
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (i >= buttonParent.childCount)
+                    continue;
+
+                string itemName = list[i].Name;
+
+                if (human.ItemSpriteMap.TryGetValue(itemName, out Sprite sprite) && sprite != null)
+                {
+                    Transform button = buttonParent.GetChild(i);
+
+                    // Destroy existing injected sprite
+                    Transform old = button.Find("InjectedSprite");
+                    if (old != null)
+                        GameObject.Destroy(old.gameObject);
+
+                    // Create image
+                    GameObject bg = new GameObject("InjectedSprite", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                    bg.transform.SetParent(button, false);
+                    bg.transform.SetAsFirstSibling();
+
+                    RectTransform rt = bg.GetComponent<RectTransform>();
+                    rt.anchorMin = Vector2.zero;
+                    rt.anchorMax = Vector2.one;
+                    rt.offsetMin = Vector2.zero;
+                    rt.offsetMax = Vector2.zero;
+
+                    Image img = bg.GetComponent<Image>();
+                    img.sprite = sprite;
+                    img.preserveAspect = true;
+                    img.raycastTarget = false;
+                }
+            }
         }
 
         private void OnItemSelect(List<SimpleUseable> list)
@@ -156,11 +182,8 @@ namespace UI
         private void TryUseLastSelectedItem()
         {
             BaseCharacter character = _inGameManager.CurrentCharacter;
-            if (character is not Human human)
+            if (character is not Human human || _itemLists.Count == 0)
                 return;
-
-            if (_itemLists.Count == 0)
-                ScanItemLists();
 
             if (_currentItemWheelIndex >= _itemLists.Count)
                 return;
@@ -175,11 +198,8 @@ namespace UI
         private void TryUseSlot(int slotIndex)
         {
             BaseCharacter character = _inGameManager.CurrentCharacter;
-            if (character is not Human human)
+            if (character is not Human human || _itemLists.Count == 0)
                 return;
-
-            if (_itemLists.Count == 0)
-                ScanItemLists();
 
             if (_currentItemWheelIndex >= _itemLists.Count)
                 return;

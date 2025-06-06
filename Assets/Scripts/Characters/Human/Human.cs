@@ -18,6 +18,7 @@ using UI;
 using UnityEngine;
 using Utility;
 using Weather;
+using UnityEngine.UI;
 
 namespace Characters
 {
@@ -44,6 +45,10 @@ namespace Characters
         private Dictionary<Renderer, Material> FPSMaterials = new Dictionary<Renderer, Material>();
         public Dictionary<string, List<SimpleUseable>> ItemLists = new Dictionary<string, List<SimpleUseable>>();
         public Dictionary<string, string> ItemListDisplayNames = new Dictionary<string, string>();
+
+
+        public Dictionary<string, Sprite> ItemSpriteMap = new();
+
 
 
         // state
@@ -994,6 +999,11 @@ namespace Characters
 
         protected override void Awake()
         {
+
+            ItemSpriteMap["Cannon"] = Resources.Load<Sprite>("Sprites/Items/Cannon");
+            ItemSpriteMap["WallCannon"] = Resources.Load<Sprite>("Sprites/Items/WallCannon");
+            //Add more to list
+
             if (SceneLoader.SceneName == SceneName.CharacterEditor)
             {
                 this.enabled = false;
@@ -1016,6 +1026,9 @@ namespace Characters
                 Cache.AudioSources[HumanSounds.GasEnd].spatialBlend = 0;
             }
         }
+
+
+
 
         protected override void Start()
         {
@@ -2687,6 +2700,8 @@ namespace Characters
 
         public void SetupItems()
         {
+
+            
             itemList1.Add(new FlareItem(this, "Green", new Color(0f, 1f, 0f, 0.7f), 300f));
             itemList1.Add(new FlareItem(this, "Red", new Color(1f, 0f, 0f, 0.7f), 300f));
             itemList1.Add(new FlareItem(this, "Black", new Color(0f, 0f, 0f, 0.7f), 300f));
@@ -2734,11 +2749,45 @@ namespace Characters
             ItemListDisplayNames["itemList3"] = "Equipment";
             ItemListDisplayNames["itemList4"] = "Master Client Control";
 
+            RegisterItemSprites();
+
+
+
         }
 
 
 
+        private void RegisterItemSprites()
+        {
+            RegisterSprite("Green", "Sprites/Items/Green");
+            RegisterSprite("Red", "Sprites/Items/Red");
+            RegisterSprite("Black", "Sprites/Items/Black");
+            RegisterSprite("Purple", "Sprites/Items/Purple");
+            RegisterSprite("Blue", "Sprites/Items/Blue");
+            RegisterSprite("Yellow", "Sprites/Items/Yellow");
+            RegisterSprite("Cyan", "Sprites/Items/Cyan");
+            RegisterSprite("Indigo", "Sprites/Items/Indigo");
 
+            RegisterSprite("Flash Flare", "Sprites/Items/FlashFlare");
+            RegisterSprite("Acoustic Flare", "Sprites/Items/AcousticFlare");
+            RegisterSprite("Whistle", "Sprites/Items/Whistle");
+
+            RegisterSprite("Lantern On/Off", "Sprites/Items/Lantern");
+            RegisterSprite("Cape On/Off", "Sprites/Items/Cape");
+            RegisterSprite("Hood On/Off", "Sprites/Items/Hood");
+
+            RegisterSprite("Support Wagon", "Sprites/Items/Wagon1");
+            RegisterSprite("Resupply Wagon", "Sprites/Items/Wagon2");
+            RegisterSprite("Cannon", "Sprites/Items/Cannon");
+            RegisterSprite("Wall Cannon", "Sprites/Items/WallCannon");
+            RegisterSprite("Ground Cannon", "Sprites/Items/GroundCannon");
+
+            RegisterSprite("DayCycle", "Sprites/Items/DayCycle");
+            RegisterSprite("DeleteDayCycle", "Sprites/Items/DeleteDayCycle");
+
+            RegisterSprite("ShigGateSpawn", "Sprites/Items/ShigGate");
+            RegisterSprite("Field Cannon Item", "Sprites/Items/FieldCannon");
+        }
 
 
 
@@ -3618,6 +3667,14 @@ namespace Characters
         }
 
 
+        private void RegisterSprite(string itemName, string resourcePath)
+        {
+            Sprite sprite = Resources.Load<Sprite>(resourcePath);
+            if (sprite != null)
+                ItemSpriteMap[itemName] = sprite;
+            else
+                Debug.LogWarning($"Missing sprite for '{itemName}' at {resourcePath}");
+        }
 
 
 
