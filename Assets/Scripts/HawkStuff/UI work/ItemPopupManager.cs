@@ -12,6 +12,7 @@ namespace UI
         public static ItemPopupManager Instance;
 
         private const float Duration = 4f;
+        private const float FadeDuration = 1f;
         private const int MaxPopups = 5;
         private const float Spacing = 35f;
 
@@ -58,12 +59,27 @@ namespace UI
             _popupQueue.Enqueue(popup);
             UpdatePopupPositions();
 
-            StartCoroutine(DestroyAfter(popup, Duration));
+            StartCoroutine(FadeAndDestroy(popup, Duration, FadeDuration));
         }
 
-        private IEnumerator DestroyAfter(GameObject popup, float delay)
+        private IEnumerator FadeAndDestroy(GameObject popup, float totalDuration, float fadeDuration)
         {
-            yield return new WaitForSeconds(delay);
+            yield return new WaitForSeconds(totalDuration - fadeDuration);
+
+            CanvasGroup cg = popup.GetComponent<CanvasGroup>();
+            if (cg == null)
+                cg = popup.AddComponent<CanvasGroup>();
+
+            float elapsed = 0f;
+            while (elapsed < fadeDuration)
+            {
+                elapsed += Time.deltaTime;
+                cg.alpha = 1f - (elapsed / fadeDuration);
+                yield return null;
+            }
+
+            cg.alpha = 0f;
+
             if (_popupQueue.Contains(popup))
             {
                 _popupQueue.Dequeue();
