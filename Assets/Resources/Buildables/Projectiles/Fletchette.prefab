@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6963198632040064322}
   - component: {fileID: 613545041779105218}
   - component: {fileID: 1054117498641522468}
-  - component: {fileID: 4953210923520760886}
+  - component: {fileID: 3708089389529514999}
   m_Layer: 23
   m_Name: CannonShot2
   m_TagString: Untagged
@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4, y: 4, z: 4}
+  m_LocalScale: {x: 0.05, y: 0.05, z: 0.05}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7593039761623740435}
@@ -50,7 +50,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 734921821488878518}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: d6039cf8ceb07874b8a6619c092dfad4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -100,13 +100,13 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 5.24
+  m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4953210923520760886
+--- !u!114 &3708089389529514999
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -115,30 +115,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 734921821488878518}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 061ac515305580b458282dbb94d82d19, type: 3}
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destroyAfterSeconds: 10
-  killSourceName: Cannonball
-  playAnimationOnCollision: 0
-  collisionAnimation: {fileID: 0}
-  animationDelayTime: 0
-  makeKinematicOnCollision: 0
-  animationCollisionLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  spawnParticleOnCollision: 0
-  collisionParticlePrefab: {fileID: 0}
-  damageHumans: 0
-  humanDamage: 100
-  damageNape: 0
-  titanNapeDamage: 1000
-  disableArms: 0
-  crippleLegs: 0
-  blindEyes: 1
-  directionalStun: 0
-  knockbackForce: 30
-  maxKnockbacksPerTitan: 1
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 0
+  ObservedComponents:
+  - {fileID: 0}
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &1530743120385670784
 GameObject:
   m_ObjectHideFlags: 0
@@ -151,9 +141,10 @@ GameObject:
   - component: {fileID: 1977296905841031455}
   - component: {fileID: 6827687798816693571}
   - component: {fileID: 4645783274596728983}
-  - component: {fileID: 8348118042904691061}
   - component: {fileID: 1026821852153327291}
   - component: {fileID: 8151622635488489972}
+  - component: {fileID: 2114418534013206731}
+  - component: {fileID: 5991328158730770927}
   m_Layer: 23
   m_Name: Fletchette
   m_TagString: Untagged
@@ -170,8 +161,8 @@ Transform:
   m_GameObject: {fileID: 1530743120385670784}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9.923885, y: 24.428621, z: -193.68886}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_LocalPosition: {x: -23.519249, y: 0, z: -397.45883}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 503758668310849170}
@@ -192,7 +183,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1530743120385670784}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -242,39 +233,12 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &8348118042904691061
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1530743120385670784}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 12582912
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 1
-  m_Constraints: 0
-  m_CollisionDetection: 2
 --- !u!114 &1026821852153327291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -314,3 +278,63 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!114 &2114418534013206731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1530743120385670784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 061ac515305580b458282dbb94d82d19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  destroyAfterSeconds: 10
+  killSourceName: Cannonball
+  playAnimationOnCollision: 0
+  collisionAnimation: {fileID: 0}
+  animationDelayTime: 0
+  makeKinematicOnCollision: 0
+  animationCollisionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  spawnParticleOnCollision: 0
+  collisionParticlePrefab: {fileID: 0}
+  damageHumans: 0
+  humanDamage: 100
+  damageNape: 0
+  titanNapeDamage: 1000
+  disableArms: 0
+  crippleLegs: 0
+  blindEyes: 1
+  directionalStun: 0
+  knockbackForce: 30
+  maxKnockbacksPerTitan: 1
+--- !u!54 &5991328158730770927
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1530743120385670784}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 12582912
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 2

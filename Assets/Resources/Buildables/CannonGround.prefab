@@ -394,7 +394,6 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 4543013416111928623}
   - {fileID: 6734433899248431384}
-  - {fileID: 0}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -430,8 +429,6 @@ MonoBehaviour:
   mountPoint: {fileID: 1551013655377393878}
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
-  mountPromptText: Press G to Mount
-  unmountPromptText: Press G to Unmount
   unmountPromptDuration: 5
   useHorseIdle: 0
   enableRunAnimation: 0
@@ -479,7 +476,7 @@ MonoBehaviour:
     knockbackForce: 1000
     startingAmmo: 15
   - name: Fletchette
-    prefab: {fileID: 1530743120385670784, guid: 5a3466af44dadde47b6be3dd6d723eeb, type: 3}
+    prefab: {fileID: 1530743120385670784, guid: fc85a5f74d7f5f54db0a98ab011a3647, type: 3}
     launchForce: 4000
     upwardForce: 250
     sprite: {fileID: 21300000, guid: e4b40a4f2fcbae6428abc383fd308620, type: 3}
