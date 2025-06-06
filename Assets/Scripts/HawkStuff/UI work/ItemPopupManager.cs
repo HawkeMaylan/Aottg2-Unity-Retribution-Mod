@@ -12,7 +12,7 @@ namespace UI
         public static ItemPopupManager Instance;
 
         private const float Duration = 4f;
-        private const float FadeDuration = 1f;
+        private const float FadeDuration = 2f;
         private const int MaxPopups = 5;
         private const float Spacing = 35f;
 
