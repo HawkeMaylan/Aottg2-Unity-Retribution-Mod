@@ -159,6 +159,14 @@ namespace UI
                     img.sprite = sprite;
                     img.preserveAspect = true;
                     img.raycastTarget = false;
+
+                    // Dim the sprite if item is on cooldown
+                    if (list[i].GetCooldownLeft() > 0f)
+                        img.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+                    else
+                        img.color = Color.white;
+
+
                 }
             }
         }
