@@ -128,6 +128,15 @@ namespace UI
 
             //  Inject sprites after show
             Transform buttonParent = ((WheelPopup)_itemWheelPopup).transform.Find("Panel/Buttons");
+
+            //  Clear all old InjectedSprites
+            foreach (Transform button in buttonParent)
+            {
+                Transform oldSprite = button.Find("InjectedSprite");
+                if (oldSprite != null)
+                    Destroy(oldSprite.gameObject);
+            }
+
             for (int i = 0; i < list.Count; i++)
             {
                 if (i >= buttonParent.childCount)
