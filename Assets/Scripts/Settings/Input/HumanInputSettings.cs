@@ -10,6 +10,9 @@
         public KeybindSetting HookBoth = new KeybindSetting(new string[] { "None", "None" });
         public KeybindSetting Dash = new KeybindSetting(new string[] { "LeftControl", "None" });
         public KeybindSetting DashUp = new KeybindSetting(new string[] { "UpArrow", "None" });
+        public KeybindSetting DashDown = new KeybindSetting(new string[] { "DownArrow", "None" });
+        public KeybindSetting DashLeft = new KeybindSetting(new string[] { "RightArrow", "None" });
+        public KeybindSetting DashRight = new KeybindSetting(new string[] { "LeftArrow", "None" });
         public KeybindSetting ReelIn = new KeybindSetting(new string[] { "WheelDown", "None" });
         public KeybindSetting ReelOut = new KeybindSetting(new string[] { "LeftAlt", "None" });
         public KeybindSetting Dodge = new KeybindSetting(new string[] { "LeftControl", "None" });
