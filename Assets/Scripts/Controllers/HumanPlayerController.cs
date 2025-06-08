@@ -525,7 +525,7 @@ namespace Controllers
             {
                 if (_humanInput.DashLeft.GetKeyDown())
                 {
-                    float angle = 180f;
+                    float angle = 0f;
                     Vector3 direction = Vector3.left;
                     _human.DashLeft(angle, direction);
                 }

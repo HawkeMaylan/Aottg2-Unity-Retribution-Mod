@@ -520,12 +520,14 @@ namespace Characters
                 CrossFade(HumanAnimations.Dash, 0.1f, 0.1f);
                 State = HumanState.AirDodge;
                 FalseAttack();
-                Cache.Rigidbody.AddForce(Vector3.left * 45f, ForceMode.VelocityChange);
+
+      
+                Cache.Rigidbody.AddForce(-Cache.Transform.right * 45f, ForceMode.VelocityChange);
+
                 _dashCooldownLeft = 0.2f;
                 ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.ShakeGas();
             }
         }
-
 
         public void DashLeft(float targetAngle, Vector3 direction)
         {
@@ -543,11 +545,15 @@ namespace Characters
                 CrossFade(HumanAnimations.Dash, 0.1f, 0.1f);
                 State = HumanState.AirDodge;
                 FalseAttack();
-                Cache.Rigidbody.AddForce(Vector3.right * 45f, ForceMode.VelocityChange);
+
+    
+                Cache.Rigidbody.AddForce(Cache.Transform.right * 45f, ForceMode.VelocityChange);
+
                 _dashCooldownLeft = 0.2f;
                 ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.ShakeGas();
             }
         }
+
 
 
 
