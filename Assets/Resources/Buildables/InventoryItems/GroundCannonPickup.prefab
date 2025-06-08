@@ -118,6 +118,7 @@ GameObject:
   - component: {fileID: 4123675651327273061}
   - component: {fileID: 7652474636996363256}
   - component: {fileID: -4444985515956963193}
+  - component: {fileID: 9086811799584638285}
   m_Layer: 23
   m_Name: GroundCannonPickup
   m_TagString: Untagged
@@ -185,6 +186,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: -3588091784983060515}
   - {fileID: -4444985515956963193}
+  - {fileID: 9086811799584638285}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -231,6 +233,22 @@ MonoBehaviour:
   m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
+--- !u!114 &9086811799584638285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4487851565603608389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 1
+  m_UseLocal: 1
 --- !u!1 &7629647849373700749
 GameObject:
   m_ObjectHideFlags: 0

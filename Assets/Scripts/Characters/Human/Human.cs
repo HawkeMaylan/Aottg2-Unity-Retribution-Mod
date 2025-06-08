@@ -460,6 +460,29 @@ namespace Characters
             }
         }
 
+        public void DashUp(float targetAngle, Vector3 direction)
+        {
+            if (_dashTimeLeft <= 0f && Stats.CurrentGas > 0 && MountState == HumanMountState.None &&
+                State != HumanState.Grab && CarryState != HumanCarryState.Carry && _dashCooldownLeft <= 0f)
+            {
+                Stats.UseDashGas();
+                TargetAngle = targetAngle;
+                _originalDashSpeed = Cache.Rigidbody.velocity.magnitude;
+                _targetRotation = Quaternion.LookRotation(direction);
+                Cache.Rigidbody.rotation = _targetRotation;
+                EffectSpawner.Spawn(EffectPrefabs.GasBurst, Cache.Transform.position, Cache.Transform.rotation);
+                PlaySound(HumanSounds.GasBurst);
+                _dashTimeLeft = 0.5f;
+                CrossFade(HumanAnimations.Dash, 0.1f, 0.1f);
+                State = HumanState.AirDodge;
+                FalseAttack();
+                Cache.Rigidbody.AddForce(Vector3.up * 40f, ForceMode.VelocityChange); 
+                _dashCooldownLeft = 0.2f;
+                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.ShakeGas();
+            }
+        }
+
+
         public void Idle()
         {
             if (State == HumanState.Attack || State == HumanState.SpecialAttack)
