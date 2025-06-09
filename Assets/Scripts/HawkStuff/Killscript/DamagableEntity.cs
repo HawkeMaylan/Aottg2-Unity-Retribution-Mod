@@ -4,7 +4,7 @@ using System.Collections;
 using CustomLogic;
 using GameManagers;
 using Settings;
-
+using Characters;
 namespace Entities
 {
     public enum EntityForm
@@ -121,6 +121,25 @@ namespace Entities
         {
             if (hpBillboard != null && Camera.main != null)
                 hpBillboard.transform.rotation = Quaternion.LookRotation(hpBillboard.transform.position - Camera.main.transform.position);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            TryHitFromCollider(other);
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            TryHitFromCollider(collision.collider);
+        }
+
+        private void TryHitFromCollider(Collider collider)
+        {
+            var attacker = collider.GetComponentInParent<BaseCharacter>();
+            if (attacker != null && attacker.IsMine())
+            {
+                attacker.OnHit(null, this, collider, "Blade", true);
+            }
         }
     }
 }

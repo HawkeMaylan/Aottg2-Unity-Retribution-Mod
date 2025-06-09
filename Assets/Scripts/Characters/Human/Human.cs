@@ -19,6 +19,7 @@ using UnityEngine;
 using Utility;
 using Weather;
 using UnityEngine.UI;
+using Entities;
 
 namespace Characters
 {
@@ -1199,33 +1200,21 @@ namespace Characters
                 {
                     type = "AHSS";
                     if (((CapsuleCollider)HumanCache.AHSSHit._collider).radius == CharacterData.HumanWeaponInfo["AHSS"]["Radius"].AsFloat * 2f)
-                    {
                         type = "AHSSDouble";
-                    }
                 }
-
                 else if (hitbox == HumanCache.APGHit)
                     type = "APG";
             }
+
             int damage = (CarryState == HumanCarryState.Carry && Carrier != null)
                 ? Mathf.Max((int)(Carrier.CarryVelocity.magnitude * 10f), 10)
                 : Mathf.Max((int)(Cache.Rigidbody.velocity.magnitude * 10f), 10);
+
             if (type == "Blade")
             {
-                if (!(victim is CustomLogicCollisionHandler))
-                    EffectSpawner.Spawn(EffectPrefabs.Blood1, hitbox.transform.position, Quaternion.Euler(270f, 0f, 0f));
-                if (SettingsManager.SoundSettings.OldBladeEffect.Value)
-                    PlaySound(HumanSounds.OldBladeHit);
-                else
-                    PlaySound(HumanSounds.BladeHit);
+                PlaySound(SettingsManager.SoundSettings.OldBladeEffect.Value ? HumanSounds.OldBladeHit : HumanSounds.BladeHit);
                 var weapon = (BladeWeapon)Weapon;
-                if (Stats.Perks["AdvancedAlloy"].CurrPoints == 1)
-                {
-                    if (damage < 500)
-                        weapon.UseDurability(weapon.CurrentDurability);
-                }
-                else
-                    weapon.UseDurability(2f);
+                weapon.UseDurability(Stats.Perks["AdvancedAlloy"].CurrPoints == 1 && damage < 500 ? weapon.CurrentDurability : 2f);
                 if (weapon.CurrentDurability == 0f)
                 {
                     ToggleBlades(false);
@@ -1233,90 +1222,46 @@ namespace Characters
                 }
                 damage = (int)(damage * CharacterData.HumanWeaponInfo["Blade"]["DamageMultiplier"].AsFloat);
             }
-            else if (type == "AHSS")
+            else if (type == "AHSS" || type == "AHSSDouble")
             {
                 damage = (int)(damage * CharacterData.HumanWeaponInfo["AHSS"]["DamageMultiplier"].AsFloat);
             }
-            else if (type == "AHSSDouble")
-                type = "AHSS";
             else if (type == "APG")
+            {
                 damage = (int)(damage * CharacterData.HumanWeaponInfo["APG"]["DamageMultiplier"].AsFloat);
+            }
+
             damage = Mathf.Max(damage, 10);
             if (CustomDamageEnabled)
                 damage = CustomDamage;
-            if (victim is CustomLogicCollisionHandler)
+
+            Vector3 hitPos = hitbox != null ? hitbox.transform.position : Cache.Transform.position;
+
+            // Support for DamageableEntity
+            var entity = (victim as Component)?.GetComponentInParent<Entities.DamageableEntity>();
+            if (entity != null)
             {
-                Vector3 position = Vector3.zero;
-                if (hitbox != null)
-                    position = hitbox.transform.position;
-                (victim as CustomLogicCollisionHandler).GetHit(this, Name, damage, type, position);
+                entity.GetHit(Name, damage, type, collider.name);
+                EffectSpawner.Spawn(EffectPrefabs.Blood1, hitPos, Quaternion.Euler(270f, 0f, 0f));
                 return;
             }
-            var victimChar = (BaseCharacter)victim;
-            if (!victimChar.Dead)
+
+            // Regular BaseCharacter victim
+            var victimChar = victim as BaseCharacter;
+            if (victimChar != null && !victimChar.Dead)
             {
-                if (victimChar is BaseTitan)
+                if (victimChar is BaseTitan titan)
                 {
-                    var titan = (BaseTitan)victimChar;
                     if (titan.BaseTitanCache.NapeHurtbox == collider)
                     {
-                        if (type == "Blade" && !titan.CheckNapeAngle(hitbox.transform.position, CharacterData.HumanWeaponInfo["Blade"]["RestrictAngle"].AsFloat))
+                        float angle = type == "Blade" ? CharacterData.HumanWeaponInfo["Blade"]["RestrictAngle"].AsFloat : 180f;
+                        if (!titan.CheckNapeAngle(hitbox.transform.position, angle))
                             return;
-                        if (type == "AHSS" && !titan.CheckNapeAngle(hitbox.transform.position, CharacterData.HumanWeaponInfo["AHSS"]["RestrictAngle"].AsFloat))
-                            return;
-                        if (type == "APG" && !titan.CheckNapeAngle(hitbox.transform.position, CharacterData.HumanWeaponInfo["APG"]["RestrictAngle"].AsFloat))
-                            return;
-                        if (type != "APG" && _lastNapeHitTimes.ContainsKey(titan) && (_lastNapeHitTimes[titan] + 0.2f) > Time.time)
-                            return;
-                        ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
-                        ((InGameCamera)SceneLoader.CurrentCamera).TakeSnapshot(titan.BaseTitanCache.Neck.position, damage);
-                        if (type == "Blade" && SettingsManager.GraphicsSettings.BloodSplatterEnabled.Value)
-                            ((InGameMenu)UIManager.CurrentMenu).ShowBlood();
-                        if (type == "Blade" || type == "AHSS" || type == "APG")
-                        {
-                            if (SettingsManager.SoundSettings.OldNapeEffect.Value)
-                                PlaySound(HumanSounds.OldNapeHit);
-                            else
-                            {
-                                if (type == "APG")
-                                    PlaySound(HumanSounds.NapeHit);
-                                if (type == "Blade")
-                                {
-                                    if (damage < 500)
-                                        PlaySound(HumanSounds.NapeHit);
-                                    if (damage < 1000)
-                                        PlaySound(HumanSounds.GetRandomBladeNapeVar1());
-                                    else if (damage < 2000)
-                                        PlaySound(HumanSounds.GetRandomBladeNapeVar2());
-                                    else if (damage < 3000)
-                                        PlaySound(HumanSounds.GetRandomBladeNapeVar3());
-                                    else
-                                        PlaySound(HumanSounds.GetRandomBladeNapeVar4());
-                                }
-                                else if (type == "AHSS")
-                                {
-                                    if (damage < 1000)
-                                    {
-                                        PlaySound(HumanSounds.NapeHit);
-                                    }
-                                    else if (damage < 2000)
-                                    {
-                                        PlaySound(HumanSounds.GetRandomAHSSNapeHitVar1());
-                                    }
-                                    else
-                                    {
-                                        PlaySound(HumanSounds.GetRandomAHSSNapeHitVar2());
-                                    }
-                                }
-
-                            }
-
-                        }
-                        _lastNapeHitTimes[titan] = Time.time;
                     }
+
                     if (titan.BaseTitanCache.Hurtboxes.Contains(collider))
                     {
-                        EffectSpawner.Spawn(EffectPrefabs.CriticalHit, hitbox.transform.position, Quaternion.Euler(270f, 0f, 0f));
+                        EffectSpawner.Spawn(EffectPrefabs.CriticalHit, hitPos, Quaternion.Euler(270f, 0f, 0f));
                         victimChar.GetHit(this, damage, type, collider.name);
                         if (titan.BaseTitanCache.NapeHurtbox != collider)
                             PlaySound(HumanSounds.LimbHit);
@@ -1324,12 +1269,20 @@ namespace Characters
                 }
                 else
                 {
+                    EffectSpawner.Spawn(EffectPrefabs.CriticalHit, hitPos, Quaternion.Euler(270f, 0f, 0f));
                     ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
                     ((InGameCamera)SceneLoader.CurrentCamera).TakeSnapshot(victimChar.Cache.Transform.position, damage);
                     victimChar.GetHit(this, damage, type, collider.name);
                 }
             }
         }
+
+
+
+
+
+
+
 
         protected void Update()
         {
