@@ -26,6 +26,8 @@ namespace Characters
         private float _whistleTimer = 0f;
         private const float WhistleDuration = 8f;
 
+        protected override int DefaultMaxHealth => 150;
+
         public int MountedStatus = 0; // 0 = No rider, 1 = Rider mounted
 
 
