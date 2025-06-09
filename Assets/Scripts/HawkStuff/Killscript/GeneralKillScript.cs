@@ -177,7 +177,14 @@ public class GeneralKillScript : MonoBehaviourPunCallbacks
 
     private void SelfDestruct()
     {
-        if (photonView.IsMine)
-            PhotonNetwork.Destroy(gameObject);
+        if (PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient && photonView != null && photonView.ViewID != 0)
+        {
+            PhotonNetwork.Destroy(transform.root.gameObject);
+        }
+        else
+        {
+            Destroy(gameObject); // Fallback for local or non-networked objects
+        }
     }
+
 }

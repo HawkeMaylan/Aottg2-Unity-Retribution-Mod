@@ -7,17 +7,20 @@ public class SelfDestroy : MonoBehaviourPun
 
     private void Start()
     {
-        if (photonView.IsMine || PhotonNetwork.IsMasterClient)
-        {
-            Invoke(nameof(DestroyNetworkedObject), lifetime);
-        }
+        Invoke(nameof(DestroyObjectSafely), lifetime);
     }
 
-    private void DestroyNetworkedObject()
+    private void DestroyObjectSafely()
     {
-        if (photonView != null && photonView.IsMine)
+        // If the object is networked and this is the Master Client, try network destroy
+        if (PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient && photonView != null && photonView.ViewID != 0)
         {
-            PhotonNetwork.Destroy(gameObject);
+            PhotonNetwork.Destroy(transform.root.gameObject);
+        }
+        else
+        {
+            // Fallback: local destroy in case Photon fails or not a networked object
+            Destroy(gameObject);
         }
     }
 }
