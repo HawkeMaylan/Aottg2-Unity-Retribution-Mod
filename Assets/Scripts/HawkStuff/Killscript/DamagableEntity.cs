@@ -68,14 +68,14 @@ namespace Entities
 
         private void Start()
         {
-            referenceCamera = Camera.main;
+            if (referenceCamera == null)
+                referenceCamera = Camera.main;
 
             UpdateBillboard();
             UpdateHealthBar();
             if (photonView.IsMine)
                 photonView.RPC("SyncHealthRPC", RpcTarget.AllBuffered, currentHP, maxHP);
         }
-
 
         [PunRPC]
         private void SyncHealthRPC(int hp, int max)
@@ -114,7 +114,7 @@ namespace Entities
             if (showKillFeed && CustomLogicManager.Evaluator != null)
             {
                 int damage = Mathf.Clamp(maxHP, 0, maxHP);
-                RPCManager.PhotonView.RPC("ShowKillFeedRPC", RpcTarget.All, new object[] { killerName, entityName, damage, type });
+                RPCManager.PhotonView?.RPC("ShowKillFeedRPC", RpcTarget.All, new object[] { killerName, entityName, damage, type });
             }
 
             if (destroyOnDeath)
@@ -142,7 +142,7 @@ namespace Entities
             textMesh.characterSize = 0.1f;
             textMesh.alignment = TextAlignment.Center;
             textMesh.anchor = TextAnchor.MiddleCenter;
-            textMesh.color = Color.red;
+            textMesh.color = Color.white;
             hpText = textMesh;
         }
 
@@ -186,7 +186,7 @@ namespace Entities
                 if (ratio <= 0.25f)
                     color = Color.red;
                 else if (ratio <= 0.5f)
-                    color = new Color(1f, 0.65f, 0f); // Orange
+                    color = new Color(1f, 0.65f, 0f);
 
                 foregroundBar.GetComponent<Renderer>().material.color = color;
             }
@@ -194,22 +194,23 @@ namespace Entities
 
         private void FixedUpdate()
         {
-            if (Camera.main == null)
+            if (referenceCamera == null)
+                referenceCamera = Camera.main;
+            if (referenceCamera == null)
                 return;
 
-            float dist = referenceCamera != null ? Vector3.Distance(referenceCamera.transform.position, transform.position) : 0f;
-            bool showUI = (!onlyShowUIWhenDamaged || wasDamaged) &&
-                          (referenceCamera == null || dist < hideUIDistance);
+            float dist = Vector3.Distance(referenceCamera.transform.position, transform.position);
+            bool showUI = (!onlyShowUIWhenDamaged || wasDamaged) && dist < hideUIDistance;
 
             if (useTextDisplay && hpBillboard != null)
             {
-                hpBillboard.transform.rotation = Quaternion.LookRotation(hpBillboard.transform.position - Camera.main.transform.position);
+                hpBillboard.transform.rotation = Quaternion.LookRotation(hpBillboard.transform.position - referenceCamera.transform.position);
                 hpBillboard.SetActive(showUI);
             }
 
             if (use3DHealthBar && healthBarRoot != null)
             {
-                healthBarRoot.transform.rotation = Quaternion.LookRotation(healthBarRoot.transform.position - Camera.main.transform.position);
+                healthBarRoot.transform.rotation = Quaternion.LookRotation(healthBarRoot.transform.position - referenceCamera.transform.position);
                 healthBarRoot.SetActive(showUI);
             }
         }
