@@ -49,6 +49,15 @@ namespace Entities
         [Header("Damage Settings")]
         public int flatDamageFromUnknown = 100;
 
+        [Header("Effect Prefabs (Resources/HParticles)")]
+        public GameObject hitEffectPrefab;
+        public Vector3 hitEffectOffset;
+        public Vector3 hitEffectRotation;
+
+        public GameObject deathEffectPrefab;
+        public Vector3 deathEffectOffset;
+        public Vector3 deathEffectRotation;
+
         private bool isDead;
         private float lastHitTime = -999f;
         private bool wasDamaged = false;
@@ -101,11 +110,12 @@ namespace Entities
             lastHitTime = Time.time;
             wasDamaged = true;
 
-            Debug.Log($"[{entityName}] hit by {source} for {damage}. HP before hit: {currentHP}");
-
             currentHP -= damage;
             UpdateBillboard();
             UpdateHealthBar();
+
+            if (hitEffectPrefab != null)
+                photonView.RPC("SpawnEffectRPC", RpcTarget.All, hitEffectPrefab.name, transform.position + hitEffectOffset, Quaternion.Euler(hitEffectRotation));
 
             if (currentHP <= 0)
                 Die(source, type);
@@ -114,6 +124,9 @@ namespace Entities
         private void Die(string killerName, string type)
         {
             isDead = true;
+
+            if (deathEffectPrefab != null)
+                photonView.RPC("SpawnEffectRPC", RpcTarget.All, deathEffectPrefab.name, transform.position + deathEffectOffset, Quaternion.Euler(deathEffectRotation));
 
             if (showKillFeed && CustomLogicManager.Evaluator != null)
             {
@@ -132,6 +145,14 @@ namespace Entities
                 PhotonNetwork.Destroy(gameObject);
             else
                 Destroy(gameObject);
+        }
+
+        [PunRPC]
+        private void SpawnEffectRPC(string resourceName, Vector3 position, Quaternion rotation)
+        {
+            GameObject prefab = Resources.Load<GameObject>($"HParticles/{resourceName}");
+            if (prefab != null)
+                PhotonNetwork.Instantiate($"HParticles/{resourceName}", position, rotation);
         }
 
         private void CreateBillboard()

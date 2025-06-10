@@ -182,6 +182,8 @@ GameObject:
   - component: {fileID: 8847878626710036823}
   - component: {fileID: 4133663127283518437}
   - component: {fileID: 2843010682291069575}
+  - component: {fileID: 659009459093803472}
+  - component: {fileID: 9087174453081477372}
   m_Layer: 23
   m_Name: WallCannon
   m_TagString: Untagged
@@ -388,6 +390,63 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 2
+--- !u!65 &659009459093803472
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4859669245983106058}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 5, y: 5, z: 5}
+  m_Center: {x: 0, y: 2, z: -1}
+--- !u!114 &9087174453081477372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4859669245983106058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a450ee0181e48c64d84ae85d6812f58a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: Damageable
+  maxHP: 15000
+  currentHP: 15000
+  team: Human
+  entityForm: 0
+  showKillFeed: 1
+  useTextDisplay: 1
+  use3DHealthBar: 1
+  destroyOnDeath: 1
+  onlyShowUIWhenDamaged: 1
+  hideUIDistance: 100
+  referenceCamera: {fileID: 0}
+  fadeUIAfterDelay: 1
+  uiFadeDelay: 3
+  healthBarOffset: {x: 0, y: 10, z: 0}
+  textOffset: {x: 0, y: 10, z: 0}
+  hitCooldown: 0.2
+  flatDamageFromUnknown: 100
+  hitEffectPrefab: {fileID: 4725709683707712150, guid: 48f23525ac2a8714b898cd6ca5a55c49, type: 3}
+  hitEffectOffset: {x: 0, y: 0, z: 0}
+  hitEffectRotation: {x: -90, y: 0, z: 0}
+  deathEffectPrefab: {fileID: 0}
+  deathEffectOffset: {x: 0, y: 0, z: 0}
+  deathEffectRotation: {x: 0, y: 0, z: 0}
 --- !u!1 &4961432146797875497
 GameObject:
   m_ObjectHideFlags: 0
