@@ -20,6 +20,7 @@ namespace Entities
         [Header("Entity Setup")]
         public string entityName = "DamageableEntity";
         public int maxHP = 100;
+        public int currentHP = -1; // Start as uninitialized
         public string team = "Neutral";
 
         [Header("GeneralKill Compatibility")]
@@ -27,28 +28,40 @@ namespace Entities
 
         [Header("Options")]
         public bool showKillFeed = true;
-        public bool showBillboard = true;
+        public bool useTextDisplay = true;
+        public bool use3DHealthBar = true;
+        public bool destroyOnDeath = true;
 
         [Header("Hit Cooldown")]
         public float hitCooldown = 0.2f;
 
-        private int currentHP;
+        [Header("Damage Settings")]
+        public int flatDamageFromUnknown = 100;
+
         private bool isDead;
         private float lastHitTime = -999f;
 
         private GameObject hpBillboard;
         private TextMesh hpText;
 
+        private GameObject healthBarRoot;
+        private Transform foregroundBar;
+
         private void Awake()
         {
-            currentHP = maxHP;
-            if (showBillboard)
+            if (currentHP < 0 || currentHP > maxHP)
+                currentHP = maxHP;
+
+            if (useTextDisplay)
                 CreateBillboard();
+            if (use3DHealthBar)
+                CreateHealthBar();
         }
 
         private void Start()
         {
             UpdateBillboard();
+            UpdateHealthBar();
             if (photonView.IsMine)
             {
                 photonView.RPC("SyncHealthRPC", RpcTarget.AllBuffered, currentHP, maxHP);
@@ -61,6 +74,7 @@ namespace Entities
             currentHP = hp;
             maxHP = max;
             UpdateBillboard();
+            UpdateHealthBar();
         }
 
         public void GetHit(string source, int damage, string type = "Collision", string hitbox = "")
@@ -77,6 +91,7 @@ namespace Entities
 
             currentHP -= damage;
             UpdateBillboard();
+            UpdateHealthBar();
 
             if (currentHP <= 0)
                 Die(source, type);
@@ -92,7 +107,8 @@ namespace Entities
                 RPCManager.PhotonView.RPC("ShowKillFeedRPC", RpcTarget.All, new object[] { killerName, entityName, damage, type });
             }
 
-            StartCoroutine(SelfDestruct());
+            if (destroyOnDeath)
+                StartCoroutine(SelfDestruct());
         }
 
         private IEnumerator SelfDestruct()
@@ -121,16 +137,51 @@ namespace Entities
             hpText = textMesh;
         }
 
+        private void CreateHealthBar()
+        {
+            healthBarRoot = new GameObject("HealthBarRoot");
+            healthBarRoot.transform.SetParent(transform);
+            healthBarRoot.transform.localPosition = new Vector3(0, 2.5f, 0);
+
+            GameObject bg = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            bg.name = "BarBackground";
+            bg.transform.SetParent(healthBarRoot.transform);
+            bg.transform.localPosition = Vector3.zero;
+            bg.transform.localScale = new Vector3(1f, 0.2f, 1f);
+            bg.GetComponent<Renderer>().material.color = Color.black;
+
+            GameObject fg = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            fg.name = "BarForeground";
+            fg.transform.SetParent(healthBarRoot.transform);
+            fg.transform.localPosition = new Vector3(-0.5f, 0f, -0.01f);
+            fg.transform.localScale = new Vector3(1f, 0.2f, 1f);
+            fg.GetComponent<Renderer>().material.color = Color.green;
+            foregroundBar = fg.transform;
+        }
+
         private void UpdateBillboard()
         {
             if (hpText != null)
                 hpText.text = currentHP.ToString();
         }
 
+        private void UpdateHealthBar()
+        {
+            if (foregroundBar != null && maxHP > 0)
+            {
+                float ratio = Mathf.Clamp01((float)currentHP / maxHP);
+                foregroundBar.localScale = new Vector3(ratio, 0.2f, 1f);
+                foregroundBar.localPosition = new Vector3((ratio - 1f) * 0.5f, 0f, -0.01f);
+            }
+        }
+
         private void FixedUpdate()
         {
-            if (hpBillboard != null && Camera.main != null)
+            if (useTextDisplay && hpBillboard != null && Camera.main != null)
                 hpBillboard.transform.rotation = Quaternion.LookRotation(hpBillboard.transform.position - Camera.main.transform.position);
+
+            if (use3DHealthBar && healthBarRoot != null && Camera.main != null)
+                healthBarRoot.transform.rotation = Quaternion.LookRotation(healthBarRoot.transform.position - Camera.main.transform.position);
         }
 
         private void OnTriggerEnter(Collider other)
@@ -160,9 +211,5 @@ namespace Entities
             //  Fallback: titan or unknown type deals fixed damage
             GetHit(attacker.Name, 100, "Collision", collider.name);
         }
-
-
-
-
     }
 }

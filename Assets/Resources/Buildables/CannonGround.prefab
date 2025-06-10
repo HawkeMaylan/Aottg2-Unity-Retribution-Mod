@@ -532,13 +532,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entityName: Damageable
-  maxHP: 5000
+  maxHP: 500
+  currentHP: 500
   team: Human
   entityForm: 0
   showKillFeed: 1
-  showBillboard: 1
-  allowPlayerHits: 1
+  useTextDisplay: 1
+  use3DHealthBar: 1
+  destroyOnDeath: 1
   hitCooldown: 0.2
+  flatDamageFromUnknown: 100
 --- !u!1001 &8048790762546070642
 PrefabInstance:
   m_ObjectHideFlags: 0
