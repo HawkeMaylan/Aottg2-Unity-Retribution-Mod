@@ -39,9 +39,11 @@ namespace Entities
         public bool fadeUIAfterDelay = false;
         public float uiFadeDelay = 5f;
 
-        [Header("UI Offsets")]
+        [Header("UI Offsets and Scale")]
         public Vector3 healthBarOffset = new Vector3(0f, 2.5f, 0f);
         public Vector3 textOffset = new Vector3(0f, 2f, 0f);
+        public float textScale = 1f;
+        public Vector3 healthBarScale = new Vector3(1f, 0.2f, 1f);
 
         [Header("Hit Cooldown")]
         public float hitCooldown = 0.2f;
@@ -161,6 +163,7 @@ namespace Entities
             hpBillboard.transform.SetParent(transform);
             hpBillboard.transform.localPosition = textOffset;
             hpBillboard.transform.localRotation = Quaternion.identity;
+            hpBillboard.transform.localScale = Vector3.one * textScale;
 
             TextMesh textMesh = hpBillboard.AddComponent<TextMesh>();
             textMesh.fontSize = 32;
@@ -176,19 +179,20 @@ namespace Entities
             healthBarRoot = new GameObject("HealthBarRoot");
             healthBarRoot.transform.SetParent(transform);
             healthBarRoot.transform.localPosition = healthBarOffset;
+            healthBarRoot.transform.localScale = healthBarScale;
 
             GameObject bg = GameObject.CreatePrimitive(PrimitiveType.Quad);
             bg.name = "BarBackground";
             bg.transform.SetParent(healthBarRoot.transform);
             bg.transform.localPosition = Vector3.zero;
-            bg.transform.localScale = new Vector3(1f, 0.2f, 1f);
+            bg.transform.localScale = Vector3.one;
             bg.GetComponent<Renderer>().material.color = Color.black;
 
             GameObject fg = GameObject.CreatePrimitive(PrimitiveType.Quad);
             fg.name = "BarForeground";
             fg.transform.SetParent(healthBarRoot.transform);
             fg.transform.localPosition = new Vector3(-0.5f, 0f, -0.01f);
-            fg.transform.localScale = new Vector3(1f, 0.2f, 1f);
+            fg.transform.localScale = Vector3.one;
             fg.GetComponent<Renderer>().material.color = Color.green;
             foregroundBar = fg.transform;
         }
@@ -204,7 +208,7 @@ namespace Entities
             if (foregroundBar != null && maxHP > 0)
             {
                 float ratio = Mathf.Clamp01((float)currentHP / maxHP);
-                foregroundBar.localScale = new Vector3(ratio, 0.2f, 1f);
+                foregroundBar.localScale = new Vector3(ratio, 1f, 1f);
                 foregroundBar.localPosition = new Vector3((ratio - 1f) * 0.5f, 0f, -0.01f);
 
                 var color = Color.green;

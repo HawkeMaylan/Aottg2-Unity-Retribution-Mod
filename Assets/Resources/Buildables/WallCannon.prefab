@@ -436,9 +436,11 @@ MonoBehaviour:
   hideUIDistance: 100
   referenceCamera: {fileID: 0}
   fadeUIAfterDelay: 1
-  uiFadeDelay: 3
+  uiFadeDelay: 15
   healthBarOffset: {x: 0, y: 10, z: 0}
   textOffset: {x: 0, y: 10, z: 0}
+  textScale: 1
+  healthBarScale: {x: 5, y: 0.8, z: 4}
   hitCooldown: 0.2
   flatDamageFromUnknown: 1000
   hitEffectPrefab: {fileID: 4725709683707712150, guid: 48f23525ac2a8714b898cd6ca5a55c49, type: 3}
