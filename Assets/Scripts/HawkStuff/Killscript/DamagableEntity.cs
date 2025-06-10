@@ -60,6 +60,9 @@ namespace Entities
         public Vector3 deathEffectOffset;
         public Vector3 deathEffectRotation;
 
+        [Header("Custom Collider")]
+        public Collider customCollider;
+
         private bool isDead;
         private float lastHitTime = -999f;
         private bool wasDamaged = false;
@@ -90,6 +93,12 @@ namespace Entities
             UpdateHealthBar();
             if (photonView.IsMine)
                 photonView.RPC("SyncHealthRPC", RpcTarget.AllBuffered, currentHP, maxHP);
+
+            if (customCollider != null && customCollider != GetComponent<Collider>())
+            {
+                ColliderEventForwarder forwarder = customCollider.gameObject.AddComponent<ColliderEventForwarder>();
+                forwarder.Setup(this);
+            }
         }
 
         [PunRPC]
@@ -247,15 +256,17 @@ namespace Entities
 
         private void OnTriggerEnter(Collider other)
         {
-            TryHitFromCollider(other);
+            if (customCollider == null)
+                TryHitFromCollider(other);
         }
 
         private void OnCollisionEnter(Collision collision)
         {
-            TryHitFromCollider(collision.collider);
+            if (customCollider == null)
+                TryHitFromCollider(collision.collider);
         }
 
-        private void TryHitFromCollider(Collider collider)
+        public void TryHitFromCollider(Collider collider)
         {
             var hitbox = collider.GetComponent<BaseHitbox>();
             var attacker = hitbox?.Owner;
@@ -270,6 +281,26 @@ namespace Entities
             }
 
             GetHit(attacker.Name, flatDamageFromUnknown, "Collision", collider.name);
+        }
+    }
+
+    public class ColliderEventForwarder : MonoBehaviour
+    {
+        private DamageableEntity damageable;
+
+        public void Setup(DamageableEntity entity)
+        {
+            damageable = entity;
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            damageable?.TryHitFromCollider(other);
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            damageable?.TryHitFromCollider(collision.collider);
         }
     }
 }
