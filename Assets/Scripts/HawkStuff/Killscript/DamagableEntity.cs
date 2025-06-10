@@ -145,17 +145,16 @@ namespace Entities
 
         private void TryHitFromCollider(Collider collider)
         {
-            var attacker = collider.GetComponentInParent<BaseCharacter>();
-            if (attacker != null && attacker.IsMine())
+            var hitbox = collider.GetComponent<BaseHitbox>();
+            if (hitbox != null && hitbox.Owner != null && hitbox.IsActive())
             {
-                
-                if (collider.GetComponent<BaseHitbox>() != null)
-                {
-                    attacker.OnHit(null, this, collider, "Blade", true);
-                }
+                // Instead of calling Owner.OnHit(...), we call our own GetHit() directly
+                string source = hitbox.Owner.Name;
+                string type = "TitanHit";
+                GetHit(source, 100, type, collider.name); // Damage value can be adjusted
             }
-
-            
         }
+
+
     }
 }
