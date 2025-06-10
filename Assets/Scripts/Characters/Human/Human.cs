@@ -2788,6 +2788,8 @@ namespace Characters
 
                 itemList4.Add(new ShigGateSpawn(this, "ShigGateSpawn", 1f));
                 itemList4.Add(new PickupGroundCannon(this, "Field Cannon Item", 1f));
+                itemList4.Add(new Stable2Spawn(this, "Stables", 1f));
+                
 
 
 

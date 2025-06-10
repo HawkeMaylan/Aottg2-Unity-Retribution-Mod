@@ -158,6 +158,7 @@ MonoBehaviour:
   - RPC_TryGrant
   - RPC_PlayCollisionAnimation
   - RPC_SpawnParticle
+  - SyncHealthRPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

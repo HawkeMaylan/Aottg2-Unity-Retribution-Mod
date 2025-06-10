@@ -557,6 +557,7 @@ MonoBehaviour:
   deathEffectPrefab: {fileID: 0}
   deathEffectOffset: {x: 0, y: 0, z: 0}
   deathEffectRotation: {x: 0, y: 0, z: 0}
+  customCollider: {fileID: 0}
 --- !u!1001 &8048790762546070642
 PrefabInstance:
   m_ObjectHideFlags: 0
