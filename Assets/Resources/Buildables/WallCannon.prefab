@@ -440,7 +440,7 @@ MonoBehaviour:
   healthBarOffset: {x: 0, y: 10, z: 0}
   textOffset: {x: 0, y: 10, z: 0}
   hitCooldown: 0.2
-  flatDamageFromUnknown: 100
+  flatDamageFromUnknown: 1000
   hitEffectPrefab: {fileID: 4725709683707712150, guid: 48f23525ac2a8714b898cd6ca5a55c49, type: 3}
   hitEffectOffset: {x: 0, y: 0, z: 0}
   hitEffectRotation: {x: -90, y: 0, z: 0}
