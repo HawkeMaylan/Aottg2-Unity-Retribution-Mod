@@ -20,7 +20,7 @@ namespace Entities
         [Header("Entity Setup")]
         public string entityName = "DamageableEntity";
         public int maxHP = 100;
-        public int currentHP = -1; // Start as uninitialized
+        public int currentHP = -1;
         public string team = "Neutral";
 
         [Header("GeneralKill Compatibility")]
@@ -31,6 +31,13 @@ namespace Entities
         public bool useTextDisplay = true;
         public bool use3DHealthBar = true;
         public bool destroyOnDeath = true;
+        public bool onlyShowUIWhenDamaged = false;
+        public float hideUIDistance = 50f;
+        public Camera referenceCamera;
+
+        [Header("UI Offsets")]
+        public Vector3 healthBarOffset = new Vector3(0f, 2.5f, 0f);
+        public Vector3 textOffset = new Vector3(0f, 2f, 0f);
 
         [Header("Hit Cooldown")]
         public float hitCooldown = 0.2f;
@@ -40,6 +47,7 @@ namespace Entities
 
         private bool isDead;
         private float lastHitTime = -999f;
+        private bool wasDamaged = false;
 
         private GameObject hpBillboard;
         private TextMesh hpText;
@@ -60,13 +68,14 @@ namespace Entities
 
         private void Start()
         {
+            referenceCamera = Camera.main;
+
             UpdateBillboard();
             UpdateHealthBar();
             if (photonView.IsMine)
-            {
                 photonView.RPC("SyncHealthRPC", RpcTarget.AllBuffered, currentHP, maxHP);
-            }
         }
+
 
         [PunRPC]
         private void SyncHealthRPC(int hp, int max)
@@ -86,6 +95,7 @@ namespace Entities
                 return;
 
             lastHitTime = Time.time;
+            wasDamaged = true;
 
             Debug.Log($"[{entityName}] hit by {source} for {damage}. HP before hit: {currentHP}");
 
@@ -114,7 +124,6 @@ namespace Entities
         private IEnumerator SelfDestruct()
         {
             yield return new WaitForSeconds(0.1f);
-
             if (PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient && photonView.ViewID != 0)
                 PhotonNetwork.Destroy(gameObject);
             else
@@ -125,7 +134,7 @@ namespace Entities
         {
             hpBillboard = new GameObject("HPBillboard");
             hpBillboard.transform.SetParent(transform);
-            hpBillboard.transform.localPosition = new Vector3(0f, 2f, 0f);
+            hpBillboard.transform.localPosition = textOffset;
             hpBillboard.transform.localRotation = Quaternion.identity;
 
             TextMesh textMesh = hpBillboard.AddComponent<TextMesh>();
@@ -141,7 +150,7 @@ namespace Entities
         {
             healthBarRoot = new GameObject("HealthBarRoot");
             healthBarRoot.transform.SetParent(transform);
-            healthBarRoot.transform.localPosition = new Vector3(0, 2.5f, 0);
+            healthBarRoot.transform.localPosition = healthBarOffset;
 
             GameObject bg = GameObject.CreatePrimitive(PrimitiveType.Quad);
             bg.name = "BarBackground";
@@ -172,16 +181,37 @@ namespace Entities
                 float ratio = Mathf.Clamp01((float)currentHP / maxHP);
                 foregroundBar.localScale = new Vector3(ratio, 0.2f, 1f);
                 foregroundBar.localPosition = new Vector3((ratio - 1f) * 0.5f, 0f, -0.01f);
+
+                var color = Color.green;
+                if (ratio <= 0.25f)
+                    color = Color.red;
+                else if (ratio <= 0.5f)
+                    color = new Color(1f, 0.65f, 0f); // Orange
+
+                foregroundBar.GetComponent<Renderer>().material.color = color;
             }
         }
 
         private void FixedUpdate()
         {
-            if (useTextDisplay && hpBillboard != null && Camera.main != null)
-                hpBillboard.transform.rotation = Quaternion.LookRotation(hpBillboard.transform.position - Camera.main.transform.position);
+            if (Camera.main == null)
+                return;
 
-            if (use3DHealthBar && healthBarRoot != null && Camera.main != null)
+            float dist = referenceCamera != null ? Vector3.Distance(referenceCamera.transform.position, transform.position) : 0f;
+            bool showUI = (!onlyShowUIWhenDamaged || wasDamaged) &&
+                          (referenceCamera == null || dist < hideUIDistance);
+
+            if (useTextDisplay && hpBillboard != null)
+            {
+                hpBillboard.transform.rotation = Quaternion.LookRotation(hpBillboard.transform.position - Camera.main.transform.position);
+                hpBillboard.SetActive(showUI);
+            }
+
+            if (use3DHealthBar && healthBarRoot != null)
+            {
                 healthBarRoot.transform.rotation = Quaternion.LookRotation(healthBarRoot.transform.position - Camera.main.transform.position);
+                healthBarRoot.SetActive(showUI);
+            }
         }
 
         private void OnTriggerEnter(Collider other)
@@ -201,15 +231,14 @@ namespace Entities
 
             if (hitbox == null || attacker == null || !hitbox.IsActive())
                 return;
-            //  Use this instead of attacker.IsHuman
+
             if (attacker is Human && attacker.IsMine())
             {
                 attacker.OnHit(hitbox, this, collider, "Blade", true);
                 return;
             }
 
-            //  Fallback: titan or unknown type deals fixed damage
-            GetHit(attacker.Name, 100, "Collision", collider.name);
+            GetHit(attacker.Name, flatDamageFromUnknown, "Collision", collider.name);
         }
     }
 }

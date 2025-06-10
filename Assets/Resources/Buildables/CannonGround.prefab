@@ -532,14 +532,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entityName: Damageable
-  maxHP: 500
-  currentHP: 500
+  maxHP: 5000
+  currentHP: 5000
   team: Human
   entityForm: 0
   showKillFeed: 1
   useTextDisplay: 1
   use3DHealthBar: 1
   destroyOnDeath: 1
+  onlyShowUIWhenDamaged: 1
+  hideUIDistance: 50
+  referenceCamera: {fileID: 0}
+  healthBarOffset: {x: 0, y: 10, z: 0}
+  textOffset: {x: 0, y: 10, z: 0}
   hitCooldown: 0.2
   flatDamageFromUnknown: 100
 --- !u!1001 &8048790762546070642
