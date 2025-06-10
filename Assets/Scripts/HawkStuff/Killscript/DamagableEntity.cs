@@ -5,6 +5,7 @@ using CustomLogic;
 using GameManagers;
 using Settings;
 using Characters;
+
 namespace Entities
 {
     public enum EntityForm
@@ -28,8 +29,12 @@ namespace Entities
         public bool showKillFeed = true;
         public bool showBillboard = true;
 
+        [Header("Hit Cooldown")]
+        public float hitCooldown = 0.2f;
+
         private int currentHP;
         private bool isDead;
+        private float lastHitTime = -999f;
 
         private GameObject hpBillboard;
         private TextMesh hpText;
@@ -62,6 +67,11 @@ namespace Entities
         {
             if (!PhotonNetwork.IsMasterClient || isDead)
                 return;
+
+            if (Time.time - lastHitTime < hitCooldown)
+                return;
+
+            lastHitTime = Time.time;
 
             Debug.Log($"[{entityName}] hit by {source} for {damage}. HP before hit: {currentHP}");
 
@@ -138,8 +148,14 @@ namespace Entities
             var attacker = collider.GetComponentInParent<BaseCharacter>();
             if (attacker != null && attacker.IsMine())
             {
-                attacker.OnHit(null, this, collider, "Blade", true);
+                
+                if (collider.GetComponent<BaseHitbox>() != null)
+                {
+                    attacker.OnHit(null, this, collider, "Blade", true);
+                }
             }
+
+            
         }
     }
 }

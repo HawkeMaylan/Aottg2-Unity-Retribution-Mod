@@ -537,6 +537,7 @@ MonoBehaviour:
   entityForm: 0
   showKillFeed: 1
   showBillboard: 1
+  hitCooldown: 0.2
 --- !u!1001 &8048790762546070642
 PrefabInstance:
   m_ObjectHideFlags: 0
