@@ -1242,9 +1242,16 @@ namespace Characters
             if (entity != null)
             {
                 entity.GetHit(Name, damage, type, collider.name);
-                EffectSpawner.Spawn(EffectPrefabs.Blood1, hitPos, Quaternion.Euler(270f, 0f, 0f));
+
+                // Only spawn blood if the entity is NOT a DamageableEntity
+                if (!(victim is Entities.DamageableEntity))
+                {
+                    EffectSpawner.Spawn(EffectPrefabs.Blood1, hitPos, Quaternion.Euler(270f, 0f, 0f));
+                }
+
                 return;
             }
+
 
             // Regular BaseCharacter victim
             var victimChar = victim as BaseCharacter;
