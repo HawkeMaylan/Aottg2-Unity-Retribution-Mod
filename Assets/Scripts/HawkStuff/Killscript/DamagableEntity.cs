@@ -146,14 +146,22 @@ namespace Entities
         private void TryHitFromCollider(Collider collider)
         {
             var hitbox = collider.GetComponent<BaseHitbox>();
-            if (hitbox != null && hitbox.Owner != null && hitbox.IsActive())
+            var attacker = hitbox?.Owner;
+
+            if (hitbox == null || attacker == null || !hitbox.IsActive())
+                return;
+            //  Use this instead of attacker.IsHuman
+            if (attacker is Human && attacker.IsMine())
             {
-                // Instead of calling Owner.OnHit(...), we call our own GetHit() directly
-                string source = hitbox.Owner.Name;
-                string type = "TitanHit";
-                GetHit(source, 100, type, collider.name); // Damage value can be adjusted
+                attacker.OnHit(hitbox, this, collider, "Blade", true);
+                return;
             }
+
+            //  Fallback: titan or unknown type deals fixed damage
+            GetHit(attacker.Name, 100, "Collision", collider.name);
         }
+
+
 
 
     }
