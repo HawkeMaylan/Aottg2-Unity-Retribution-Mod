@@ -35,6 +35,10 @@ namespace Entities
         public float hideUIDistance = 50f;
         public Camera referenceCamera;
 
+        [Header("UI Fade Settings")]
+        public bool fadeUIAfterDelay = false;
+        public float uiFadeDelay = 5f;
+
         [Header("UI Offsets")]
         public Vector3 healthBarOffset = new Vector3(0f, 2.5f, 0f);
         public Vector3 textOffset = new Vector3(0f, 2f, 0f);
@@ -200,7 +204,8 @@ namespace Entities
                 return;
 
             float dist = Vector3.Distance(referenceCamera.transform.position, transform.position);
-            bool showUI = (!onlyShowUIWhenDamaged || wasDamaged) && dist < hideUIDistance;
+            bool recentlyHit = Time.time - lastHitTime < uiFadeDelay;
+            bool showUI = (!onlyShowUIWhenDamaged || (wasDamaged && (!fadeUIAfterDelay || recentlyHit))) && dist < hideUIDistance;
 
             if (useTextDisplay && hpBillboard != null)
             {
