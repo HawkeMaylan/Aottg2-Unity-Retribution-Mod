@@ -56,7 +56,10 @@
 		"OzanLoadingMenu3",
 		"OzanLoadingMenu4",
 
-		"LichtLoadingMenu1"
+		"LichtLoadingMenu1",
+
+		"DisclosedInfo1",
+		"DisclosedInfo2"
 
 	],
 	"AllBackgrounds": 73,
@@ -80,7 +83,7 @@
 		"Enjoy the present as you never know when it will no longer be here.",
 		"If you hear a howl in the night, find a high place and hide",
 		"Check your stats and items with right alt",
-		"The MC has access to a menu with a variety of option access it with right control",
+		"The MC has access to a menu with a variety of options, access it with right control",
 		"Sometimes its best to be hidden, with realism on the hood hides player names.",
 		"I don't know much at all, not in the grand scheme of things",
 		"Keep an eye out for blood stains, what caused them may still be around.",
