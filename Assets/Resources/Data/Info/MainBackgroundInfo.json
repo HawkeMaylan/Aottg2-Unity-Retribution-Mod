@@ -14,7 +14,7 @@
 		"MainBackground17Texture"
 	],
 	"LoadingBackgrounds": [
-		
+
 
 
 
@@ -54,7 +54,12 @@
 		"HawkLoadingMenu14",
 		"HawkLoadingMenu15",
 		"HawkLoadingMenu16",
-		"HawkLoadingMenu17"
+		"HawkLoadingMenu17",
+
+		"OzanLoadingMenu1",
+		"OzanLoadingMenu2",
+		"OzanLoadingMenu3",
+		"OzanLoadingMenu4"
 
 	],
 	"AllBackgrounds": 73,
