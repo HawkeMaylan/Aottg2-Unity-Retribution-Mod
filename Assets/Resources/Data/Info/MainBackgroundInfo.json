@@ -5,6 +5,7 @@
 
 		"OzanMainMenu1",
 		"OzanMainMenu2",
+		"OzanMainMenu3",
 		"LichtMainMenu1"
 	],
 	"LoadingBackgrounds": [
@@ -82,7 +83,7 @@
 		"The MC has access to a menu with a variety of option access it with right control",
 		"Sometimes its best to be hidden, with realism on the hood hides player names.",
 		"I don't know much at all, not in the grand scheme of things",
-		"Keep an eye out for blood stains, what caused them to be there may still be around.",
+		"Keep an eye out for blood stains, what caused them may still be around.",
 		"If your horse dies you can always get on wagons or your comrades horse."
 
 	]
