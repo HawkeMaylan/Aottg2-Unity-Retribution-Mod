@@ -1,4 +1,42 @@
 [
+
+    {
+        "Category": "Lead Mod Developer",
+        "Names": [
+            "Hawk"
+
+        ]
+    },
+    {
+        "Category": "Hawk Inc Dev Team",
+        "Names": [
+            "thjorfjinn",
+            "daddylonglegs03761",
+            "xongjiao",
+            "ardvinzel"
+
+        ]
+    },
+
+
+    {
+        "Category": "Mod Background Artwork",
+        "Names": [
+            "Ozan ''The Owl'' Shadis",
+            "uwawauwa_1"
+
+
+        ]
+    },
+
+
+    {
+        "Category": "Main Game Devs",
+        "Names": [
+            "-----------------------------------------------------------------"
+
+        ]
+    },
     {
         "Category": "Lead Developers",
         "Names": [
@@ -325,7 +363,7 @@
             "Maxafur",
             "Samtroulfion",
             "Dr. Eisenlocke",
-            "kukong", 
+            "kukong",
             "ilAlecs",
             "Aliya",
             "desu",
