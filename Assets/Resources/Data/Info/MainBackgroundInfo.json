@@ -2,16 +2,10 @@
 	"EventBackgrounds": [
 	],
 	"MainBackgrounds": [
-		"MainBackground2Texture",
-		"MainBackground4Texture",
-		"MainBackground5Texture",
-		"MainBackground7Texture",
-		"MainBackground8Texture",
-		"MainBackground9Texture",
-		"MainBackground11Texture",
-		"MainBackground12Texture",
-		"MainBackground16Texture",
-		"MainBackground17Texture"
+
+		"OzanMainMenu1",
+		"OzanMainMenu2",
+		"LichtMainMenu1"
 	],
 	"LoadingBackgrounds": [
 
@@ -59,7 +53,9 @@
 		"OzanLoadingMenu1",
 		"OzanLoadingMenu2",
 		"OzanLoadingMenu3",
-		"OzanLoadingMenu4"
+		"OzanLoadingMenu4",
+
+		"LichtLoadingMenu1"
 
 	],
 	"AllBackgrounds": 73,
