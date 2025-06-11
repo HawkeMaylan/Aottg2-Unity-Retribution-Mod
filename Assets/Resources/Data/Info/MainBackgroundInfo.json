@@ -35,9 +35,7 @@
 
 
 
-		"HawkLoadingMenu1",
-		"HawkLoadingMenu2",
-		"HawkLoadingMenu3",
+
 		"HawkLoadingMenu4",
 		"HawkLoadingMenu5",
 		"HawkLoadingMenu6",
@@ -62,6 +60,9 @@
 
 		"DisclosedInfo1",
 		"DisclosedInfo2",
+		"DisclosedInfo3",
+		"DisclosedInfo4",
+		"DisclosedInfo5",
 
 		"RitisMainMenu1"
 
