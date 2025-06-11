@@ -6,7 +6,9 @@
 		"OzanMainMenu1",
 		"OzanMainMenu2",
 		"OzanMainMenu3",
-		"LichtMainMenu1"
+		"LichtMainMenu1",
+		"RitisMainMenu2",
+		"RitisMainMenu3"
 	],
 	"LoadingBackgrounds": [
 
@@ -59,7 +61,9 @@
 		"LichtLoadingMenu1",
 
 		"DisclosedInfo1",
-		"DisclosedInfo2"
+		"DisclosedInfo2",
+
+		"RitisMainMenu1"
 
 	],
 	"AllBackgrounds": 73,
