@@ -894,7 +894,37 @@ namespace Characters
             Weapon.Reset();
             Stats.CurrentGas = Stats.MaxGas;
         }
+        public void RefillGasOnly()
+        {
+            if (!IsRefillable) return;
 
+            Stats.CurrentGas = Stats.MaxGas;
+            State = HumanState.Refill;
+            CrossFade(HumanAnimations.Refill, 0.1f);
+            PlaySound(HumanSounds.Refill);
+            _stateTimeLeft = Animation.GetTotalTime(HumanAnimations.Refill);
+
+            Debug.Log("Gas refilled.");
+        }
+
+        public void RefillBladesOnly()
+        {
+            if (!IsRefillable || Weapon == null) return;
+
+            Weapon.Reset();
+
+            if (Weapon is BladeWeapon)
+            {
+                ToggleBlades(true);
+            }
+
+            State = HumanState.Refill;
+            CrossFade(HumanAnimations.Refill, 0.1f);
+            PlaySound(HumanSounds.Refill);
+            _stateTimeLeft = Animation.GetTotalTime(HumanAnimations.Refill);
+
+            Debug.Log("Blades refilled.");
+        }
         public override void Emote(string emote)
         {
             if (CanEmote())

@@ -115,6 +115,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 439366}
+  - component: {fileID: -6968070824859622716}
   m_Layer: 23
   m_Name: Supply2
   m_TagString: Untagged
@@ -138,3 +139,19 @@ Transform:
   - {fileID: 439364}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-6968070824859622716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 139366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eed105ca4d9cfc641af983a5a7525e5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bladeSupplies: 10
+  gasSupplies: 5
+  radialUI: {fileID: 0}
+  interactionZone: {fileID: 0}
