@@ -146,8 +146,8 @@ MonoBehaviour:
   team: Neutral
   entityForm: 0
   showKillFeed: 1
-  useTextDisplay: 1
-  use3DHealthBar: 1
+  useTextDisplay: 0
+  use3DHealthBar: 0
   destroyOnDeath: 1
   onlyShowUIWhenDamaged: 0
   hideUIDistance: 50
