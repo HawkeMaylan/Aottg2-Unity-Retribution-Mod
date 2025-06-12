@@ -397,14 +397,18 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                 if (horseView.Owner != null && horseView.Owner.ActorNumber == targetPlayer.ActorNumber)
                 {
                     // Ownership confirmed
-                    horseView.RPC("RPC_SetHorseOwner", horseView.Owner, targetPlayer.ActorNumber);
+                    horseView.RPC("RPC_SetHorseOwner", RpcTarget.All, targetPlayer.ActorNumber);
+
+
 
                     // Now init horse
                     Horse horse = horseView.GetComponent<Horse>();
                     Human human = FindHumanByPlayer(targetPlayer);
                     if (horse != null && human != null)
                     {
-                        horse.Init(human);
+
+
+
                     }
 
                     yield break;

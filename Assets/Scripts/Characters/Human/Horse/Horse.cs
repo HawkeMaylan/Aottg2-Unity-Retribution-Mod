@@ -31,9 +31,20 @@ namespace Characters
 
         public void Init(Human human)
         {
-            base.Init(true, human.Team);
+            if (human == null) return;
+
             _owner = human;
+            base.Init(true, human.Team);  // Sets team and health etc
+
+            if (photonView.IsMine && Cache.Rigidbody != null)
+            {
+                Cache.Rigidbody.isKinematic = false;
+            }
+
+            Debug.Log($"[Horse] Init completed for {human.name} on actor {PhotonNetwork.LocalPlayer.ActorNumber}");
         }
+
+
 
         protected override void CreateCache(BaseComponentCache cache)
         {
@@ -138,20 +149,34 @@ namespace Characters
             _idleTimeLeft = Animation.GetLength(animation);
         }
 
+        private float _initTimeout = 5f;
+
         private void Update()
         {
-            if (!IsMine()) return;
-
-            _jumpCooldownLeft -= Time.deltaTime;
-
-            if (_owner == null || _owner.Dead)
+            if (_owner == null)
             {
-                PhotonNetwork.Destroy(gameObject);
+                // Wait patiently for Init() without destroying
                 return;
             }
 
-            //  Update MountedStatus automatically
-            MountedStatus = (_owner.MountState == HumanMountState.Horse) ? 1 : 0;
+            if (_owner.Dead)
+            {
+                if (photonView.IsMine || PhotonNetwork.IsMasterClient)
+                {
+                    PhotonNetwork.Destroy(gameObject);
+                }
+                return;
+            }
+
+           
+
+
+
+
+
+
+        //  Update MountedStatus automatically
+        MountedStatus = (_owner.MountState == HumanMountState.Horse) ? 1 : 0;
 
             if (_owner.MountState == HumanMountState.Horse)
             {
@@ -213,26 +238,19 @@ namespace Characters
         [PunRPC]
         public void RPC_SetHorseOwner(int actorNumber)
         {
-            Player targetPlayer = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
-
-            // Only run this on the client who owns the horse
-            if (!photonView.IsMine)
-                return;
-
-            foreach (Human h in FindObjectsOfType<Human>())
+            foreach (var human in FindObjectsOfType<Human>())
             {
-                if (h.photonView.Owner == targetPlayer)
+                if (human.photonView != null && human.photonView.Owner != null &&
+                    human.photonView.Owner.ActorNumber == actorNumber)
                 {
-                    Init(h);        // 
-                    h.Horse = this; // Optional reference for reverse lookup
-                    return;
+                    Init(human);          // This must assign _owner = human
+                    human.Horse = this;   // This line must be included
                 }
             }
-
-            // If no matching human found, destroy this horse to prevent zombie objects
-            Debug.LogWarning("Horse could not find its human owner.");
-            PhotonNetwork.Destroy(gameObject);
         }
+
+
+
 
 
         protected override void FixedUpdate()
