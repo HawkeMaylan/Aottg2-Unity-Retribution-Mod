@@ -105,8 +105,7 @@ public class GeneralKillScript : MonoBehaviourPunCallbacks
                 particleSpawned = true;
             }
 
-            if (!PhotonNetwork.IsMasterClient)
-                continue;
+            
 
             Human human = other.GetComponentInParent<Human>();
             if (damageHumans && human != null && human.IsMine())
@@ -209,13 +208,14 @@ public class GeneralKillScript : MonoBehaviourPunCallbacks
 
     private void SelfDestruct()
     {
-        if (PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient && photonView != null && photonView.ViewID != 0)
+        if (PhotonNetwork.IsConnected && photonView != null && photonView.IsMine)
         {
-            PhotonNetwork.Destroy(transform.root.gameObject);
+            PhotonNetwork.Destroy(photonView.gameObject);
         }
-        else
+        else if (!PhotonNetwork.IsConnected)
         {
             Destroy(gameObject);
         }
     }
+
 }

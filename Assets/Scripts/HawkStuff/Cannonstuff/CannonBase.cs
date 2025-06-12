@@ -317,7 +317,9 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             if (Time.time >= nextFireTime && projectileOptions.Count > 0)
             {
                 nextFireTime = Time.time + projectileOptions[selectedProjectileIndex].fireCooldown;
-                photonView.RPC("RPC_FireProjectile", RpcTarget.All, selectedProjectileIndex);
+                RPC_FireProjectile(selectedProjectileIndex);
+                photonView.RPC("RPC_PlayFiringEffects", RpcTarget.Others, selectedProjectileIndex);
+
             }
             else if (cooldownSound != null && audioSource != null)
             {
@@ -338,6 +340,13 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         HandleCooldownUI();
         HandleProjectileUISwap();
         RotateTowardsCamera();
+
+
+        if (isMounted && (!ValidateHumanInTrigger() || humanInTrigger.MountedTransform != mountPoint))
+        {
+            Debug.LogWarning("CannonBase: Mounted human lost or removed externally. Forcibly detaching.");
+            DetachHuman();
+        }
     }
 
 
@@ -420,8 +429,9 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
-    [PunRPC]
+    
     public void RPC_FireProjectile(int index)
+
     {
         if (!ValidateHumanInTrigger()) return;
 
@@ -479,6 +489,22 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
 
 
+    [PunRPC]
+    public void RPC_PlayFiringEffects(int index)
+    {
+        var selected = projectileOptions[index];
+
+        if (selected.BarrelRecoil && CannonBarrel != null)
+            StartCoroutine(BarrelRecoil(CannonBarrel, selected.RecoilDistance, selected.barrelRecoilAngle, selected.RecoilSpeed));
+
+        if (selected.Knockback && moveRigidbody != null)
+        {
+            Vector3 backwardForce = -firePoint.forward * selected.knockbackForce;
+            moveRigidbody.AddForce(backwardForce, ForceMode.Impulse);
+        }
+
+        
+    }
 
 
 

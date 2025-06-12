@@ -7,25 +7,23 @@ using GameManagers;
 using ApplicationManagers;
 using System.Collections;
 
-public class HorseReviveZone : MonoBehaviourPunCallbacks
+public class HorseReviveZone : MonoBehaviourPunCallbacks, IPunObservable
 {
-    public Collider triggerZone; // 
+    public Collider triggerZone;
     public Vector3 spawnOffset = new Vector3(2f, 0f, 0f);
     public float promptDuration = 3f;
+    public float cooldownDuration = 10f;
+    public int maxRespawns = 3;
 
     private Human localHuman;
     private Coroutine promptCoroutine;
     private static string currentPrompt = "";
+    private static string extraPrompt = "";
     private bool isInside = false;
 
+    // Synced state
     private float lastRespawnTime = -999f;
-    public float cooldownDuration = 10f;
-
-    public int maxRespawns = 3; 
     private int respawnsUsed = 0;
-    private static string extraPrompt = ""; 
-
-
 
     private void Update()
     {
@@ -72,22 +70,16 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
 
                 if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
                 {
-                    lastRespawnTime = Time.time;
-                    respawnsUsed++;
-
-                    if (PhotonNetwork.IsMasterClient)
-                        TryRespawnHorse(localHuman.photonView.Owner);
-                    else
-                        photonView.RPC(nameof(RPC_RequestHorseRespawn), RpcTarget.MasterClient, localHuman.photonView.OwnerActorNr);
-
+                    photonView.RPC(nameof(RPC_RequestHorseRespawn),
+                        RpcTarget.MasterClient,
+                        localHuman.photonView.OwnerActorNr,
+                        localHuman.Cache.Transform.position);
                     ClearPrompt();
                     isInside = false;
                 }
             }
         }
-
     }
-
 
     private Human FindLocalHumanInZone()
     {
@@ -110,21 +102,29 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    private void RPC_RequestHorseRespawn(int actorNumber)
+    private void RPC_RequestHorseRespawn(int actorNumber, Vector3 position)
     {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        if (respawnsUsed >= maxRespawns) return;
+
+        float timeSinceLast = Time.time - lastRespawnTime;
+        if (timeSinceLast < cooldownDuration) return;
+
         Player target = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
         if (target != null)
-            TryRespawnHorse(target);
+        {
+            respawnsUsed++;
+            lastRespawnTime = Time.time;
+            TryRespawnHorse(target, position);
+        }
     }
 
-    private void TryRespawnHorse(Player player)
+    private void TryRespawnHorse(Player player, Vector3 position)
     {
-        Human humanOwner = FindHumanByPlayer(player);
-        if (humanOwner == null) return;
-
-        Vector3 spawnPosition = humanOwner.Cache.Transform.position + spawnOffset;
         KillOwnedHorse(player);
 
+        Vector3 spawnPosition = position + spawnOffset;
         GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
         PhotonView horseView = horseObj.GetComponent<PhotonView>();
         horseView.TransferOwnership(player);
@@ -167,36 +167,8 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
             elapsed += 0.2f;
         }
 
-        Debug.LogWarning($"[HorseRespawnZone] Failed to assign horse to player {actorNumber}");
+        Debug.LogWarning($"[HorseReviveZone] Failed to assign horse to player {actorNumber}");
     }
-
-    private Human FindHumanByPlayer(Player player)
-    {
-        foreach (var h in FindObjectsOfType<Human>())
-        {
-            if (h.photonView != null && h.photonView.Owner == player)
-                return h;
-        }
-        return null;
-    }
-
-    private void SetPrompt(string baseText, float duration)
-    {
-        if (Time.time - lastRespawnTime < cooldownDuration)
-        {
-            float timeLeft = Mathf.Ceil(cooldownDuration - (Time.time - lastRespawnTime));
-            currentPrompt = $"Respawn on cooldown ({timeLeft}s)";
-        }
-        else
-        {
-            currentPrompt = baseText;
-        }
-
-        if (promptCoroutine != null)
-            StopCoroutine(promptCoroutine);
-        promptCoroutine = StartCoroutine(ClearPromptAfterDelay(duration));
-    }
-
 
     private void ClearPrompt()
     {
@@ -207,13 +179,6 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
             StopCoroutine(promptCoroutine);
             promptCoroutine = null;
         }
-    }
-
-
-    private IEnumerator ClearPromptAfterDelay(float time)
-    {
-        yield return new WaitForSeconds(time);
-        ClearPrompt();
     }
 
     private void OnGUI()
@@ -239,5 +204,17 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
         }
     }
 
-
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting && PhotonNetwork.IsMasterClient)
+        {
+            stream.SendNext(respawnsUsed);
+            stream.SendNext(lastRespawnTime);
+        }
+        else if (stream.IsReading)
+        {
+            respawnsUsed = (int)stream.ReceiveNext();
+            lastRespawnTime = (float)stream.ReceiveNext();
+        }
+    }
 }

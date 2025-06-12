@@ -373,9 +373,48 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         PhotonView horseView = horseObj.GetComponent<PhotonView>();
 
         horseView.TransferOwnership(selectedPlayer);
-        StartCoroutine(EnsureHorseOwnershipAndLink(horseView, selectedPlayer.ActorNumber));
+        StartCoroutine(EnsureHorseOwnershipAndLinkAndInit(horseView, selectedPlayer));
+
     }
 
+    private IEnumerator EnsureHorseOwnershipAndLinkAndInit(PhotonView horseView, Player player)
+    {
+        float timeout = 2f;
+        float elapsed = 0f;
+
+        while (elapsed < timeout)
+        {
+            if (horseView != null)
+            {
+                if (horseView.Owner != null && horseView.Owner == player)
+                {
+                    horseView.RPC("RPC_SetHorseOwner", player, player.ActorNumber);
+
+                    // Also try to Init the horse with the player's Human
+                    Human human = FindHumanByPlayer(player);
+                    if (human != null)
+                    {
+                        Horse horse = horseView.GetComponent<Horse>();
+                        if (horse != null)
+                        {
+                            horse.Init(human);
+                        }
+                    }
+
+                    yield break;
+                }
+                else
+                {
+                    horseView.TransferOwnership(player);
+                }
+            }
+
+            yield return new WaitForSeconds(0.2f);
+            elapsed += 0.2f;
+        }
+
+        Debug.LogWarning($"[TeleportMenu] Failed to assign and init horse for player {player.ActorNumber}");
+    }
 
 
 
