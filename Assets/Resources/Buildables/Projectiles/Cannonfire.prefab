@@ -5000,6 +5000,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lifetime: 3
+  ownershipTimeout: 5
 --- !u!114 &-7190779652470223556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5015,8 +5016,8 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
+  Synchronization: 1
+  OwnershipTransfer: 1
   observableSearch: 0
   ObservedComponents:
   - {fileID: 0}

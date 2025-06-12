@@ -159,6 +159,7 @@ MonoBehaviour:
   - RPC_PlayCollisionAnimation
   - RPC_SpawnParticle
   - SyncHealthRPC
+  - RPC_PlayFiringEffects
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

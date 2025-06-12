@@ -38,7 +38,7 @@ TagManager:
   - Background
   - MapObjectTitans
   - MapObjectHumans
-  - 
+  - Cannon
   m_SortingLayers:
   - name: Default
     uniqueID: 0

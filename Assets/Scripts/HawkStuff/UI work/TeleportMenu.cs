@@ -373,11 +373,12 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         PhotonView horseView = horseObj.GetComponent<PhotonView>();
 
         horseView.TransferOwnership(selectedPlayer);
-        StartCoroutine(EnsureHorseOwnershipAndLinkAndInit(horseView, selectedPlayer));
+        StartCoroutine(WaitForOwnershipAndInit(horseView, selectedPlayer));
+
 
     }
 
-    private IEnumerator EnsureHorseOwnershipAndLinkAndInit(PhotonView horseView, Player player)
+    private IEnumerator WaitForOwnershipAndInit(PhotonView horseView, Player targetPlayer)
     {
         float timeout = 2f;
         float elapsed = 0f;
@@ -386,26 +387,24 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         {
             if (horseView != null)
             {
-                if (horseView.Owner != null && horseView.Owner == player)
+                if (horseView.Owner != null && horseView.Owner.ActorNumber == targetPlayer.ActorNumber)
                 {
-                    horseView.RPC("RPC_SetHorseOwner", player, player.ActorNumber);
+                    // Ownership confirmed
+                    horseView.RPC("RPC_SetHorseOwner", horseView.Owner, targetPlayer.ActorNumber);
 
-                    // Also try to Init the horse with the player's Human
-                    Human human = FindHumanByPlayer(player);
-                    if (human != null)
+                    // Now init horse
+                    Horse horse = horseView.GetComponent<Horse>();
+                    Human human = FindHumanByPlayer(targetPlayer);
+                    if (horse != null && human != null)
                     {
-                        Horse horse = horseView.GetComponent<Horse>();
-                        if (horse != null)
-                        {
-                            horse.Init(human);
-                        }
+                        horse.Init(human);
                     }
 
                     yield break;
                 }
                 else
                 {
-                    horseView.TransferOwnership(player);
+                    horseView.TransferOwnership(targetPlayer);
                 }
             }
 
@@ -413,8 +412,9 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             elapsed += 0.2f;
         }
 
-        Debug.LogWarning($"[TeleportMenu] Failed to assign and init horse for player {player.ActorNumber}");
+        Debug.LogWarning($"[HorseRespawn] Failed to confirm ownership for player {targetPlayer.ActorNumber}");
     }
+
 
 
 

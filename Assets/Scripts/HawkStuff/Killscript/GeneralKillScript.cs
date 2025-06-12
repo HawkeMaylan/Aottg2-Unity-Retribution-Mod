@@ -208,14 +208,25 @@ public class GeneralKillScript : MonoBehaviourPunCallbacks
 
     private void SelfDestruct()
     {
-        if (PhotonNetwork.IsConnected && photonView != null && photonView.IsMine)
-        {
-            PhotonNetwork.Destroy(photonView.gameObject);
-        }
-        else if (!PhotonNetwork.IsConnected)
+        if (!PhotonNetwork.IsConnected)
         {
             Destroy(gameObject);
+            return;
+        }
+
+        if (photonView != null && photonView.ViewID != 0)
+        {
+            if (photonView.IsMine || PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.Destroy(photonView.gameObject);
+            }
+            else
+            {
+                Debug.LogWarning("[SelfDestruct] Cannot destroy object. Not owner or MC.");
+            }
         }
     }
+
+
 
 }

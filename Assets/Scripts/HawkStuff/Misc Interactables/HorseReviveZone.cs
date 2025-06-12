@@ -21,7 +21,6 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks, IPunObservable
     private static string extraPrompt = "";
     private bool isInside = false;
 
-    // Synced state
     private float lastRespawnTime = -999f;
     private int respawnsUsed = 0;
 
@@ -70,10 +69,7 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks, IPunObservable
 
                 if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
                 {
-                    photonView.RPC(nameof(RPC_RequestHorseRespawn),
-                        RpcTarget.MasterClient,
-                        localHuman.photonView.OwnerActorNr,
-                        localHuman.Cache.Transform.position);
+                    photonView.RPC(nameof(RPC_RequestHorseRespawn), RpcTarget.MasterClient, localHuman.photonView.OwnerActorNr, localHuman.Cache.Transform.position);
                     ClearPrompt();
                     isInside = false;
                 }
@@ -105,7 +101,6 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks, IPunObservable
     private void RPC_RequestHorseRespawn(int actorNumber, Vector3 position)
     {
         if (!PhotonNetwork.IsMasterClient) return;
-
         if (respawnsUsed >= maxRespawns) return;
 
         float timeSinceLast = Time.time - lastRespawnTime;
@@ -116,29 +111,26 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks, IPunObservable
         {
             respawnsUsed++;
             lastRespawnTime = Time.time;
-            TryRespawnHorse(target, position);
+            Vector3 spawnPosition = position + spawnOffset;
+            GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
+            PhotonView horseView = horseObj.GetComponent<PhotonView>();
+            horseView.TransferOwnership(target);
+            photonView.RPC(nameof(RPC_ConfirmHorseRespawn), target, horseView.ViewID);
+            StartCoroutine(EnsureHorseOwnershipAndLink(horseView, actorNumber));
         }
     }
 
-    private void TryRespawnHorse(Player player, Vector3 position)
+    [PunRPC]
+    private void RPC_ConfirmHorseRespawn(int viewID)
     {
-        KillOwnedHorse(player);
-
-        Vector3 spawnPosition = position + spawnOffset;
-        GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
-        PhotonView horseView = horseObj.GetComponent<PhotonView>();
-        horseView.TransferOwnership(player);
-        StartCoroutine(EnsureHorseOwnershipAndLink(horseView, player.ActorNumber));
-    }
-
-    private void KillOwnedHorse(Player player)
-    {
-        foreach (var horse in FindObjectsOfType<Horse>())
+        PhotonView horseView = PhotonView.Find(viewID);
+        if (horseView != null && horseView.IsMine)
         {
-            if (horse.photonView != null && horse.photonView.Owner == player)
+            Horse horse = horseView.GetComponent<Horse>();
+            if (horse != null)
             {
-                PhotonNetwork.Destroy(horse.gameObject);
-                break;
+                Debug.Log("[HorseReviveZone] Horse confirmed and owned.");
+                // Optionally auto-mount or link here
             }
         }
     }
