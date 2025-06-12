@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2952196466123103651}
   - component: {fileID: 124207222437964781}
   - component: {fileID: 700683306092137389}
+  - component: {fileID: 1991684649345744401}
   m_Layer: 31
   m_Name: Building1Build
   m_TagString: Untagged
@@ -44,12 +45,12 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -77,6 +78,45 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &1991684649345744401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5139746843184834283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a450ee0181e48c64d84ae85d6812f58a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: DamageableEntity
+  maxHP: 400
+  currentHP: 400
+  team: Neutral
+  entityForm: 0
+  showKillFeed: 1
+  useTextDisplay: 1
+  use3DHealthBar: 1
+  destroyOnDeath: 1
+  onlyShowUIWhenDamaged: 1
+  hideUIDistance: 50
+  referenceCamera: {fileID: 0}
+  fadeUIAfterDelay: 1
+  uiFadeDelay: 5
+  healthBarOffset: {x: 0, y: 50, z: 0}
+  textOffset: {x: 0, y: 50, z: 0}
+  textScale: 4
+  healthBarScale: {x: 10, y: 2, z: 10}
+  hitCooldown: 0.2
+  flatDamageFromUnknown: 100
+  hitEffectPrefab: {fileID: 0}
+  hitEffectOffset: {x: 0, y: 0, z: 0}
+  hitEffectRotation: {x: 0, y: 0, z: 0}
+  deathEffectPrefab: {fileID: 0}
+  deathEffectOffset: {x: 0, y: 0, z: 0}
+  deathEffectRotation: {x: 0, y: 0, z: 0}
+  customCollider: {fileID: 0}
 --- !u!1 &7032772756027385690
 GameObject:
   m_ObjectHideFlags: 0
@@ -172,7 +212,7 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
