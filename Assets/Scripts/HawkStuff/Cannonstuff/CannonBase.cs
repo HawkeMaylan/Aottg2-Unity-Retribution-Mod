@@ -344,9 +344,11 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         if (isMounted && (!ValidateHumanInTrigger() || humanInTrigger.MountedTransform != mountPoint))
         {
-            Debug.LogWarning("CannonBase: Mounted human lost or removed externally. Forcibly detaching.");
+            Debug.LogWarning("CannonBase: Mounted human invalid or removed. Detaching.");
             DetachHuman();
         }
+
+
     }
 
 
@@ -578,10 +580,12 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         if (isTooFar || isDead)
         {
-            DetachHuman();
+            Debug.LogWarning("CannonBase: Detaching due to distance or death.");
+            DetachHuman(); // Force detach on death
             ClearPrompt();
         }
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (isMounted) return;
@@ -1018,20 +1022,14 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
         if (humanInTrigger == null)
             return false;
 
-        if (!humanInTrigger.gameObject.activeInHierarchy || humanInTrigger.Dead)
-        {
-            Debug.LogWarning("CannonBase: Detected stale humanInTrigger. Clearing.");
-            humanInTrigger = null;
-            humanRigidbody = null;
-            ClearPrompt();
-            return false;
-        }
+        bool isDead = humanInTrigger.Dead || !humanInTrigger.gameObject.activeInHierarchy;
+        bool isNotMine = !humanInTrigger.IsMine();
 
-        if (!humanInTrigger.IsMine())
-            return false;
-
-        return true;
+        return !(isDead || isNotMine);
     }
+
+
+
     private void UpdatePromptTexts()
     {
         string key = SettingsManager.InputSettings.Interaction.Interact.ToString().Replace("Alpha", "");

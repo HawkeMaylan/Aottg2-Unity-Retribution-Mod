@@ -361,22 +361,29 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (selectedPlayer == null || !PhotonNetwork.IsMasterClient)
             return;
 
-        Human humanOwner = FindHumanByPlayer(selectedPlayer);
-        if (humanOwner == null)
-            return;
+        StartCoroutine(RespawnHorseCoroutine(selectedPlayer));
+    }
 
-        Vector3 spawnPosition = humanOwner.Cache.Transform.position + Vector3.right * 2f;
+    private IEnumerator RespawnHorseCoroutine(Player targetPlayer)
+    {
+        Human humanOwner = FindHumanByPlayer(targetPlayer);
+        if (humanOwner == null)
+            yield break;
+
+        Vector3 spawnPos = humanOwner.Cache.Transform.position + Vector3.right * 2f;
 
         TryKillHorse(); // Clean up old horse
 
-        GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
+        GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPos, Quaternion.identity);
+        yield return new WaitUntil(() => horseObj.GetComponent<PhotonView>().ViewID != 0);
+        yield return new WaitForSeconds(0.25f); // Allow network propagation
+
         PhotonView horseView = horseObj.GetComponent<PhotonView>();
+        horseView.TransferOwnership(targetPlayer);
 
-        horseView.TransferOwnership(selectedPlayer);
-        StartCoroutine(WaitForOwnershipAndInit(horseView, selectedPlayer));
-
-
+        StartCoroutine(WaitForOwnershipAndInit(horseView, targetPlayer));
     }
+
 
     private IEnumerator WaitForOwnershipAndInit(PhotonView horseView, Player targetPlayer)
     {

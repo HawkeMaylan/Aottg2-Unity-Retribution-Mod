@@ -160,6 +160,7 @@ MonoBehaviour:
   - RPC_SpawnParticle
   - SyncHealthRPC
   - RPC_PlayFiringEffects
+  - RPC_ConfirmHorseRespawn
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -4903,6 +4903,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lifetime: 4
+  ownershipTimeout: 2
 --- !u!114 &6832912220633418698
 MonoBehaviour:
   m_ObjectHideFlags: 0
