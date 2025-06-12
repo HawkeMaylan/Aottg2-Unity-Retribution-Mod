@@ -1464,7 +1464,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   triggerZone: {fileID: 2777570742966908096}
   spawnOffset: {x: 2, y: 0, z: 0}
-  promptDuration: 3
   cooldownDuration: 10
   maxRespawns: 10
 --- !u!114 &-5730435547047850318
