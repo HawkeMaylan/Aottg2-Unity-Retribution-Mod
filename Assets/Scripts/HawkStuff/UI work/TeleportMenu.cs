@@ -206,7 +206,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
         if (GUI.Button(new Rect(Screen.width - 300, 240, 200, 30), "Teleport Player")) TryTeleportSelectedPlayer();
         if (GUI.Button(new Rect(Screen.width - 300, 280, 200, 30), "Teleport Player's Horse")) TryTeleportHorseToPlayer();
-        if (GUI.Button(new Rect(Screen.width - 300, 320, 200, 30), "Kill Player's Horse")) TryKillHorse();
+        if (GUI.Button(new Rect(Screen.width - 300, 320, 200, 30), "Kill Player's Horse")) StartCoroutine(TryKillHorse(selectedPlayer));
         if (GUI.Button(new Rect(Screen.width - 300, 360, 200, 30), "Respawn Player's Horse")) TryRespawnHorse();
         if (GUI.Button(new Rect(Screen.width - 300, 400, 200, 30), "Bring Selected Player to Me")) BringPlayerToMC();
         if (GUI.Button(new Rect(Screen.width - 300, 440, 200, 30), "Bring Me to Selected Player")) BringMCToPlayer();
@@ -343,18 +343,54 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
 
 
-    private void TryKillHorse()
+    private IEnumerator TryKillHorse(Player targetPlayer)
     {
+        Horse targetHorse = null;
+
         foreach (var horse in FindObjectsOfType<Horse>())
         {
             if (horse.photonView != null && horse.photonView.Owner != null &&
-                horse.photonView.Owner.ActorNumber == selectedPlayer.ActorNumber)
+                horse.photonView.Owner.ActorNumber == targetPlayer.ActorNumber)
             {
-                PhotonNetwork.Destroy(horse.gameObject);
+                targetHorse = horse;
                 break;
             }
         }
+
+        if (targetHorse == null)
+        {
+            Debug.LogWarning($"[HorseKill] No horse found for player {targetPlayer.ActorNumber}");
+            yield break;
+        }
+
+        PhotonView horseView = targetHorse.photonView;
+
+        // Request ownership if not already owned by the MC
+        if (!horseView.IsMine)
+        {
+            horseView.TransferOwnership(PhotonNetwork.LocalPlayer);
+        }
+
+        // Wait for ownership confirmation (up to 2s)
+        float elapsed = 0f;
+        while (!horseView.IsMine && elapsed < 2f)
+        {
+            yield return new WaitForSeconds(0.1f);
+            elapsed += 0.1f;
+        }
+
+        if (horseView.IsMine)
+        {
+            PhotonNetwork.Destroy(horseView.gameObject);
+            Debug.Log($"[HorseKill] Successfully destroyed horse owned by player {targetPlayer.ActorNumber}");
+        }
+        else
+        {
+            Debug.LogWarning($"[HorseKill] Could not gain ownership of horse for player {targetPlayer.ActorNumber}");
+        }
     }
+
+
 
     private void TryRespawnHorse()
     {
@@ -372,7 +408,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
         Vector3 spawnPos = humanOwner.Cache.Transform.position + Vector3.right * 2f;
 
-        TryKillHorse(); // Clean up old horse
+        StartCoroutine(TryKillHorse(selectedPlayer));
+        // Clean up old horse
 
         GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPos, Quaternion.identity);
         yield return new WaitUntil(() => horseObj.GetComponent<PhotonView>().ViewID != 0);
@@ -584,7 +621,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         Vector3 targetPos = new Vector3(x, y, z);
 
         // 1. Kill human if alive
-        TryKillHorse();
+        StartCoroutine(TryKillHorse(selectedPlayer));
+
         foreach (var human in FindObjectsOfType<Human>())
         {
             if (human.photonView != null && human.photonView.Owner == selectedPlayer)
@@ -596,11 +634,13 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         }
 
         // 2. Kill horse
-        TryKillHorse();
+        StartCoroutine(TryKillHorse(selectedPlayer));
+
 
         // 3. Revive human after a short delay
         StartCoroutine(DelayedRelocateRevive(selectedPlayer, targetPos));
-        TryKillHorse();
+        StartCoroutine(TryKillHorse(selectedPlayer));
+
     }
 
     private IEnumerator DelayedRelocateRevive(Player targetPlayer, Vector3 targetPos)
@@ -624,7 +664,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
         Vector3 spawnPosition = targetPos + Vector3.right * 2f;
 
-        TryKillHorse(); // Clean up any lingering horse
+        StartCoroutine(TryKillHorse(selectedPlayer));
+        // Clean up any lingering horse
 
         GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
         PhotonView horseView = horseObj.GetComponent<PhotonView>();
