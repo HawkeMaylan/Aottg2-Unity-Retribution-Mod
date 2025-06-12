@@ -243,11 +243,14 @@ namespace Characters
                 if (human.photonView != null && human.photonView.Owner != null &&
                     human.photonView.Owner.ActorNumber == actorNumber)
                 {
-                    Init(human);          // This must assign _owner = human
-                    human.Horse = this;   // This line must be included
+                    Init(human);          // Set _owner = human on ALL clients
+                    human.Horse = this;   // Link horse to human on ALL clients
+                    break;
                 }
             }
         }
+
+
 
 
 
