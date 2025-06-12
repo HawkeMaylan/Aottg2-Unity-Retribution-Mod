@@ -1239,18 +1239,20 @@ namespace Characters
 
             // Support for DamageableEntity
             var entity = (victim as Component)?.GetComponentInParent<Entities.DamageableEntity>();
-            if (entity != null)
+            bool hasDamageable = entity != null;
+
+            // Spawn blood only if there's no DamageableEntity on the victim
+            if (!hasDamageable && type == "Blade")
+            {
+                EffectSpawner.Spawn(EffectPrefabs.Blood1, hitPos, Quaternion.Euler(270f, 0f, 0f));
+            }
+
+            if (hasDamageable)
             {
                 entity.GetHit(Name, damage, type, collider.name);
-
-                // Only spawn blood if the entity is NOT a DamageableEntity
-                if (!(victim is Entities.DamageableEntity))
-                {
-                    EffectSpawner.Spawn(EffectPrefabs.Blood1, hitPos, Quaternion.Euler(270f, 0f, 0f));
-                }
-
                 return;
             }
+
 
 
             // Regular BaseCharacter victim
