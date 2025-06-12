@@ -91,8 +91,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entityName: DamageableEntity
-  maxHP: 400
-  currentHP: 400
+  maxHP: 10000
+  currentHP: 10000
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -109,7 +109,7 @@ MonoBehaviour:
   textScale: 4
   healthBarScale: {x: 10, y: 2, z: 10}
   hitCooldown: 0.2
-  flatDamageFromUnknown: 100
+  flatDamageFromUnknown: 5000
   hitEffectPrefab: {fileID: 0}
   hitEffectOffset: {x: 0, y: 0, z: 0}
   hitEffectRotation: {x: 0, y: 0, z: 0}
