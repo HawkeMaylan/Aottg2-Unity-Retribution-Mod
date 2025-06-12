@@ -7,22 +7,29 @@ using GameManagers;
 using ApplicationManagers;
 using System.Collections;
 
-public class HorseReviveZone : MonoBehaviourPunCallbacks
+public class HorseReviveZone : MonoBehaviourPunCallbacks, IPunObservable
 {
     public Collider triggerZone;
     public Vector3 spawnOffset = new Vector3(2f, 0f, 0f);
-    public float promptDuration = 3f;
     public float cooldownDuration = 10f;
     public int maxRespawns = 3;
 
     private Human localHuman;
-    private Coroutine promptCoroutine;
     private string currentPrompt = "";
     private string extraPrompt = "";
     private bool isInside = false;
 
     private float lastRespawnTime = -999f;
     private int respawnsUsed = 0;
+
+    private void Start()
+    {
+        if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("revive_used", out object used))
+            respawnsUsed = (int)used;
+
+        if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("revive_time", out object time))
+            lastRespawnTime = (float)(double)time;
+    }
 
     private void Update()
     {
@@ -46,7 +53,8 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
 
         if (isInside && localHuman != null)
         {
-            float timeSinceLast = Time.time - lastRespawnTime;
+            float timeSinceLast = (float)(PhotonNetwork.Time - lastRespawnTime);
+
             int remaining = maxRespawns - respawnsUsed;
 
             if (remaining <= 0)
@@ -103,24 +111,29 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient) return;
         if (respawnsUsed >= maxRespawns) return;
 
-        float timeSinceLast = Time.time - lastRespawnTime;
+        float timeSinceLast = (float)(PhotonNetwork.Time - lastRespawnTime);
         if (timeSinceLast < cooldownDuration) return;
 
         Player target = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
         if (target != null)
         {
             respawnsUsed++;
-            lastRespawnTime = Time.time;
-
-            // Broadcast updated state to all clients
-            photonView.RPC(nameof(RPC_UpdateReviveState), RpcTarget.All, respawnsUsed, lastRespawnTime);
+            lastRespawnTime = (float)PhotonNetwork.Time;
 
             Vector3 spawnPosition = position + spawnOffset;
             GameObject horseObj = PhotonNetwork.Instantiate("Characters/Horse/Prefabs/Horse", spawnPosition, Quaternion.identity);
             PhotonView horseView = horseObj.GetComponent<PhotonView>();
             horseView.TransferOwnership(target);
+
             photonView.RPC(nameof(RPC_ConfirmHorseRespawn), target, horseView.ViewID);
             StartCoroutine(EnsureHorseOwnershipAndLink(horseView, actorNumber));
+
+            ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable
+            {
+                { "revive_used", respawnsUsed },
+                { "revive_time", lastRespawnTime }
+            };
+            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
         }
     }
 
@@ -134,16 +147,8 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
             if (horse != null)
             {
                 Debug.Log("[HorseReviveZone] Horse confirmed and owned.");
-                // Optionally auto-mount or link here
             }
         }
-    }
-
-    [PunRPC]
-    private void RPC_UpdateReviveState(int used, float respawnTime)
-    {
-        respawnsUsed = used;
-        lastRespawnTime = respawnTime;
     }
 
     private IEnumerator EnsureHorseOwnershipAndLink(PhotonView horseView, int actorNumber)
@@ -177,11 +182,6 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
     {
         currentPrompt = "";
         extraPrompt = "";
-        if (promptCoroutine != null)
-        {
-            StopCoroutine(promptCoroutine);
-            promptCoroutine = null;
-        }
     }
 
     private void OnGUI()
@@ -207,6 +207,20 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
 
             if (!string.IsNullOrEmpty(extraPrompt))
                 GUI.Label(new Rect(labelX, 85, labelWidth, labelHeight), extraPrompt, style);
+        }
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting && PhotonNetwork.IsMasterClient)
+        {
+            stream.SendNext(respawnsUsed);
+            stream.SendNext(lastRespawnTime);
+        }
+        else if (stream.IsReading)
+        {
+            respawnsUsed = (int)stream.ReceiveNext();
+            lastRespawnTime = (float)stream.ReceiveNext();
         }
     }
 }
