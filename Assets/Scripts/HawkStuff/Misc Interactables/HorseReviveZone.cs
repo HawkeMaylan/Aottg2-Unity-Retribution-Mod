@@ -106,13 +106,26 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
         double timeSinceLast = PhotonNetwork.Time - lastRespawnTime;
         if (timeSinceLast < cooldownDuration) return;
 
+        // Try to find the Human for this actorNumber
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human.photonView.Owner != null && human.photonView.Owner.ActorNumber == actorNumber)
+            {
+                // Destroy current horse if it exists
+                if (human.Horse != null && human.Horse.photonView != null)
+                {
+                    PhotonNetwork.Destroy(human.Horse.gameObject);
+                }
+                break;
+            }
+        }
+
         Player target = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
         if (target != null)
         {
             respawnsUsed++;
             lastRespawnTime = PhotonNetwork.Time;
 
-            // Sync cooldown + usage to all
             photonView.RPC(nameof(RPC_UpdateReviveState), RpcTarget.All, respawnsUsed, lastRespawnTime);
 
             Vector3 spawnPosition = position + spawnOffset;
