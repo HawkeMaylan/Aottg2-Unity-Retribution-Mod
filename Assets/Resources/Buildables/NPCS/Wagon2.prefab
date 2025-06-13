@@ -267,14 +267,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33e1839197d7ace4880e4856fbd90c79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 3
   waypoints:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   waitTimeAtWaypoint: 3
-  rotationSpeed: 5
+  rotationSpeed: 1
   rotationOffsetEuler: {x: 0, y: 0, z: 0}
+  targetAnimator: {fileID: 6736749461127815132}
+  moveBoolName: IsMoving
 --- !u!65 &2370400619070859699
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -328,8 +330,8 @@ MonoBehaviour:
   healthBarScale: {x: 12, y: 2, z: 12}
   hitCooldown: 0.2
   flatDamageFromUnknown: 100
-  hitEffectPrefab: {fileID: 0}
-  hitEffectOffset: {x: 0, y: 0, z: 0}
+  hitEffectPrefab: {fileID: 8133246511525014426, guid: 3ea5cddfd5a68994cab92d81cc45754e, type: 3}
+  hitEffectOffset: {x: 0, y: 3, z: 0}
   hitEffectRotation: {x: 0, y: 0, z: 0}
   deathEffectPrefab: {fileID: 0}
   deathEffectOffset: {x: 0, y: 0, z: 0}
