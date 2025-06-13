@@ -170,7 +170,7 @@ GameObject:
   - component: {fileID: 5559020637181832613}
   m_Layer: 23
   m_Name: Side_1
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -260,7 +260,7 @@ GameObject:
   - component: {fileID: 2688480703017018711}
   m_Layer: 23
   m_Name: Wagon2
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -331,7 +331,11 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  waitTimeAtWaypoint: 3
+  waitTimeAtWaypoint: 1
+  loopPath: 1
+  finalWaitTime: 3
+  pingPongPath: 1
+  randomOrderPath: 0
   rotationSpeed: 1
   rotationOffsetEuler: {x: 0, y: 0, z: 0}
   targetAnimator: {fileID: 6736749461127815132}
@@ -339,7 +343,7 @@ MonoBehaviour:
   slopeRaycastDistance: 1.5
   groundMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8388608
   stuckSpeedThreshold: 0.2
   stuckTimeBeforeJump: 2
   jumpForce: 5
@@ -378,8 +382,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entityName: Escort Wagon
-  maxHP: 10000
-  currentHP: 10000
+  maxHP: 5000
+  currentHP: 5000
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -396,7 +400,7 @@ MonoBehaviour:
   textScale: 4
   healthBarScale: {x: 12, y: 2, z: 12}
   hitCooldown: 0.2
-  flatDamageFromUnknown: 100
+  flatDamageFromUnknown: 1000
   hitEffectPrefab: {fileID: 8133246511525014426, guid: 3ea5cddfd5a68994cab92d81cc45754e, type: 3}
   hitEffectOffset: {x: 0, y: 3, z: 0}
   hitEffectRotation: {x: 0, y: 0, z: 0}
@@ -460,7 +464,7 @@ GameObject:
   - component: {fileID: 6736749461127815132}
   m_Layer: 23
   m_Name: Horse
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -650,7 +654,7 @@ GameObject:
   - component: {fileID: 8819267166592336280}
   m_Layer: 23
   m_Name: Side_3
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -996,7 +1000,7 @@ GameObject:
   - component: {fileID: 7028452683634514596}
   m_Layer: 23
   m_Name: Side_4
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1207,7 +1211,7 @@ GameObject:
   - component: {fileID: 2691025192291051194}
   m_Layer: 23
   m_Name: Side_2
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7087,7 +7091,7 @@ GameObject:
   - component: {fileID: 8208266644758391592}
   m_Layer: 23
   m_Name: Side
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7140,7 +7144,7 @@ GameObject:
   - component: {fileID: 6556925210441051491}
   m_Layer: 23
   m_Name: Side
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7387,7 +7391,7 @@ GameObject:
   - component: {fileID: 3097475100666995711}
   m_Layer: 23
   m_Name: Side
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7536,7 +7540,7 @@ GameObject:
   - component: {fileID: 4342204962281570314}
   m_Layer: 23
   m_Name: Side
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

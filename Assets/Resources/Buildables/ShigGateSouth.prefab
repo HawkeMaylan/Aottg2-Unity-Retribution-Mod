@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3329057203283744423}
   m_Layer: 0
   m_Name: InteractSphere
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -73,7 +73,7 @@ GameObject:
   - component: {fileID: 528411375891788329}
   m_Layer: 0
   m_Name: ShigGateSouth
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -106,9 +106,17 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 23
       objectReference: {fileID: 0}
+    - target: {fileID: 123022, guid: 0533b889925d32847940809e0818be59, type: 3}
+      propertyPath: m_TagString
+      value: HookFollow
+      objectReference: {fileID: 0}
     - target: {fileID: 123024, guid: 0533b889925d32847940809e0818be59, type: 3}
       propertyPath: m_Name
       value: ShigGateS2
+      objectReference: {fileID: 0}
+    - target: {fileID: 123024, guid: 0533b889925d32847940809e0818be59, type: 3}
+      propertyPath: m_TagString
+      value: HookFollow
       objectReference: {fileID: 0}
     - target: {fileID: 423024, guid: 0533b889925d32847940809e0818be59, type: 3}
       propertyPath: m_LocalScale.x

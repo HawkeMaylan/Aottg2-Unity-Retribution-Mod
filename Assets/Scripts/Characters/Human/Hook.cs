@@ -372,8 +372,18 @@ namespace Characters
                                     SetHooked(finalHit.point, obj.transform, -1, mapObject.ScriptObject.Id);
                             }
                             else
-                               
-                                SetHooked(finalHit.point, obj.transform.root); 
+                            {
+                                // Only follow if the object has a specific tag
+                                if (obj.CompareTag("HookFollow"))
+                                {
+                                    SetHooked(finalHit.point, obj.transform.root); // Will follow movement
+                                }
+                                else
+                                {
+                                    SetHooked(finalHit.point); // Static hook point
+                                }
+                            }
+
 
                             return;
                         }

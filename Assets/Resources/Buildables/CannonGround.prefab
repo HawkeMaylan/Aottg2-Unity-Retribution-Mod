@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6748738809391093893}
   m_Layer: 31
   m_Name: FirePoint
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 8337667290523175072}
   m_Layer: 31
   m_Name: Barrel
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -79,7 +79,7 @@ GameObject:
   - component: {fileID: 1223366086935870054}
   m_Layer: 31
   m_Name: Model
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -199,7 +199,7 @@ GameObject:
   - component: {fileID: 8143439677222423477}
   m_Layer: 31
   m_Name: End
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -233,7 +233,7 @@ GameObject:
   - component: {fileID: 3507042291727946915}
   m_Layer: 31
   m_Name: Ground cannon1
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -342,7 +342,7 @@ GameObject:
   - component: {fileID: 2064780420139344010}
   m_Layer: 31
   m_Name: CannonGround
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -414,7 +414,6 @@ MonoBehaviour:
   - {fileID: 4543013416111928623}
   - {fileID: 6734433899248431384}
   - {fileID: 1223366086935870054}
-  - {fileID: 0}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -656,6 +655,10 @@ PrefabInstance:
     - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_Layer
       value: 31
+      objectReference: {fileID: 0}
+    - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: m_TagString
+      value: HookFollow
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 5801033945792118813, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}

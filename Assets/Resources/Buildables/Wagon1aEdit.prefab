@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1184271185235650668}
   m_Layer: 23
   m_Name: Axis
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 329281774355813303}
   m_Layer: 23
   m_Name: LeftWheelPivot
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -232,7 +232,7 @@ GameObject:
   - component: {fileID: 9041186036987090055}
   m_Layer: 23
   m_Name: Body
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -270,7 +270,7 @@ GameObject:
   - component: {fileID: 6049297147208685547}
   m_Layer: 23
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -323,7 +323,7 @@ GameObject:
   - component: {fileID: 1500204174918273495}
   m_Layer: 23
   m_Name: Left
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -376,7 +376,7 @@ GameObject:
   - component: {fileID: 95728644016054335}
   m_Layer: 23
   m_Name: RightWheelPivot
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -411,7 +411,7 @@ GameObject:
   - component: {fileID: 4310452643383074075}
   m_Layer: 23
   m_Name: DamageCube
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -513,7 +513,7 @@ GameObject:
   - component: {fileID: 124937138211943033}
   m_Layer: 23
   m_Name: Carriage
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -547,7 +547,7 @@ GameObject:
   - component: {fileID: 9014864536276616517}
   m_Layer: 23
   m_Name: Right
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -712,7 +712,7 @@ GameObject:
   - component: {fileID: 8166951849109919319}
   m_Layer: 0
   m_Name: Wagon1aEdit
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -904,7 +904,7 @@ GameObject:
   - component: {fileID: 6427955528177728945}
   m_Layer: 23
   m_Name: mache
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1006,7 +1006,7 @@ GameObject:
   - component: {fileID: 8225185000113040810}
   m_Layer: 23
   m_Name: Wheels
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1041,7 +1041,7 @@ GameObject:
   - component: {fileID: 554285413112253049}
   m_Layer: 23
   m_Name: Cube (1)
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1094,7 +1094,7 @@ GameObject:
   - component: {fileID: 3093091060668086330}
   m_Layer: 23
   m_Name: Cube (1)
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1147,7 +1147,7 @@ GameObject:
   - component: {fileID: 1886561012975467830}
   m_Layer: 23
   m_Name: Cube (1)
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1200,7 +1200,7 @@ GameObject:
   - component: {fileID: 4102033675322849957}
   m_Layer: 23
   m_Name: Cube (2)
-  m_TagString: Untagged
+  m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1305,6 +1305,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MountSphere_2
       objectReference: {fileID: 0}
+    - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: m_TagString
+      value: HookFollow
+      objectReference: {fileID: 0}
     - target: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_LocalPosition.y
       value: -0.23500001
@@ -1383,6 +1387,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MountSphere
       objectReference: {fileID: 0}
+    - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: m_TagString
+      value: HookFollow
+      objectReference: {fileID: 0}
     - target: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_LocalPosition.y
       value: -0.235
@@ -1460,6 +1468,10 @@ PrefabInstance:
     - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_Name
       value: MountSphere_6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: m_TagString
+      value: HookFollow
       objectReference: {fileID: 0}
     - target: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1551,6 +1563,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MountSphere_4
       objectReference: {fileID: 0}
+    - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: m_TagString
+      value: HookFollow
+      objectReference: {fileID: 0}
     - target: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0.002
@@ -1628,6 +1644,10 @@ PrefabInstance:
     - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_Name
       value: MountSphere_5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: m_TagString
+      value: HookFollow
       objectReference: {fileID: 0}
     - target: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1707,6 +1727,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MountSphere_3
       objectReference: {fileID: 0}
+    - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: m_TagString
+      value: HookFollow
+      objectReference: {fileID: 0}
     - target: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_LocalPosition.y
       value: -0.23500001
@@ -1784,6 +1808,10 @@ PrefabInstance:
     - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_Name
       value: MountSphere_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: m_TagString
+      value: HookFollow
       objectReference: {fileID: 0}
     - target: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_LocalPosition.y
