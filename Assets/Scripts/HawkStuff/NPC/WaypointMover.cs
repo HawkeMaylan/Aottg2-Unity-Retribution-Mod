@@ -15,6 +15,10 @@ public class WaypointMover : MonoBehaviourPun
     public float rotationSpeed = 5f;
     public Vector3 rotationOffsetEuler = Vector3.zero;
 
+    [Header("Animation Settings")]
+    public Animator targetAnimator;
+    public string moveBoolName = "IsMoving";
+
     private int currentIndex = 0;
     private bool isMoving = true;
     private bool isWaiting = false;
@@ -24,7 +28,10 @@ public class WaypointMover : MonoBehaviourPun
     private void Update()
     {
         if (!PhotonNetwork.IsMasterClient || waypoints.Count == 0 || isWaiting || !isMoving)
+        {
+            SetMovingState(false); // not moving
             return;
+        }
 
         Transform target = waypoints[currentIndex];
         Vector3 direction = target.position - transform.position;
@@ -35,16 +42,18 @@ public class WaypointMover : MonoBehaviourPun
             Vector3 moveDir = direction.normalized;
             transform.position += moveDir * moveSpeed * Time.deltaTime;
 
-            // Rotate toward direction + offset
             if (moveDir != Vector3.zero)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(moveDir) * rotationOffset;
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
                 photonView.RPC("SyncTransform", RpcTarget.Others, transform.position, transform.rotation);
             }
+
+            SetMovingState(true);
         }
         else
         {
+            SetMovingState(false);
             StartCoroutine(WaitAtWaypoint());
         }
     }
@@ -52,6 +61,7 @@ public class WaypointMover : MonoBehaviourPun
     private IEnumerator WaitAtWaypoint()
     {
         isWaiting = true;
+        SetMovingState(false);
         yield return new WaitForSeconds(waitTimeAtWaypoint);
         currentIndex++;
         if (currentIndex >= waypoints.Count)
@@ -65,5 +75,11 @@ public class WaypointMover : MonoBehaviourPun
         if (PhotonNetwork.IsMasterClient) return;
         transform.position = pos;
         transform.rotation = rot;
+    }
+
+    private void SetMovingState(bool state)
+    {
+        if (targetAnimator != null && targetAnimator.GetBool(moveBoolName) != state)
+            targetAnimator.SetBool(moveBoolName, state);
     }
 }
