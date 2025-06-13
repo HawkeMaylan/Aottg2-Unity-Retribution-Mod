@@ -363,7 +363,8 @@ namespace Characters
                                     if (HasOffset)
                                         SetHooked(finalHit.point + new Vector3(0f, 0.1f, 0f));  // Try and only add the offset if directly on a flat plane.
                                     else
-                                        SetHooked(finalHit.point);
+                                        SetHooked(finalHit.point, obj.transform.root);
+
                                 }
                                 else if (mapObject.RuntimeCreated)
                                     SetHooked(finalHit.point, obj.transform);
@@ -371,7 +372,9 @@ namespace Characters
                                     SetHooked(finalHit.point, obj.transform, -1, mapObject.ScriptObject.Id);
                             }
                             else
-                                SetHooked(finalHit.point);
+                               
+                                SetHooked(finalHit.point, obj.transform.root); 
+
                             return;
                         }
                     }
