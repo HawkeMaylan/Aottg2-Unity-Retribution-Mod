@@ -46,7 +46,7 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
 
         if (isInside && localHuman != null)
         {
-            float timeSinceLast = (float)(PhotonNetwork.Time - lastRespawnTime);
+            float timeSinceLast = Time.time - lastRespawnTime;
             int remaining = maxRespawns - respawnsUsed;
 
             if (remaining <= 0)
@@ -110,7 +110,7 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
         if (target != null)
         {
             respawnsUsed++;
-            lastRespawnTime = (float)PhotonNetwork.Time;
+            lastRespawnTime = Time.time;
 
             // Broadcast updated state to all clients
             photonView.RPC(nameof(RPC_UpdateReviveState), RpcTarget.All, respawnsUsed, lastRespawnTime);
@@ -134,7 +134,7 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
             if (horse != null)
             {
                 Debug.Log("[HorseReviveZone] Horse confirmed and owned.");
-                
+                // Optionally auto-mount or link here
             }
         }
     }
