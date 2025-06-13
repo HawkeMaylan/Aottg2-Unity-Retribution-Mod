@@ -12,6 +12,12 @@ public class WaypointMover : MonoBehaviourPun
     public List<Transform> waypoints = new List<Transform>();
     public float waitTimeAtWaypoint = 1f;
 
+    [Header("Path Options")]
+    public bool loopPath = false;
+    public float finalWaitTime = 2f;
+    public bool pingPongPath = false;
+    public bool randomOrderPath = false;
+
     [Header("Rotation Settings")]
     public float rotationSpeed = 5f;
     public Vector3 rotationOffsetEuler = Vector3.zero;
@@ -33,6 +39,7 @@ public class WaypointMover : MonoBehaviourPun
     private int currentIndex = 0;
     private bool isMoving = true;
     private bool isWaiting = false;
+    private bool movingForward = true;
 
     private float stuckTimer = 0f;
     private Quaternion rotationOffset => Quaternion.Euler(rotationOffsetEuler);
@@ -67,7 +74,6 @@ public class WaypointMover : MonoBehaviourPun
             MoveWithPhysics(slopeAdjustedDir);
             RotateToward(slopeAdjustedDir);
 
-            // Check for stuck condition
             if (rb.velocity.magnitude < stuckSpeedThreshold)
             {
                 stuckTimer += Time.deltaTime;
@@ -109,11 +115,65 @@ public class WaypointMover : MonoBehaviourPun
     private IEnumerator WaitAtWaypoint()
     {
         isWaiting = true;
-        yield return new WaitForSeconds(waitTimeAtWaypoint);
-        currentIndex++;
-        if (currentIndex >= waypoints.Count)
-            isMoving = false;
+
+        bool isLast = currentIndex == waypoints.Count - 1;
+        float wait = isLast && (loopPath || pingPongPath || randomOrderPath) ? finalWaitTime : waitTimeAtWaypoint;
+        yield return new WaitForSeconds(wait);
+
+        if (randomOrderPath)
+        {
+            currentIndex = GetRandomNextIndex(currentIndex);
+        }
+        else if (pingPongPath)
+        {
+            if (movingForward)
+            {
+                if (currentIndex >= waypoints.Count - 1)
+                {
+                    movingForward = false;
+                    currentIndex--;
+                }
+                else currentIndex++;
+            }
+            else
+            {
+                if (currentIndex <= 0)
+                {
+                    movingForward = true;
+                    currentIndex++;
+                }
+                else currentIndex--;
+            }
+        }
+        else if (loopPath)
+        {
+            if (currentIndex >= waypoints.Count - 1)
+                currentIndex = 0;
+            else
+                currentIndex++;
+        }
+        else
+        {
+            if (currentIndex >= waypoints.Count - 1)
+                isMoving = false;
+            else
+                currentIndex++;
+        }
+
         isWaiting = false;
+    }
+
+    private int GetRandomNextIndex(int excludeIndex)
+    {
+        if (waypoints.Count <= 1) return excludeIndex;
+
+        int newIndex;
+        do
+        {
+            newIndex = Random.Range(0, waypoints.Count);
+        } while (newIndex == excludeIndex); // avoid immediate repeat
+
+        return newIndex;
     }
 
     private void SetMovingState(bool state)
