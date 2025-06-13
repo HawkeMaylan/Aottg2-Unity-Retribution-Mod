@@ -24,10 +24,17 @@ public class WaypointMover : MonoBehaviourPun
     public float slopeRaycastDistance = 1.5f;
     public LayerMask groundMask;
 
+    [Header("Stuck Jump Settings")]
+    public float stuckSpeedThreshold = 0.2f;
+    public float stuckTimeBeforeJump = 2f;
+    public float jumpForce = 5f;
+    public float forwardJumpBoost = 2f;
+
     private int currentIndex = 0;
     private bool isMoving = true;
     private bool isWaiting = false;
 
+    private float stuckTimer = 0f;
     private Quaternion rotationOffset => Quaternion.Euler(rotationOffsetEuler);
     private Rigidbody rb;
 
@@ -55,9 +62,25 @@ public class WaypointMover : MonoBehaviourPun
         if (distance > 0.5f)
         {
             SetMovingState(true);
+
             Vector3 slopeAdjustedDir = GetSlopeAdjustedDirection(direction.normalized);
             MoveWithPhysics(slopeAdjustedDir);
             RotateToward(slopeAdjustedDir);
+
+            // Check for stuck condition
+            if (rb.velocity.magnitude < stuckSpeedThreshold)
+            {
+                stuckTimer += Time.deltaTime;
+                if (stuckTimer >= stuckTimeBeforeJump)
+                {
+                    JumpNudge(slopeAdjustedDir);
+                    stuckTimer = 0f;
+                }
+            }
+            else
+            {
+                stuckTimer = 0f;
+            }
         }
         else
         {
@@ -109,5 +132,11 @@ public class WaypointMover : MonoBehaviourPun
         }
 
         return inputDirection;
+    }
+
+    private void JumpNudge(Vector3 moveDirection)
+    {
+        Vector3 jumpVector = Vector3.up * jumpForce + moveDirection * forwardJumpBoost;
+        rb.AddForce(jumpVector, ForceMode.VelocityChange);
     }
 }
