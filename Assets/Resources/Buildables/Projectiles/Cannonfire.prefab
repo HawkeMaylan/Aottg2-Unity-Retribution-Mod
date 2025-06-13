@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -792643980778937005}
   - component: {fileID: -8109740660816989619}
   - component: {fileID: -7190779652470223556}
+  - component: {fileID: -6924652344743833282}
   m_Layer: 0
   m_Name: Cannonfire
   m_TagString: Untagged
@@ -4912,7 +4913,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 50
-  MaxDistance: 500
+  MaxDistance: 20000
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -5024,3 +5025,27 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!167 &-6924652344743833282
+AudioReverbZone:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235915867927116546}
+  m_Enabled: 1
+  m_MinDistance: 1000
+  m_MaxDistance: 20000
+  m_ReverbPreset: 1
+  m_Room: -1000
+  m_RoomHF: -100
+  m_DecayTime: 1.49
+  m_DecayHFRatio: 0.83
+  m_Reflections: -2602
+  m_ReflectionsDelay: 0.007
+  m_Reverb: 200
+  m_ReverbDelay: 0.011
+  m_HFReference: 5000
+  m_Diffusion: 100
+  m_Density: 100
+  m_LFReference: 250
+  m_RoomLF: 0
