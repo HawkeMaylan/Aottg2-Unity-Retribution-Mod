@@ -21,7 +21,7 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
     private string extraPrompt = "";
     private bool isInside = false;
 
-    private float lastRespawnTime = -999f;
+    private double lastRespawnTime = -999f;
     private int respawnsUsed = 0;
 
     private void Update()
@@ -46,7 +46,7 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
 
         if (isInside && localHuman != null)
         {
-            float timeSinceLast = Time.time - lastRespawnTime;
+            double timeSinceLast = PhotonNetwork.Time - lastRespawnTime;
             int remaining = maxRespawns - respawnsUsed;
 
             if (remaining <= 0)
@@ -60,7 +60,7 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
 
             if (timeSinceLast < cooldownDuration)
             {
-                float timeLeft = Mathf.Ceil(cooldownDuration - timeSinceLast);
+                float timeLeft = Mathf.Ceil((float)(cooldownDuration - timeSinceLast));
                 currentPrompt = $"New Horse Being Prepared ({timeLeft}s)";
             }
             else
@@ -103,16 +103,16 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient) return;
         if (respawnsUsed >= maxRespawns) return;
 
-        float timeSinceLast = Time.time - lastRespawnTime;
+        double timeSinceLast = PhotonNetwork.Time - lastRespawnTime;
         if (timeSinceLast < cooldownDuration) return;
 
         Player target = PhotonNetwork.CurrentRoom.GetPlayer(actorNumber);
         if (target != null)
         {
             respawnsUsed++;
-            lastRespawnTime = Time.time;
+            lastRespawnTime = PhotonNetwork.Time;
 
-            // Broadcast updated state to all clients
+            // Sync cooldown + usage to all
             photonView.RPC(nameof(RPC_UpdateReviveState), RpcTarget.All, respawnsUsed, lastRespawnTime);
 
             Vector3 spawnPosition = position + spawnOffset;
@@ -134,13 +134,12 @@ public class HorseReviveZone : MonoBehaviourPunCallbacks
             if (horse != null)
             {
                 Debug.Log("[HorseReviveZone] Horse confirmed and owned.");
-                // Optionally auto-mount or link here
             }
         }
     }
 
     [PunRPC]
-    private void RPC_UpdateReviveState(int used, float respawnTime)
+    private void RPC_UpdateReviveState(int used, double respawnTime)
     {
         respawnsUsed = used;
         lastRespawnTime = respawnTime;
