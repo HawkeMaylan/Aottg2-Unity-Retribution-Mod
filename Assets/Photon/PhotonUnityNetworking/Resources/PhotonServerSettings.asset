@@ -162,6 +162,7 @@ MonoBehaviour:
   - RPC_PlayFiringEffects
   - RPC_ConfirmHorseRespawn
   - RPC_UpdateReviveState
+  - SyncTransform
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
