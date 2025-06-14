@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8567929059875197820}
   - component: {fileID: 1157997306785597308}
   - component: {fileID: 2225727139346268621}
+  - component: {fileID: 356668933606302805}
   m_Layer: 23
   m_Name: WorkerLogDrop
   m_TagString: Untagged
@@ -106,6 +107,29 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 0.4, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &356668933606302805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2150116832296065822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 0
+  ObservedComponents:
+  - {fileID: 0}
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &5337017147300540417
 GameObject:
   m_ObjectHideFlags: 0

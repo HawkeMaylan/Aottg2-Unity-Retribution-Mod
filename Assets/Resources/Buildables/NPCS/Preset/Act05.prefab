@@ -132,6 +132,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 13674860, guid: e86172859cc30704c9633099e6cc0531, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 13674860, guid: e86172859cc30704c9633099e6cc0531, type: 3}
+      propertyPath: m_IncludeLayers.m_Bits
+      value: 4294967295
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -169,8 +177,8 @@ MonoBehaviour:
   team: Neutral
   entityForm: 0
   showKillFeed: 1
-  useTextDisplay: 1
-  use3DHealthBar: 1
+  useTextDisplay: 0
+  use3DHealthBar: 0
   destroyOnDeath: 1
   onlyShowUIWhenDamaged: 0
   hideUIDistance: 50
@@ -908,7 +916,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Marlet
   maxHP: 1
-  currentHP: -1
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -1057,7 +1065,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Sarah
   maxHP: 1
-  currentHP: -1
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -1232,7 +1240,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Tina
   maxHP: 1
-  currentHP: -1
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -1315,9 +1323,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 120522, guid: bb89e51e6c796d54cba4f2491238cd00, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 6958119359212908916}
-    - targetCorrespondingSourceObject: {fileID: 120522, guid: bb89e51e6c796d54cba4f2491238cd00, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 1312266604766894372}
     - targetCorrespondingSourceObject: {fileID: 120522, guid: bb89e51e6c796d54cba4f2491238cd00, type: 3}
       insertIndex: -1
@@ -1325,6 +1330,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 120522, guid: bb89e51e6c796d54cba4f2491238cd00, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5021703748860770655}
+    - targetCorrespondingSourceObject: {fileID: 120522, guid: bb89e51e6c796d54cba4f2491238cd00, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8105824866678115706}
   m_SourcePrefab: {fileID: 100100000, guid: bb89e51e6c796d54cba4f2491238cd00, type: 3}
 --- !u!4 &4367751060082351701 stripped
 Transform:
@@ -1336,27 +1344,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 120522, guid: bb89e51e6c796d54cba4f2491238cd00, type: 3}
   m_PrefabInstance: {fileID: 4367751060082472191}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &6958119359212908916
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4367751060082450997}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 2, z: 1}
-  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &1312266604766894372
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1375,8 +1362,8 @@ MonoBehaviour:
   team: Neutral
   entityForm: 0
   showKillFeed: 1
-  useTextDisplay: 1
-  use3DHealthBar: 1
+  useTextDisplay: 0
+  use3DHealthBar: 0
   destroyOnDeath: 1
   onlyShowUIWhenDamaged: 0
   hideUIDistance: 50
@@ -1439,6 +1426,27 @@ MonoBehaviour:
   textOffset: {x: 0, y: 2, z: 0}
   textScale: 1
   referenceCamera: {fileID: 0}
+--- !u!65 &8105824866678115706
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4367751060082450997}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 2, z: 1}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &4421129667750196883
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2181,7 +2189,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Sarah
   maxHP: 1
-  currentHP: -1
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -2373,9 +2381,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 174526, guid: bd0ac019884abd24889d63e00e9d54ce, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 23309254123547481}
-    - targetCorrespondingSourceObject: {fileID: 174526, guid: bd0ac019884abd24889d63e00e9d54ce, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 7247598163293398253}
     - targetCorrespondingSourceObject: {fileID: 174526, guid: bd0ac019884abd24889d63e00e9d54ce, type: 3}
       insertIndex: -1
@@ -2383,6 +2388,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 174526, guid: bd0ac019884abd24889d63e00e9d54ce, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2687340083769677529}
+    - targetCorrespondingSourceObject: {fileID: 174526, guid: bd0ac019884abd24889d63e00e9d54ce, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3177316157584683359}
   m_SourcePrefab: {fileID: 100100000, guid: bd0ac019884abd24889d63e00e9d54ce, type: 3}
 --- !u!4 &5714493672854166588 stripped
 Transform:
@@ -2394,27 +2402,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 174526, guid: bd0ac019884abd24889d63e00e9d54ce, type: 3}
   m_PrefabInstance: {fileID: 5714493672854626722}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &23309254123547481
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5714493672854456348}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 2, z: 1}
-  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &7247598163293398253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2433,8 +2420,8 @@ MonoBehaviour:
   team: Neutral
   entityForm: 0
   showKillFeed: 1
-  useTextDisplay: 1
-  use3DHealthBar: 1
+  useTextDisplay: 0
+  use3DHealthBar: 0
   destroyOnDeath: 1
   onlyShowUIWhenDamaged: 0
   hideUIDistance: 50
@@ -2497,6 +2484,27 @@ MonoBehaviour:
   textOffset: {x: 0, y: 2, z: 0}
   textScale: 1
   referenceCamera: {fileID: 0}
+--- !u!65 &3177316157584683359
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5714493672854456348}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &5785072455981142596
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2605,7 +2613,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Tina
   maxHP: 1
-  currentHP: -1
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -2929,7 +2937,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Marlet
   maxHP: 1
-  currentHP: -1
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -3069,7 +3077,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Tina
   maxHP: 1
-  currentHP: -1
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -3245,7 +3253,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Marlet
   maxHP: 1
-  currentHP: -1
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -3388,7 +3396,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Larold
   maxHP: 5
-  currentHP: 5
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -3520,9 +3528,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 189140, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 4209559835881629150}
-    - targetCorrespondingSourceObject: {fileID: 189140, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 9113390881317329787}
     - targetCorrespondingSourceObject: {fileID: 189140, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
       insertIndex: -1
@@ -3530,33 +3535,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 189140, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5313024670049538630}
+    - targetCorrespondingSourceObject: {fileID: 189140, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 357092505193154188}
   m_SourcePrefab: {fileID: 100100000, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
 --- !u!1 &7598497452375752933 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 189140, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
   m_PrefabInstance: {fileID: 7598497452375908913}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &4209559835881629150
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7598497452375752933}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &9113390881317329787
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3575,8 +3562,8 @@ MonoBehaviour:
   team: Neutral
   entityForm: 0
   showKillFeed: 1
-  useTextDisplay: 1
-  use3DHealthBar: 1
+  useTextDisplay: 0
+  use3DHealthBar: 0
   destroyOnDeath: 1
   onlyShowUIWhenDamaged: 0
   hideUIDistance: 50
@@ -3639,6 +3626,27 @@ MonoBehaviour:
   textOffset: {x: 0, y: 2, z: 0}
   textScale: 1
   referenceCamera: {fileID: 0}
+--- !u!65 &357092505193154188
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7598497452375752933}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!4 &7598497452375987333 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 489140, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
@@ -3948,7 +3956,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Joe
   maxHP: 1
-  currentHP: -1
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -4231,7 +4239,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Joe
   maxHP: 1
-  currentHP: -1
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
@@ -4379,7 +4387,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityName: Harold
   maxHP: 5
-  currentHP: 5
+  currentHP: 1
   team: Neutral
   entityForm: 0
   showKillFeed: 1
