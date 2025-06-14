@@ -6144,7 +6144,7 @@ MonoBehaviour:
       customPreviewImage: {fileID: 0}
     - name: pine1 Small
       settings:
-        brushRadius: 0.01
+        brushRadius: 370
         brushSpacing: 25.1
         brushOverlapCheckMode: 1
         brushOverlapDistance: 90
@@ -6454,7 +6454,7 @@ MonoBehaviour:
       - gameObject: {fileID: 0}
       - gameObject: {fileID: 0}
       selectedSlot: 0
-      selected: 0
+      selected: 1
       colorTag: 0
       customPreviewImage: {fileID: 0}
     - name: pine1Optimized
@@ -6769,7 +6769,7 @@ MonoBehaviour:
       - gameObject: {fileID: 0}
       - gameObject: {fileID: 0}
       selectedSlot: 0
-      selected: 1
+      selected: 0
       colorTag: 0
       customPreviewImage: {fileID: 0}
     - name: 'pineMedium Optimized '
