@@ -16772,6 +16772,7 @@ MonoBehaviour:
   - Wagon2
   - WallCannon
   - CannonGround
+  - WorkerLog
 --- !u!1 &4310715724008364727
 GameObject:
   m_ObjectHideFlags: 0
