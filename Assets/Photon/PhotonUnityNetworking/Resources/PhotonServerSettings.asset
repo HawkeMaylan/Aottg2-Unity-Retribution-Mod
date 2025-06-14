@@ -163,6 +163,7 @@ MonoBehaviour:
   - RPC_ConfirmHorseRespawn
   - RPC_UpdateReviveState
   - SyncTransform
+  - RPC_ShowDialogue
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
