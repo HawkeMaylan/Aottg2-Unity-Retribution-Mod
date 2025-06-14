@@ -7,106 +7,89 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class NpcHumanSetup : MonoBehaviour
 {
+    [Header("References")]
+    public Renderer chestRenderer;
+    public Renderer legRenderer;
+    public Renderer headRenderer;
+    public Renderer hairRenderer;
+    public GameObject hairObjectRoot;
+
     [Header("Editor Tools")]
     public bool randomizeOnStart = false;
 
     private JSONNode costumeInfo;
     private JSONNode hairInfo;
-    private Transform headBone, chestBone, legBone;
-
-    private GameObject currentHair, currentBody, currentLegs, currentHead;
 
     private void Start()
     {
 #if UNITY_EDITOR
         if (!Application.isPlaying && randomizeOnStart)
         {
-            RandomizeAndSetup();
+            ApplyRandomPresetToAssignedParts();
         }
 #endif
     }
 
-    [ContextMenu("Randomize Appearance")]
-    public void RandomizeAndSetup()
+    [ContextMenu("Apply Random Costume To Body Parts")]
+    public void ApplyRandomPresetToAssignedParts()
     {
         LoadCostumeInfo();
-        FindBones();
-
         if (costumeInfo == null || hairInfo == null)
         {
             Debug.LogWarning("Costume JSON not loaded.");
             return;
         }
 
-        ClearOldParts();
-
         System.Random rand = new System.Random();
-
-        // Random sex
         bool male = rand.Next(0, 2) == 0;
         var costumeArray = costumeInfo[male ? "Male" : "Female"].AsArray;
-        var hairArray = hairInfo[male ? "Male" : "Female"].AsArray;
-
-        // Select costume and hair index
         int costumeIndex = rand.Next(0, costumeArray.Count);
+        var costume = costumeArray[costumeIndex];
+
+        var hairArray = hairInfo[male ? "Male" : "Female"].AsArray;
         int hairIndex = rand.Next(0, hairArray.Count);
+        var hair = hairArray[hairIndex];
 
-        // Apply body
-        currentBody = transform.Find("character_chest")?.gameObject;
-        if (currentBody != null)
+        // Apply chest textures
+        ApplyTexture(chestRenderer, costume["_main_tex"], "_MainTex");
+        ApplyTexture(chestRenderer, costume["_main_tex_mask"], "_MaskTex");
+        ApplyTexture(chestRenderer, costume["_color_tex"], "_ColorTex");
+
+        // Apply leg texture
+        ApplyTexture(legRenderer, costume["_pants_tex"], "_MainTex");
+
+        // Apply skin to head
+        ApplyTexture(headRenderer, "skin", "_MainTex");
+
+        // Apply hair mesh (assumes hair mesh prefab already in hairObjectRoot)
+        if (hairObjectRoot != null && hairRenderer != null)
         {
-            var mat = CreateColoredMaterial();
-            var renderer = currentBody.GetComponent<Renderer>();
-            if (renderer != null) renderer.material = mat;
+            string hairTex = hair["Texture"];
+            ApplyTexture(hairRenderer, hairTex, "_MainTex");
         }
+    }
 
-        // Apply legs
-        currentLegs = transform.Find("character_leg")?.gameObject;
-        if (currentLegs != null)
+    private void ApplyTexture(Renderer renderer, string textureName, string propName)
+    {
+        if (renderer == null || string.IsNullOrEmpty(textureName)) return;
+        Texture tex = Resources.Load<Texture>("Textures/" + textureName);
+        if (tex != null)
         {
-            var mat = CreateColoredMaterial();
-            var renderer = currentLegs.GetComponent<Renderer>();
-            if (renderer != null) renderer.material = mat;
+            if (renderer.sharedMaterial == null)
+                renderer.sharedMaterial = new Material(Shader.Find("Standard"));
+
+            renderer.sharedMaterial.shader = Shader.Find("Standard");
+            renderer.sharedMaterial.SetTexture(propName, tex);
         }
-
-        // Apply head
-        currentHead = transform.Find("char_head")?.gameObject;
-        if (currentHead != null)
+        else
         {
-            var mat = CreateColoredMaterial();
-            var renderer = currentHead.GetComponent<Renderer>();
-            if (renderer != null) renderer.material = mat;
-        }
-
-        // Spawn hair
-        var hairJson = hairArray[hairIndex];
-        string hairMesh = hairJson["Texture"];
-        if (!string.IsNullOrEmpty(hairMesh))
-        {
-            GameObject hairPrefab = Resources.Load<GameObject>("Characters/" + hairMesh);
-            if (hairPrefab != null && headBone != null)
-            {
-                currentHair = Instantiate(hairPrefab);
-                currentHair.transform.SetParent(headBone, false);
-                currentHair.transform.localPosition = Vector3.zero;
-                currentHair.transform.localRotation = Quaternion.identity;
-
-                var mat = CreateColoredMaterial();
-                Renderer r = currentHair.GetComponentInChildren<Renderer>();
-                if (r != null)
-                    r.material = mat;
-            }
-            else
-            {
-                Debug.LogWarning("Hair prefab not found: " + hairMesh);
-            }
+            Debug.LogWarning("Missing texture: " + textureName);
         }
     }
 
     private void LoadCostumeInfo()
     {
         TextAsset jsonAsset = Resources.Load<TextAsset>("Data/Info/CostumeInfo");
-
         if (jsonAsset != null)
         {
             var root = JSON.Parse(jsonAsset.text);
@@ -115,31 +98,7 @@ public class NpcHumanSetup : MonoBehaviour
         }
         else
         {
-            Debug.LogError("CostumeInfo.json not found in Resources/Info!");
+            Debug.LogError("CostumeInfo.json not found! Expected at Resources/Data/Info/CostumeInfo.json");
         }
-    }
-
-    private void FindBones()
-    {
-        headBone = transform.Find("Armature/Core/Controller_Body/hip/spine/chest/neck/head");
-        chestBone = transform.Find("Armature/Core/Controller_Body/hip/spine/chest");
-        legBone = transform.Find("character_leg");
-    }
-
-    private void ClearOldParts()
-    {
-        if (currentHair != null) DestroyImmediate(currentHair);
-    }
-
-    private Material CreateColoredMaterial()
-    {
-        var mat = new Material(Shader.Find("Standard"));
-        mat.color = RandomColor();
-        return mat;
-    }
-
-    private Color RandomColor()
-    {
-        return UnityEngine.Random.ColorHSV(0f, 1f, 0.6f, 1f, 0.6f, 1f);
     }
 }

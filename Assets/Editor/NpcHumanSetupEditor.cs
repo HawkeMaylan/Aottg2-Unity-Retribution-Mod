@@ -12,7 +12,7 @@ public class NpcHumanSetupEditor : Editor
         NpcHumanSetup npc = (NpcHumanSetup)target;
         if (GUILayout.Button("Randomize Appearance"))
         {
-            npc.RandomizeAndSetup();
+            npc.ApplyRandomPresetToAssignedParts();
             EditorUtility.SetDirty(npc);
         }
     }
