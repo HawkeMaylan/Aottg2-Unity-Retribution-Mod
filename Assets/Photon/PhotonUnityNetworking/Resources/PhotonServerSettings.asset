@@ -164,6 +164,9 @@ MonoBehaviour:
   - RPC_UpdateReviveState
   - SyncTransform
   - RPC_ShowDialogue
+  - UpdateHealthRPC
+  - RequestHitRPC
+  - RequestDestroyRPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

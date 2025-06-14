@@ -4,7 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 
 [RequireComponent(typeof(PhotonView), typeof(Rigidbody), typeof(Collider))]
-public class WaypointMover : MonoBehaviourPun
+public class WaypointMover : MonoBehaviourPun, IPunObservable
 {
     [Header("Movement Settings")]
     public float moveForce = 50f;
@@ -20,7 +20,6 @@ public class WaypointMover : MonoBehaviourPun
 
     [Header("Rotation Settings")]
     public float rotationSpeed = 5f;
-    public Vector3 rotationOffsetEuler = Vector3.zero;
 
     [Header("Animation Settings")]
     public Animator targetAnimator;
@@ -42,8 +41,11 @@ public class WaypointMover : MonoBehaviourPun
     private bool movingForward = true;
 
     private float stuckTimer = 0f;
-    private Quaternion rotationOffset => Quaternion.Euler(rotationOffsetEuler);
     private Rigidbody rb;
+    private Vector3 lastPosition;
+
+    // Animation sync
+    private bool networkIsMoving;
 
     private void Awake()
     {
@@ -51,11 +53,29 @@ public class WaypointMover : MonoBehaviourPun
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        lastPosition = transform.position;
     }
 
     private void Update()
     {
-        if (!PhotonNetwork.IsMasterClient || waypoints.Count == 0 || isWaiting || !isMoving)
+        // Everyone rotates locally based on movement
+        RotateTowardMovement();
+
+        if (!photonView.IsMine)
+        {
+            if (targetAnimator != null)
+                targetAnimator.SetBool(moveBoolName, networkIsMoving);
+
+            return;
+        }
+
+        RunMovementLogic();
+    }
+
+    private void RunMovementLogic()
+    {
+        if (waypoints.Count == 0 || isWaiting || !isMoving)
         {
             SetMovingState(false);
             return;
@@ -72,7 +92,6 @@ public class WaypointMover : MonoBehaviourPun
 
             Vector3 slopeAdjustedDir = GetSlopeAdjustedDirection(direction.normalized);
             MoveWithPhysics(slopeAdjustedDir);
-            RotateToward(slopeAdjustedDir);
 
             if (rb.velocity.magnitude < stuckSpeedThreshold)
             {
@@ -95,20 +114,25 @@ public class WaypointMover : MonoBehaviourPun
         }
     }
 
+    private void RotateTowardMovement()
+    {
+        Vector3 moveDir = transform.position - lastPosition;
+        moveDir.y = 0f;
+
+        if (moveDir.sqrMagnitude > 0.0001f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(moveDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+        }
+
+        lastPosition = transform.position;
+    }
+
     private void MoveWithPhysics(Vector3 moveDir)
     {
         if (rb.velocity.magnitude < maxSpeed)
         {
             rb.AddForce(moveDir * moveForce, ForceMode.Acceleration);
-        }
-    }
-
-    private void RotateToward(Vector3 direction)
-    {
-        if (direction.sqrMagnitude > 0.01f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(direction) * rotationOffset;
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
     }
 
@@ -147,10 +171,7 @@ public class WaypointMover : MonoBehaviourPun
         }
         else if (loopPath)
         {
-            if (currentIndex >= waypoints.Count - 1)
-                currentIndex = 0;
-            else
-                currentIndex++;
+            currentIndex = (currentIndex + 1) % waypoints.Count;
         }
         else
         {
@@ -171,7 +192,7 @@ public class WaypointMover : MonoBehaviourPun
         do
         {
             newIndex = Random.Range(0, waypoints.Count);
-        } while (newIndex == excludeIndex); // avoid immediate repeat
+        } while (newIndex == excludeIndex);
 
         return newIndex;
     }
@@ -198,5 +219,17 @@ public class WaypointMover : MonoBehaviourPun
     {
         Vector3 jumpVector = Vector3.up * jumpForce + moveDirection * forwardJumpBoost;
         rb.AddForce(jumpVector, ForceMode.VelocityChange);
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(targetAnimator != null && targetAnimator.GetBool(moveBoolName));
+        }
+        else
+        {
+            networkIsMoving = (bool)stream.ReceiveNext();
+        }
     }
 }

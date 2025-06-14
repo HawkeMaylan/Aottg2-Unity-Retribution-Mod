@@ -73,7 +73,7 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
+  Synchronization: 1
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents: []
@@ -446,7 +446,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4780327227482508668, guid: a7b0592c9c2a8094ba343568111ad182, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2398.6
+      value: -2384.6
       objectReference: {fileID: 0}
     - target: {fileID: 4780327227482508668, guid: a7b0592c9c2a8094ba343568111ad182, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1517,6 +1517,30 @@ PrefabInstance:
       propertyPath: sceneViewId
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 544669190839618336, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: Synchronization
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 544669190839618336, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: observableSearch
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 544669190839618336, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: ObservedComponents.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 544669190839618336, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: 'ObservedComponents.Array.data[0]'
+      value: 
+      objectReference: {fileID: 3300603472070923110}
+    - target: {fileID: 544669190839618336, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: 'ObservedComponents.Array.data[1]'
+      value: 
+      objectReference: {fileID: 3300603472070923110}
+    - target: {fileID: 1194891361862919669, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: m_SynchronizeAngularVelocity
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2130735680717980818, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
       propertyPath: m_TagString
       value: HookFollow
@@ -1537,9 +1561,45 @@ PrefabInstance:
       propertyPath: deathEffectPrefab
       value: 
       objectReference: {fileID: 196516, guid: ca91ecf75c5b3964f817d3ab2bed38d9, type: 3}
+    - target: {fileID: 3641604127038770371, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: m_Interpolate
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4004447695540423181, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: m_AABB.m_Center.y
+      value: -0.021624323
+      objectReference: {fileID: 0}
+    - target: {fileID: 4004447695540423181, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: m_AABB.m_Center.z
+      value: 0.0000031876843
+      objectReference: {fileID: 0}
+    - target: {fileID: 4004447695540423181, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: m_AABB.m_Extent.y
+      value: 0.03162432
+      objectReference: {fileID: 0}
+    - target: {fileID: 4004447695540423181, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 0.0001851842
+      objectReference: {fileID: 0}
     - target: {fileID: 4084320050817456930, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
       propertyPath: m_TagString
       value: HookFollow
+      objectReference: {fileID: 0}
+    - target: {fileID: 4210226743546170024, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: m_AABB.m_Center.y
+      value: -0.021625236
+      objectReference: {fileID: 0}
+    - target: {fileID: 4210226743546170024, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: m_AABB.m_Center.z
+      value: 0.000003024601
+      objectReference: {fileID: 0}
+    - target: {fileID: 4210226743546170024, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: m_AABB.m_Extent.y
+      value: 0.031625234
+      objectReference: {fileID: 0}
+    - target: {fileID: 4210226743546170024, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 0.00018525765
       objectReference: {fileID: 0}
     - target: {fileID: 4849444181819463409, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
       propertyPath: m_Name
@@ -1653,6 +1713,17 @@ PrefabInstance:
       addedObject: {fileID: 4327500276786462850}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+--- !u!114 &3300603472070923110 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1194891361862919669, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
+  m_PrefabInstance: {fileID: 4421129667750196883}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &7829358962337849915 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5907731486900737192, guid: b402784ffa28bec45b5258f2c762dfa4, type: 3}
@@ -1702,6 +1773,26 @@ PrefabInstance:
       propertyPath: m_IncludeLayers.m_Bits
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1608641702914383530, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: m_AABB.m_Center.y
+      value: -0.021625236
+      objectReference: {fileID: 0}
+    - target: {fileID: 1608641702914383530, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: m_AABB.m_Center.z
+      value: 0.000003024601
+      objectReference: {fileID: 0}
+    - target: {fileID: 1608641702914383530, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: m_AABB.m_Extent.y
+      value: 0.031625234
+      objectReference: {fileID: 0}
+    - target: {fileID: 1608641702914383530, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 0.00018525765
+      objectReference: {fileID: 0}
+    - target: {fileID: 1894053927224617217, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: m_SynchronizeAngularVelocity
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2356435430567840517, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
       propertyPath: m_TagString
       value: HookFollow
@@ -1726,6 +1817,22 @@ PrefabInstance:
       propertyPath: sceneViewId
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4614928775820342016, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: m_AABB.m_Center.y
+      value: -0.021624323
+      objectReference: {fileID: 0}
+    - target: {fileID: 4614928775820342016, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: m_AABB.m_Center.z
+      value: 0.0000031876843
+      objectReference: {fileID: 0}
+    - target: {fileID: 4614928775820342016, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: m_AABB.m_Extent.y
+      value: 0.03162432
+      objectReference: {fileID: 0}
+    - target: {fileID: 4614928775820342016, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 0.0001851842
+      objectReference: {fileID: 0}
     - target: {fileID: 5363802600273789774, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
       propertyPath: m_TagString
       value: HookFollow
@@ -1738,6 +1845,10 @@ PrefabInstance:
       propertyPath: deathEffectPrefab
       value: 
       objectReference: {fileID: 196516, guid: ca91ecf75c5b3964f817d3ab2bed38d9, type: 3}
+    - target: {fileID: 7013145705405283228, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: m_Interpolate
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7676209350833182720, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
       propertyPath: m_TagString
       value: HookFollow
@@ -1746,13 +1857,33 @@ PrefabInstance:
       propertyPath: sceneViewId
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7756048918245764778, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: Synchronization
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7756048918245764778, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: observableSearch
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7756048918245764778, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: ObservedComponents.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7756048918245764778, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: 'ObservedComponents.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2672163203956483247}
+    - target: {fileID: 7756048918245764778, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+      propertyPath: 'ObservedComponents.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2672163203956483247}
     - target: {fileID: 7817150428642109145, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
       propertyPath: m_TagString
       value: HookFollow
       objectReference: {fileID: 0}
     - target: {fileID: 8040941960241374167, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2405.8
+      value: -2399.42
       objectReference: {fileID: 0}
     - target: {fileID: 8040941960241374167, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1814,6 +1945,17 @@ PrefabInstance:
       addedObject: {fileID: 5785072455980686780}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+--- !u!114 &2672163203956483247 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1894053927224617217, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
+  m_PrefabInstance: {fileID: 4565636565633207726}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &5821830885953138297 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8040941960241374167, guid: 354ad1a2625cfe641bbfadd180990eb2, type: 3}
@@ -2789,7 +2931,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1538989306132555931, guid: eb680d07f08eeb64f962c37a21da18a9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2400.78
+      value: -2393.79
       objectReference: {fileID: 0}
     - target: {fileID: 1538989306132555931, guid: eb680d07f08eeb64f962c37a21da18a9, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4147,6 +4289,26 @@ PrefabInstance:
       propertyPath: sceneViewId
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 650801037194351665, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: Synchronization
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 650801037194351665, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: observableSearch
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 650801037194351665, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: ObservedComponents.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 650801037194351665, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: 'ObservedComponents.Array.data[0]'
+      value: 
+      objectReference: {fileID: 3907228661986667931}
+    - target: {fileID: 650801037194351665, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: 'ObservedComponents.Array.data[1]'
+      value: 
+      objectReference: {fileID: 3907228661986667931}
     - target: {fileID: 1244454732468255371, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
       propertyPath: m_TagString
       value: HookFollow
@@ -4185,7 +4347,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3687488490122492955, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2397.6416
+      value: -2394.1
       objectReference: {fileID: 0}
     - target: {fileID: 3687488490122492955, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4251,17 +4413,61 @@ PrefabInstance:
       propertyPath: 'waypoints.Array.data[5]'
       value: 
       objectReference: {fileID: 6058226328920231917}
+    - target: {fileID: 3936250391271159070, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_AABB.m_Center.y
+      value: -0.021625236
+      objectReference: {fileID: 0}
+    - target: {fileID: 3936250391271159070, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_AABB.m_Center.z
+      value: 0.000003024601
+      objectReference: {fileID: 0}
+    - target: {fileID: 3936250391271159070, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_AABB.m_Extent.y
+      value: 0.031625234
+      objectReference: {fileID: 0}
+    - target: {fileID: 3936250391271159070, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 0.00018525765
+      objectReference: {fileID: 0}
     - target: {fileID: 4409549477046309848, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
       propertyPath: m_TagString
       value: HookFollow
+      objectReference: {fileID: 0}
+    - target: {fileID: 4717335243718356059, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_TeleportEnabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4717335243718356059, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_SynchronizeAngularVelocity
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6726840334565770082, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
       propertyPath: m_IncludeLayers.m_Bits
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6771165248212275493, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_Interpolate
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7402952989784572147, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
       propertyPath: m_TagString
       value: HookFollow
+      objectReference: {fileID: 0}
+    - target: {fileID: 7410900291571631434, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_AABB.m_Center.y
+      value: -0.021624323
+      objectReference: {fileID: 0}
+    - target: {fileID: 7410900291571631434, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_AABB.m_Center.z
+      value: 0.0000031876843
+      objectReference: {fileID: 0}
+    - target: {fileID: 7410900291571631434, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_AABB.m_Extent.y
+      value: 0.03162432
+      objectReference: {fileID: 0}
+    - target: {fileID: 7410900291571631434, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 0.0001851842
       objectReference: {fileID: 0}
     - target: {fileID: 7611051327608761805, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
       propertyPath: m_Name
@@ -4281,6 +4487,17 @@ PrefabInstance:
       addedObject: {fileID: 6635584324475366195}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+--- !u!114 &3907228661986667931 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4717335243718356059, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+  m_PrefabInstance: {fileID: 8596831473665032640}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &4927645613885259227 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3687488490122492955, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}

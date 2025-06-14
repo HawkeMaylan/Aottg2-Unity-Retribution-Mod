@@ -8,14 +8,10 @@ using Characters;
 
 namespace Entities
 {
-    public enum EntityForm
-    {
-        Human,
-        Titan
-    }
+    public enum EntityForm { Human, Titan }
 
     [RequireComponent(typeof(Collider))]
-    public class DamageableEntity : MonoBehaviourPunCallbacks
+    public class DamageableEntity : MonoBehaviourPunCallbacks, IPunInstantiateMagicCallback
     {
         [Header("Entity Setup")]
         public string entityName = "DamageableEntity";
@@ -91,8 +87,6 @@ namespace Entities
 
             UpdateBillboard();
             UpdateHealthBar();
-            if (photonView.IsMine)
-                photonView.RPC("SyncHealthRPC", RpcTarget.AllBuffered, currentHP, maxHP);
 
             if (customCollider != null && customCollider != GetComponent<Collider>())
             {
@@ -101,11 +95,15 @@ namespace Entities
             }
         }
 
+        public void OnPhotonInstantiate(PhotonMessageInfo info)
+        {
+            photonView.RPC("UpdateHealthRPC", RpcTarget.All, currentHP);
+        }
+
         [PunRPC]
-        private void SyncHealthRPC(int hp, int max)
+        private void UpdateHealthRPC(int hp)
         {
             currentHP = hp;
-            maxHP = max;
             UpdateBillboard();
             UpdateHealthBar();
         }
@@ -120,16 +118,24 @@ namespace Entities
 
             lastHitTime = Time.time;
             wasDamaged = true;
-
             currentHP -= damage;
-            UpdateBillboard();
-            UpdateHealthBar();
+
+            photonView.RPC("UpdateHealthRPC", RpcTarget.All, currentHP);
 
             if (hitEffectPrefab != null)
                 photonView.RPC("SpawnEffectRPC", RpcTarget.All, hitEffectPrefab.name, transform.position + hitEffectOffset, Quaternion.Euler(hitEffectRotation));
 
             if (currentHP <= 0)
                 Die(source, type);
+        }
+
+        [PunRPC]
+        private void RequestHitRPC(string source, int damage, string type, string hitbox, int viewID)
+        {
+            if (!PhotonNetwork.IsMasterClient || isDead || photonView.ViewID != viewID)
+                return;
+
+            GetHit(source, damage, type, hitbox);
         }
 
         private void Die(string killerName, string type)
@@ -146,16 +152,14 @@ namespace Entities
             }
 
             if (destroyOnDeath)
-                StartCoroutine(SelfDestruct());
+                photonView.RPC("RequestDestroyRPC", RpcTarget.MasterClient);
         }
 
-        private IEnumerator SelfDestruct()
+        [PunRPC]
+        private void RequestDestroyRPC()
         {
-            yield return new WaitForSeconds(0.1f);
-            if (PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient && photonView.ViewID != 0)
+            if (PhotonNetwork.IsMasterClient && photonView.IsMine)
                 PhotonNetwork.Destroy(gameObject);
-            else
-                Destroy(gameObject);
         }
 
         [PunRPC]
@@ -163,7 +167,7 @@ namespace Entities
         {
             GameObject prefab = Resources.Load<GameObject>($"HParticles/{resourceName}");
             if (prefab != null)
-                PhotonNetwork.Instantiate($"HParticles/{resourceName}", position, rotation);
+                Instantiate(prefab, position, rotation); // Local-only visual effect
         }
 
         private void CreateBillboard()
@@ -274,13 +278,16 @@ namespace Entities
             if (hitbox == null || attacker == null || !hitbox.IsActive())
                 return;
 
-            if (attacker is Human && attacker.IsMine())
-            {
-                attacker.OnHit(hitbox, this, collider, "Blade", true);
-                return;
-            }
+            string attackerName = attacker.Name ?? "Unknown";
 
-            GetHit(attacker.Name, flatDamageFromUnknown, "Collision", collider.name);
+            if (attacker is Human human && human.IsMine())
+            {
+                photonView.RPC("RequestHitRPC", RpcTarget.MasterClient, attackerName, flatDamageFromUnknown, "Blade", collider.name, photonView.ViewID);
+            }
+            else if (attacker == null)
+            {
+                photonView.RPC("RequestHitRPC", RpcTarget.MasterClient, "Unknown", flatDamageFromUnknown, "Collision", collider.name, photonView.ViewID);
+            }
         }
     }
 
