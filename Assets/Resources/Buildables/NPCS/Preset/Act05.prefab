@@ -1506,7 +1506,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 3687488490122492955, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9109561133680340532}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
 --- !u!4 &4927645613885259227 stripped
@@ -1514,6 +1517,189 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3687488490122492955, guid: 0e972762240b52f42967e9a23e94a3f7, type: 3}
   m_PrefabInstance: {fileID: 8596831473665032640}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &9109561133680790736
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4927645613885259227}
+    m_Modifications:
+    - target: {fileID: 167684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_Name
+      value: Harold
+      objectReference: {fileID: 0}
+    - target: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.026987016
+      objectReference: {fileID: 0}
+    - target: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.9899902
+      objectReference: {fileID: 0}
+    - target: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.2861228
+      objectReference: {fileID: 0}
+    - target: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.9959689
+      objectReference: {fileID: 0}
+    - target: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.08969985
+      objectReference: {fileID: 0}
+    - target: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 187.167
+      objectReference: {fileID: 0}
+    - target: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 167684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6358140313923321920}
+    - targetCorrespondingSourceObject: {fileID: 167684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3590867443490772758}
+    - targetCorrespondingSourceObject: {fileID: 167684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1377241656017357273}
+    - targetCorrespondingSourceObject: {fileID: 167684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8079497027013092795}
+  m_SourcePrefab: {fileID: 100100000, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+--- !u!4 &9109561133680340532 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 467684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+  m_PrefabInstance: {fileID: 9109561133680790736}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &9109561133680624596 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 167684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
+  m_PrefabInstance: {fileID: 9109561133680790736}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &6358140313923321920
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9109561133680624596}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &3590867443490772758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9109561133680624596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a450ee0181e48c64d84ae85d6812f58a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityName: Harold
+  maxHP: 5
+  currentHP: 5
+  team: Neutral
+  entityForm: 0
+  showKillFeed: 1
+  useTextDisplay: 0
+  use3DHealthBar: 0
+  destroyOnDeath: 1
+  onlyShowUIWhenDamaged: 0
+  hideUIDistance: 50
+  referenceCamera: {fileID: 0}
+  fadeUIAfterDelay: 0
+  uiFadeDelay: 5
+  healthBarOffset: {x: 0, y: 2.5, z: 0}
+  textOffset: {x: 0, y: 2, z: 0}
+  textScale: 1
+  healthBarScale: {x: 1, y: 0.2, z: 1}
+  hitCooldown: 0.2
+  flatDamageFromUnknown: 100
+  hitEffectPrefab: {fileID: 196516, guid: ca91ecf75c5b3964f817d3ab2bed38d9, type: 3}
+  hitEffectOffset: {x: 0, y: 1, z: 0}
+  hitEffectRotation: {x: 0, y: 0, z: 0}
+  deathEffectPrefab: {fileID: 196516, guid: ca91ecf75c5b3964f817d3ab2bed38d9, type: 3}
+  deathEffectOffset: {x: 0, y: 1, z: 0}
+  deathEffectRotation: {x: 0, y: 0, z: 0}
+  customCollider: {fileID: 0}
+--- !u!114 &1377241656017357273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9109561133680624596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &8079497027013092795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9109561133680624596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 485e3a7ff03500c4fb08327902a6f88e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dialogueLines:
+  - I really hate the north
+  - When is it going to get warm out
+  - Why do these damn workers have to unionize now of all time
+  - Just wanna clean this up and go home
+  dialogueInterval: 10
+  fadeTime: 2
+  textOffset: {x: 0, y: 2, z: 0}
+  textScale: 3
+  referenceCamera: {fileID: 0}
 --- !u!1001 &9152499176286523403
 PrefabInstance:
   m_ObjectHideFlags: 0
