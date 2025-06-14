@@ -236,8 +236,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactionTrigger: {fileID: 9065145253717040063}
   movingPart: {fileID: 2901369996363212498}
-  closedLocalPosition: {x: -15530.7, y: 134.5, z: 44392.3}
-  openedLocalPosition: {x: -15530.7, y: 269.4, z: 44392.3}
+  closedLocalPosition: {x: 14645, y: 347.3, z: 20017.3}
+  openedLocalPosition: {x: 14645, y: 454.3, z: 20017.3}
   moveSpeed: 6
   interactionText: Press G to Open/Close
 --- !u!114 &7754062071639082406
@@ -260,7 +260,7 @@ MonoBehaviour:
   observableSearch: 0
   ObservedComponents:
   - {fileID: 1207305658383928415}
-  sceneViewId: 0
+  sceneViewId: 3
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!114 &1207305658383928415
