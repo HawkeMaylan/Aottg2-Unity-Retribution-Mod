@@ -120,27 +120,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 457946, guid: f29cd50049f46bf4184f84d0128b51d8, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.62551993
+      value: 0.5006317
       objectReference: {fileID: 0}
     - target: {fileID: 457946, guid: f29cd50049f46bf4184f84d0128b51d8, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.7258229
+      value: 0.6560671
       objectReference: {fileID: 0}
     - target: {fileID: 457946, guid: f29cd50049f46bf4184f84d0128b51d8, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.7258229
+      value: 0.6560671
       objectReference: {fileID: 0}
     - target: {fileID: 457946, guid: f29cd50049f46bf4184f84d0128b51d8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -15544
+      value: -15530.7
       objectReference: {fileID: 0}
     - target: {fileID: 457946, guid: f29cd50049f46bf4184f84d0128b51d8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1127.5
+      value: 134.5
       objectReference: {fileID: 0}
     - target: {fileID: 457946, guid: f29cd50049f46bf4184f84d0128b51d8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 51597
+      value: 44392.3
       objectReference: {fileID: 0}
     - target: {fileID: 457946, guid: f29cd50049f46bf4184f84d0128b51d8, type: 3}
       propertyPath: m_LocalRotation.w
@@ -236,8 +236,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactionTrigger: {fileID: 9065145253717040063}
   movingPart: {fileID: 2901369996363212498}
-  closedLocalPosition: {x: 14645, y: 347.3, z: 20017.3}
-  openedLocalPosition: {x: 14645, y: 500, z: 20017.3}
+  closedLocalPosition: {x: -15530.7, y: 134.5, z: 44392.3}
+  openedLocalPosition: {x: -15530.7, y: 269.4, z: 44392.3}
   moveSpeed: 6
   interactionText: Press G to Open/Close
 --- !u!114 &7754062071639082406
