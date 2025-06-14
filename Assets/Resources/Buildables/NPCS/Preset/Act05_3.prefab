@@ -135,9 +135,6 @@ PrefabInstance:
       addedObject: {fileID: 7086142108403505534}
     - targetCorrespondingSourceObject: {fileID: 167684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8228204749863922857}
-    - targetCorrespondingSourceObject: {fileID: 167684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 6636782406034193275}
     - targetCorrespondingSourceObject: {fileID: 167684, guid: afaafa8438da5a24993eb50685eab77d, type: 3}
       insertIndex: -1
@@ -174,45 +171,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &8228204749863922857
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 87623544004694056}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a450ee0181e48c64d84ae85d6812f58a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityName: Cherold
-  maxHP: 5
-  currentHP: 5
-  team: Neutral
-  entityForm: 0
-  showKillFeed: 1
-  useTextDisplay: 0
-  use3DHealthBar: 0
-  destroyOnDeath: 1
-  onlyShowUIWhenDamaged: 0
-  hideUIDistance: 50
-  referenceCamera: {fileID: 0}
-  fadeUIAfterDelay: 0
-  uiFadeDelay: 5
-  healthBarOffset: {x: 0, y: 2.5, z: 0}
-  textOffset: {x: 0, y: 2, z: 0}
-  textScale: 1
-  healthBarScale: {x: 1, y: 0.2, z: 1}
-  hitCooldown: 0.2
-  flatDamageFromUnknown: 100
-  hitEffectPrefab: {fileID: 3729050558684392942, guid: ffffaa42f9aabea41b19e3c06d6a0f2d, type: 3}
-  hitEffectOffset: {x: 0, y: 2, z: 0}
-  hitEffectRotation: {x: 0, y: 0, z: 0}
-  deathEffectPrefab: {fileID: 4102742875528160013, guid: 0bd1dcbba4a0db24a87da89efe4b8efa, type: 3}
-  deathEffectOffset: {x: 0, y: 1, z: 0}
-  deathEffectRotation: {x: 0, y: 0, z: 0}
-  customCollider: {fileID: 0}
 --- !u!114 &6636782406034193275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -674,9 +632,6 @@ PrefabInstance:
       addedObject: {fileID: 3486972961728673616}
     - targetCorrespondingSourceObject: {fileID: 162840, guid: 8eb6d6c2a71abd34f8c00ccbc01fdae3, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 751789968994481709}
-    - targetCorrespondingSourceObject: {fileID: 162840, guid: 8eb6d6c2a71abd34f8c00ccbc01fdae3, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 5643201641911948115}
   m_SourcePrefab: {fileID: 100100000, guid: 8eb6d6c2a71abd34f8c00ccbc01fdae3, type: 3}
 --- !u!1 &3171789396742120590 stripped
@@ -705,45 +660,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &751789968994481709
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3171789396742120590}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a450ee0181e48c64d84ae85d6812f58a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityName: Tina
-  maxHP: 1
-  currentHP: 1
-  team: Neutral
-  entityForm: 0
-  showKillFeed: 1
-  useTextDisplay: 0
-  use3DHealthBar: 0
-  destroyOnDeath: 1
-  onlyShowUIWhenDamaged: 1
-  hideUIDistance: 50
-  referenceCamera: {fileID: 0}
-  fadeUIAfterDelay: 0
-  uiFadeDelay: 5
-  healthBarOffset: {x: 0, y: 2.5, z: 0}
-  textOffset: {x: 0, y: 2, z: 0}
-  textScale: 1
-  healthBarScale: {x: 1, y: 0.2, z: 1}
-  hitCooldown: 0.2
-  flatDamageFromUnknown: 100
-  hitEffectPrefab: {fileID: 3729050558684392942, guid: ffffaa42f9aabea41b19e3c06d6a0f2d, type: 3}
-  hitEffectOffset: {x: 0, y: 0, z: 0}
-  hitEffectRotation: {x: 0, y: 0, z: 0}
-  deathEffectPrefab: {fileID: 0}
-  deathEffectOffset: {x: 0, y: 0, z: 0}
-  deathEffectRotation: {x: 0, y: 0, z: 0}
-  customCollider: {fileID: 0}
 --- !u!114 &5643201641911948115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -762,7 +678,8 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 0}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -833,9 +750,6 @@ PrefabInstance:
       addedObject: {fileID: 2424079183066174434}
     - targetCorrespondingSourceObject: {fileID: 143118, guid: 691c04a06a09cfa41af3990fd3601f7f, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2433120761663361950}
-    - targetCorrespondingSourceObject: {fileID: 143118, guid: 691c04a06a09cfa41af3990fd3601f7f, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 562423353144752407}
   m_SourcePrefab: {fileID: 100100000, guid: 691c04a06a09cfa41af3990fd3601f7f, type: 3}
 --- !u!1 &3289347788443812981 stripped
@@ -864,45 +778,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &2433120761663361950
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3289347788443812981}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a450ee0181e48c64d84ae85d6812f58a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityName: Marlet
-  maxHP: 1
-  currentHP: 1
-  team: Neutral
-  entityForm: 0
-  showKillFeed: 1
-  useTextDisplay: 0
-  use3DHealthBar: 0
-  destroyOnDeath: 1
-  onlyShowUIWhenDamaged: 1
-  hideUIDistance: 50
-  referenceCamera: {fileID: 0}
-  fadeUIAfterDelay: 0
-  uiFadeDelay: 5
-  healthBarOffset: {x: 0, y: 2.5, z: 0}
-  textOffset: {x: 0, y: 2, z: 0}
-  textScale: 1
-  healthBarScale: {x: 1, y: 0.2, z: 1}
-  hitCooldown: 0.2
-  flatDamageFromUnknown: 100
-  hitEffectPrefab: {fileID: 3729050558684392942, guid: ffffaa42f9aabea41b19e3c06d6a0f2d, type: 3}
-  hitEffectOffset: {x: 0, y: 0, z: 0}
-  hitEffectRotation: {x: 0, y: 0, z: 0}
-  deathEffectPrefab: {fileID: 0}
-  deathEffectOffset: {x: 0, y: 0, z: 0}
-  deathEffectRotation: {x: 0, y: 0, z: 0}
-  customCollider: {fileID: 0}
 --- !u!114 &562423353144752407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -992,9 +867,6 @@ PrefabInstance:
       addedObject: {fileID: 4993247555312801083}
     - targetCorrespondingSourceObject: {fileID: 148622, guid: 4fa2051e8093b194ca31793dfe2a9543, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2240320010292054312}
-    - targetCorrespondingSourceObject: {fileID: 148622, guid: 4fa2051e8093b194ca31793dfe2a9543, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 7339662926233932038}
     - targetCorrespondingSourceObject: {fileID: 148622, guid: 4fa2051e8093b194ca31793dfe2a9543, type: 3}
       insertIndex: -1
@@ -1026,45 +898,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &2240320010292054312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4512988145356266012}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a450ee0181e48c64d84ae85d6812f58a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityName: Sarah
-  maxHP: 1
-  currentHP: 1
-  team: Neutral
-  entityForm: 0
-  showKillFeed: 1
-  useTextDisplay: 0
-  use3DHealthBar: 0
-  destroyOnDeath: 1
-  onlyShowUIWhenDamaged: 1
-  hideUIDistance: 50
-  referenceCamera: {fileID: 0}
-  fadeUIAfterDelay: 0
-  uiFadeDelay: 5
-  healthBarOffset: {x: 0, y: 2.5, z: 0}
-  textOffset: {x: 0, y: 2, z: 0}
-  textScale: 1
-  healthBarScale: {x: 1, y: 0.2, z: 1}
-  hitCooldown: 0.2
-  flatDamageFromUnknown: 100
-  hitEffectPrefab: {fileID: 3729050558684392942, guid: ffffaa42f9aabea41b19e3c06d6a0f2d, type: 3}
-  hitEffectOffset: {x: 0, y: 0, z: 0}
-  hitEffectRotation: {x: 0, y: 0, z: 0}
-  deathEffectPrefab: {fileID: 0}
-  deathEffectOffset: {x: 0, y: 0, z: 0}
-  deathEffectRotation: {x: 0, y: 0, z: 0}
-  customCollider: {fileID: 0}
 --- !u!114 &7339662926233932038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1083,7 +916,8 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 0}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -1359,9 +1193,6 @@ PrefabInstance:
       addedObject: {fileID: 6139590328536962621}
     - targetCorrespondingSourceObject: {fileID: 189140, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1206506185070418408}
-    - targetCorrespondingSourceObject: {fileID: 189140, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 5803261364653021220}
   m_SourcePrefab: {fileID: 100100000, guid: ed8a90a6bf8eed946815afce449aa99f, type: 3}
 --- !u!1 &8290582920469144859 stripped
@@ -1390,45 +1221,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &1206506185070418408
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8290582920469144859}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a450ee0181e48c64d84ae85d6812f58a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  entityName: Joe
-  maxHP: 1
-  currentHP: 1
-  team: Neutral
-  entityForm: 0
-  showKillFeed: 1
-  useTextDisplay: 0
-  use3DHealthBar: 0
-  destroyOnDeath: 1
-  onlyShowUIWhenDamaged: 1
-  hideUIDistance: 50
-  referenceCamera: {fileID: 0}
-  fadeUIAfterDelay: 0
-  uiFadeDelay: 5
-  healthBarOffset: {x: 0, y: 2.5, z: 0}
-  textOffset: {x: 0, y: 2, z: 0}
-  textScale: 1
-  healthBarScale: {x: 1, y: 0.2, z: 1}
-  hitCooldown: 0.2
-  flatDamageFromUnknown: 100
-  hitEffectPrefab: {fileID: 3729050558684392942, guid: ffffaa42f9aabea41b19e3c06d6a0f2d, type: 3}
-  hitEffectOffset: {x: 0, y: 0, z: 0}
-  hitEffectRotation: {x: 0, y: 0, z: 0}
-  deathEffectPrefab: {fileID: 0}
-  deathEffectOffset: {x: 0, y: 0, z: 0}
-  deathEffectRotation: {x: 0, y: 0, z: 0}
-  customCollider: {fileID: 0}
 --- !u!114 &5803261364653021220
 MonoBehaviour:
   m_ObjectHideFlags: 0

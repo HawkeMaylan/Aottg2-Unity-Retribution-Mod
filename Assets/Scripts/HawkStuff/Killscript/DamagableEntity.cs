@@ -11,7 +11,7 @@ namespace Entities
     public enum EntityForm { Human, Titan }
 
     [RequireComponent(typeof(Collider))]
-    public class DamageableEntity : MonoBehaviourPunCallbacks, IPunInstantiateMagicCallback
+    public class DamageableEntity : MonoBehaviourPunCallbacks, IPunInstantiateMagicCallback, IPunObservable
     {
         [Header("Entity Setup")]
         public string entityName = "DamageableEntity";
@@ -73,17 +73,17 @@ namespace Entities
         {
             if (currentHP < 0 || currentHP > maxHP)
                 currentHP = maxHP;
-
-            if (useTextDisplay)
-                CreateBillboard();
-            if (use3DHealthBar)
-                CreateHealthBar();
         }
 
         private void Start()
         {
             if (referenceCamera == null)
                 referenceCamera = Camera.main;
+
+            if (useTextDisplay && hpBillboard == null)
+                CreateBillboard();
+            if (use3DHealthBar && healthBarRoot == null)
+                CreateHealthBar();
 
             UpdateBillboard();
             UpdateHealthBar();
@@ -97,7 +97,21 @@ namespace Entities
 
         public void OnPhotonInstantiate(PhotonMessageInfo info)
         {
-            photonView.RPC("UpdateHealthRPC", RpcTarget.All, currentHP);
+            photonView.RPC("UpdateHealthRPC", RpcTarget.AllBuffered, currentHP);
+            UpdateBillboard();
+            UpdateHealthBar();
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            if (stream.IsWriting)
+                stream.SendNext(currentHP);
+            else
+            {
+                currentHP = (int)stream.ReceiveNext();
+                UpdateBillboard();
+                UpdateHealthBar();
+            }
         }
 
         [PunRPC]
@@ -167,7 +181,7 @@ namespace Entities
         {
             GameObject prefab = Resources.Load<GameObject>($"HParticles/{resourceName}");
             if (prefab != null)
-                Instantiate(prefab, position, rotation); // Local-only visual effect
+                Instantiate(prefab, position, rotation);
         }
 
         private void CreateBillboard()
