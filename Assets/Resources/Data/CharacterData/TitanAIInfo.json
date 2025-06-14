@@ -258,7 +258,7 @@
 		],
 		"AttackSpeedMultiplier": 1.0,
 
-		"AttackSpeedMultiplierMin": 0.7,
+		"AttackSpeedMultiplierMin": 0.8,
 		"AttackSpeedMultiplierMax": 2.0,
 
 		"AttackSpeeds": {
@@ -342,7 +342,7 @@
 		},
 		"Normal": {
 			"FocusTimeMin": 5.0,
-			"FocusTimeMax": 1200.0
+			"FocusTimeMax": 100.0
 		},
 		"Hard": {
 			"TurnPause": 0.3,
