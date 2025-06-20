@@ -78,6 +78,8 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Update()
     {
+
+
         timeOfDay += Time.deltaTime / dayDuration;
         if (timeOfDay > 1f) timeOfDay -= 1f;
 
@@ -99,6 +101,8 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
 
         UpdateSunAndMoon();
         UpdateLighting();
+
+       
     }
 
     private void NormalizeDurations()
@@ -123,19 +127,27 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
 
     private float GetSunAngle(float t)
     {
-        float sunriseEnd = sunriseDuration;
-        float middayEnd = sunriseEnd + middayDuration;
-        float sunsetEnd = middayEnd + sunsetDuration;
+        float time = t * dayDuration;
 
-        if (t < sunriseEnd)
-            return Mathf.Lerp(0f, 15f, t / sunriseDuration);
-        else if (t < middayEnd)
-            return Mathf.Lerp(15f, 165f, (t - sunriseEnd) / middayDuration);
-        else if (t < sunsetEnd)
-            return Mathf.Lerp(165f, 180f, (t - middayEnd) / sunsetDuration);
+        float sunriseTime = sunriseDuration * dayDuration;
+        float middayTime = middayDuration * dayDuration;
+        float sunsetTime = sunsetDuration * dayDuration;
+        float nightTime = nightDuration * dayDuration;
+
+        float sunriseEnd = sunriseTime;
+        float middayEnd = sunriseEnd + middayTime;
+        float sunsetEnd = middayEnd + sunsetTime;
+
+        if (time < sunriseEnd)
+            return Mathf.Lerp(0f, 15f, time / sunriseTime);
+        else if (time < middayEnd)
+            return Mathf.Lerp(15f, 165f, (time - sunriseEnd) / middayTime);
+        else if (time < sunsetEnd)
+            return Mathf.Lerp(165f, 180f, (time - middayEnd) / sunsetTime);
         else
-            return Mathf.Lerp(180f, 360f, (t - sunsetEnd) / nightDuration);
+            return Mathf.Lerp(180f, 360f, (time - sunsetEnd) / nightTime);
     }
+
 
     private void UpdateLighting()
     {
@@ -235,13 +247,27 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
 
     private void ReapplySkybox()
     {
-        if (skyboxMaterial != null)
+        // Load material if needed
+        if (skyboxMaterial == null)
+            skyboxMaterial = Resources.Load<Material>("HawkProcedural");
+
+        // Apply only if not already set
+        if (RenderSettings.skybox != skyboxMaterial)
         {
             RenderSettings.skybox = skyboxMaterial;
             DynamicGI.UpdateEnvironment();
-            skyboxMaterial = Resources.Load<Material>("HawkProcedural");
+        }
+
+        // Clear per-camera override
+        var cam = Camera.main;
+        if (cam != null)
+        {
+            Skybox sb = cam.GetComponent<Skybox>();
+            if (sb != null && sb.material != null)
+                sb.material = null;
         }
     }
+
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
