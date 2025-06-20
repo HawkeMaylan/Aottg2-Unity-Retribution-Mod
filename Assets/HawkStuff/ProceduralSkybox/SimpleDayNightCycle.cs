@@ -239,6 +239,7 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
         {
             RenderSettings.skybox = skyboxMaterial;
             DynamicGI.UpdateEnvironment();
+            skyboxMaterial = Resources.Load<Material>("HawkProcedural");
         }
     }
 
