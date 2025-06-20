@@ -102,23 +102,7 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
         UpdateSunAndMoon();
         UpdateLighting();
 
-        if (skyboxMaterial == null)
-            skyboxMaterial = Resources.Load<Material>("HawkProcedural");
-
-        if (skyboxMaterial != null)
-        {
-            RenderSettings.skybox = skyboxMaterial;
-            DynamicGI.UpdateEnvironment();
-        }
-
-        var cam = Camera.main;
-        if (cam != null)
-        {
-            Skybox sb = cam.GetComponent<Skybox>();
-            if (sb) sb.material = null;
-        }
-
-
+       
     }
 
     private void NormalizeDurations()
