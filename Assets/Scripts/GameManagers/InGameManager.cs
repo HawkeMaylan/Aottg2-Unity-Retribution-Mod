@@ -716,6 +716,7 @@ namespace GameManagers
                     float crawler = jumper + settings.TitanSpawnCrawler.Value / 100f;
                     float thrower = crawler + settings.TitanSpawnThrower.Value / 100f;
                     float punk = thrower + settings.TitanSpawnPunk.Value / 100f;
+                    float abberant = punk + settings.TitanSpawnAbberrant.Value / 100f;
                     if (roll < normal)
                         type = "Normal";
                     else if (roll < abnormal)
@@ -728,6 +729,8 @@ namespace GameManagers
                         type = "Thrower";
                     else if (roll < punk)
                         type = "Punk";
+                    else if (roll < abberant)
+                        type = "Abberant";
                 }
             }
             else if (type == "Random")
