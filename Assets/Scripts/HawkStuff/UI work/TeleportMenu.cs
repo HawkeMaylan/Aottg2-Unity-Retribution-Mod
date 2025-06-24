@@ -57,6 +57,10 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     private string customRotX = "0", customRotY = "0", customRotZ = "0";
 
 
+    private string customLayer = "23";
+
+
+
 
 
 
@@ -221,7 +225,11 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             customRotY = GUI.TextField(new Rect(195, Screen.height - 290, 50, 20), customRotY);
             customRotZ = GUI.TextField(new Rect(250, Screen.height - 290, 50, 20), customRotZ);
 
-            if (GUI.Button(new Rect(100, Screen.height - 250, 160, 30), "Spawn"))
+            GUI.Label(new Rect(60, Screen.height - 260, 100, 20), "Layer:");
+            customLayer = GUI.TextField(new Rect(140, Screen.height - 260, 180, 20), customLayer);
+
+
+            if (GUI.Button(new Rect(100, Screen.height - 220, 160, 30), "Spawn"))
             {
                 StartCoroutine(SpawnCustomAssetCoroutine());
 
@@ -909,8 +917,10 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         Quaternion rot = Quaternion.Euler(rx, ry, rz);
         GameObject go = Instantiate(prefab, pos, rot);
 
+        int parsedLayer = 23;
+        int.TryParse(customLayer, out parsedLayer); // fallback to 23 if invalid
+        SetLayerRecursively(go, parsedLayer);
 
-        SetLayerRecursively(go, 23); 
 
         int viewID = -1;
         PhotonView view = go.GetComponent<PhotonView>();
@@ -945,7 +955,11 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         }
 
         GameObject go = Instantiate(prefab, pos, rot);
-        SetLayerRecursively(go, 23); // Set to layer 23
+
+        int parsedLayer = 23;
+        int.TryParse(customLayer, out parsedLayer); // Use same fallback
+        SetLayerRecursively(go, parsedLayer);
+
 
         if (viewID > 0)
         {
