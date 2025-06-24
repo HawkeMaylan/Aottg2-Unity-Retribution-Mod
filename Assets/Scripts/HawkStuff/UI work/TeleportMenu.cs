@@ -9,6 +9,9 @@ using Photon.Pun;
 using System.Collections;
 using System.IO;
 using Settings;
+using ApplicationManagers;
+using UI;
+using GameManagers;
 
 
 public class TeleportMenu : MonoBehaviourPunCallbacks
@@ -46,6 +49,14 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     private Vector2 savedScroll;
 
     private bool showSavedLocationPanel = false;
+
+    private bool showCustomSpawnPanel = false;
+    private string customPrefabName = "";
+    private string customBundleName = "";
+    private string customPosX = "0", customPosY = "0", customPosZ = "0";
+    private string customRotX = "0", customRotY = "0", customRotZ = "0";
+
+
 
 
 
@@ -175,6 +186,13 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             RefreshPlayerList();
         }
 
+
+        if (GUI.Button(new Rect(Screen.width - 1000, 600, 200, 30), "Spawn Custom Asset"))
+        {
+            showCustomSpawnPanel = !showCustomSpawnPanel;
+        }
+
+
         DrawPlayerPanel();
 
         // Draw saved location panel if toggled
@@ -182,6 +200,34 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         {
             DrawSavedLocationPanel();
         }
+
+        if (showCustomSpawnPanel)
+        {
+            GUI.Box(new Rect(50, Screen.height - 400, 300, 250), "Custom Asset Spawner");
+
+            GUI.Label(new Rect(60, Screen.height - 380, 100, 20), "Bundle:");
+            customBundleName = GUI.TextField(new Rect(140, Screen.height - 380, 180, 20), customBundleName);
+
+            GUI.Label(new Rect(60, Screen.height - 350, 100, 20), "Prefab:");
+            customPrefabName = GUI.TextField(new Rect(140, Screen.height - 350, 180, 20), customPrefabName);
+
+            GUI.Label(new Rect(60, Screen.height - 320, 100, 20), "Position:");
+            customPosX = GUI.TextField(new Rect(140, Screen.height - 320, 50, 20), customPosX);
+            customPosY = GUI.TextField(new Rect(195, Screen.height - 320, 50, 20), customPosY);
+            customPosZ = GUI.TextField(new Rect(250, Screen.height - 320, 50, 20), customPosZ);
+
+            GUI.Label(new Rect(60, Screen.height - 290, 100, 20), "Rotation:");
+            customRotX = GUI.TextField(new Rect(140, Screen.height - 290, 50, 20), customRotX);
+            customRotY = GUI.TextField(new Rect(195, Screen.height - 290, 50, 20), customRotY);
+            customRotZ = GUI.TextField(new Rect(250, Screen.height - 290, 50, 20), customRotZ);
+
+            if (GUI.Button(new Rect(100, Screen.height - 250, 160, 30), "Spawn"))
+            {
+                StartCoroutine(SpawnCustomAssetCoroutine());
+
+            }
+        }
+
     }
 
 
@@ -325,6 +371,9 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
                     selectedHuman.photonView?.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
                         stats.Speed, stats.Gas, stats.Ammunition, stats.Acceleration, float.Parse(newHorseSpeed));
             }
+
+            
+
             else
             {
                 GUI.Label(new Rect(leftX, statsY, 200, 20), "Stats not found.");
@@ -825,10 +874,84 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
 
 
+    private IEnumerator SpawnCustomAssetCoroutine()
+    {
+        if (!float.TryParse(customPosX, out float x) ||
+            !float.TryParse(customPosY, out float y) ||
+            !float.TryParse(customPosZ, out float z) ||
+            !float.TryParse(customRotX, out float rx) ||
+            !float.TryParse(customRotY, out float ry) ||
+            !float.TryParse(customRotZ, out float rz))
+        {
+            ChatManager.AddLine("Invalid position or rotation input.", ChatTextColor.System);
+            yield break;
+        }
 
+        if (!AssetBundleManager.LoadedBundle(customBundleName))
+        {
+            yield return StartCoroutine(AssetBundleManager.LoadBundle(customBundleName, "", true));
 
+            if (!AssetBundleManager.LoadedBundle(customBundleName))
+            {
+                ChatManager.AddLine("Failed to load bundle: " + customBundleName, ChatTextColor.System);
+                yield break;
+            }
+        }
 
+        GameObject prefab = AssetBundleManager.LoadAsset(customBundleName, customPrefabName) as GameObject;
+        if (prefab == null)
+        {
+            ChatManager.AddLine("Prefab not found: " + customPrefabName, ChatTextColor.System);
+            yield break;
+        }
 
+        Vector3 pos = new Vector3(x, y, z);
+        Quaternion rot = Quaternion.Euler(rx, ry, rz);
+        GameObject go = Instantiate(prefab, pos, rot);
 
+        int viewID = -1;
+        PhotonView view = go.GetComponent<PhotonView>();
+        if (view != null)
+        {
+            viewID = PhotonNetwork.AllocateViewID(true);
+            view.ViewID = viewID;
+        }
+
+        photonView.RPC("RPC_SpawnAssetLocally", RpcTarget.Others, customBundleName, customPrefabName, pos, new Vector3(rx, ry, rz), viewID);
+        ChatManager.AddLine($"[MC] Spawned: {customPrefabName} from {customBundleName}", ChatTextColor.System);
+    }
+
+    [PunRPC]
+    private void RPC_SpawnAssetLocally(string bundleName, string prefabName, Vector3 pos, Vector3 rotEuler, int viewID)
+    {
+        StartCoroutine(SpawnAfterLoad(bundleName, prefabName, pos, Quaternion.Euler(rotEuler), viewID));
+    }
+
+    private IEnumerator SpawnAfterLoad(string bundleName, string prefabName, Vector3 pos, Quaternion rot, int viewID)
+    {
+        if (!AssetBundleManager.LoadedBundle(bundleName))
+            yield return AssetBundleManager.LoadBundle(bundleName, "", true);
+
+        GameObject prefab = AssetBundleManager.LoadAsset(bundleName, prefabName) as GameObject;
+        if (prefab == null)
+        {
+            Debug.LogWarning($"[SpawnAfterLoad] Prefab not found: {prefabName} in bundle: {bundleName}");
+            yield break;
+        }
+
+        GameObject go = Instantiate(prefab, pos, rot);
+
+        if (viewID > 0)
+        {
+            PhotonView view = go.GetComponent<PhotonView>();
+            if (view != null)
+                view.ViewID = viewID;
+        }
+    }
 
 }
+
+
+
+
+
