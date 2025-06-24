@@ -909,6 +909,9 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         Quaternion rot = Quaternion.Euler(rx, ry, rz);
         GameObject go = Instantiate(prefab, pos, rot);
 
+
+        SetLayerRecursively(go, 23); 
+
         int viewID = -1;
         PhotonView view = go.GetComponent<PhotonView>();
         if (view != null)
@@ -919,6 +922,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
         photonView.RPC("RPC_SpawnAssetLocally", RpcTarget.Others, customBundleName, customPrefabName, pos, new Vector3(rx, ry, rz), viewID);
         ChatManager.AddLine($"[MC] Spawned: {customPrefabName} from {customBundleName}", ChatTextColor.System);
+
+
     }
 
     [PunRPC]
@@ -940,12 +945,28 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         }
 
         GameObject go = Instantiate(prefab, pos, rot);
+        SetLayerRecursively(go, 23); // Set to layer 23
 
         if (viewID > 0)
         {
             PhotonView view = go.GetComponent<PhotonView>();
             if (view != null)
                 view.ViewID = viewID;
+        }
+        
+        
+
+
+    }
+
+
+    private void SetLayerRecursively(GameObject obj, int layer)
+    {
+        if (obj == null) return;
+        obj.layer = layer;
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, layer);
         }
     }
 
