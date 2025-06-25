@@ -200,15 +200,7 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         }
 
 
-        if (GUI.Button(new Rect(Screen.width - 1000, 600, 200, 30), "Spawn Custom Asset"))
-        {
-            showCustomSpawnPanel = !showCustomSpawnPanel;
-        }
-
-        if (GUI.Button(new Rect(Screen.width - 1000, 640, 200, 30), showAssetManagerPanel ? "Hide Spawned Assets" : "Show Spawned Assets"))
-        {
-            showAssetManagerPanel = !showAssetManagerPanel;
-        }
+        
 
 
         DrawPlayerPanel();
@@ -250,39 +242,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             }
         }
 
-        if (showAssetManagerPanel)
-        {
-            GUI.Box(new Rect(400, Screen.height - 400, 400, 250), "Spawned Assets");
-
-            int yOffset = 0;
-            for (int i = 0; i < spawnedCustomAssets.Count; i++)
-            {
-                GameObject go = spawnedCustomAssets[i];
-                if (go == null) continue;
-
-                string label = go.name;
-                GUI.Label(new Rect(410, Screen.height - 380 + yOffset, 150, 20), label);
-
-                if (GUI.Button(new Rect(570, Screen.height - 380 + yOffset, 60, 20), "Move"))
-                {
-                    selectedMoveTarget = go;
-                    moveInputX = go.transform.position.x.ToString();
-                    moveInputY = go.transform.position.y.ToString();
-                    moveInputZ = go.transform.position.z.ToString();
-                }
-
-                if (GUI.Button(new Rect(635, Screen.height - 380 + yOffset, 50, 20), "Delete"))
-                {
-                    PhotonNetwork.Destroy(go); // If networked
-                    Destroy(go); // Safety
-                    spawnedCustomAssets.RemoveAt(i);
-                    i--;
-                    continue;
-                }
-
-                yOffset += 25;
-            }
-        }
+       
+        
 
         if (selectedMoveTarget != null)
         {
