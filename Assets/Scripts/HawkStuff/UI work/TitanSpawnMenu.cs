@@ -2,7 +2,8 @@ using UnityEngine;
 using Photon.Pun;
 using ApplicationManagers;
 using GameManagers;
-using Characters; // Required for BaseTitan
+using Characters;
+using System.Collections;
 
 public class TitanSpawnMenu : MonoBehaviourPun
 {
@@ -15,7 +16,6 @@ public class TitanSpawnMenu : MonoBehaviourPun
     private bool useRandomWeights = false;
     private string[] weightInputs = new string[] { "10", "10", "10", "10", "10", "10", "10" };
 
-    // Stat overrides
     private bool overrideSize = false, overrideHP = false, overrideSpeed = false, overrideAnimSpeed = false;
     private string minSize = "1", maxSize = "1";
     private string minHP = "1000", maxHP = "2000";
@@ -24,7 +24,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftAlt))
+        if (Input.GetKeyDown(KeyCode.LeftAlt) && PhotonNetwork.IsMasterClient)
         {
             menuOpen = !menuOpen;
             Cursor.visible = menuOpen;
@@ -78,9 +78,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
         GUI.Label(new Rect(150, baseY + 190, 80, 20), "Max:"); maxAnimSpeed = GUI.TextField(new Rect(190, baseY + 190, 50, 20), maxAnimSpeed);
 
         if (GUI.Button(new Rect(140, baseY + 230, 100, 30), "Spawn"))
-        {
             TrySpawnTitans();
-        }
     }
 
     private void TrySpawnTitans()
@@ -105,34 +103,36 @@ public class TitanSpawnMenu : MonoBehaviourPun
             return;
         }
 
+        string typeToUse = useRandomWeights ? GetWeightedRandomType() : titanTypes[selectedTypeIndex];
+        manager.StartCoroutine(SpawnAndOverrideRoutine(manager, typeToUse, count, basePos, 0f));
+    }
+
+    private IEnumerator SpawnAndOverrideRoutine(InGameManager manager, string type, int count, Vector3 basePos, float rotationY)
+    {
         for (int i = 0; i < count; i++)
         {
-            string typeToUse = useRandomWeights ? GetWeightedRandomType() : titanTypes[selectedTypeIndex];
             Vector3 offset = new Vector3(i * 5f, 0f, 0f);
-            BaseTitan titan = manager.SpawnAITitanAt(typeToUse, basePos + offset, 0f);
+            BaseTitan titan = manager.SpawnAITitanAt(type, basePos + offset, rotationY);
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
 
-            if (titan == null) continue;
+            if (titan == null)
+            {
+                Debug.LogError($"[TitanSpawnMenu] Failed to spawn titan of type: {type}");
+                continue;
+            }
 
             if (overrideSize && float.TryParse(minSize, out float minS) && float.TryParse(maxSize, out float maxS))
-            {
-                float size = Random.Range(minS, maxS);
-                titan.SetSize(size);
-            }
+                titan.SetSize(Random.Range(minS, maxS));
 
             if (overrideHP && int.TryParse(minHP, out int minHp) && int.TryParse(maxHP, out int maxHp))
-            {
                 titan.SetHealth(Random.Range(minHp, maxHp + 1));
-            }
 
             if (overrideSpeed && float.TryParse(minSpeed, out float minSpd) && float.TryParse(maxSpeed, out float maxSpd))
-            {
                 titan.RunSpeedBase = Random.Range(minSpd, maxSpd);
-            }
 
             if (overrideAnimSpeed && float.TryParse(minAnimSpeed, out float minAnim) && float.TryParse(maxAnimSpeed, out float maxAnim))
-            {
                 titan.AttackSpeedMultiplier = Random.Range(minAnim, maxAnim);
-            }
         }
     }
 

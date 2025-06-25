@@ -822,12 +822,12 @@
 			"WalkSpeedBase": 10.0,
 			"RunSpeedBase": 20.0
 		}
-	}
+	},
 
 
-	"Abberant": {
+	"Aberrant": {
 		"Default": {
-			"Name": "Abberant",
+			"Name": "Aberrant",
 			"IsRun": true,
 
 			"FarAttackMaxRange": 200,
@@ -936,5 +936,5 @@
 			"RunSpeedBase": 20.0
 		}
 	}
-	
+
 }
