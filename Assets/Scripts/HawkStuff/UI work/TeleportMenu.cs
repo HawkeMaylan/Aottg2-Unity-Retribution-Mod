@@ -57,7 +57,16 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
     private string customRotX = "0", customRotY = "0", customRotZ = "0";
 
 
+    private List<GameObject> spawnedCustomAssets = new List<GameObject>();
+
+
+
     private string customLayer = "23";
+
+    private bool showAssetManagerPanel = false;
+    private GameObject selectedMoveTarget = null;
+    private string moveInputX = "0", moveInputY = "0", moveInputZ = "0";
+
 
 
 
@@ -196,6 +205,11 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
             showCustomSpawnPanel = !showCustomSpawnPanel;
         }
 
+        if (GUI.Button(new Rect(Screen.width - 1000, 640, 200, 30), showAssetManagerPanel ? "Hide Spawned Assets" : "Show Spawned Assets"))
+        {
+            showAssetManagerPanel = !showAssetManagerPanel;
+        }
+
 
         DrawPlayerPanel();
 
@@ -235,6 +249,71 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
 
             }
         }
+
+        if (showAssetManagerPanel)
+        {
+            GUI.Box(new Rect(400, Screen.height - 400, 400, 250), "Spawned Assets");
+
+            int yOffset = 0;
+            for (int i = 0; i < spawnedCustomAssets.Count; i++)
+            {
+                GameObject go = spawnedCustomAssets[i];
+                if (go == null) continue;
+
+                string label = go.name;
+                GUI.Label(new Rect(410, Screen.height - 380 + yOffset, 150, 20), label);
+
+                if (GUI.Button(new Rect(570, Screen.height - 380 + yOffset, 60, 20), "Move"))
+                {
+                    selectedMoveTarget = go;
+                    moveInputX = go.transform.position.x.ToString();
+                    moveInputY = go.transform.position.y.ToString();
+                    moveInputZ = go.transform.position.z.ToString();
+                }
+
+                if (GUI.Button(new Rect(635, Screen.height - 380 + yOffset, 50, 20), "Delete"))
+                {
+                    PhotonNetwork.Destroy(go); // If networked
+                    Destroy(go); // Safety
+                    spawnedCustomAssets.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+
+                yOffset += 25;
+            }
+        }
+
+        if (selectedMoveTarget != null)
+        {
+            GUI.Box(new Rect(850, Screen.height - 200, 200, 130), "Move Object");
+
+            GUI.Label(new Rect(860, Screen.height - 180, 30, 20), "X:");
+            moveInputX = GUI.TextField(new Rect(890, Screen.height - 180, 80, 20), moveInputX);
+
+            GUI.Label(new Rect(860, Screen.height - 155, 30, 20), "Y:");
+            moveInputY = GUI.TextField(new Rect(890, Screen.height - 155, 80, 20), moveInputY);
+
+            GUI.Label(new Rect(860, Screen.height - 130, 30, 20), "Z:");
+            moveInputZ = GUI.TextField(new Rect(890, Screen.height - 130, 80, 20), moveInputZ);
+
+            if (GUI.Button(new Rect(860, Screen.height - 100, 100, 25), "Apply"))
+            {
+                if (float.TryParse(moveInputX, out float x) &&
+                    float.TryParse(moveInputY, out float y) &&
+                    float.TryParse(moveInputZ, out float z))
+                {
+                    selectedMoveTarget.transform.position = new Vector3(x, y, z);
+                    selectedMoveTarget = null;
+                }
+            }
+
+            if (GUI.Button(new Rect(965, Screen.height - 100, 70, 25), "Cancel"))
+            {
+                selectedMoveTarget = null;
+            }
+        }
+
 
     }
 
@@ -916,6 +995,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         Vector3 pos = new Vector3(x, y, z);
         Quaternion rot = Quaternion.Euler(rx, ry, rz);
         GameObject go = Instantiate(prefab, pos, rot);
+        spawnedCustomAssets.Add(go);
+
 
         int parsedLayer = 23;
         int.TryParse(customLayer, out parsedLayer); // fallback to 23 if invalid
@@ -955,6 +1036,8 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         }
 
         GameObject go = Instantiate(prefab, pos, rot);
+        spawnedCustomAssets.Add(go);
+
 
         int parsedLayer = 23;
         int.TryParse(customLayer, out parsedLayer); // Use same fallback
