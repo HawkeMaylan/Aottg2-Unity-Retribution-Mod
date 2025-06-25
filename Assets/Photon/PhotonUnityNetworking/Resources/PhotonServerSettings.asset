@@ -168,6 +168,12 @@ MonoBehaviour:
   - RequestHitRPC
   - RequestDestroyRPC
   - RPC_ApplyStats
+  - RPC_SpawnAssetLocally
+  - RPC_DeleteCustomAsset
+  - RPC_MoveCustomAsset
+  - RPC_DeleteCustomAssetByID
+  - RPC_MoveCustomAssetByID
+  - RPC_SpawnAssetLocallyWithID
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
