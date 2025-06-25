@@ -2,6 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using ApplicationManagers;
 using GameManagers;
+using Characters; // Required for BaseTitan
 
 public class TitanSpawnMenu : MonoBehaviourPun
 {
@@ -11,10 +12,15 @@ public class TitanSpawnMenu : MonoBehaviourPun
     private int selectedTypeIndex = 0;
 
     private string inputX = "0", inputY = "0", inputZ = "0", inputCount = "1";
-
     private bool useRandomWeights = false;
-
     private string[] weightInputs = new string[] { "10", "10", "10", "10", "10", "10", "10" };
+
+    // Stat overrides
+    private bool overrideSize = false, overrideHP = false, overrideSpeed = false, overrideAnimSpeed = false;
+    private string minSize = "1", maxSize = "1";
+    private string minHP = "1000", maxHP = "2000";
+    private string minSpeed = "10", maxSpeed = "20";
+    private string minAnimSpeed = "1", maxAnimSpeed = "1.5";
 
     void Update()
     {
@@ -30,27 +36,18 @@ public class TitanSpawnMenu : MonoBehaviourPun
     {
         if (!menuOpen) return;
 
-        GUI.Box(new Rect(20, 20, 380, 420), "Titan Spawn Menu");
+        GUI.Box(new Rect(20, 20, 400, 700), "Titan Spawn Menu");
 
-        // Position Inputs
-        GUI.Label(new Rect(30, 60, 80, 20), "Position X:");
-        inputX = GUI.TextField(new Rect(120, 60, 100, 20), inputX);
-        GUI.Label(new Rect(30, 90, 80, 20), "Position Y:");
-        inputY = GUI.TextField(new Rect(120, 90, 100, 20), inputY);
-        GUI.Label(new Rect(30, 120, 80, 20), "Position Z:");
-        inputZ = GUI.TextField(new Rect(120, 120, 100, 20), inputZ);
+        GUI.Label(new Rect(30, 60, 80, 20), "Position X:"); inputX = GUI.TextField(new Rect(120, 60, 100, 20), inputX);
+        GUI.Label(new Rect(30, 90, 80, 20), "Position Y:"); inputY = GUI.TextField(new Rect(120, 90, 100, 20), inputY);
+        GUI.Label(new Rect(30, 120, 80, 20), "Position Z:"); inputZ = GUI.TextField(new Rect(120, 120, 100, 20), inputZ);
+        GUI.Label(new Rect(30, 150, 80, 20), "Count:"); inputCount = GUI.TextField(new Rect(120, 150, 100, 20), inputCount);
 
-        // Count
-        GUI.Label(new Rect(30, 150, 80, 20), "Count:");
-        inputCount = GUI.TextField(new Rect(120, 150, 100, 20), inputCount);
-
-        // Random Toggle
         useRandomWeights = GUI.Toggle(new Rect(30, 180, 200, 20), useRandomWeights, " Use Weighted Random");
 
         if (useRandomWeights)
         {
             GUI.Label(new Rect(30, 210, 200, 20), "Titan Type Weights (%):");
-
             for (int i = 0; i < titanTypes.Length; i++)
             {
                 GUI.Label(new Rect(30, 240 + i * 25, 80, 20), titanTypes[i]);
@@ -60,10 +57,27 @@ public class TitanSpawnMenu : MonoBehaviourPun
         else
         {
             GUI.Label(new Rect(30, 210, 100, 20), "Titan Type:");
-            selectedTypeIndex = GUI.Toolbar(new Rect(30, 240, 320, 30), selectedTypeIndex, titanTypes);
+            selectedTypeIndex = GUI.Toolbar(new Rect(30, 240, 340, 30), selectedTypeIndex, titanTypes);
         }
 
-        if (GUI.Button(new Rect(140, 380, 100, 30), "Spawn"))
+        int baseY = 440;
+        overrideSize = GUI.Toggle(new Rect(30, baseY, 200, 20), overrideSize, " Override Size");
+        GUI.Label(new Rect(50, baseY + 25, 80, 20), "Min:"); minSize = GUI.TextField(new Rect(90, baseY + 25, 50, 20), minSize);
+        GUI.Label(new Rect(150, baseY + 25, 80, 20), "Max:"); maxSize = GUI.TextField(new Rect(190, baseY + 25, 50, 20), maxSize);
+
+        overrideHP = GUI.Toggle(new Rect(30, baseY + 55, 200, 20), overrideHP, " Override HP");
+        GUI.Label(new Rect(50, baseY + 80, 80, 20), "Min:"); minHP = GUI.TextField(new Rect(90, baseY + 80, 50, 20), minHP);
+        GUI.Label(new Rect(150, baseY + 80, 80, 20), "Max:"); maxHP = GUI.TextField(new Rect(190, baseY + 80, 50, 20), maxHP);
+
+        overrideSpeed = GUI.Toggle(new Rect(30, baseY + 110, 200, 20), overrideSpeed, " Override Run Speed");
+        GUI.Label(new Rect(50, baseY + 135, 80, 20), "Min:"); minSpeed = GUI.TextField(new Rect(90, baseY + 135, 50, 20), minSpeed);
+        GUI.Label(new Rect(150, baseY + 135, 80, 20), "Max:"); maxSpeed = GUI.TextField(new Rect(190, baseY + 135, 50, 20), maxSpeed);
+
+        overrideAnimSpeed = GUI.Toggle(new Rect(30, baseY + 165, 200, 20), overrideAnimSpeed, " Override Animation Speed");
+        GUI.Label(new Rect(50, baseY + 190, 80, 20), "Min:"); minAnimSpeed = GUI.TextField(new Rect(90, baseY + 190, 50, 20), minAnimSpeed);
+        GUI.Label(new Rect(150, baseY + 190, 80, 20), "Max:"); maxAnimSpeed = GUI.TextField(new Rect(190, baseY + 190, 50, 20), maxAnimSpeed);
+
+        if (GUI.Button(new Rect(140, baseY + 230, 100, 30), "Spawn"))
         {
             TrySpawnTitans();
         }
@@ -95,7 +109,30 @@ public class TitanSpawnMenu : MonoBehaviourPun
         {
             string typeToUse = useRandomWeights ? GetWeightedRandomType() : titanTypes[selectedTypeIndex];
             Vector3 offset = new Vector3(i * 5f, 0f, 0f);
-            manager.SpawnAITitanAt(typeToUse, basePos + offset, 0f);
+            BaseTitan titan = manager.SpawnAITitanAt(typeToUse, basePos + offset, 0f);
+
+            if (titan == null) continue;
+
+            if (overrideSize && float.TryParse(minSize, out float minS) && float.TryParse(maxSize, out float maxS))
+            {
+                float size = Random.Range(minS, maxS);
+                titan.SetSize(size);
+            }
+
+            if (overrideHP && int.TryParse(minHP, out int minHp) && int.TryParse(maxHP, out int maxHp))
+            {
+                titan.SetHealth(Random.Range(minHp, maxHp + 1));
+            }
+
+            if (overrideSpeed && float.TryParse(minSpeed, out float minSpd) && float.TryParse(maxSpeed, out float maxSpd))
+            {
+                titan.RunSpeedBase = Random.Range(minSpd, maxSpd);
+            }
+
+            if (overrideAnimSpeed && float.TryParse(minAnimSpeed, out float minAnim) && float.TryParse(maxAnimSpeed, out float maxAnim))
+            {
+                titan.AttackSpeedMultiplier = Random.Range(minAnim, maxAnim);
+            }
         }
     }
 
@@ -112,7 +149,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
         }
 
         if (totalWeight <= 0f)
-            return "Normal"; // fallback
+            return "Normal";
 
         float rand = Random.Range(0f, totalWeight);
         float cumulative = 0f;
@@ -124,6 +161,6 @@ public class TitanSpawnMenu : MonoBehaviourPun
                 return titanTypes[i];
         }
 
-        return titanTypes[0]; // fallback
+        return titanTypes[0];
     }
 }
