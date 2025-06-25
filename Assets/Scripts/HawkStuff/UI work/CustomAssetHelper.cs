@@ -3,15 +3,16 @@ using Photon.Pun;
 
 public class CustomAssetHelper : MonoBehaviourPun
 {
-    public void Move(Vector3 newPosition)
+    public void Move(Vector3 newPosition, Vector3 newRotation)
     {
         if (photonView.IsMine || !PhotonNetwork.IsConnected)
         {
             transform.position = newPosition;
+            transform.rotation = Quaternion.Euler(newRotation);
         }
         else
         {
-            photonView.RPC("RPC_Move", RpcTarget.MasterClient, newPosition);
+            photonView.RPC("RPC_Move", RpcTarget.MasterClient, newPosition, newRotation);
         }
     }
 
@@ -28,9 +29,10 @@ public class CustomAssetHelper : MonoBehaviourPun
     }
 
     [PunRPC]
-    private void RPC_Move(Vector3 newPosition)
+    private void RPC_Move(Vector3 newPosition, Vector3 newRotation)
     {
         transform.position = newPosition;
+        transform.rotation = Quaternion.Euler(newRotation);
     }
 
     [PunRPC]
@@ -39,3 +41,8 @@ public class CustomAssetHelper : MonoBehaviourPun
         PhotonNetwork.Destroy(gameObject);
     }
 }
+
+
+
+
+

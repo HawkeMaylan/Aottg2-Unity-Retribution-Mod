@@ -20,6 +20,9 @@ public class CustomAssetMenu : MonoBehaviourPun
     private GameObject selectedObject = null;
     private string moveX = "0", moveY = "0", moveZ = "0";
 
+    private string moveRotX = "0", moveRotY = "0", moveRotZ = "0";
+
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.BackQuote))
@@ -64,6 +67,7 @@ public class CustomAssetMenu : MonoBehaviourPun
                 float.TryParse(rotY, out float ry) &&
                 float.TryParse(rotZ, out float rz) &&
                 int.TryParse(layer, out int parsedLayer))
+
             {
                 StartCoroutine(SpawnAsset(bundleName, prefabName, new Vector3(x, y, z), new Vector3(rx, ry, rz), parsedLayer));
             }
@@ -85,6 +89,11 @@ public class CustomAssetMenu : MonoBehaviourPun
                 moveX = pos.x.ToString();
                 moveY = pos.y.ToString();
                 moveZ = pos.z.ToString();
+                var rot = obj.transform.rotation.eulerAngles;
+                moveRotX = rot.x.ToString();
+                moveRotY = rot.y.ToString();
+                moveRotZ = rot.z.ToString();
+
             }
 
             if (GUI.Button(new Rect(585, 50 + 25 * i, 60, 20), "Delete"))
@@ -103,16 +112,31 @@ public class CustomAssetMenu : MonoBehaviourPun
             moveY = GUI.TextField(new Rect(160, 410, 60, 20), moveY);
             GUI.Label(new Rect(230, 410, 30, 20), "Z:");
             moveZ = GUI.TextField(new Rect(260, 410, 60, 20), moveZ);
+            GUI.Label(new Rect(30, 470, 30, 20), "Rot X:");
+            moveRotX = GUI.TextField(new Rect(60, 470, 60, 20), moveRotX);
+            GUI.Label(new Rect(130, 470, 30, 20), "Y:");
+            moveRotY = GUI.TextField(new Rect(160, 470, 60, 20), moveRotY);
+            GUI.Label(new Rect(230, 470, 30, 20), "Z:");
+            moveRotZ = GUI.TextField(new Rect(260, 470, 60, 20), moveRotZ);
+
 
             if (GUI.Button(new Rect(60, 440, 100, 25), "Apply"))
             {
                 if (float.TryParse(moveX, out float mx) &&
-                    float.TryParse(moveY, out float my) &&
-                    float.TryParse(moveZ, out float mz))
+                float.TryParse(moveY, out float my) &&
+                float.TryParse(moveZ, out float mz) &&
+                float.TryParse(moveRotX, out float rx) &&
+                float.TryParse(moveRotY, out float ry) &&
+                float.TryParse(moveRotZ, out float rz))
                 {
-                    selectedObject.GetComponent<CustomAssetHelper>()?.Move(new Vector3(mx, my, mz));
+                    var helper = selectedObject.GetComponent<CustomAssetHelper>();
+                    if (helper != null)
+                    {
+                        helper.Move(new Vector3(mx, my, mz), new Vector3(rx, ry, rz));
+                    }
                     selectedObject = null;
                 }
+
             }
 
             if (GUI.Button(new Rect(170, 440, 100, 25), "Cancel"))
