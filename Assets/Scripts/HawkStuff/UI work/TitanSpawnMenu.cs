@@ -149,6 +149,11 @@ public class TitanSpawnMenu : MonoBehaviourPun
         {
             LoadPreset();
         }
+        if (GUI.Button(new Rect(1050, 90, 90, 25), "Refresh List"))
+        {
+            RefreshPresetList();
+        }
+
 
         GUI.Label(new Rect(850, 120, 150, 20), "Saved Presets:");
         presetScroll = GUI.BeginScrollView(
