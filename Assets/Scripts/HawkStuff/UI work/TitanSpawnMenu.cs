@@ -45,6 +45,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
     private string[] savedPresetNames = new string[0];
     private int selectedPresetIndex = -1;
 
+   
 
 
 
@@ -63,7 +64,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
         public bool useRandomArea;
         public string cornerAX, cornerAY, cornerAZ;
         public string cornerBX, cornerBY, cornerBZ;
-
+        public string inputCount;
     }
 
     void Update()
@@ -169,7 +170,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
             if (GUI.Button(new Rect(0, i * 30, 160, 25), savedPresetNames[i]))
             {
                 presetName = savedPresetNames[i];
-                LoadPreset();
+                selectedPresetIndex = i;
             }
 
             if (GUI.Button(new Rect(170, i * 30, 25, 25), "X"))
@@ -371,6 +372,8 @@ public class TitanSpawnMenu : MonoBehaviourPun
             cornerBX = this.cornerBX,
             cornerBY = this.cornerBY,
             cornerBZ = this.cornerBZ,
+            inputCount = this.inputCount,
+
 
         };
 
@@ -412,6 +415,9 @@ public class TitanSpawnMenu : MonoBehaviourPun
         cornerBX = preset.cornerBX;
         cornerBY = preset.cornerBY;
         cornerBZ = preset.cornerBZ;
+        inputCount = preset.inputCount;
+
+
 
 
         Debug.Log("Preset loaded: " + presetName);
