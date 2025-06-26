@@ -240,8 +240,23 @@ public class TitanSpawnMenu : MonoBehaviourPun
     {
         for (int i = 0; i < count; i++)
         {
-            Vector3 offset = new Vector3(i * 5f, 0f, 0f);
-            BaseTitan titan = manager.SpawnAITitanAt(type, basePos + offset, rotationY);
+            Vector3 spawnPos = basePos;
+
+            if (useRandomArea)
+            {
+                float.TryParse(cornerAX, out float x1); float.TryParse(cornerBX, out float x2);
+                float.TryParse(cornerAY, out float y1); float.TryParse(cornerBY, out float y2);
+                float.TryParse(cornerAZ, out float z1); float.TryParse(cornerBZ, out float z2);
+
+                spawnPos = new Vector3(
+                    UnityEngine.Random.Range(Mathf.Min(x1, x2), Mathf.Max(x1, x2)),
+                    UnityEngine.Random.Range(Mathf.Min(y1, y2), Mathf.Max(y1, y2)),
+                    UnityEngine.Random.Range(Mathf.Min(z1, z2), Mathf.Max(z1, z2))
+                );
+            }
+
+            BaseTitan titan = manager.SpawnAITitanAt(type, spawnPos, rotationY);
+
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
 
