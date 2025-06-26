@@ -22,6 +22,15 @@ public class TitanSpawnMenu : MonoBehaviourPun
     private string minSpeed = "10", maxSpeed = "20";
     private string minAnimSpeed = "1", maxAnimSpeed = "1.5";
 
+    private bool overrideWalkSpeed = false, overrideTurnSpeed = false, overrideActionPause = false;
+    private bool overrideTurnPause = false, overrideJumpForce = false, overrideRotateSpeed = false;
+    private string minWalkSpeed = "5", maxWalkSpeed = "10";
+    private string minTurnSpeed = "1", maxTurnSpeed = "3";
+    private string minActionPause = "0.5", maxActionPause = "1";
+    private string minTurnPause = "0.5", maxTurnPause = "1.2";
+    private string minJumpForce = "100", maxJumpForce = "300";
+    private string minRotateSpeed = "1.5", maxRotateSpeed = "4.0";
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.LeftAlt) && PhotonNetwork.IsMasterClient)
@@ -36,7 +45,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
     {
         if (!menuOpen) return;
 
-        GUI.Box(new Rect(20, 20, 400, 700), "Titan Spawn Menu");
+        GUI.Box(new Rect(20, 20, 400, 1150), "Titan Spawn Menu");
 
         GUI.Label(new Rect(30, 60, 80, 20), "Position X:"); inputX = GUI.TextField(new Rect(120, 60, 100, 20), inputX);
         GUI.Label(new Rect(30, 90, 80, 20), "Position Y:"); inputY = GUI.TextField(new Rect(120, 90, 100, 20), inputY);
@@ -61,24 +70,26 @@ public class TitanSpawnMenu : MonoBehaviourPun
         }
 
         int baseY = 440;
-        overrideSize = GUI.Toggle(new Rect(30, baseY, 200, 20), overrideSize, " Override Size");
-        GUI.Label(new Rect(50, baseY + 25, 80, 20), "Min:"); minSize = GUI.TextField(new Rect(90, baseY + 25, 50, 20), minSize);
-        GUI.Label(new Rect(150, baseY + 25, 80, 20), "Max:"); maxSize = GUI.TextField(new Rect(190, baseY + 25, 50, 20), maxSize);
+        DrawOverride("Size", ref overrideSize, ref minSize, ref maxSize, baseY);
+        DrawOverride("HP", ref overrideHP, ref minHP, ref maxHP, baseY += 55);
+        DrawOverride("Run Speed", ref overrideSpeed, ref minSpeed, ref maxSpeed, baseY += 55);
+        DrawOverride("Animation Speed", ref overrideAnimSpeed, ref minAnimSpeed, ref maxAnimSpeed, baseY += 55);
+        DrawOverride("Walk Speed", ref overrideWalkSpeed, ref minWalkSpeed, ref maxWalkSpeed, baseY += 55);
+        DrawOverride("Turn Speed", ref overrideTurnSpeed, ref minTurnSpeed, ref maxTurnSpeed, baseY += 55);
+        DrawOverride("Action Pause", ref overrideActionPause, ref minActionPause, ref maxActionPause, baseY += 55);
+        DrawOverride("Turn Pause", ref overrideTurnPause, ref minTurnPause, ref maxTurnPause, baseY += 55);
+        DrawOverride("Jump Force", ref overrideJumpForce, ref minJumpForce, ref maxJumpForce, baseY += 55);
+        DrawOverride("Rotate Speed", ref overrideRotateSpeed, ref minRotateSpeed, ref maxRotateSpeed, baseY += 55);
 
-        overrideHP = GUI.Toggle(new Rect(30, baseY + 55, 200, 20), overrideHP, " Override HP");
-        GUI.Label(new Rect(50, baseY + 80, 80, 20), "Min:"); minHP = GUI.TextField(new Rect(90, baseY + 80, 50, 20), minHP);
-        GUI.Label(new Rect(150, baseY + 80, 80, 20), "Max:"); maxHP = GUI.TextField(new Rect(190, baseY + 80, 50, 20), maxHP);
-
-        overrideSpeed = GUI.Toggle(new Rect(30, baseY + 110, 200, 20), overrideSpeed, " Override Run Speed");
-        GUI.Label(new Rect(50, baseY + 135, 80, 20), "Min:"); minSpeed = GUI.TextField(new Rect(90, baseY + 135, 50, 20), minSpeed);
-        GUI.Label(new Rect(150, baseY + 135, 80, 20), "Max:"); maxSpeed = GUI.TextField(new Rect(190, baseY + 135, 50, 20), maxSpeed);
-
-        overrideAnimSpeed = GUI.Toggle(new Rect(30, baseY + 165, 200, 20), overrideAnimSpeed, " Override Animation Speed");
-        GUI.Label(new Rect(50, baseY + 190, 80, 20), "Min:"); minAnimSpeed = GUI.TextField(new Rect(90, baseY + 190, 50, 20), minAnimSpeed);
-        GUI.Label(new Rect(150, baseY + 190, 80, 20), "Max:"); maxAnimSpeed = GUI.TextField(new Rect(190, baseY + 190, 50, 20), maxAnimSpeed);
-
-        if (GUI.Button(new Rect(140, baseY + 230, 100, 30), "Spawn"))
+        if (GUI.Button(new Rect(240, 60, 100, 30), "Spawn"))
             TrySpawnTitans();
+    }
+
+    private void DrawOverride(string label, ref bool toggle, ref string min, ref string max, int y)
+    {
+        toggle = GUI.Toggle(new Rect(30, y, 200, 20), toggle, $" Override {label}");
+        GUI.Label(new Rect(50, y + 25, 80, 20), "Min:"); min = GUI.TextField(new Rect(90, y + 25, 50, 20), min);
+        GUI.Label(new Rect(150, y + 25, 80, 20), "Max:"); max = GUI.TextField(new Rect(190, y + 25, 50, 20), max);
     }
 
     private void TrySpawnTitans()
@@ -96,7 +107,6 @@ public class TitanSpawnMenu : MonoBehaviourPun
 
         Vector3 basePos = new Vector3(x, y, z);
         InGameManager manager = SceneLoader.CurrentGameManager as InGameManager;
-
         if (manager == null)
         {
             Debug.LogError("InGameManager not found.");
@@ -124,15 +134,24 @@ public class TitanSpawnMenu : MonoBehaviourPun
 
             if (overrideSize && float.TryParse(minSize, out float minS) && float.TryParse(maxSize, out float maxS))
                 titan.SetSize(Random.Range(minS, maxS));
-
             if (overrideHP && int.TryParse(minHP, out int minHp) && int.TryParse(maxHP, out int maxHp))
                 titan.SetHealth(Random.Range(minHp, maxHp + 1));
-
             if (overrideSpeed && float.TryParse(minSpeed, out float minSpd) && float.TryParse(maxSpeed, out float maxSpd))
                 titan.RunSpeedBase = Random.Range(minSpd, maxSpd);
-
             if (overrideAnimSpeed && float.TryParse(minAnimSpeed, out float minAnim) && float.TryParse(maxAnimSpeed, out float maxAnim))
                 titan.AttackSpeedMultiplier = Random.Range(minAnim, maxAnim);
+            if (overrideWalkSpeed && float.TryParse(minWalkSpeed, out float minWalk) && float.TryParse(maxWalkSpeed, out float maxWalk))
+                titan.WalkSpeedBase = Random.Range(minWalk, maxWalk);
+            if (overrideTurnSpeed && float.TryParse(minTurnSpeed, out float minTurn) && float.TryParse(maxTurnSpeed, out float maxTurn))
+                titan.TurnSpeed = Random.Range(minTurn, maxTurn);
+            if (overrideActionPause && float.TryParse(minActionPause, out float minActPause) && float.TryParse(maxActionPause, out float maxActPause))
+                titan.ActionPause = Random.Range(minActPause, maxActPause);
+            if (overrideTurnPause && float.TryParse(minTurnPause, out float minTPause) && float.TryParse(maxTurnPause, out float maxTPause))
+                titan.TurnPause = Random.Range(minTPause, maxTPause);
+            if (overrideJumpForce && float.TryParse(minJumpForce, out float minJump) && float.TryParse(maxJumpForce, out float maxJump))
+                titan.JumpForce = Random.Range(minJump, maxJump);
+            if (overrideRotateSpeed && float.TryParse(minRotateSpeed, out float minRot) && float.TryParse(maxRotateSpeed, out float maxRot))
+                titan.RotateSpeed = Random.Range(minRot, maxRot);
         }
     }
 

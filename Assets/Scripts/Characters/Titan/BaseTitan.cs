@@ -169,16 +169,14 @@ namespace Characters
                 else if (data.HasKey("TurnPause"))
                     TurnPause = data["TurnPause"].AsFloat;
 
-                // OPTIONAL: handle more fields like DetectRange, FocusRange, FocusTime, TurnAngle if you want!
 
-                // OPTIONAL: Handle AttackSpeeds dictionary
                 if (data.HasKey("AttackSpeeds"))
                 {
                     foreach (string attack in data["AttackSpeeds"].Keys)
                         AttackSpeeds.Add(attack, data["AttackSpeeds"][attack].AsFloat);
                 }
 
-                // OPTIONAL: if TurnSpeed separately
+                //  if TurnSpeed separately
                 if (data.HasKey("TurnSpeed"))
                 {
                     TurnSpeed = data["TurnSpeed"].AsFloat;
