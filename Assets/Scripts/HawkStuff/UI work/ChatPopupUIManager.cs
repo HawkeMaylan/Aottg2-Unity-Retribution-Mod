@@ -5,9 +5,8 @@ using Characters;
 using GameManagers;
 using ApplicationManagers;
 using Settings;
-using UI;
-using Utility;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ChatPopupUIManager : MonoBehaviourPun
 {
@@ -15,6 +14,11 @@ public class ChatPopupUIManager : MonoBehaviourPun
     private InputField chatInput;
     private Button sendButton;
     private InGameManager gameManager;
+
+    private static readonly float EmoteDuration = 15f;
+    private static readonly int MaxMessages = 5;
+
+    private static Dictionary<Transform, List<GameObject>> activePopups = new Dictionary<Transform, List<GameObject>>();
 
     private void Awake()
     {
@@ -77,10 +81,18 @@ public class ChatPopupUIManager : MonoBehaviourPun
         if (!SettingsManager.UISettings.ShowEmotes.Value)
             return;
 
-        BaseCharacter character = Util.FindCharacterByViewId(viewId);
+        PhotonView view = PhotonView.Find(viewId);
+        if (view == null) return;
+
+        BaseCharacter character = view.GetComponent<BaseCharacter>();
         if (character == null) return;
 
-        StartCoroutine(SpawnFloatingText(character.Cache.Transform, message));
+        Transform target = character.Cache.Transform;
+
+        if (!activePopups.ContainsKey(target))
+            activePopups[target] = new List<GameObject>();
+
+        StartCoroutine(SpawnFloatingText(target, message));
     }
 
     private IEnumerator SpawnFloatingText(Transform target, string message)
@@ -88,58 +100,77 @@ public class ChatPopupUIManager : MonoBehaviourPun
         GameObject canvasGO = GameObject.Find("DefaultMenu(Clone)");
         if (canvasGO == null) yield break;
 
-        GameObject textGO = new GameObject("FloatingText", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
-        textGO.transform.SetParent(canvasGO.transform, false);
+        GameObject wrapper = new GameObject("FloatingTextWrapper", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        wrapper.transform.SetParent(canvasGO.transform, false);
+        wrapper.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.85f); // black background
+
+        GameObject textGO = new GameObject("FloatingText", typeof(RectTransform), typeof(Text));
+        textGO.transform.SetParent(wrapper.transform, false);
+
+        RectTransform wrapperRect = wrapper.GetComponent<RectTransform>();
+        wrapperRect.sizeDelta = new Vector2(250, 30);
+
+        RectTransform textRect = textGO.GetComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
 
         Text textComp = textGO.GetComponent<Text>();
         textComp.text = message;
         textComp.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        textComp.fontSize = 20;
+        textComp.fontSize = 18;
         textComp.alignment = TextAnchor.MiddleCenter;
         textComp.color = Color.white;
 
-        RectTransform rect = textGO.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(300, 50);
+        // Add message to the list
+        var list = activePopups[target];
+        list.Add(wrapper);
+        if (list.Count > MaxMessages)
+        {
+            Destroy(list[0]);
+            list.RemoveAt(0);
+        }
 
-        float duration = 2.5f;
         float elapsed = 0f;
-
-        while (elapsed < duration)
+        while (elapsed < EmoteDuration)
         {
             elapsed += Time.deltaTime;
 
             if (target == null)
                 break;
 
-            Vector3 worldPos = target.position + Vector3.up * 2.5f;
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
-            rect.position = screenPos;
+            Vector3 basePos = target.position + Vector3.up * 2.5f;
+            for (int i = 0; i < list.Count; i++)
+            {
+                GameObject go = list[i];
+                if (go == null) continue;
+                Vector3 pos = Camera.main.WorldToScreenPoint(basePos + Vector3.up * (list.Count - 1 - i) * 0.4f);
+                go.GetComponent<RectTransform>().position = pos;
+            }
 
             yield return null;
         }
 
-        Destroy(textGO);
+        if (activePopups.ContainsKey(target))
+        {
+            activePopups[target].Remove(wrapper);
+        }
+        Destroy(wrapper);
     }
 
     private void CreateChatUI()
     {
         GameObject canvasGO = GameObject.Find("DefaultMenu(Clone)");
-        if (canvasGO == null)
-        {
-            Debug.LogWarning("ChatPopupUIManager: DefaultMenu canvas not found.");
-            return;
-        }
+        if (canvasGO == null) return;
 
         Canvas canvas = canvasGO.GetComponent<Canvas>();
-        if (canvas == null)
-        {
-            Debug.LogWarning("ChatPopupUIManager: DefaultMenu has no Canvas.");
-            return;
-        }
+        if (canvas == null) return;
 
         panel = new GameObject("ChatPanel", typeof(RectTransform), typeof(Image));
         panel.transform.SetParent(canvas.transform, false);
         panel.GetComponent<Image>().color = new Color(0, 0, 0, 0.5f);
+
         RectTransform panelRect = panel.GetComponent<RectTransform>();
         panelRect.anchorMin = new Vector2(0.3f, 0.1f);
         panelRect.anchorMax = new Vector2(0.7f, 0.2f);
@@ -155,7 +186,7 @@ public class ChatPopupUIManager : MonoBehaviourPun
         inputRect.offsetMax = new Vector2(-10, -10);
 
         Image inputImage = inputGO.GetComponent<Image>();
-        inputImage.color = Color.white;
+        inputImage.color = Color.black;
 
         chatInput = inputGO.GetComponent<InputField>();
         chatInput.textComponent = CreateUIText(chatInput.transform, "InputText", TextAnchor.MiddleLeft, 14);
@@ -171,7 +202,7 @@ public class ChatPopupUIManager : MonoBehaviourPun
         buttonRect.offsetMax = new Vector2(-10, -10);
 
         Image buttonImage = buttonGO.GetComponent<Image>();
-        buttonImage.color = new Color(0.8f, 0.8f, 0.8f);
+        buttonImage.color = Color.gray;
 
         sendButton = buttonGO.GetComponent<Button>();
         sendButton.onClick.AddListener(SendChatPopup);
