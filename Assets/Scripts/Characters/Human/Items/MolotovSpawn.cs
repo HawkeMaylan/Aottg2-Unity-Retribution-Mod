@@ -27,21 +27,26 @@ namespace Characters
 
             try
             {
-                // Use cursor aim point from camera
+                // Get aim target and direction
                 Vector3 target = human.GetAimPoint();
                 Vector3 spawnPos = human.Cache.Transform.position + Vector3.up * 1.5f;
                 Vector3 direction = (target - spawnPos).normalized;
-                float throwForce = 20f;
+                float baseThrowSpeed = 20f;
 
-                // Create molotov
+                // Include player's forward momentum
+                Vector3 playerVelocity = human.Cache.Rigidbody.velocity;
+                float addedSpeed = Mathf.Max(Vector3.Dot(playerVelocity, direction), 0f);
+                float finalSpeed = baseThrowSpeed + addedSpeed;
+                Vector3 finalVelocity = direction * finalSpeed;
+
+                // Spawn molotov and apply force
                 GameObject molotov = PhotonNetwork.Instantiate("Buildables/Molotov", spawnPos, Quaternion.LookRotation(direction));
 
-                // Apply throw force
                 Rigidbody rb = molotov.GetComponent<Rigidbody>();
                 if (rb != null)
                 {
                     rb.velocity = Vector3.zero;
-                    rb.AddForce(direction * throwForce, ForceMode.VelocityChange);
+                    rb.AddForce(finalVelocity, ForceMode.VelocityChange);
                 }
 
                 // Decrease inventory
