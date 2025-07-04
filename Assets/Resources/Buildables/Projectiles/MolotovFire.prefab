@@ -4904,7 +4904,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 0f025bacc1bcb6b48a8aec118195ec06, type: 3}
+  m_audioClip: {fileID: 8300000, guid: f5e63c8bf12ca72469a0cca4fee133db, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -5159,7 +5159,7 @@ MonoBehaviour:
   humanDamage: 100
   damageNape: 0
   titanNapeDamage: 100
-  disableArms: 1
+  disableArms: 0
   crippleLegs: 1
   blindEyes: 1
   directionalStun: 0

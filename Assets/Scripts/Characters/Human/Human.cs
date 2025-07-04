@@ -2771,8 +2771,10 @@ namespace Characters
             itemList1.Add(new FlareItem(this, "Indigo", Color.blue, 300f));
             itemList2.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
             itemList2.Add(new FlareItem3(this, "Acoustic Flare", Color.grey, 300f));
-            itemList2.Add(new HorseWhistleItem(this, "Whistle", 5f));        
-            
+            itemList2.Add(new HorseWhistleItem(this, "Whistle", 5f));
+
+            itemList2.Add(new MolotovSpawn(this, "Molotov", 1f));
+
 
             itemList3.Add(new Lanterntoggle(this, "Lantern On/Off", 1f));
             itemList3.Add(new CloakToggle(this, "Cape On/Off", 1f));
