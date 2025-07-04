@@ -2781,6 +2781,13 @@ namespace Characters
 
                 if (inventory.GetItemCount("Molotov") > 0)
                     itemList2.Add(new MolotovSpawn(this, "Molotov", 1f)); // 'this' is the owner
+
+                inventory.SetItemCount("GasBomb", inventory.GetItemCount("GasBomb")); // ensure key exists
+
+                if (inventory.GetItemCount("GasBomb") > 0)
+                    itemList2.Add(new GasBombSpawn(this, "Gas Bomb", 1f)); // 'this' is the owner
+
+                
             }
 
 
@@ -2853,6 +2860,10 @@ namespace Characters
                 {
                     case "Molotov":
                         itemList2.Add(new MolotovSpawn(this, itemName, 1f));
+                        break;
+
+                    case "GasBomb":
+                        itemList2.Add(new GasBombSpawn(this, itemName, 1f));
                         break;
 
                         // ADD MORE IF NEEDING TO BE REFRESHED HERE 

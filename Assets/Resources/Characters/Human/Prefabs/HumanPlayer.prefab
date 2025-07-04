@@ -16776,6 +16776,7 @@ MonoBehaviour:
   - CannonGround
   - WorkerLog
   - Molotov
+  - GasBomb
 --- !u!114 &-5803597552919391511
 MonoBehaviour:
   m_ObjectHideFlags: 0
