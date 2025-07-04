@@ -177,5 +177,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   safetyTime: 0.5
-  prefabToSpawn: {fileID: 451477915838638354, guid: 5804d1949c5931b43b0a97e087b68937, type: 3}
-  resourcePath: Buildables/Projectiles/IncendiaryZoneCannon
+  prefabToSpawn: {fileID: 451477915838638354, guid: afdc84a3943e3a14fb469722b15fa8b5, type: 3}
+  resourcePath: Buildables/Projectiles/MolotovFire

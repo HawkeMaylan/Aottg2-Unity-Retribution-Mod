@@ -181,6 +181,7 @@ MonoBehaviour:
   - RPC_SpawnRemote
   - RPC_Delete
   - RPC_Move
+  - RPC_RequestDestruction
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
