@@ -2773,7 +2773,18 @@ namespace Characters
             itemList2.Add(new FlareItem3(this, "Acoustic Flare", Color.grey, 300f));
             itemList2.Add(new HorseWhistleItem(this, "Whistle", 5f));
 
-            itemList2.Add(new MolotovSpawn(this, "Molotov", 1f));
+
+            var inventory = GetComponent<HumanInventory>();
+            if (inventory != null)
+            {
+                inventory.SetItemCount("Molotov", inventory.GetItemCount("Molotov")); // ensure key exists
+
+                if (inventory.GetItemCount("Molotov") > 0)
+                    itemList2.Add(new MolotovSpawn(this, "Molotov", 1f)); // 'this' is the owner
+            }
+
+
+
 
 
             itemList3.Add(new Lanterntoggle(this, "Lantern On/Off", 1f));
@@ -2825,6 +2836,28 @@ namespace Characters
 
 
 
+        }
+
+        public void RefreshItemBasedOnInventory(string itemName)
+        {
+            var inventory = GetComponent<HumanInventory>();
+            if (inventory == null) return;
+
+            // Clean out any existing instance of that item
+            itemList2.RemoveAll(i => i.Name == itemName);
+
+            // Only re-add if count > 0
+            if (inventory.GetItemCount(itemName) > 0)
+            {
+                switch (itemName)
+                {
+                    case "Molotov":
+                        itemList2.Add(new MolotovSpawn(this, itemName, 1f));
+                        break;
+
+                        // ADD MORE IF NEEDING TO BE REFRESHED HERE 
+                }
+            }
         }
 
 

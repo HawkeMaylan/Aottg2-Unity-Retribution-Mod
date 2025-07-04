@@ -68,6 +68,13 @@ namespace Characters
                 int delta = newCount - oldCount;
                 string change = delta > 0 ? $"+{delta}" : $"{delta}";
                 ItemPopupManager.Instance?.ShowPopup($"{type} {change}");
+
+                Human human = GetComponent<Human>();
+                if (human != null)
+                {
+                    human.RefreshItemBasedOnInventory(type);
+                }
+
             }
         }
 
