@@ -32,7 +32,6 @@ public class SelfDestroyOnImpact : MonoBehaviourPun
         if (!canTrigger) return;
 
         Vector3 hitPosition = collision.contacts[0].point;
-        Quaternion hitRotation = Quaternion.LookRotation(collision.contacts[0].normal);
 
         if (prefabToSpawn == null)
         {
@@ -46,15 +45,15 @@ public class SelfDestroyOnImpact : MonoBehaviourPun
             return;
         }
 
-        // Spawn effect (networked if online, local if offline)
+        // Force Quaternion.identity (0,0,0 rotation)
         if (PhotonNetwork.InRoom)
-            PhotonNetwork.Instantiate(resourcePath, hitPosition, hitRotation);
+            PhotonNetwork.Instantiate(resourcePath, hitPosition, Quaternion.identity);
         else
-            Instantiate(Resources.Load(resourcePath), hitPosition, hitRotation);
+            Instantiate(Resources.Load(resourcePath), hitPosition, Quaternion.identity);
 
-        // Destroy with fallback logic
         TryDestroy();
     }
+
 
     private void TryDestroy()
     {
