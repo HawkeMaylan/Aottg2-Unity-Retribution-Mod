@@ -25421,6 +25421,10 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: 1750504082877903736, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: m_MaxParticleSize
+      value: 0.3
+      objectReference: {fileID: 0}
     - target: {fileID: 1750518954752999704, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -33768,6 +33772,14 @@ PrefabInstance:
     - target: {fileID: 2284107408000749745, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 2284279256769224761, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: InitialModule.startSizeY.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2284279256769224761, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: InitialModule.startSizeZ.minMaxState
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2284497616498435313, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -43368,6 +43380,22 @@ PrefabInstance:
     - target: {fileID: 2963870972890523247, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 2964349433628163793, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: InitialModule.startSizeY.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2964349433628163793, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: InitialModule.startSizeZ.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2964349433628163793, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: InitialModule.startRotationX.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2964349433628163793, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: InitialModule.startRotationY.minMaxState
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2964917350146593841, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -54624,6 +54652,14 @@ PrefabInstance:
     - target: {fileID: 3726723493913729207, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 3726893600860754335, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: InitialModule.startSizeY.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3726893600860754335, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: InitialModule.startSizeZ.minMaxState
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3727130464812468012, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_Layer
@@ -70165,6 +70201,10 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: 4840672094636781784, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: m_MaxParticleSize
+      value: 0.3
+      objectReference: {fileID: 0}
     - target: {fileID: 4840830884596768813, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -70912,6 +70952,10 @@ PrefabInstance:
     - target: {fileID: 4890751111985050920, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 4891969752348289376, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: m_MaxParticleSize
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 4892000688263579566, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_Layer
@@ -103321,6 +103365,10 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: 7230074809517572729, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: m_MaxParticleSize
+      value: 0.3
+      objectReference: {fileID: 0}
     - target: {fileID: 7230314400868312763, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_Layer
       value: 23
@@ -115856,6 +115904,14 @@ PrefabInstance:
     - target: {fileID: 8076281191587937671, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 8076311358877914362, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: InitialModule.startSizeY.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8076311358877914362, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
+      propertyPath: InitialModule.startSizeZ.minMaxState
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8076333191117034799, guid: 349eec8e17cf3d74ab1b8b1b5c46420e, type: 3}
       propertyPath: m_StaticEditorFlags

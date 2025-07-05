@@ -24,6 +24,11 @@ namespace Characters
                 GameObject ShigGateN = PhotonNetwork.Instantiate("Buildables/ShigGateNorth", pos, Quaternion.identity);
                 GameObject ShigGateS = PhotonNetwork.Instantiate("Buildables/ShigGateSouth", pos, Quaternion.identity);
                 GameObject Varreosa = PhotonNetwork.Instantiate("Buildables/PastVarreosa", pos, Quaternion.identity);
+                GameObject Varreosa5 = PhotonNetwork.Instantiate("Buildables/Riot", pos, Quaternion.identity);
+                GameObject Varreosa1 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Act06_1", pos, Quaternion.identity);
+                GameObject Varreosa2 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Act06_2", pos, Quaternion.identity);
+                GameObject Varreosa3 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Act06_3", pos, Quaternion.identity);
+                GameObject Varreosa4 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Fay", pos, Quaternion.identity);
                 /// GameObject WaterBase = PhotonNetwork.Instantiate("Buildables/WaterEmpty", pos, Quaternion.identity);
             }
             catch { /* Silently ignore errors if any occur */ }
