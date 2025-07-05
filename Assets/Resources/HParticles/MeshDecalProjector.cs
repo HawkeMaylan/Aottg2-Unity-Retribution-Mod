@@ -44,16 +44,14 @@ public class MeshDecalProjector: MonoBehaviour
                 Vector3 center = (v0 + v1 + v2) / 3f;
                 Vector3 dir = transform.forward;
 
-                if (Vector3.Dot(normal, -dir) < 0.5f) continue;
+                ///if (Vector3.Dot(normal, -dir) < 0.5f) continue;
                 if (Vector3.Distance(transform.position, center) > decalSize) continue;
 
                 vertices.Add(transform.InverseTransformPoint(v0));
                 vertices.Add(transform.InverseTransformPoint(v1));
                 vertices.Add(transform.InverseTransformPoint(v2));
 
-                uvs.Add(new Vector2(0, 0));
-                uvs.Add(new Vector2(0, 1));
-                uvs.Add(new Vector2(1, 0));
+
 
                 triangles.Add(triOffset++);
                 triangles.Add(triOffset++);
