@@ -337,7 +337,7 @@ MonoBehaviour:
   spawnParticleOnCollision: 0
   collisionParticlePrefab: {fileID: 0}
   damageHumans: 1
-  humanDamage: 100
+  humanDamage: 30
   damageNape: 1
   titanNapeDamage: 1000
   disableArms: 1
@@ -362,7 +362,7 @@ Rigidbody:
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 12582912
+    m_Bits: 12587008
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
