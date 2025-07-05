@@ -2286,7 +2286,7 @@ namespace Characters
                     reelAxis = 0f;
             }
             float reel = Mathf.Clamp(reelAxis, -0.8f, 0.8f) + 1f;
-            v = Vector3.RotateTowards(v, _currentVelocity, 1.53938f * reel, 1.53938f * reel).normalized;
+            v = Vector3.RotateTowards(v, _currentVelocity, 1.33938f * reel, 1.33938f * reel).normalized;
             if (reelAxis > 0f)
                 _isReelingOut = true;
             else if (reelAxis < 0f && !_reelInWaitForRelease)
