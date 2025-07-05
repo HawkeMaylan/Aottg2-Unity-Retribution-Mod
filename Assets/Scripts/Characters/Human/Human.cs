@@ -2285,7 +2285,7 @@ namespace Characters
                 if (SettingsManager.InGameCurrent.Misc.RealismMode.Value && Vector3.Distance(Cache.Transform.position, position) > RealismMaxReel)
                     reelAxis = 0f;
             }
-            float reel = Mathf.Clamp(reelAxis, -0.8f, 0.8f) + 1f;
+            float reel = Mathf.Clamp(reelAxis, -1f, 2f) + 1f;
             v = Vector3.RotateTowards(v, _currentVelocity, 1.33938f * reel, 1.33938f * reel).normalized;
             if (reelAxis > 0f)
                 _isReelingOut = true;
