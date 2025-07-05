@@ -127,7 +127,7 @@ MonoBehaviour:
   killSourceName: Cannonball
   playAnimationOnCollision: 1
   collisionAnimation: {fileID: 7400000, guid: 84e9bdb990e1c7248ba9f1b302266a59, type: 2}
-  animationDelayTime: 0.1
+  animationDelayTime: 1
   makeKinematicOnCollision: 1
   animationCollisionLayers:
     serializedVersion: 2

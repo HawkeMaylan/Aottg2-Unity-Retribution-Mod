@@ -180,7 +180,7 @@ Transform:
   m_GameObject: {fileID: 3959170942141187699}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.7, z: 6}
+  m_LocalPosition: {x: 0, y: 1.7, z: 6.54}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -361,6 +361,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 8452582915418814263}
   - {fileID: 4133663127283518437}
+  - {fileID: 9087174453081477372}
   - {fileID: 6719653893802239214}
   sceneViewId: 0
   InstantiationId: 0
