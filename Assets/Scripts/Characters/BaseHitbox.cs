@@ -136,7 +136,10 @@ namespace Characters
             }
             var go = other.transform.root.gameObject;
             BaseCharacter character = go.GetComponent<BaseCharacter>();
-            CustomLogicCollisionHandler handler = other.gameObject.GetComponent<CustomLogicCollisionHandler>();
+            CustomLogicCollisionHandler handler = other.GetComponent<CustomLogicCollisionHandler>();
+            Entities.DamageableEntity entity = other.GetComponentInParent<Entities.DamageableEntity>();
+
+
             if (character != null && !TeamInfo.SameTeam(Owner, character) && !_hitGameObjects.Contains(other.gameObject))
             {
                 _hitGameObjects.Add(other.gameObject);
@@ -147,6 +150,12 @@ namespace Characters
                 _hitGameObjects.Add(other.gameObject);
                 OnHit(handler, other);
             }
+            else if (entity != null && !_hitGameObjects.Contains(other.gameObject))
+            {
+                _hitGameObjects.Add(other.gameObject);
+                Owner.OnHit(this, entity, other, "", true); // true = first hit
+            }
+
         }
 
         protected virtual void OnHit(BaseCharacter victim, Collider collider)

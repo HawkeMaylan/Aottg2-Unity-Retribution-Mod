@@ -289,20 +289,16 @@ namespace Entities
             var hitbox = collider.GetComponent<BaseHitbox>();
             var attacker = hitbox?.Owner;
 
-            if (hitbox == null || attacker == null || !hitbox.IsActive())
+            if (hitbox == null || !hitbox.IsActive())
                 return;
 
-            string attackerName = attacker.Name ?? "Unknown";
-
-            if (attacker is Human human && human.IsMine())
-            {
-                photonView.RPC("RequestHitRPC", RpcTarget.MasterClient, attackerName, flatDamageFromUnknown, "Blade", collider.name, photonView.ViewID);
-            }
-            else if (attacker == null)
+            // Only apply fallback flat damage if no attacker exists (e.g., environment collision)
+            if (attacker == null)
             {
                 photonView.RPC("RequestHitRPC", RpcTarget.MasterClient, "Unknown", flatDamageFromUnknown, "Collision", collider.name, photonView.ViewID);
             }
         }
+
     }
 
     public class ColliderEventForwarder : MonoBehaviour
