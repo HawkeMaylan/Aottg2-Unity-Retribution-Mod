@@ -25,6 +25,21 @@ public class NetworkedRigidbodyStatFixer : MonoBehaviourPun
         targetRigidbody = GetComponent<Rigidbody>();
     }
 
+    private void Start()
+    {
+        if (targetRigidbody == null)
+            targetRigidbody = GetComponent<Rigidbody>();
+
+        if (targetRigidbody != null)
+        {
+            // Initialize expected values from actual Rigidbody
+            expectedMass = targetRigidbody.mass;
+            expectedUseGravity = targetRigidbody.useGravity;
+            expectedDrag = targetRigidbody.drag;
+            expectedAngularDrag = targetRigidbody.angularDrag;
+        }
+    }
+
     private void Update()
     {
         if (!photonView.IsMine || isMounted || targetRigidbody == null)
