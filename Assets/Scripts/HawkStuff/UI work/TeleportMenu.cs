@@ -303,6 +303,18 @@ public class TeleportMenu : MonoBehaviourPunCallbacks
         if (GUI.Button(new Rect(Screen.width - 300, 320, 200, 30), "Kill Player's Horse")) StartCoroutine(TryKillHorse(selectedPlayer));
         if (GUI.Button(new Rect(Screen.width - 300, 360, 200, 30), "Respawn Player's Horse")) TryRespawnHorse();
         if (GUI.Button(new Rect(Screen.width - 300, 400, 200, 30), "Bring Selected Player to Me")) BringPlayerToMC();
+        if (GUI.Button(new Rect(Screen.width - 300, 480, 200, 30), "Get Player Coordinates"))
+        {
+            Human human = FindHumanByPlayer(selectedPlayer);
+            if (human != null)
+            {
+                Vector3 pos = human.Cache.Transform.position;
+                inputX = pos.x.ToString("F2");
+                inputY = pos.y.ToString("F2");
+                inputZ = pos.z.ToString("F2");
+            }
+        }
+
         if (GUI.Button(new Rect(Screen.width - 300, 440, 200, 30), "Bring Me to Selected Player")) BringMCToPlayer();
         if (GUI.Button(new Rect(Screen.width - 500, 240, 200, 30), "Revive Player")) TryReviveSelectedPlayer();
         if (GUI.Button(new Rect(Screen.width - 500, 280, 200, 30), "Kill Player")) TryKillSelectedPlayer();
