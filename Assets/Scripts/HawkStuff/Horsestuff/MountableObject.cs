@@ -45,10 +45,10 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     private string _lastCachedKey = "";
 
     private Collider _triggerCollider;
-    private const float MaxDistanceBuffer = 1.5f;
+    private const float MaxDistanceBuffer = 4.5f;
 
     [Header("Trigger Validation")]
-public float maxTriggerDistance = 2.5f; // Adjustable distance to validate trigger stay
+public float maxTriggerDistance = 5.5f; // Adjustable distance to validate trigger stay
 
 
     private void Start()
