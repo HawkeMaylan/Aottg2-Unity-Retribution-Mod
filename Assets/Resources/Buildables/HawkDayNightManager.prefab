@@ -237,7 +237,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sun: {fileID: 42349908458179679}
   moon: {fileID: 4745114026488916793}
-  dayDuration: 36
+  dayDuration: 3600
   sunriseDuration: 0.1
   middayDuration: 0.5
   sunsetDuration: 0.1
