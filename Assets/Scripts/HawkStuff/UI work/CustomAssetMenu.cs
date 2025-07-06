@@ -22,6 +22,12 @@ public class CustomAssetMenu : MonoBehaviourPun
 
     private string moveRotX = "0", moveRotY = "0", moveRotZ = "0";
 
+    private List<string> buildablePrefabNames = new List<string>();
+    private int selectedBuildableIndex = 0;
+    private Vector2 buildableScroll = Vector2.zero;
+    private bool buildablesLoaded = false;
+
+
 
     private void Update()
     {
@@ -144,7 +150,61 @@ public class CustomAssetMenu : MonoBehaviourPun
                 selectedObject = null;
             }
         }
+        if (!buildablesLoaded)
+            LoadBuildablePrefabs();
+
+        GUI.Box(new Rect(680, 20, 300, 300), "Resources/Buildables");
+
+        GUI.Label(new Rect(690, 50, 200, 20), "Select Buildable:");
+
+        buildableScroll = GUI.BeginScrollView(
+            new Rect(690, 75, 280, 160),
+            buildableScroll,
+            new Rect(0, 0, 260, buildablePrefabNames.Count * 25)
+        );
+
+        for (int i = 0; i < buildablePrefabNames.Count; i++)
+        {
+            if (GUI.Button(new Rect(0, i * 25, 260, 25), buildablePrefabNames[i]))
+            {
+                selectedBuildableIndex = i;
+            }
+        }
+
+        GUI.EndScrollView();
+
+        GUI.Label(new Rect(690, 240, 200, 20), "Selected: " + buildablePrefabNames[selectedBuildableIndex]);
+
+        if (GUI.Button(new Rect(690, 270, 140, 30), "Spawn Buildable"))
+        {
+            if (float.TryParse(posX, out float x) &&
+                float.TryParse(posY, out float y) &&
+                float.TryParse(posZ, out float z) &&
+                float.TryParse(rotX, out float rx) &&
+                float.TryParse(rotY, out float ry) &&
+                float.TryParse(rotZ, out float rz) &&
+                int.TryParse(layer, out int parsedLayer))
+            {
+                string buildableName = buildablePrefabNames[selectedBuildableIndex];
+                SpawnBuildable(buildableName, new Vector3(x, y, z), new Vector3(rx, ry, rz), parsedLayer);
+            }
+        }
+
+
+
     }
+
+    private void LoadBuildablePrefabs()
+    {
+        GameObject[] allPrefabs = Resources.LoadAll<GameObject>("Buildables");
+        buildablePrefabNames.Clear();
+        foreach (var prefab in allPrefabs)
+            buildablePrefabNames.Add(prefab.name);
+        buildablesLoaded = true;
+    }
+
+
+
 
     private IEnumerator SpawnAsset(string bundle, string prefab, Vector3 position, Vector3 rotation, int layer)
     {
@@ -190,6 +250,18 @@ public class CustomAssetMenu : MonoBehaviourPun
         SetLayerRecursively(go, layer);
         go.AddComponent<CustomAssetHelper>();
     }
+
+    private void SpawnBuildable(string prefabName, Vector3 position, Vector3 rotation, int layer)
+    {
+        GameObject go = PhotonNetwork.Instantiate("Buildables/" + prefabName, position, Quaternion.Euler(rotation), 0);
+        SetLayerRecursively(go, layer);
+        go.AddComponent<CustomAssetHelper>();
+        spawnedAssets.Add(go);
+    }
+
+
+
+
 
     private void SetLayerRecursively(GameObject obj, int layer)
     {
