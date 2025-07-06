@@ -242,7 +242,8 @@ public class TitanSpawnMenu : MonoBehaviourPun
         manager.StartCoroutine(SpawnAndOverrideRoutine(manager, typeToUse, count, basePos, 0f));
     }
 
-    private IEnumerator SpawnAndOverrideRoutine(InGameManager manager, string type, int count, Vector3 basePos, float rotationY)
+    private IEnumerator SpawnAndOverrideRoutine(InGameManager manager, string fixedType, int count, Vector3 basePos, float rotationY)
+
     {
         for (int i = 0; i < count; i++)
         {
@@ -260,6 +261,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
                     UnityEngine.Random.Range(Mathf.Min(z1, z2), Mathf.Max(z1, z2))
                 );
             }
+            string type = useRandomWeights ? GetWeightedRandomType() : fixedType;
 
             BaseTitan titan = manager.SpawnAITitanAt(type, spawnPos, rotationY);
 
