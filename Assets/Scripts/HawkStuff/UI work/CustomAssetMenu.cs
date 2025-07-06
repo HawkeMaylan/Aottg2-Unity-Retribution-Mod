@@ -196,12 +196,23 @@ public class CustomAssetMenu : MonoBehaviourPun
 
     private void LoadBuildablePrefabs()
     {
-        GameObject[] allPrefabs = Resources.LoadAll<GameObject>("Buildables");
         buildablePrefabNames.Clear();
-        foreach (var prefab in allPrefabs)
-            buildablePrefabNames.Add(prefab.name);
+        GameObject[] allPrefabs = Resources.LoadAll<GameObject>("Buildables");
+        foreach (GameObject prefab in allPrefabs)
+        {
+            // Filter out subfoldered prefabs
+            string fullPath = "Buildables/" + prefab.name;
+            GameObject check = Resources.Load<GameObject>(fullPath);
+            if (check != null)
+            {
+                buildablePrefabNames.Add(prefab.name);
+            }
+        }
+
         buildablesLoaded = true;
     }
+
+
 
 
 
