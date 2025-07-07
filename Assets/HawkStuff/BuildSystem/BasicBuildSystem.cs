@@ -27,7 +27,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     void Start()
     {
         LoadBuildablePrefabs();
-        ChangeCurrentBuilding(0);
+        // Do not create the preview at start. Wait for the player to press the build key.
     }
 
     void Update()
