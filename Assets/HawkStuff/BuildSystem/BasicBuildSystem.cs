@@ -148,21 +148,23 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             float gridSize = helper.gridSize;
             float offset = helper.offset;
 
-            currentPos = hit.point;
-            currentPos -= Vector3.one * offset;
+            // Align the preview object to the surface normal
+            currentPos = hit.point + hit.normal * offset;
+
+            // Snap to grid
             currentPos /= gridSize;
             currentPos = new Vector3(Mathf.Round(currentPos.x), Mathf.Round(currentPos.y), Mathf.Round(currentPos.z));
             currentPos *= gridSize;
-            currentPos += Vector3.one * offset;
 
             currentPreview.transform.position = currentPos;
+
+            // Rotate the preview object to align with the surface normal
+            currentPreview.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal) * Quaternion.Euler(currentRot);
 
             if (Input.GetKeyDown(KeyCode.RightArrow))
                 currentRot += new Vector3(0, 45, 0);
             if (Input.GetKeyDown(KeyCode.LeftArrow))
                 currentRot -= new Vector3(0, 45, 0);
-
-            currentPreview.transform.localEulerAngles = currentRot;
 
             UpdatePreviewMaterials();
         }
@@ -193,7 +195,9 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         Bounds checkBounds = helper.collisionCheckObject.GetComponent<Collider>().bounds;
         Vector3 checkPosition = currentPreview.transform.position + helper.collisionCheckObject.transform.localPosition;
 
-        Collider[] colliders = Physics.OverlapBox(checkPosition, checkBounds.extents, currentPreview.transform.rotation, layer);
+        // Ignore collisions with the "Player" layer
+        int layerMask = layer | (1 << LayerMask.NameToLayer("Player"));
+        Collider[] colliders = Physics.OverlapBox(checkPosition, checkBounds.extents, currentPreview.transform.rotation, layerMask);
         return colliders.Length == 0;
     }
 
@@ -211,7 +215,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             string prefabName = prefab.name;
             string photonPath = "Buildables/" + prefabName;
 
-            PhotonNetwork.Instantiate(photonPath, currentPos, Quaternion.Euler(currentRot));
+            PhotonNetwork.Instantiate(photonPath, currentPos, currentPreview.transform.rotation);
 
             Destroy(currentPreview);
 
