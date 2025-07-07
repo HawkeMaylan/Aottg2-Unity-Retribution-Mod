@@ -113,8 +113,27 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             return;
         }
 
+        // Instantiate the preview object
         currentPreview = Instantiate(helper.preview, currentPos, Quaternion.Euler(currentRot));
-        currentPreview.layer = LayerMask.NameToLayer("Preview");
+
+        // Ensure the preview object and all its children are on the correct layer
+        SetLayerRecursively(currentPreview, LayerMask.NameToLayer("Preview"));
+
+        // Verify that the layer was set correctly
+        if (currentPreview.layer != LayerMask.NameToLayer("Preview"))
+        {
+            Debug.LogError("Failed to set the layer of the preview object.");
+        }
+    }
+
+    // Helper method to set the layer of an object and all its children
+    void SetLayerRecursively(GameObject obj, int layer)
+    {
+        obj.layer = layer;
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, layer);
+        }
     }
 
     void UpdatePreview()
