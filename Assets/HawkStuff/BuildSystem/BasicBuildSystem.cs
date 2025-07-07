@@ -3,26 +3,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 
-public class BasicBuildSystem : MonoBehaviour
+public class BuildSystem : MonoBehaviourPunCallbacks
 {
-    public List<buildObjects> objects = new List<buildObjects>();
-    public buildObjects currentobject;
-    private Vector3 currentpos;
-    private Vector3 currentrot;
-    public Transform currentpreview;
     public Transform cam;
-    public RaycastHit hit;
     public LayerMask layer;
 
     public float offset = 1.0f;
     public float gridSize = 1.0f;
 
-    public bool IsBuilding;
+    private bool isBuilding = false;
     private bool scriptActive = false;
+
+    private GameObject currentPreview;
+    private Vector3 currentPos;
+    private Vector3 currentRot;
+
+    private List<GameObject> buildablePrefabs = new List<GameObject>();
+    private int currentBuildableIndex = 0;
+
+    public Material buildableMaterial;
+    public Material notBuildableMaterial;
 
     void Start()
     {
-        changeCurrentBuilding(0);
+        LoadBuildablePrefabs();
+        ChangeCurrentBuilding(0);
     }
 
     void Update()
@@ -30,12 +35,12 @@ public class BasicBuildSystem : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.BackQuote))
         {
             scriptActive = !scriptActive;
-            IsBuilding = false;
+            isBuilding = false;
             ToggleCursor(!scriptActive);
 
-            if (!scriptActive && currentpreview != null)
+            if (!scriptActive && currentPreview != null)
             {
-                Destroy(currentpreview.gameObject);
+                Destroy(currentPreview);
             }
         }
 
@@ -43,127 +48,148 @@ public class BasicBuildSystem : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.K))
         {
-            IsBuilding = !IsBuilding;
+            isBuilding = !isBuilding;
 
-            if (!IsBuilding && currentpreview != null)
+            if (!isBuilding && currentPreview != null)
             {
-                Destroy(currentpreview.gameObject);
+                Destroy(currentPreview);
             }
 
-            if (IsBuilding && currentpreview == null)
+            if (isBuilding && currentPreview == null)
             {
-                GameObject curprev = Instantiate(currentobject.preview, currentpos, Quaternion.Euler(currentrot));
-                currentpreview = curprev.transform;
+                CreatePreview();
             }
         }
 
-        if (IsBuilding)
+        if (isBuilding)
         {
-            startPreview();
+            UpdatePreview();
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
                 Build();
 
             if (Input.GetKeyDown(KeyCode.B))
-                switchCurrentBuilding();
+                SwitchCurrentBuilding();
         }
     }
 
-    public void switchCurrentBuilding()
+    void LoadBuildablePrefabs()
     {
-        int nextIndex = objects.IndexOf(currentobject) + 1;
-        if (nextIndex >= objects.Count)
-            nextIndex = 0;
-
-        changeCurrentBuilding(nextIndex);
-    }
-
-    public void changeCurrentBuilding(int cur)
-    {
-        if (cur < 0 || cur >= objects.Count)
+        buildablePrefabs.Clear();
+        GameObject[] prefabs = Resources.LoadAll<GameObject>("Buildables");
+        foreach (GameObject prefab in prefabs)
         {
-            Debug.LogError($"Invalid index {cur}. Ensure the index is within the bounds of the objects list.");
-            return;
-        }
-
-        currentobject = objects[cur];
-
-        if (currentpreview != null)
-            Destroy(currentpreview.gameObject);
-
-        GameObject curprev = Instantiate(currentobject.preview, currentpos, Quaternion.Euler(currentrot));
-        if (curprev == null)
-        {
-            Debug.LogError("Failed to instantiate the preview object.");
-            return;
-        }
-
-        currentpreview = curprev.transform;
-    }
-
-    public void startPreview()
-    {
-        if (Physics.Raycast(cam.position, cam.forward, out hit, 40, layer))
-        {
-            if (hit.transform != this.transform)
-                showPreview(hit);
-        }
-    }
-
-    public void showPreview(RaycastHit hit2)
-    {
-        if (currentpreview == null) return;
-
-        currentpos = hit2.point;
-        currentpos -= Vector3.one * offset;
-        currentpos /= gridSize;
-        currentpos = new Vector3(Mathf.Round(currentpos.x), Mathf.Round(currentpos.y), Mathf.Round(currentpos.z));
-        currentpos *= gridSize;
-        currentpos += Vector3.one * offset;
-
-        currentpreview.position = currentpos;
-
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-            currentrot += new Vector3(0, 45, 0);
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-            currentrot -= new Vector3(0, 45, 0);
-
-        currentpreview.localEulerAngles = currentrot;
-    }
-
-    public void Build()
-    {
-        if (currentpreview == null)
-        {
-            Debug.LogError("currentpreview is null. Cannot build.");
-            return;
-        }
-
-        PreviewObject PO = currentpreview.GetComponent<PreviewObject>();
-        if (PO == null)
-        {
-            Debug.LogError("PreviewObject component is missing on currentpreview.");
-            return;
-        }
-
-        if (PO.IsBuildable)
-        {
-            if (currentobject == null || currentobject.prefab == null)
+            if (prefab.GetComponent<BuildableObjectHelper>() != null)
             {
-                Debug.LogError("currentobject or its prefab is not assigned.");
-                return;
+                buildablePrefabs.Add(prefab);
             }
+        }
+    }
 
-            string prefabName = currentobject.prefab.name;
+    void ChangeCurrentBuilding(int index)
+    {
+        if (index < 0 || index >= buildablePrefabs.Count)
+        {
+            Debug.LogError($"Invalid index {index}. Ensure the index is within the bounds of the buildablePrefabs list.");
+            return;
+        }
+
+        currentBuildableIndex = index;
+
+        if (currentPreview != null)
+            Destroy(currentPreview);
+
+        CreatePreview();
+    }
+
+    void CreatePreview()
+    {
+        GameObject prefab = buildablePrefabs[currentBuildableIndex];
+        BuildableObjectHelper helper = prefab.GetComponent<BuildableObjectHelper>();
+
+        if (helper == null || helper.preview == null)
+        {
+            Debug.LogError("BuildableObjectHelper or its preview is not assigned.");
+            return;
+        }
+
+        currentPreview = Instantiate(helper.preview, currentPos, Quaternion.Euler(currentRot));
+        currentPreview.layer = LayerMask.NameToLayer("Preview");
+    }
+
+    void UpdatePreview()
+    {
+        if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, 40, layer))
+        {
+            currentPos = hit.point;
+            currentPos -= Vector3.one * offset;
+            currentPos /= gridSize;
+            currentPos = new Vector3(Mathf.Round(currentPos.x), Mathf.Round(currentPos.y), Mathf.Round(currentPos.z));
+            currentPos *= gridSize;
+            currentPos += Vector3.one * offset;
+
+            currentPreview.transform.position = currentPos;
+
+            if (Input.GetKeyDown(KeyCode.RightArrow))
+                currentRot += new Vector3(0, 45, 0);
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
+                currentRot -= new Vector3(0, 45, 0);
+
+            currentPreview.transform.localEulerAngles = currentRot;
+
+            UpdatePreviewMaterials();
+        }
+    }
+
+    void UpdatePreviewMaterials()
+    {
+        bool isBuildable = IsPreviewBuildable();
+
+        foreach (Transform child in currentPreview.transform)
+        {
+            child.GetComponent<Renderer>().material = isBuildable ? buildableMaterial : notBuildableMaterial;
+        }
+    }
+
+    bool IsPreviewBuildable()
+    {
+        if (currentPreview == null) return false;
+
+        BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
+        if (helper == null || helper.collisionCheckObject == null)
+        {
+            Debug.LogError("BuildableObjectHelper or its collisionCheckObject is not assigned.");
+            return false;
+        }
+
+        // Use the collisionCheckObject's bounds for the overlap check
+        Bounds checkBounds = helper.collisionCheckObject.GetComponent<Collider>().bounds;
+        Vector3 checkPosition = currentPreview.transform.position + helper.collisionCheckObject.transform.localPosition;
+
+        Collider[] colliders = Physics.OverlapBox(checkPosition, checkBounds.extents, currentPreview.transform.rotation, layer);
+        return colliders.Length == 0;
+    }
+
+    void Build()
+    {
+        if (currentPreview == null)
+        {
+            Debug.LogError("currentPreview is null. Cannot build.");
+            return;
+        }
+
+        if (IsPreviewBuildable())
+        {
+            GameObject prefab = buildablePrefabs[currentBuildableIndex];
+            string prefabName = prefab.name;
             string photonPath = "Buildables/" + prefabName;
 
-            PhotonNetwork.Instantiate(photonPath, currentpos, Quaternion.Euler(currentrot));
+            PhotonNetwork.Instantiate(photonPath, currentPos, Quaternion.Euler(currentRot));
 
-            Destroy(currentpreview.gameObject);
+            Destroy(currentPreview);
 
             // Immediately create a new preview so player can keep building
-            GameObject curprev = Instantiate(currentobject.preview, currentpos, Quaternion.Euler(currentrot));
-            currentpreview = curprev.transform;
+            CreatePreview();
         }
         else
         {
@@ -171,18 +197,15 @@ public class BasicBuildSystem : MonoBehaviour
         }
     }
 
+    void SwitchCurrentBuilding()
+    {
+        currentBuildableIndex = (currentBuildableIndex + 1) % buildablePrefabs.Count;
+        ChangeCurrentBuilding(currentBuildableIndex);
+    }
+
     void ToggleCursor(bool enable)
     {
         Cursor.visible = enable;
         Cursor.lockState = enable ? CursorLockMode.None : CursorLockMode.Locked;
     }
-}
-
-[System.Serializable]
-public class buildObjects
-{
-    public string name;
-    public GameObject prefab;
-    public GameObject preview;
-    public int resources;
 }
