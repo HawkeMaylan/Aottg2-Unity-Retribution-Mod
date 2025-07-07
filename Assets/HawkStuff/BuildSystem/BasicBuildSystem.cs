@@ -8,9 +8,6 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     public Transform cam;
     public LayerMask layer;
 
-    public float offset = 1.0f;
-    public float gridSize = 1.0f;
-
     private bool isBuilding = false;
     private bool scriptActive = false;
 
@@ -140,6 +137,17 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     {
         if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, 40, layer))
         {
+            BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
+            if (helper == null)
+            {
+                Debug.LogError("BuildableObjectHelper is not assigned.");
+                return;
+            }
+
+            // Use the grid size and offset from the helper script
+            float gridSize = helper.gridSize;
+            float offset = helper.offset;
+
             currentPos = hit.point;
             currentPos -= Vector3.one * offset;
             currentPos /= gridSize;

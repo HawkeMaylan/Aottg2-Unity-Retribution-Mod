@@ -249,3 +249,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   preview: {fileID: 3303310570190839526}
   collisionCheckObject: {fileID: 933685556645732565}
+  gridSize: 1
+  offset: 1

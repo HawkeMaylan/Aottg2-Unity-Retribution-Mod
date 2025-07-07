@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 124207222437964781}
   - component: {fileID: 700683306092137389}
   - component: {fileID: 1991684649345744401}
-  m_Layer: 31
+  m_Layer: 23
   m_Name: Building1Build
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +74,8 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 1991684649345744401}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -135,7 +136,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &4526683913361959869
 Transform:

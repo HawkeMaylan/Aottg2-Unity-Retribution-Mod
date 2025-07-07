@@ -122,6 +122,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   preview: {fileID: 3819410487572659498}
   collisionCheckObject: {fileID: 5560879205574147634}
+  gridSize: 2
+  offset: 1
 --- !u!114 &-8330346002429318577
 MonoBehaviour:
   m_ObjectHideFlags: 0
