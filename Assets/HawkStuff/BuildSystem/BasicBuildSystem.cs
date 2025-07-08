@@ -197,8 +197,21 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
         // Ignore collisions with the "Player" layer
         int layerMask = layer | (1 << LayerMask.NameToLayer("Player"));
-        Collider[] colliders = Physics.OverlapBox(checkPosition, checkBounds.extents, currentPreview.transform.rotation, layerMask);
-        return colliders.Length == 0;
+
+        // Use OverlapBoxNonAlloc to improve performance
+        Collider[] colliders = new Collider[10];
+        int colliderCount = Physics.OverlapBoxNonAlloc(checkPosition, checkBounds.extents, colliders, currentPreview.transform.rotation, layerMask);
+
+        // Check if any colliders overlap
+        for (int i = 0; i < colliderCount; i++)
+        {
+            if (colliders[i] != null && colliders[i].gameObject != currentPreview)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     void Build()
