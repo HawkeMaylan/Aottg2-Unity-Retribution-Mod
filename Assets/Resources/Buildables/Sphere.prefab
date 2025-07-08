@@ -251,3 +251,5 @@ MonoBehaviour:
   collisionCheckObject: {fileID: 933685556645732565}
   gridSize: 0.5
   offset: 0.25
+  category: base
+  displayName: sphere

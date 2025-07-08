@@ -27,7 +27,7 @@ TagManager:
   - CharacterDetection
   - NPC
   - Speakers
-  - 
+  - Preview
   - MapObjectMapObjects
   - MapObjectProjectiles
   - MapObjectCharacters

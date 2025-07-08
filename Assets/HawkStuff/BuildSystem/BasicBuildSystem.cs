@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UI;
 
 public class BuildSystem : MonoBehaviourPunCallbacks
 {
@@ -21,8 +22,23 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     public Material buildableMaterial;
     public Material notBuildableMaterial;
 
+    // Radial wheel popup
+    private ModularWheelPopup modularWheelPopup;
+    private Dictionary<string, List<GameObject>> buildableCategories = new Dictionary<string, List<GameObject>>();
+    private string currentCategory = "Default";
+
     void Start()
     {
+        modularWheelPopup = FindObjectOfType<ModularWheelPopup>();
+        if (modularWheelPopup == null)
+        {
+            Debug.LogError("ModularWheelPopup not found in the scene.");
+        }
+        else
+        {
+            modularWheelPopup.Setup();
+        }
+
         LoadBuildablePrefabs();
         // Do not create the preview at start. Wait for the player to press the build key.
     }
@@ -66,19 +82,29 @@ public class BuildSystem : MonoBehaviourPunCallbacks
                 Build();
 
             if (Input.GetKeyDown(KeyCode.B))
-                SwitchCurrentBuilding();
+                CycleCategory();
         }
     }
 
     void LoadBuildablePrefabs()
     {
         buildablePrefabs.Clear();
+        buildableCategories.Clear();
         GameObject[] prefabs = Resources.LoadAll<GameObject>("Buildables");
         foreach (GameObject prefab in prefabs)
         {
-            if (prefab.GetComponent<BuildableObjectHelper>() != null)
+            BuildableObjectHelper helper = prefab.GetComponent<BuildableObjectHelper>();
+            if (helper != null)
             {
                 buildablePrefabs.Add(prefab);
+
+                // Group prefabs by category (use prefab name as default category)
+                string category = helper.category ?? prefab.name;
+                if (!buildableCategories.ContainsKey(category))
+                {
+                    buildableCategories[category] = new List<GameObject>();
+                }
+                buildableCategories[category].Add(prefab);
             }
         }
     }
@@ -241,10 +267,52 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         }
     }
 
-    void SwitchCurrentBuilding()
+    void CycleCategory()
     {
-        currentBuildableIndex = (currentBuildableIndex + 1) % buildablePrefabs.Count;
-        ChangeCurrentBuilding(currentBuildableIndex);
+        if (buildableCategories.Count == 0) return;
+
+        // Get the list of categories
+        List<string> categories = new List<string>(buildableCategories.Keys);
+
+        // Find the index of the current category
+        int currentIndex = categories.IndexOf(currentCategory);
+
+        // Cycle to the next category
+        currentIndex = (currentIndex + 1) % categories.Count;
+        currentCategory = categories[currentIndex];
+
+        // Show the radial wheel with the prefabs in the selected category
+        ShowRadialWheel(currentCategory);
+    }
+
+    void ShowRadialWheel(string category)
+    {
+        if (!buildableCategories.ContainsKey(category))
+        {
+            Debug.LogError($"Category {category} not found.");
+            return;
+        }
+
+        List<GameObject> categoryPrefabs = buildableCategories[category];
+        List<string> prefabNames = new List<string>();
+
+        foreach (GameObject prefab in categoryPrefabs)
+        {
+            BuildableObjectHelper helper = prefab.GetComponent<BuildableObjectHelper>();
+            prefabNames.Add(helper.displayName ?? prefab.name);
+        }
+
+        modularWheelPopup.Show(prefabNames, () => OnPrefabSelected(categoryPrefabs));
+    }
+
+    void OnPrefabSelected(List<GameObject> categoryPrefabs)
+    {
+        int selectedIndex = modularWheelPopup.SelectedItem;
+        if (selectedIndex >= 0 && selectedIndex < categoryPrefabs.Count)
+        {
+            currentBuildableIndex = buildablePrefabs.IndexOf(categoryPrefabs[selectedIndex]);
+            ChangeCurrentBuilding(currentBuildableIndex);
+        }
     }
 
     void ToggleCursor(bool enable)

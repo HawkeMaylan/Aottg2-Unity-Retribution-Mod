@@ -124,6 +124,8 @@ MonoBehaviour:
   collisionCheckObject: {fileID: 5560879205574147634}
   gridSize: 1
   offset: 1
+  category: base
+  displayName: cube
 --- !u!114 &-8330346002429318577
 MonoBehaviour:
   m_ObjectHideFlags: 0
