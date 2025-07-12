@@ -16,15 +16,8 @@ public class RadialMenuController : MonoBehaviour
     [Header("UI References")]
     public GameObject radialMenuBase;
     public RectTransform selectionIndicator;
-    public Text pageDisplayText;
-    public Text selectionNameText;
-    public Text pageNameText; // Added for displaying page name
-
-    [Header("Popup Settings")]
-    public GameObject textPopupPrefab;
-    public float textDuration = 2f;
-    public float textFadeDuration = 0.5f;
-    public Vector2 popupOffset = new Vector2(0, 50f);
+    public Text selectionNameText; // Only keeping one text display
+    public Text pageDisplayText; // Shows "Page X of Y"
 
     [Header("Pages")]
     public List<RadialMenuPage> pages = new List<RadialMenuPage>();
@@ -33,18 +26,6 @@ public class RadialMenuController : MonoBehaviour
     private bool menuActive = false;
     private int currentSelection = -1;
     private Vector2 inputDirection;
-    private Queue<GameObject> _activeTextPopups = new Queue<GameObject>();
-    private Transform _textPopupParent;
-
-    void Awake()
-    {
-        _textPopupParent = new GameObject("RadialMenuTextPopups").transform;
-        _textPopupParent.SetParent(radialMenuBase.transform);
-        RectTransform rt = _textPopupParent.gameObject.AddComponent<RectTransform>();
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = Vector2.zero;
-    }
 
     void Update()
     {
@@ -90,6 +71,8 @@ public class RadialMenuController : MonoBehaviour
 
     void UpdateSelection()
     {
+        int optionsOnPage = Mathf.Min(pages[currentPage].options.Count, segmentsPerPage);
+
         if (inputDirection.magnitude < deadZone)
         {
             if (currentSelection != -1)
@@ -101,10 +84,7 @@ public class RadialMenuController : MonoBehaviour
             return;
         }
 
-        // Calculate the actual number of options on current page
-        int optionsOnPage = Mathf.Min(pages[currentPage].options.Count, segmentsPerPage);
         float segmentAngle = 360f / optionsOnPage;
-
         float angle = Mathf.Atan2(inputDirection.y, inputDirection.x) * Mathf.Rad2Deg;
         if (angle < 0) angle += 360f;
 
@@ -132,48 +112,6 @@ public class RadialMenuController : MonoBehaviour
         if (currentPage < pages.Count && currentSelection < pages[currentPage].options.Count)
         {
             selectionNameText.text = pages[currentPage].options[currentSelection].optionName;
-            if (pages[currentPage].options[currentSelection].showPopup)
-            {
-                ShowTextPopup(pages[currentPage].options[currentSelection].optionName);
-            }
-        }
-    }
-
-    void ShowTextPopup(string message)
-    {
-        if (textPopupPrefab == null) return;
-
-        GameObject popup = Instantiate(textPopupPrefab, _textPopupParent);
-        popup.transform.localPosition = popupOffset;
-
-        Text text = popup.GetComponentInChildren<Text>();
-        if (text != null)
-            text.text = message;
-
-        _activeTextPopups.Enqueue(popup);
-        StartCoroutine(FadeAndDestroyText(popup, textDuration, textFadeDuration));
-    }
-
-    private IEnumerator FadeAndDestroyText(GameObject popup, float totalDuration, float fadeDuration)
-    {
-        yield return new WaitForSeconds(totalDuration - fadeDuration);
-
-        CanvasGroup cg = popup.GetComponent<CanvasGroup>();
-        if (cg == null)
-            cg = popup.AddComponent<CanvasGroup>();
-
-        float elapsed = 0f;
-        while (elapsed < fadeDuration)
-        {
-            elapsed += Time.deltaTime;
-            cg.alpha = 1f - (elapsed / fadeDuration);
-            yield return null;
-        }
-
-        if (_activeTextPopups.Contains(popup))
-        {
-            _activeTextPopups.Dequeue();
-            Destroy(popup);
         }
     }
 
@@ -215,19 +153,18 @@ public class RadialMenuController : MonoBehaviour
 
     void UpdateMenuDisplay()
     {
+        // Clear old menu items (preserving the selection text and page display)
         foreach (Transform child in radialMenuBase.transform)
         {
             if (child != selectionIndicator && child.gameObject != selectionNameText.gameObject &&
-                child.gameObject != pageDisplayText.gameObject && child.gameObject != pageNameText.gameObject &&
-                child != _textPopupParent)
+                child.gameObject != pageDisplayText.gameObject)
             {
                 Destroy(child.gameObject);
             }
         }
 
-        // Update page display information
-        pageDisplayText.text = $"{currentPage + 1}/{pages.Count}";
-        pageNameText.text = pages[currentPage].pageName; // Display the page name
+        // Update page display
+        pageDisplayText.text = $"Page {currentPage + 1} of {pages.Count}";
 
         if (currentPage >= pages.Count) return;
 
@@ -270,7 +207,7 @@ public class RadialMenuController : MonoBehaviour
 [System.Serializable]
 public class RadialMenuPage
 {
-    public string pageName; // Now used in the display
+    public string pageName; // Used for organization in inspector
     public List<RadialMenuOption> options = new List<RadialMenuOption>();
 }
 
@@ -279,6 +216,5 @@ public class RadialMenuOption
 {
     public string optionName;
     public Sprite icon;
-    public bool showPopup = true;
     public UnityEngine.Events.UnityEvent onSelect;
 }
