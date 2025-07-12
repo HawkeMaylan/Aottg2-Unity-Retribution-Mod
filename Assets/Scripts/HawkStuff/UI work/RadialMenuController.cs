@@ -16,8 +16,9 @@ public class RadialMenuController : MonoBehaviour
     [Header("UI References")]
     public GameObject radialMenuBase;
     public RectTransform selectionIndicator;
-    public Text selectionNameText; // Only keeping one text display
-    public Text pageDisplayText; // Shows "Page X of Y"
+    public Text selectionNameText;
+    public Text pageNameText; // For displaying the page name
+    public Text pageNumberText; // For displaying "Page X of Y"
 
     [Header("Pages")]
     public List<RadialMenuPage> pages = new List<RadialMenuPage>();
@@ -153,18 +154,21 @@ public class RadialMenuController : MonoBehaviour
 
     void UpdateMenuDisplay()
     {
-        // Clear old menu items (preserving the selection text and page display)
+        // Clear old menu items (preserving the UI elements we want to keep)
         foreach (Transform child in radialMenuBase.transform)
         {
-            if (child != selectionIndicator && child.gameObject != selectionNameText.gameObject &&
-                child.gameObject != pageDisplayText.gameObject)
+            if (child != selectionIndicator &&
+                child.gameObject != selectionNameText.gameObject &&
+                child.gameObject != pageNameText.gameObject &&
+                child.gameObject != pageNumberText.gameObject)
             {
                 Destroy(child.gameObject);
             }
         }
 
-        // Update page display
-        pageDisplayText.text = $"Page {currentPage + 1} of {pages.Count}";
+        // Update page information display
+        pageNameText.text = pages[currentPage].pageName; // Show the page name
+        pageNumberText.text = $"Page {currentPage + 1} of {pages.Count}"; // Show page numbers
 
         if (currentPage >= pages.Count) return;
 
@@ -207,7 +211,7 @@ public class RadialMenuController : MonoBehaviour
 [System.Serializable]
 public class RadialMenuPage
 {
-    public string pageName; // Used for organization in inspector
+    public string pageName; // This will be displayed at the top
     public List<RadialMenuOption> options = new List<RadialMenuOption>();
 }
 
