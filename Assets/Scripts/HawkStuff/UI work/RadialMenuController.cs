@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -19,6 +18,7 @@ public class RadialMenuController : MonoBehaviour
     public RectTransform selectionIndicator;
     public Text pageDisplayText;
     public Text selectionNameText;
+    public Text pageNameText; // Added for displaying page name
 
     [Header("Popup Settings")]
     public GameObject textPopupPrefab;
@@ -38,7 +38,6 @@ public class RadialMenuController : MonoBehaviour
 
     void Awake()
     {
-        // Create text popup parent
         _textPopupParent = new GameObject("RadialMenuTextPopups").transform;
         _textPopupParent.SetParent(radialMenuBase.transform);
         RectTransform rt = _textPopupParent.gameObject.AddComponent<RectTransform>();
@@ -102,10 +101,14 @@ public class RadialMenuController : MonoBehaviour
             return;
         }
 
+        // Calculate the actual number of options on current page
+        int optionsOnPage = Mathf.Min(pages[currentPage].options.Count, segmentsPerPage);
+        float segmentAngle = 360f / optionsOnPage;
+
         float angle = Mathf.Atan2(inputDirection.y, inputDirection.x) * Mathf.Rad2Deg;
         if (angle < 0) angle += 360f;
 
-        int newSelection = Mathf.FloorToInt(angle / (360f / segmentsPerPage));
+        int newSelection = Mathf.FloorToInt(angle / segmentAngle);
 
         if (newSelection != currentSelection)
         {
@@ -116,9 +119,12 @@ public class RadialMenuController : MonoBehaviour
 
     void UpdateSelectionVisual()
     {
-        if (currentSelection < 0 || currentSelection >= segmentsPerPage) return;
+        int optionsOnPage = Mathf.Min(pages[currentPage].options.Count, segmentsPerPage);
 
-        float angle = (currentSelection * (360f / segmentsPerPage) + (360f / segmentsPerPage / 2)) * Mathf.Deg2Rad;
+        if (currentSelection < 0 || currentSelection >= optionsOnPage) return;
+
+        float segmentAngle = 360f / optionsOnPage;
+        float angle = (currentSelection * segmentAngle + (segmentAngle / 2)) * Mathf.Deg2Rad;
         Vector2 pos = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
         selectionIndicator.anchoredPosition = pos;
         selectionIndicator.gameObject.SetActive(true);
@@ -126,7 +132,10 @@ public class RadialMenuController : MonoBehaviour
         if (currentPage < pages.Count && currentSelection < pages[currentPage].options.Count)
         {
             selectionNameText.text = pages[currentPage].options[currentSelection].optionName;
-            ShowTextPopup(pages[currentPage].options[currentSelection].optionName);
+            if (pages[currentPage].options[currentSelection].showPopup)
+            {
+                ShowTextPopup(pages[currentPage].options[currentSelection].optionName);
+            }
         }
     }
 
@@ -208,19 +217,26 @@ public class RadialMenuController : MonoBehaviour
     {
         foreach (Transform child in radialMenuBase.transform)
         {
-            if (child != selectionIndicator && child.gameObject != selectionNameText.gameObject && child != _textPopupParent)
+            if (child != selectionIndicator && child.gameObject != selectionNameText.gameObject &&
+                child.gameObject != pageDisplayText.gameObject && child.gameObject != pageNameText.gameObject &&
+                child != _textPopupParent)
+            {
                 Destroy(child.gameObject);
+            }
         }
 
+        // Update page display information
         pageDisplayText.text = $"{currentPage + 1}/{pages.Count}";
+        pageNameText.text = pages[currentPage].pageName; // Display the page name
 
         if (currentPage >= pages.Count) return;
 
-        for (int i = 0; i < pages[currentPage].options.Count; i++)
-        {
-            if (i >= segmentsPerPage) break;
+        int optionsOnPage = Mathf.Min(pages[currentPage].options.Count, segmentsPerPage);
+        float segmentAngle = 360f / optionsOnPage;
 
-            float angle = (i * (360f / segmentsPerPage) + (360f / segmentsPerPage / 2)) * Mathf.Deg2Rad;
+        for (int i = 0; i < optionsOnPage; i++)
+        {
+            float angle = (i * segmentAngle + (segmentAngle / 2)) * Mathf.Deg2Rad;
             Vector2 pos = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
 
             // Create icon
@@ -254,7 +270,7 @@ public class RadialMenuController : MonoBehaviour
 [System.Serializable]
 public class RadialMenuPage
 {
-    public string pageName;
+    public string pageName; // Now used in the display
     public List<RadialMenuOption> options = new List<RadialMenuOption>();
 }
 

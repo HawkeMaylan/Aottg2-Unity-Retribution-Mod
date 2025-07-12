@@ -155,25 +155,20 @@ MonoBehaviour:
   radius: 200
   iconSize: 50
   deadZone: 0.2
-  toggleKey: 9
+  toggleKey: 273
   useMouseSelection: 1
   radialMenuBase: {fileID: 1370462488265346918}
   selectionIndicator: {fileID: 3748461634886215482}
   pageDisplayText: {fileID: 3378083330960688851}
   selectionNameText: {fileID: 8613071451305174915}
+  pageNameText: {fileID: 3378083330960688851}
   textPopupPrefab: {fileID: 0}
   textDuration: 2
   textFadeDuration: 0.5
   popupOffset: {x: 0, y: 50}
   pages:
   - pageName: Tim
-    options:
-    - optionName: Hello
-      icon: {fileID: 21300000, guid: 7856c4c6378d32544921bec421483c57, type: 3}
-      showPopup: 0
-      onSelect:
-        m_PersistentCalls:
-          m_Calls: []
+    options: []
 --- !u!1 &100520
 GameObject:
   m_ObjectHideFlags: 0
