@@ -27,6 +27,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     private int currentBuildableIndex = 0;
     private HumanInventory _playerInventory;
     private bool _inventorySearchPerformed = false;
+    private Dictionary<string, int> _pendingRefunds = new Dictionary<string, int>();
 
     private IEnumerator Start()
     {
@@ -254,44 +255,48 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     {
         if (currentPreview == null || !IsPreviewValid())
         {
-            Debug.Log("BuildSystem: Cannot build - invalid position or no preview");
+            Debug.Log("Cannot build - invalid position");
             return;
         }
 
-        // Double-check inventory reference
-        if (_playerInventory == null)
+        if (_playerInventory == null && !FindLocalPlayerInventory())
         {
-            FindLocalPlayerInventory();
-            if (_playerInventory == null)
-            {
-                Debug.LogError("BuildSystem: Cannot build - player inventory not found!");
-                return;
-            }
+            Debug.LogError("Player inventory not found!");
+            return;
         }
 
         BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
+        if (helper == null) return;
 
-        // Check if there are any costs defined
-        if (helper.buildCosts != null && helper.buildCosts.Length > 0)
+        // FIRST CHECK ALL RESOURCES
+        bool canAfford = true;
+        foreach (InventoryCost cost in helper.buildCosts)
         {
-            if (!CanAffordBuild())
+            int currentAmount = _playerInventory.GetItemCount(cost.itemName);
+            if (currentAmount < cost.amount)
             {
-                // The "Not Enough X" message will be shown by the inventory system here
-                return;
-            }
-
-            // Deduct costs only after all checks pass
-            foreach (InventoryCost cost in helper.buildCosts)
-            {
-                _playerInventory.SetItemCount(cost.itemName,
-                    _playerInventory.GetItemCount(cost.itemName) - cost.amount);
+                // Use the new ShowNotEnoughMessage function
+                _playerInventory.ShowNotEnoughMessage(cost.itemName);
+                Debug.Log($"Need {cost.amount} {cost.itemName}, only have {currentAmount}");
+                canAfford = false;
             }
         }
 
-        // Only place if all checks pass
+        if (!canAfford)
+        {
+            return; // Exit before deducting anything
+        }
+
+        // DEDUCT RESOURCES
+        foreach (InventoryCost cost in helper.buildCosts)
+        {
+            _playerInventory.SetItemCount(cost.itemName,
+                _playerInventory.GetItemCount(cost.itemName) - cost.amount);
+        }
+
+        // Place the building
         GameObject prefab = buildablePrefabs[currentBuildableIndex];
         PhotonNetwork.Instantiate("Buildables/" + prefab.name, currentPos, currentPreview.transform.rotation);
-        Debug.Log($"BuildSystem: Built {prefab.name} at {currentPos}");
 
         Destroy(currentPreview);
         CreatePreview();
@@ -299,19 +304,13 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     bool CanAffordBuild()
     {
-        if (_playerInventory == null)
-        {
-            Debug.LogError("BuildSystem: Player inventory not found");
-            return false;
-        }
+        if (_playerInventory == null) return false;
 
         BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
         foreach (InventoryCost cost in helper.buildCosts)
         {
             if (_playerInventory.GetItemCount(cost.itemName) < cost.amount)
             {
-                // This will trigger the "Not Enough X" message in the inventory system
-                _playerInventory.SetItemCount(cost.itemName, -1);
                 return false;
             }
         }

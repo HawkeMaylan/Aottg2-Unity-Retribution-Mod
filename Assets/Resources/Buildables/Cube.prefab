@@ -129,7 +129,7 @@ MonoBehaviour:
   offset: 1
   buildCosts:
   - itemName: Resources
-    amount: 1
+    amount: 3
 --- !u!114 &-8330346002429318577
 MonoBehaviour:
   m_ObjectHideFlags: 0
