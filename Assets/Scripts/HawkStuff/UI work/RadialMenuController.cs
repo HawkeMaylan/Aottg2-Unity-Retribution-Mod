@@ -32,12 +32,24 @@ public class RadialMenuController : MonoBehaviour
 
     void Start()
     {
-        _inGameMenu = (InGameMenu)UIManager.CurrentMenu;
+        // Safer initialization
+        try
+        {
+            _inGameMenu = UIManager.CurrentMenu as InGameMenu;
+        }
+        catch
+        {
+            _inGameMenu = null;
+        }
+
+        if (radialMenuBase != null)
+        {
+            radialMenuBase.SetActive(false);
+        }
     }
 
     void OnDestroy()
     {
-        // Ensure menu state is cleared if destroyed while open
         if (menuActive && _inGameMenu != null)
         {
             _inGameMenu.SetRadialMenuActive(false);
@@ -48,7 +60,16 @@ public class RadialMenuController : MonoBehaviour
     {
         if (Input.GetKeyDown(toggleKey))
         {
-            ToggleMenu();
+            if (menuActive)
+            {
+                // Always allow closing
+                ToggleMenu();
+            }
+            else if (!IsAnyMenuOpen())
+            {
+                // Only open if no other menus are active
+                ToggleMenu();
+            }
         }
 
         if (!menuActive) return;
@@ -56,6 +77,18 @@ public class RadialMenuController : MonoBehaviour
         GetInputDirection();
         UpdateSelection();
         HandleSelectionInput();
+    }
+
+    private bool IsAnyMenuOpen()
+    {
+        try
+        {
+            return InGameMenu.InMenu();
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     void ToggleMenu()
@@ -70,10 +103,8 @@ public class RadialMenuController : MonoBehaviour
 
         if (menuActive)
         {
-            
             UpdateMenuDisplay();
         }
-
     }
 
     void GetInputDirection()
