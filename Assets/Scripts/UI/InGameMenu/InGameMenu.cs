@@ -78,6 +78,8 @@ namespace UI
         private Dictionary<string, BasePopup> _customPopups = new Dictionary<string, BasePopup>();
         private string[] trackedProperties = new string[] { "Kills", "Deaths", "HighestDamage", "TotalDamage" };
 
+        private bool _radialMenuActive = false;
+
         public override void Setup()
         {
             base.Setup();
@@ -97,6 +99,17 @@ namespace UI
             SetupSnapshot();
             HideAllMenus();
         }
+        public void SetRadialMenuActive(bool active)
+        {
+            _radialMenuActive = active;
+            if (active)
+            {
+                // Optional: Hide other UI elements when radial menu is open
+                HideAllMenus();
+            }
+        }
+
+        
 
         public void ApplyUISettings()
         {
@@ -260,7 +273,7 @@ namespace UI
                 if (popup.IsActive)
                     return true;
             }
-            return menu.EmoteHandler.IsActive || menu.ItemHandler.IsActive;
+            return menu.EmoteHandler.IsActive || menu.ItemHandler.IsActive || menu._radialMenuActive;
         }
 
         public void SetPauseMenu(bool enabled)

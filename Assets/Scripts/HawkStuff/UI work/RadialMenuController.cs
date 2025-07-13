@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using UI;
 
 public class RadialMenuController : MonoBehaviour
 {
@@ -17,8 +18,8 @@ public class RadialMenuController : MonoBehaviour
     public GameObject radialMenuBase;
     public RectTransform selectionIndicator;
     public Text selectionNameText;
-    public Text pageNameText; // For displaying the page name
-    public Text pageNumberText; // For displaying "Page X of Y"
+    public Text pageNameText;
+    public Text pageNumberText;
 
     [Header("Pages")]
     public List<RadialMenuPage> pages = new List<RadialMenuPage>();
@@ -27,6 +28,21 @@ public class RadialMenuController : MonoBehaviour
     private bool menuActive = false;
     private int currentSelection = -1;
     private Vector2 inputDirection;
+    private InGameMenu _inGameMenu;
+
+    void Start()
+    {
+        _inGameMenu = (InGameMenu)UIManager.CurrentMenu;
+    }
+
+    void OnDestroy()
+    {
+        // Ensure menu state is cleared if destroyed while open
+        if (menuActive && _inGameMenu != null)
+        {
+            _inGameMenu.SetRadialMenuActive(false);
+        }
+    }
 
     void Update()
     {
@@ -47,9 +63,14 @@ public class RadialMenuController : MonoBehaviour
         menuActive = !menuActive;
         radialMenuBase.SetActive(menuActive);
 
+        if (_inGameMenu != null)
+        {
+            _inGameMenu.SetRadialMenuActive(menuActive);
+        }
+
         if (menuActive)
         {
-           
+            
             UpdateMenuDisplay();
         }
 
@@ -160,7 +181,6 @@ public class RadialMenuController : MonoBehaviour
 
     void UpdateMenuDisplay()
     {
-        // Clear old menu items (preserving the UI elements we want to keep)
         foreach (Transform child in radialMenuBase.transform)
         {
             if (child != selectionIndicator &&
@@ -172,9 +192,8 @@ public class RadialMenuController : MonoBehaviour
             }
         }
 
-        // Update page information display
-        pageNameText.text = pages[currentPage].pageName; // Show the page name
-        pageNumberText.text = $"Page {currentPage + 1} of {pages.Count}"; // Show page numbers
+        pageNameText.text = pages[currentPage].pageName;
+        pageNumberText.text = $"Page {currentPage + 1} of {pages.Count}";
 
         if (currentPage >= pages.Count) return;
 
@@ -186,25 +205,21 @@ public class RadialMenuController : MonoBehaviour
             float angle = (i * segmentAngle + (segmentAngle / 2)) * Mathf.Deg2Rad;
             Vector2 pos = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
 
-            // Create icon
             GameObject icon = new GameObject($"Option_{i}");
             RectTransform rt = icon.AddComponent<RectTransform>();
             rt.SetParent(radialMenuBase.transform);
             rt.anchoredPosition = pos;
             rt.sizeDelta = new Vector2(iconSize, iconSize);
 
-            // Add image
             Image img = icon.AddComponent<Image>();
             img.sprite = pages[currentPage].options[i].icon;
 
-            // Add text label below icon
             GameObject label = new GameObject($"Label_{i}");
             RectTransform labelRt = label.AddComponent<RectTransform>();
             labelRt.SetParent(icon.transform);
             labelRt.anchoredPosition = new Vector2(0, -iconSize);
             labelRt.sizeDelta = new Vector2(100, 30);
 
-            // Standard Text component
             Text labelText = label.AddComponent<Text>();
             labelText.text = pages[currentPage].options[i].optionName;
             labelText.alignment = TextAnchor.UpperCenter;
@@ -217,7 +232,7 @@ public class RadialMenuController : MonoBehaviour
 [System.Serializable]
 public class RadialMenuPage
 {
-    public string pageName; // This will be displayed at the top
+    public string pageName;
     public List<RadialMenuOption> options = new List<RadialMenuOption>();
 }
 
