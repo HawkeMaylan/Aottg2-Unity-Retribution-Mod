@@ -16,8 +16,20 @@ namespace UI
         private const int MaxPopups = 5;
         private const float Spacing = 35f;
 
-        private readonly Queue<GameObject> _popupQueue = new Queue<GameObject>();
+        // Dictionary for mapping internal names to display names
+        private readonly Dictionary<string, string> _itemDisplayNames = new Dictionary<string, string>()
+        {
+            {"Wagon1", "Support Wagon"},
+            {"Wagon2", "Resupply Wagon"},
+            {"Cannon", "Cannon"},
+            {"CannonGround", "Ground Cannon"},
+            {"WallCannon", "Wall Cannon"},
+            {"GasBomb", "Gas Bomb"},
+            {"CannonTest", "Cannon"}
+            // Add more mappings as needed
+        };
 
+        private readonly Queue<GameObject> _popupQueue = new Queue<GameObject>();
         private Transform _popupParent;
         private GameObject _popupPrefab;
 
@@ -48,6 +60,31 @@ namespace UI
         {
             if (_popupPrefab == null || _popupParent == null)
                 return;
+
+            // Handle "Not Enough" messages
+            if (message.StartsWith("Not Enough "))
+            {
+                string itemName = message.Substring(11); // Remove "Not Enough "
+                if (_itemDisplayNames.TryGetValue(itemName, out string displayName))
+                {
+                    message = $"Not Enough {displayName}";
+                }
+            }
+            else
+            {
+                // Handle regular change messages (e.g., "Wagon1 -1")
+                string[] parts = message.Split(new[] { ' ' }, 2);
+                if (parts.Length == 2)
+                {
+                    string itemName = parts[0];
+                    string change = parts[1];
+
+                    if (_itemDisplayNames.TryGetValue(itemName, out string displayName))
+                    {
+                        message = $"{displayName} {change}";
+                    }
+                }
+            }
 
             GameObject popup = Instantiate(_popupPrefab, _popupParent);
             popup.transform.SetAsLastSibling();
@@ -103,6 +140,18 @@ namespace UI
             {
                 GameObject oldest = _popupQueue.Dequeue();
                 Destroy(oldest);
+            }
+        }
+
+        // Optional: Public method to add or update display names at runtime
+        public static void SetDisplayName(string internalName, string displayName)
+        {
+            if (Instance != null)
+            {
+                if (Instance._itemDisplayNames.ContainsKey(internalName))
+                    Instance._itemDisplayNames[internalName] = displayName;
+                else
+                    Instance._itemDisplayNames.Add(internalName, displayName);
             }
         }
     }
