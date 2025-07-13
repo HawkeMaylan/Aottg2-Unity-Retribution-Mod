@@ -9,13 +9,13 @@ public class InventoryDisplay : MonoBehaviour
     private Human _localHuman;
     private HumanInventory _inventory;
     private HumanStats _stats;
-    private InGameMenu _inGameMenu;
+    private InGameMenu _inGameMenu; // Reference to the main menu system
 
-    // Display name dictionary (matches ItemPopupManager)
+    // Added display name dictionary (only change)
     private readonly Dictionary<string, string> _itemDisplayNames = new Dictionary<string, string>()
     {
-        {"Wagon1", "Small Wagon"},
-        {"Wagon2", "Large Wagon"},
+        {"Wagon1", "Support Wagon"},
+        {"Wagon2", "Resupply Wagon"},
         {"Cannon", "Cannon"},
         {"CannonGround", "Ground Cannon"},
         {"WallCannon", "Wall Cannon"},
@@ -36,6 +36,7 @@ public class InventoryDisplay : MonoBehaviour
         }
         else if (_showInventory && Input.GetKeyDown(KeyCode.Escape))
         {
+            // Only close with Escape key to prevent accidental closing
             ToggleInventoryDisplay();
         }
     }
@@ -43,24 +44,19 @@ public class InventoryDisplay : MonoBehaviour
     private void ToggleInventoryDisplay()
     {
         _localHuman = FindLocalHuman();
-        _inventory = _localHuman?.GetComponent<HumanInventory>();
-        _stats = _localHuman?.Stats;
+        _inventory = _localHuman != null ? _localHuman.GetComponent<HumanInventory>() : null;
+        _stats = _localHuman != null ? _localHuman.Stats : null;
         _showInventory = !_showInventory;
 
+        // Set the in-menu state
         if (_inGameMenu != null)
         {
             _inGameMenu.SetInventoryMenuActive(_showInventory);
         }
 
-        // Update cursor state
+        // Optional: Lock cursor when inventory is open
         Cursor.visible = _showInventory;
         Cursor.lockState = _showInventory ? CursorLockMode.None : CursorLockMode.Locked;
-
-        // Refresh inventory when opening
-        if (_showInventory && _inventory != null)
-        {
-            _inventory.LogInventoryState(); // Debug output
-        }
     }
 
     private void OnGUI()
@@ -68,73 +64,34 @@ public class InventoryDisplay : MonoBehaviour
         if (!_showInventory || _inventory == null || _stats == null)
             return;
 
-        // Style setup
-        GUIStyle boxStyle = new GUIStyle(GUI.skin.box)
-        {
-            fontSize = 14,
-            alignment = TextAnchor.UpperLeft
-        };
-
-        GUIStyle labelStyle = new GUIStyle(GUI.skin.label)
-        {
-            fontSize = 12,
-            richText = true
-        };
-
-        // Layout parameters
+        // First, draw the stats panel (top fixed)
         float topX = 20f;
         float topY = 20f;
-        float boxWidth = 240f;
+        float boxWidth = 220f;
         float statsBoxHeight = 130f;
-        float padding = 10f;
 
-        // 1. Draw stats panel
-        GUI.Box(new Rect(topX, topY, boxWidth, statsBoxHeight), "<b>Character Stats</b>", boxStyle);
+        GUI.Box(new Rect(topX, topY, boxWidth, statsBoxHeight), "Stats");
+        GUI.Label(new Rect(topX + 10, topY + 30, 200, 20), $"Speed: {_stats.Speed}");
+        GUI.Label(new Rect(topX + 10, topY + 50, 200, 20), $"Gas: {_stats.Gas}");
+        GUI.Label(new Rect(topX + 10, topY + 70, 200, 20), $"Ammo: {_stats.Ammunition}");
+        GUI.Label(new Rect(topX + 10, topY + 90, 200, 20), $"Accel: {_stats.Acceleration}");
+        GUI.Label(new Rect(topX + 10, topY + 110, 200, 20), $"HorseSpeed: {_stats.HorseSpeed}");
 
-        float labelY = topY + padding + 10f;
-        DrawStatLabel(labelStyle, topX + padding, labelY, "Speed:", _stats.Speed.ToString("F1"));
-        labelY += 20f;
-        DrawStatLabel(labelStyle, topX + padding, labelY, "Gas:", _stats.Gas.ToString("F1"));
-        labelY += 20f;
-        DrawStatLabel(labelStyle, topX + padding, labelY, "Ammo:", _stats.Ammunition.ToString());
-        labelY += 20f;
-        DrawStatLabel(labelStyle, topX + padding, labelY, "Acceleration:", _stats.Acceleration.ToString("F1"));
-        labelY += 20f;
-        DrawStatLabel(labelStyle, topX + padding, labelY, "Horse Speed:", _stats.HorseSpeed.ToString("F1"));
-
-        // 2. Draw inventory panel
+        // Then, draw the inventory panel below it
         List<string> items = _inventory.GetItemTypes();
-        float inventoryHeight = 30f + (items.Count * 22f);
-        float inventoryY = topY + statsBoxHeight + 15f;
+        int itemCount = items.Count;
+        int inventoryHeight = 30 + itemCount * 20;
 
-        GUI.Box(new Rect(topX, inventoryY, boxWidth, inventoryHeight), "<b>Inventory</b>", boxStyle);
+        float inventoryY = topY + statsBoxHeight + 20;
+        GUI.Box(new Rect(topX, inventoryY, boxWidth, inventoryHeight), "Inventory");
 
-        for (int i = 0; i < items.Count; i++)
+        for (int i = 0; i < itemCount; i++)
         {
             string item = items[i];
-            string displayName = GetDisplayName(item);
+            string displayName = _itemDisplayNames.ContainsKey(item) ? _itemDisplayNames[item] : item;
             int count = _inventory.GetItemCount(item);
-
-            float itemY = inventoryY + padding + 10f + (i * 22f);
-            GUI.Label(
-                new Rect(topX + padding, itemY, boxWidth - (2 * padding), 20f),
-                $"{displayName}: <color=#FFD700>{count}</color>",
-                labelStyle
-            );
+            GUI.Label(new Rect(topX + 10, inventoryY + 20 + i * 20, 200, 20), $"{displayName}: {count}");
         }
-    }
-
-    private void DrawStatLabel(GUIStyle style, float x, float y, string label, string value)
-    {
-        GUI.Label(new Rect(x, y, 100, 20), label, style);
-        GUI.Label(new Rect(x + 100, y, 100, 20), value, style);
-    }
-
-    private string GetDisplayName(string internalName)
-    {
-        return _itemDisplayNames.TryGetValue(internalName, out string displayName)
-            ? displayName
-            : internalName;
     }
 
     private Human FindLocalHuman()
