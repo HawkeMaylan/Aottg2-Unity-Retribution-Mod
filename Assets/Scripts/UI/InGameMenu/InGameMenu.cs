@@ -80,6 +80,8 @@ namespace UI
 
         private bool _radialMenuActive = false;
 
+        private bool _inventoryMenuActive = false;
+
         public override void Setup()
         {
             base.Setup();
@@ -109,7 +111,15 @@ namespace UI
             }
         }
 
-        
+        public void SetInventoryMenuActive(bool active)
+        {
+            _inventoryMenuActive = active;
+            if (active)
+            {
+                // Optional: Hide other UI elements when radial menu is open
+                HideAllMenus();
+            }
+        }
 
         public void ApplyUISettings()
         {
@@ -273,7 +283,7 @@ namespace UI
                 if (popup.IsActive)
                     return true;
             }
-            return menu.EmoteHandler.IsActive || menu.ItemHandler.IsActive || menu._radialMenuActive;
+            return menu.EmoteHandler.IsActive || menu.ItemHandler.IsActive || menu._radialMenuActive ||menu._inventoryMenuActive;
         }
 
         public void SetPauseMenu(bool enabled)
