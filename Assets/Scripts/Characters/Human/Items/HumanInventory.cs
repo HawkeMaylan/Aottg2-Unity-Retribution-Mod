@@ -1,17 +1,20 @@
 using UnityEngine;
 using Photon.Pun;
 using System.Collections.Generic;
-using UI; // Add this if your ItemPopupManager is in a UI namespace
+using UI;
 
 namespace Characters
 {
+    [DisallowMultipleComponent]
+    [RequireComponent(typeof(PhotonView))]
     public class HumanInventory : MonoBehaviourPunCallbacks
     {
+        public static HumanInventory Instance { get; private set; }
+
         [Header("Deployable Types")]
         [SerializeField]
         private List<string> defaultDeployables = new List<string>
         {
-            // ADD NEW AS NEEDED - MAKE SURE TO ADD AT BOTTOM
             "Cannon",
             "Wagon1",
             "Wagon2",
@@ -19,34 +22,56 @@ namespace Characters
         };
 
         [Header("Inventory Counts")]
+        [Tooltip("Dictionary of item counts. Use GetItemCount() for safe access.")]
         public Dictionary<string, int> inventoryCounts = new Dictionary<string, int>();
 
         private void Awake()
         {
+            // Singleton pattern for easy access
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Debug.LogWarning("Multiple HumanInventory instances detected. Destroying duplicate.");
+                Destroy(this);
+                return;
+            }
+
+            InitializeInventory();
+        }
+
+        private void InitializeInventory()
+        {
             foreach (var type in defaultDeployables)
             {
                 if (!inventoryCounts.ContainsKey(type))
+                {
                     inventoryCounts[type] = 0;
+                    Debug.Log($"Initialized inventory slot for: {type}");
+                }
             }
         }
 
         public void AddItem(string type)
         {
-            EnsureItemType(type);
+            if (!ValidateItemType(type)) return;
             int newCount = inventoryCounts[type] + 1;
             photonView.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, type, newCount);
         }
 
         public void RemoveItem(string type)
         {
-            EnsureItemType(type);
+            if (!ValidateItemType(type)) return;
             int newCount = Mathf.Max(0, inventoryCounts[type] - 1);
             photonView.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, type, newCount);
         }
 
         public void SetItemCount(string type, int count)
         {
-            EnsureItemType(type);
+            if (!ValidateItemType(type)) return;
+
             if (count < 0 && photonView.IsMine)
             {
                 ItemPopupManager.Instance?.ShowPopup($"Not Enough {type}");
@@ -56,13 +81,15 @@ namespace Characters
 
         public int GetItemCount(string type)
         {
-            return inventoryCounts.TryGetValue(type, out int count) ? count : 0;
+            if (!ValidateItemType(type)) return 0;
+            return inventoryCounts[type];
         }
 
         [PunRPC]
         public void RPC_SetItemCount(string type, int count)
         {
-            EnsureItemType(type);
+            if (!ValidateItemType(type, true)) return;
+
             int oldCount = inventoryCounts[type];
             int newCount = Mathf.Max(0, count);
 
@@ -93,10 +120,30 @@ namespace Characters
             return new List<string>(inventoryCounts.Keys);
         }
 
-        private void EnsureItemType(string type)
+        private bool ValidateItemType(string type, bool autoAdd = false)
         {
+            if (string.IsNullOrEmpty(type))
+            {
+                Debug.LogError("Item type cannot be null or empty");
+                return false;
+            }
+
             if (!inventoryCounts.ContainsKey(type))
-                inventoryCounts[type] = 0;
+            {
+                if (autoAdd)
+                {
+                    Debug.LogWarning($"Auto-adding new item type: {type}");
+                    inventoryCounts[type] = 0;
+                    return true;
+                }
+                else
+                {
+                    Debug.LogError($"Item type '{type}' not found in inventory");
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         // Quick Access Properties
@@ -122,6 +169,15 @@ namespace Characters
         {
             get => GetItemCount("WallCannon");
             set => SetItemCount("WallCannon", value);
+        }
+
+        // Cleanup on destroy
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
         }
     }
 }

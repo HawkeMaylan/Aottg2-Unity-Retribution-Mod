@@ -1,7 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using System.Collections.Generic;
+using Characters;
+using System.Collections;
 
 public class BuildSystem : MonoBehaviourPunCallbacks
 {
@@ -24,11 +25,66 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     private Vector3 currentRot;
     private List<GameObject> buildablePrefabs = new List<GameObject>();
     private int currentBuildableIndex = 0;
+    private HumanInventory _playerInventory;
+    private bool _inventorySearchPerformed = false;
 
-    void Start()
+    private IEnumerator Start()
     {
+        yield return new WaitUntil(() => FindLocalPlayerInventory() || _inventorySearchPerformed);
+
+        if (_playerInventory == null)
+        {
+            Debug.LogError("BuildSystem: Failed to find player inventory after waiting");
+            yield break;
+        }
+
         LoadBuildablePrefabs();
         InitializeRadialMenu();
+
+        Debug.Log("BuildSystem: Initialized with inventory");
+    }
+
+    private bool FindLocalPlayerInventory()
+    {
+        // Method 1: Find by PhotonView ownership (most reliable)
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human != null && human.photonView != null && human.photonView.IsMine)
+            {
+                _playerInventory = human.GetComponent<HumanInventory>();
+                if (_playerInventory != null)
+                {
+                    Debug.Log("BuildSystem: Found local player inventory via PhotonView ownership");
+                    _inventorySearchPerformed = true;
+                    return true;
+                }
+            }
+        }
+
+        // Method 2: Fallback to tag search
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            _playerInventory = player.GetComponentInChildren<HumanInventory>(true);
+            if (_playerInventory != null)
+            {
+                Debug.Log("BuildSystem: Found player inventory via tag search");
+                _inventorySearchPerformed = true;
+                return true;
+            }
+        }
+
+        // Method 3: Final fallback
+        _playerInventory = FindObjectOfType<HumanInventory>();
+        if (_playerInventory != null)
+        {
+            Debug.Log("BuildSystem: Found player inventory via scene search");
+            _inventorySearchPerformed = true;
+            return true;
+        }
+
+        Debug.LogWarning("BuildSystem: Player inventory not found in this attempt");
+        return false;
     }
 
     void Update()
@@ -53,12 +109,13 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             if (prefab.GetComponent<BuildableObjectHelper>() != null)
             {
                 buildablePrefabs.Add(prefab);
+                Debug.Log($"BuildSystem: Loaded buildable prefab {prefab.name}");
             }
         }
 
         if (buildablePrefabs.Count == 0)
         {
-            Debug.LogWarning("No buildable prefabs found in Resources/Buildables");
+            Debug.LogWarning("BuildSystem: No buildable prefabs found in Resources/Buildables");
         }
     }
 
@@ -68,6 +125,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         if (radialMenu != null)
         {
             radialMenu.InitializeWithBuildables(buildablePrefabs);
+            Debug.Log("BuildSystem: Radial menu initialized");
         }
     }
 
@@ -113,12 +171,13 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
         if (helper == null || helper.preview == null)
         {
-            Debug.LogError("Missing BuildableObjectHelper or preview");
+            Debug.LogError("BuildSystem: Missing BuildableObjectHelper or preview");
             return;
         }
 
         currentPreview = Instantiate(helper.preview, currentPos, Quaternion.Euler(currentRot));
         SetLayerRecursively(currentPreview, LayerMask.NameToLayer("Preview"));
+        Debug.Log($"BuildSystem: Created preview for {prefab.name}");
     }
 
     void UpdatePreview()
@@ -128,7 +187,6 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
             if (helper == null) return;
 
-            // Position with grid snapping
             float gridSize = helper.gridSize;
             currentPos = hit.point + hit.normal * helper.offset;
             currentPos = new Vector3(
@@ -137,7 +195,6 @@ public class BuildSystem : MonoBehaviourPunCallbacks
                 Mathf.Round(currentPos.z / gridSize) * gridSize
             );
 
-            // Rotation
             currentPreview.transform.position = currentPos;
             currentPreview.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal) * Quaternion.Euler(currentRot);
 
@@ -147,7 +204,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void UpdatePreviewMaterials()
     {
-        bool isValid = IsPreviewValid();
+        bool isValid = IsPreviewValid() && (_playerInventory == null || CanAffordBuild());
         foreach (Renderer renderer in currentPreview.GetComponentsInChildren<Renderer>())
         {
             renderer.material = isValid ? buildableMaterial : notBuildableMaterial;
@@ -181,13 +238,11 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void HandleBuildingInput()
     {
-        // Rotation
         if (Input.GetKeyDown(KeyCode.RightArrow))
             currentRot += new Vector3(0, 45, 0);
         if (Input.GetKeyDown(KeyCode.LeftArrow))
             currentRot -= new Vector3(0, 45, 0);
 
-        // Placement
         if (Input.GetKeyDown(placeKey))
         {
             Build();
@@ -196,13 +251,69 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void Build()
     {
-        if (currentPreview == null || !IsPreviewValid()) return;
+        if (currentPreview == null || !IsPreviewValid())
+        {
+            Debug.Log("BuildSystem: Cannot build - invalid position or no preview");
+            return;
+        }
 
+        // Double-check inventory reference
+        if (_playerInventory == null)
+        {
+            FindLocalPlayerInventory();
+            if (_playerInventory == null)
+            {
+                Debug.LogError("BuildSystem: Cannot build - player inventory not found!");
+                return;
+            }
+        }
+
+        BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
+
+        // Check if there are any costs defined
+        if (helper.buildCosts != null && helper.buildCosts.Length > 0)
+        {
+            if (!CanAffordBuild())
+            {
+                Debug.Log("BuildSystem: Cannot build - not enough resources");
+                return;
+            }
+
+            // Deduct costs only after all checks pass
+            foreach (InventoryCost cost in helper.buildCosts)
+            {
+                _playerInventory.SetItemCount(cost.itemName,
+                    _playerInventory.GetItemCount(cost.itemName) - cost.amount);
+            }
+        }
+
+        // Only place if all checks pass
         GameObject prefab = buildablePrefabs[currentBuildableIndex];
         PhotonNetwork.Instantiate("Buildables/" + prefab.name, currentPos, currentPreview.transform.rotation);
+        Debug.Log($"BuildSystem: Built {prefab.name} at {currentPos}");
 
         Destroy(currentPreview);
-        CreatePreview(); // Create new preview for continuous building
+        CreatePreview();
+    }
+
+    bool CanAffordBuild()
+    {
+        if (_playerInventory == null)
+        {
+            Debug.LogError("BuildSystem: Player inventory not found");
+            return false;
+        }
+
+        BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
+        foreach (InventoryCost cost in helper.buildCosts)
+        {
+            if (_playerInventory.GetItemCount(cost.itemName) < cost.amount)
+            {
+                _playerInventory.SetItemCount(cost.itemName, -1);
+                return false;
+            }
+        }
+        return true;
     }
 
     public void HandleBuildableSelection(GameObject prefab)
@@ -210,7 +321,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         int index = buildablePrefabs.IndexOf(prefab);
         if (index == -1)
         {
-            Debug.LogError($"Prefab {prefab.name} not in buildable list");
+            Debug.LogError($"BuildSystem: Prefab {prefab.name} not in buildable list");
             return;
         }
 
@@ -242,6 +353,29 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         foreach (Transform child in obj.transform)
         {
             SetLayerRecursively(child.gameObject, layer);
+        }
+    }
+
+    // Debug function - call this with a key press to check status
+    private void DebugInventoryStatus()
+    {
+        Debug.Log("=== BuildSystem Debug ===");
+        Debug.Log($"Current _playerInventory: {_playerInventory != null}");
+
+        Human localHuman = null;
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human != null && human.photonView != null && human.photonView.IsMine)
+            {
+                localHuman = human;
+                break;
+            }
+        }
+
+        Debug.Log($"Local human found: {localHuman != null}");
+        if (localHuman != null)
+        {
+            Debug.Log($"Human has inventory: {localHuman.GetComponent<HumanInventory>() != null}");
         }
     }
 }
