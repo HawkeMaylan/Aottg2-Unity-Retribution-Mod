@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
 using UI;
@@ -13,6 +14,8 @@ public class RadialMenuController : MonoBehaviour
     public float deadZone = 0.2f;
     public KeyCode toggleKey = KeyCode.Tab;
     public bool useMouseSelection = true;
+    [Tooltip("When enabled, menu must be held open and selection is applied on release")]
+    public bool holdToSelectMode = false;
 
     [Header("UI References")]
     public GameObject radialMenuBase;
@@ -29,6 +32,15 @@ public class RadialMenuController : MonoBehaviour
     private int currentSelection = -1;
     private Vector2 inputDirection;
     private InGameMenu _inGameMenu;
+    private bool _isHolding = false;
+    private int _pendingSelection = -1;
+
+    [Tooltip("How long to stay 'in menu' after selection (seconds)")]
+    public float postSelectionMenuTime = 1f; // Inspector-configurable delay
+
+    private float _postSelectionTimer = 0f;
+    private bool _inPostSelectionState = false;
+
 
     void Start()
     {
@@ -38,11 +50,9 @@ public class RadialMenuController : MonoBehaviour
         }
         catch
         {
-            // Silently fail - menu will work without InGameMenu integration
             _inGameMenu = null;
         }
 
-        // Ensure radial menu starts closed
         if (radialMenuBase != null)
         {
             radialMenuBase.SetActive(false);
@@ -51,7 +61,6 @@ public class RadialMenuController : MonoBehaviour
 
     void OnDestroy()
     {
-        // Ensure menu state is cleared if destroyed while open
         if (menuActive && _inGameMenu != null)
         {
             _inGameMenu.SetRadialMenuActive(false);
@@ -60,19 +69,20 @@ public class RadialMenuController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(toggleKey))
+
+        // Handle post-selection timer
+        if (_inPostSelectionState)
         {
-            // Always allow closing if menu is active
-            if (menuActive)
+            _postSelectionTimer -= Time.deltaTime;
+            if (_postSelectionTimer <= 0f)
             {
-                ToggleMenu();
+                _inPostSelectionState = false;
+                if (_inGameMenu != null)
+                    _inGameMenu.SetRadialMenuActive(false);
             }
-            // Only check other menus when opening
-            else if (!IsAnyMenuOpen())
-            {
-                ToggleMenu();
-            }
+            return; // Skip other input during post-selection
         }
+        HandleMenuToggleInput();
 
         if (!menuActive) return;
 
@@ -81,42 +91,81 @@ public class RadialMenuController : MonoBehaviour
         HandleSelectionInput();
     }
 
-    private bool IsAnyMenuOpen()
+    void HandleMenuToggleInput()
     {
-        // Check if InGameMenu system reports any menu is open
-        if (InGameMenu.InMenu())
+        if (holdToSelectMode)
         {
-            return true;
+            // Hold mode behavior
+            if (Input.GetKeyDown(toggleKey) && !IsAnyMenuOpen())
+            {
+                OpenMenu();
+            }
+            else if (Input.GetKeyUp(toggleKey) && menuActive)
+            {
+                if (_isHolding && _pendingSelection != -1)
+                {
+                    ExecuteSelection(_pendingSelection);
+                }
+                CloseMenu();
+            }
         }
-
-        // Add any additional menu system checks here if needed
-        // Example: if (OtherMenuSystem.IsOpen) return true;
-
-        return false;
+        else
+        {
+            // Original toggle behavior
+            if (Input.GetKeyDown(toggleKey))
+            {
+                if (menuActive)
+                {
+                    CloseMenu();
+                }
+                else if (!IsAnyMenuOpen())
+                {
+                    OpenMenu();
+                }
+            }
+        }
     }
 
-    void ToggleMenu()
+    void OpenMenu()
     {
-        // Additional safety check (in case keybind fires while menu is closing)
-        if (IsAnyMenuOpen() && !menuActive)
-        {
-            return;
-        }
-
-        menuActive = !menuActive;
-        radialMenuBase.SetActive(menuActive);
+        menuActive = true;
+        radialMenuBase.SetActive(true);
+        _isHolding = true;
+        _pendingSelection = -1;
 
         if (_inGameMenu != null)
         {
-            _inGameMenu.SetRadialMenuActive(menuActive);
+            _inGameMenu.SetRadialMenuActive(true);
         }
+        _inPostSelectionState = false;
+        UpdateMenuDisplay();
+    }
 
-        if (menuActive)
+    void CloseMenu()
+    {
+        menuActive = false;
+        _isHolding = false;
+        radialMenuBase.SetActive(false);
+
+        // Start post-selection delay
+        _postSelectionTimer = postSelectionMenuTime;
+        _inPostSelectionState = true;
+
+        ((InGameMenu)UIManager.CurrentMenu).SkipAHSSInput = true;
+    }
+
+    void ExecuteSelection(int selectionIndex)
+    {
+        if (currentPage < pages.Count && selectionIndex < pages[currentPage].options.Count)
         {
-
-            UpdateMenuDisplay();
+            pages[currentPage].options[selectionIndex].onSelect.Invoke();
+            ((InGameMenu)UIManager.CurrentMenu).SkipAHSSInput = true;
         }
+    }
 
+    private bool IsAnyMenuOpen()
+    {
+        return InGameMenu.InMenu() || _inPostSelectionState;
     }
 
     void GetInputDirection()
@@ -156,6 +205,11 @@ public class RadialMenuController : MonoBehaviour
         {
             currentSelection = newSelection;
             UpdateSelectionVisual();
+
+            if (holdToSelectMode && _isHolding)
+            {
+                _pendingSelection = currentSelection;
+            }
         }
     }
 
@@ -179,14 +233,19 @@ public class RadialMenuController : MonoBehaviour
 
     void HandleSelectionInput()
     {
+        ((InGameMenu)UIManager.CurrentMenu).SkipAHSSInput = true;
         if (currentSelection == -1) return;
 
-        if (Input.GetButtonDown("Submit") || Input.GetMouseButtonDown(0))
+        if (!holdToSelectMode)
         {
-            if (currentPage < pages.Count && currentSelection < pages[currentPage].options.Count)
+            if (Input.GetButtonDown("Submit") || Input.GetMouseButtonDown(0))
             {
-                pages[currentPage].options[currentSelection].onSelect.Invoke();
-                ToggleMenu();
+                if (EventSystem.current.currentSelectedGameObject != null ||
+                    EventSystem.current.IsPointerOverGameObject())
+                {
+                    ExecuteSelection(currentSelection);
+                    CloseMenu();
+                }
             }
         }
 

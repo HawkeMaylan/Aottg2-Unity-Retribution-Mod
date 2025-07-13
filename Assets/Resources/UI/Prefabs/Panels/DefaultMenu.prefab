@@ -135,6 +135,7 @@ MonoBehaviour:
   deadZone: 0.1
   toggleKey: 273
   useMouseSelection: 1
+  holdToSelectMode: 0
   radialMenuBase: {fileID: 1370462488265346918}
   selectionIndicator: {fileID: 3748461634886215482}
   selectionNameText: {fileID: 8613071451305174915}
@@ -153,13 +154,14 @@ MonoBehaviour:
       onSelect:
         m_PersistentCalls:
           m_Calls: []
-  - pageName: Tim
+  - pageName: Chim
     options:
     - optionName: 2222
       icon: {fileID: 21300000, guid: 7856c4c6378d32544921bec421483c57, type: 3}
       onSelect:
         m_PersistentCalls:
           m_Calls: []
+  postSelectionMenuTime: 0.1
 --- !u!1 &100520
 GameObject:
   m_ObjectHideFlags: 0
