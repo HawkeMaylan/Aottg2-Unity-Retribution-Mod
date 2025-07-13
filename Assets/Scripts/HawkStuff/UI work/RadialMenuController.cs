@@ -49,13 +49,10 @@ public class RadialMenuController : MonoBehaviour
 
         if (menuActive)
         {
-            Time.timeScale = 0f;
+           
             UpdateMenuDisplay();
         }
-        else
-        {
-            Time.timeScale = 1f;
-        }
+
     }
 
     void GetInputDirection()
@@ -142,6 +139,7 @@ public class RadialMenuController : MonoBehaviour
     void NextPage()
     {
         currentPage = (currentPage + 1) % pages.Count;
+        ResetSelection();
         UpdateMenuDisplay();
     }
 
@@ -149,7 +147,15 @@ public class RadialMenuController : MonoBehaviour
     {
         currentPage--;
         if (currentPage < 0) currentPage = pages.Count - 1;
+        ResetSelection();
         UpdateMenuDisplay();
+    }
+
+    void ResetSelection()
+    {
+        currentSelection = -1;
+        selectionIndicator.gameObject.SetActive(false);
+        selectionNameText.text = "";
     }
 
     void UpdateMenuDisplay()

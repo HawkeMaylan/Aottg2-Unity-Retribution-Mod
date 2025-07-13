@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 11400258}
   - component: {fileID: 11400256}
   - component: {fileID: -7247004672503531477}
-  - component: {fileID: -8659102037057560214}
   - component: {fileID: 490599386996468374}
   m_Layer: 5
   m_Name: DefaultMenu
@@ -118,27 +117,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 336e45cd0add7be4ebb532346fabe4de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-8659102037057560214
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100218}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1882d8d29da72554080c19e33952bffb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  buttons:
-  - {fileID: 11455456, guid: f87f5144b2b2d964d9de7b4f05bcc505, type: 3}
-  - {fileID: 11455456, guid: f87f5144b2b2d964d9de7b4f05bcc505, type: 3}
-  - {fileID: 11455456, guid: f87f5144b2b2d964d9de7b4f05bcc505, type: 3}
-  - {fileID: 11455456, guid: f87f5144b2b2d964d9de7b4f05bcc505, type: 3}
-  - {fileID: 11455456, guid: f87f5144b2b2d964d9de7b4f05bcc505, type: 3}
-  - {fileID: 11455456, guid: f87f5144b2b2d964d9de7b4f05bcc505, type: 3}
-  - {fileID: 11455456, guid: f87f5144b2b2d964d9de7b4f05bcc505, type: 3}
-  - {fileID: 11455456, guid: f87f5144b2b2d964d9de7b4f05bcc505, type: 3}
 --- !u!114 &490599386996468374
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,9 +130,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   segmentsPerPage: 8
-  radius: 200
-  iconSize: 50
-  deadZone: 20
+  radius: 300
+  iconSize: 70
+  deadZone: 0.1
   toggleKey: 273
   useMouseSelection: 1
   radialMenuBase: {fileID: 1370462488265346918}
