@@ -126,6 +126,53 @@ public class RadialMenuController : MonoBehaviour
         }
     }
 
+    private Dictionary<string, GameObject> prefabLookup = new Dictionary<string, GameObject>();
+
+    public void InitializeWithBuildables(List<GameObject> buildablePrefabs)
+    {
+        prefabLookup.Clear();
+        pages.Clear();
+
+        // Create a single page for all buildables
+        RadialMenuPage page = new RadialMenuPage { pageName = "Buildables" };
+
+        foreach (GameObject prefab in buildablePrefabs)
+        {
+            BuildableObjectHelper helper = prefab.GetComponent<BuildableObjectHelper>();
+            if (helper == null) continue;
+
+            // Add to lookup dictionary
+            prefabLookup[helper.displayName ?? prefab.name] = prefab;
+
+            // Create menu option
+            RadialMenuOption option = new RadialMenuOption
+            {
+                optionName = helper.displayName ?? prefab.name,
+                icon = helper.menuIcon
+            };
+
+            option.onSelect = new UnityEngine.Events.UnityEvent();
+            option.onSelect.AddListener(() => OnBuildableSelected(option.optionName));
+
+            page.options.Add(option);
+        }
+
+        pages.Add(page);
+        UpdateMenuDisplay();
+    }
+
+    private void OnBuildableSelected(string optionName)
+    {
+        if (prefabLookup.TryGetValue(optionName, out GameObject prefab))
+        {
+            BuildSystem buildSystem = FindObjectOfType<BuildSystem>();
+            if (buildSystem != null)
+            {
+                buildSystem.HandleBuildableSelection(prefab);
+            }
+        }
+    }
+
     void OpenMenu()
     {
         menuActive = true;

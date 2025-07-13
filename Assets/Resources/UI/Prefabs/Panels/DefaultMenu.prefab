@@ -141,26 +141,7 @@ MonoBehaviour:
   selectionNameText: {fileID: 8613071451305174915}
   pageNameText: {fileID: 3378083330960688851}
   pageNumberText: {fileID: 5037774985405990752}
-  pages:
-  - pageName: Tim
-    options:
-    - optionName: Fog
-      icon: {fileID: 21300000, guid: 7856c4c6378d32544921bec421483c57, type: 3}
-      onSelect:
-        m_PersistentCalls:
-          m_Calls: []
-    - optionName: AHHHH
-      icon: {fileID: -1113727347, guid: d1813b8d625e311488e78632e3578d19, type: 3}
-      onSelect:
-        m_PersistentCalls:
-          m_Calls: []
-  - pageName: Chim
-    options:
-    - optionName: 2222
-      icon: {fileID: 21300000, guid: 7856c4c6378d32544921bec421483c57, type: 3}
-      onSelect:
-        m_PersistentCalls:
-          m_Calls: []
+  pages: []
   postSelectionMenuTime: 0.1
 --- !u!1 &100520
 GameObject:
