@@ -1,5 +1,6 @@
 using UnityEngine;
 using Photon.Pun;
+using Photon.Realtime;  // Add this line
 using ApplicationManagers;
 using GameManagers;
 using Characters;
@@ -44,8 +45,10 @@ public class TitanSpawnMenu : MonoBehaviourPun
     private Vector2 presetScroll;
     private string[] savedPresetNames = new string[0];
     private int selectedPresetIndex = -1;
+    private bool avoidPlayers = false;
+    private string minDistanceFromPlayers = "50";
 
-   
+
 
 
 
@@ -65,6 +68,8 @@ public class TitanSpawnMenu : MonoBehaviourPun
         public string cornerAX, cornerAY, cornerAZ;
         public string cornerBX, cornerBY, cornerBZ;
         public string inputCount;
+        public bool avoidPlayers;
+        public string minDistanceFromPlayers;
     }
 
     void Update()
@@ -104,7 +109,12 @@ public class TitanSpawnMenu : MonoBehaviourPun
             cornerBZ = GUI.TextField(new Rect(630, 120, 50, 20), cornerBZ);
         }
 
-
+        avoidPlayers = GUI.Toggle(new Rect(360, 150, 250, 20), avoidPlayers, " Avoid Players");
+        if (avoidPlayers)
+        {
+            GUI.Label(new Rect(360, 180, 150, 20), "Min Distance:");
+            minDistanceFromPlayers = GUI.TextField(new Rect(460, 180, 80, 20), minDistanceFromPlayers);
+        }
 
         useRandomWeights = GUI.Toggle(new Rect(30, 180, 200, 20), useRandomWeights, " Use Weighted Random");
 
@@ -195,6 +205,22 @@ public class TitanSpawnMenu : MonoBehaviourPun
         GUI.Label(new Rect(150, y + 25, 80, 20), "Max:"); max = GUI.TextField(new Rect(190, y + 25, 50, 20), max);
     }
 
+
+    private bool IsPositionValid(Vector3 pos, float minDistance)
+    {
+        foreach (var player in PhotonNetwork.PlayerList)
+        {
+            var human = FindHumanByPlayer(player);
+            if (human != null)
+            {
+                float distance = Vector3.Distance(pos, human.Cache.Transform.position);
+                if (distance < minDistance)
+                    return false;
+            }
+        }
+        return true;
+    }
+
     private void TrySpawnTitans()
     {
         if (!PhotonNetwork.IsMasterClient)
@@ -203,33 +229,11 @@ public class TitanSpawnMenu : MonoBehaviourPun
             return;
         }
 
-        float x = 0f, y = 0f, z = 0f;
-        int count = 1;
-
-        float.TryParse(inputX, out x);
-        float.TryParse(inputY, out y);
-        float.TryParse(inputZ, out z);
-        int.TryParse(inputCount, out count);
-
-        Vector3 basePos = Vector3.zero;
-
-        if (useRandomArea)
-        {
-            float.TryParse(cornerAX, out float x1); float.TryParse(cornerBX, out float x2);
-            float.TryParse(cornerAY, out float y1); float.TryParse(cornerBY, out float y2);
-            float.TryParse(cornerAZ, out float z1); float.TryParse(cornerBZ, out float z2);
-
-            basePos = new Vector3(
-                UnityEngine.Random.Range(Mathf.Min(x1, x2), Mathf.Max(x1, x2)),
-                UnityEngine.Random.Range(Mathf.Min(y1, y2), Mathf.Max(y1, y2)),
-                UnityEngine.Random.Range(Mathf.Min(z1, z2), Mathf.Max(z1, z2))
-            );
-        }
-        else
-        {
-            basePos = new Vector3(x, y, z);
-        }
-
+        float.TryParse(inputX, out float x);
+        float.TryParse(inputY, out float y);
+        float.TryParse(inputZ, out float z);
+        int.TryParse(inputCount, out int count);
+        float.TryParse(minDistanceFromPlayers, out float minDistance);
 
         InGameManager manager = SceneLoader.CurrentGameManager as InGameManager;
         if (manager == null)
@@ -239,11 +243,74 @@ public class TitanSpawnMenu : MonoBehaviourPun
         }
 
         string typeToUse = useRandomWeights ? GetWeightedRandomType() : titanTypes[selectedTypeIndex];
-        manager.StartCoroutine(SpawnAndOverrideRoutine(manager, typeToUse, count, basePos, 0f));
+        manager.StartCoroutine(SpawnWithDistanceCheck(manager, typeToUse, count, new Vector3(x, y, z), minDistance));
+    }
+
+    // New coroutine for distance-checked spawning
+    private IEnumerator SpawnWithDistanceCheck(InGameManager manager, string fixedType, int count, Vector3 basePos, float minDistance)
+    {
+        int attempts = 0;
+        int maxAttempts = 100; // Prevent infinite loops
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 spawnPos = basePos;
+            bool validPos = false;
+
+            if (useRandomArea)
+            {
+                float.TryParse(cornerAX, out float x1); float.TryParse(cornerBX, out float x2);
+                float.TryParse(cornerAY, out float y1); float.TryParse(cornerBY, out float y2);
+                float.TryParse(cornerAZ, out float z1); float.TryParse(cornerBZ, out float z2);
+
+                attempts = 0;
+                do
+                {
+                    spawnPos = new Vector3(
+                        UnityEngine.Random.Range(Mathf.Min(x1, x2), Mathf.Max(x1, x2)),
+                        UnityEngine.Random.Range(Mathf.Min(y1, y2), Mathf.Max(y1, y2)),
+                        UnityEngine.Random.Range(Mathf.Min(z1, z2), Mathf.Max(z1, z2))
+                    );
+
+                    if (!avoidPlayers || IsPositionValid(spawnPos, minDistance))
+                    {
+                        validPos = true;
+                        break;
+                    }
+
+                    attempts++;
+                    yield return null; // Prevent freezing
+                }
+                while (attempts < maxAttempts);
+            }
+            else
+            {
+                validPos = !avoidPlayers || IsPositionValid(spawnPos, minDistance);
+            }
+
+            if (!validPos)
+            {
+                Debug.LogWarning($"Could not find valid spawn position for titan after {maxAttempts} attempts");
+                continue;
+            }
+
+            string type = useRandomWeights ? GetWeightedRandomType() : fixedType;
+            BaseTitan titan = manager.SpawnAITitanAt(type, spawnPos, 0f);
+
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            if (titan == null)
+            {
+                Debug.LogError($"[TitanSpawnMenu] Failed to spawn titan of type: {type}");
+                continue;
+            }
+
+            ApplyTitanOverrides(titan);
+        }
     }
 
     private IEnumerator SpawnAndOverrideRoutine(InGameManager manager, string fixedType, int count, Vector3 basePos, float rotationY)
-
     {
         for (int i = 0; i < count; i++)
         {
@@ -274,26 +341,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
                 continue;
             }
 
-            if (overrideSize && float.TryParse(minSize, out float minS) && float.TryParse(maxSize, out float maxS))
-                titan.SetSize(UnityEngine.Random.Range(minS, maxS));
-            if (overrideHP && int.TryParse(minHP, out int minHp) && int.TryParse(maxHP, out int maxHp))
-                titan.SetHealth(UnityEngine.Random.Range(minHp, maxHp + 1));
-            if (overrideSpeed && float.TryParse(minSpeed, out float minSpd) && float.TryParse(maxSpeed, out float maxSpd))
-                titan.RunSpeedBase = UnityEngine.Random.Range(minSpd, maxSpd);
-            if (overrideAnimSpeed && float.TryParse(minAnimSpeed, out float minAnim) && float.TryParse(maxAnimSpeed, out float maxAnim))
-                titan.AttackSpeedMultiplier = UnityEngine.Random.Range(minAnim, maxAnim);
-            if (overrideWalkSpeed && float.TryParse(minWalkSpeed, out float minWalk) && float.TryParse(maxWalkSpeed, out float maxWalk))
-                titan.WalkSpeedBase = UnityEngine.Random.Range(minWalk, maxWalk);
-            if (overrideTurnSpeed && float.TryParse(minTurnSpeed, out float minTurn) && float.TryParse(maxTurnSpeed, out float maxTurn))
-                titan.TurnSpeed = UnityEngine.Random.Range(minTurn, maxTurn);
-            if (overrideActionPause && float.TryParse(minActionPause, out float minActPause) && float.TryParse(maxActionPause, out float maxActPause))
-                titan.ActionPause = UnityEngine.Random.Range(minActPause, maxActPause);
-            if (overrideTurnPause && float.TryParse(minTurnPause, out float minTPause) && float.TryParse(maxTurnPause, out float maxTPause))
-                titan.TurnPause = UnityEngine.Random.Range(minTPause, maxTPause);
-            if (overrideJumpForce && float.TryParse(minJumpForce, out float minJump) && float.TryParse(maxJumpForce, out float maxJump))
-                titan.JumpForce = UnityEngine.Random.Range(minJump, maxJump);
-            if (overrideRotateSpeed && float.TryParse(minRotateSpeed, out float minRot) && float.TryParse(maxRotateSpeed, out float maxRot))
-                titan.RotateSpeed = UnityEngine.Random.Range(minRot, maxRot);
+            ApplyTitanOverrides(titan);
         }
     }
 
@@ -375,7 +423,8 @@ public class TitanSpawnMenu : MonoBehaviourPun
             cornerBY = this.cornerBY,
             cornerBZ = this.cornerBZ,
             inputCount = this.inputCount,
-
+            avoidPlayers = this.avoidPlayers,
+            minDistanceFromPlayers = this.minDistanceFromPlayers
 
         };
 
@@ -418,6 +467,8 @@ public class TitanSpawnMenu : MonoBehaviourPun
         cornerBY = preset.cornerBY;
         cornerBZ = preset.cornerBZ;
         inputCount = preset.inputCount;
+        avoidPlayers = preset.avoidPlayers;
+        minDistanceFromPlayers = preset.minDistanceFromPlayers;
 
 
 
@@ -435,4 +486,37 @@ public class TitanSpawnMenu : MonoBehaviourPun
             savedPresetNames[i] = Path.GetFileNameWithoutExtension(files[i]);
     }
 
+    private Human FindHumanByPlayer(Player player)
+    {
+        foreach (var h in FindObjectsOfType<Human>())
+        {
+            if (h.photonView != null && h.photonView.Owner == player)
+                return h;
+        }
+        return null;
+    }
+
+    private void ApplyTitanOverrides(BaseTitan titan)
+    {
+        if (overrideSize && float.TryParse(minSize, out float minS) && float.TryParse(maxSize, out float maxS))
+            titan.SetSize(UnityEngine.Random.Range(minS, maxS));
+        if (overrideHP && int.TryParse(minHP, out int minHp) && int.TryParse(maxHP, out int maxHp))
+            titan.SetHealth(UnityEngine.Random.Range(minHp, maxHp + 1));
+        if (overrideSpeed && float.TryParse(minSpeed, out float minSpd) && float.TryParse(maxSpeed, out float maxSpd))
+            titan.RunSpeedBase = UnityEngine.Random.Range(minSpd, maxSpd);
+        if (overrideAnimSpeed && float.TryParse(minAnimSpeed, out float minAnim) && float.TryParse(maxAnimSpeed, out float maxAnim))
+            titan.AttackSpeedMultiplier = UnityEngine.Random.Range(minAnim, maxAnim);
+        if (overrideWalkSpeed && float.TryParse(minWalkSpeed, out float minWalk) && float.TryParse(maxWalkSpeed, out float maxWalk))
+            titan.WalkSpeedBase = UnityEngine.Random.Range(minWalk, maxWalk);
+        if (overrideTurnSpeed && float.TryParse(minTurnSpeed, out float minTurn) && float.TryParse(maxTurnSpeed, out float maxTurn))
+            titan.TurnSpeed = UnityEngine.Random.Range(minTurn, maxTurn);
+        if (overrideActionPause && float.TryParse(minActionPause, out float minActPause) && float.TryParse(maxActionPause, out float maxActPause))
+            titan.ActionPause = UnityEngine.Random.Range(minActPause, maxActPause);
+        if (overrideTurnPause && float.TryParse(minTurnPause, out float minTPause) && float.TryParse(maxTurnPause, out float maxTPause))
+            titan.TurnPause = UnityEngine.Random.Range(minTPause, maxTPause);
+        if (overrideJumpForce && float.TryParse(minJumpForce, out float minJump) && float.TryParse(maxJumpForce, out float maxJump))
+            titan.JumpForce = UnityEngine.Random.Range(minJump, maxJump);
+        if (overrideRotateSpeed && float.TryParse(minRotateSpeed, out float minRot) && float.TryParse(maxRotateSpeed, out float maxRot))
+            titan.RotateSpeed = UnityEngine.Random.Range(minRot, maxRot);
+    }
 }
