@@ -32,16 +32,17 @@ public class RadialMenuController : MonoBehaviour
 
     void Start()
     {
-        // Safer initialization
         try
         {
-            _inGameMenu = UIManager.CurrentMenu as InGameMenu;
+            _inGameMenu = (InGameMenu)UIManager.CurrentMenu;
         }
         catch
         {
+            // Silently fail - menu will work without InGameMenu integration
             _inGameMenu = null;
         }
 
+        // Ensure radial menu starts closed
         if (radialMenuBase != null)
         {
             radialMenuBase.SetActive(false);
@@ -50,6 +51,7 @@ public class RadialMenuController : MonoBehaviour
 
     void OnDestroy()
     {
+        // Ensure menu state is cleared if destroyed while open
         if (menuActive && _inGameMenu != null)
         {
             _inGameMenu.SetRadialMenuActive(false);
@@ -60,14 +62,14 @@ public class RadialMenuController : MonoBehaviour
     {
         if (Input.GetKeyDown(toggleKey))
         {
+            // Always allow closing if menu is active
             if (menuActive)
             {
-                // Always allow closing
                 ToggleMenu();
             }
+            // Only check other menus when opening
             else if (!IsAnyMenuOpen())
             {
-                // Only open if no other menus are active
                 ToggleMenu();
             }
         }
@@ -81,18 +83,26 @@ public class RadialMenuController : MonoBehaviour
 
     private bool IsAnyMenuOpen()
     {
-        try
+        // Check if InGameMenu system reports any menu is open
+        if (InGameMenu.InMenu())
         {
-            return InGameMenu.InMenu();
+            return true;
         }
-        catch
-        {
-            return false;
-        }
+
+        // Add any additional menu system checks here if needed
+        // Example: if (OtherMenuSystem.IsOpen) return true;
+
+        return false;
     }
 
     void ToggleMenu()
     {
+        // Additional safety check (in case keybind fires while menu is closing)
+        if (IsAnyMenuOpen() && !menuActive)
+        {
+            return;
+        }
+
         menuActive = !menuActive;
         radialMenuBase.SetActive(menuActive);
 
@@ -103,8 +113,10 @@ public class RadialMenuController : MonoBehaviour
 
         if (menuActive)
         {
+
             UpdateMenuDisplay();
         }
+
     }
 
     void GetInputDirection()
