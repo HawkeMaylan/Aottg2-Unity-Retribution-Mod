@@ -19,9 +19,19 @@ namespace Characters
                 return;
 
             var inventory = human.GetComponent<HumanInventory>();
-            if (inventory == null || inventory.GetItemCount("Wagon1") <= 0)
+            if (inventory == null)
+            {
+                Debug.LogError("HumanInventory component not found!");
+                return;
+            }
+
+            // Check item count and show popup if needed
+            if (inventory.GetItemCount("Wagon1") <= 0)
             {
                 Debug.Log("Not enough Wagon1 count to spawn.");
+
+                // Show the "Not Enough" popup through the inventory system
+                inventory.SetItemCount("Wagon1", -1); // This will trigger the popup
                 return;
             }
 
@@ -30,9 +40,8 @@ namespace Characters
                 Vector3 pos = human.Cache.Transform.position + Vector3.up * 1.5f;
                 GameObject wagonObj = PhotonNetwork.Instantiate("Buildables/Wagon1aEdit", pos, Quaternion.identity);
 
-                // Deduct Wagon1 using modular inventory system
-                int newWagon1Count = Mathf.Max(0, inventory.GetItemCount("Wagon1") - 1);
-                inventory.photonView?.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, "Wagon1", newWagon1Count);
+                // Use the proper inventory method to remove the item
+                inventory.RemoveItem("Wagon1"); // This will handle the RPC and popup automatically
             }
             catch
             {

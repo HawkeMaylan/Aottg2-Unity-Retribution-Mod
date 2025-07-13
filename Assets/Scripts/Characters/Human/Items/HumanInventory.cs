@@ -47,6 +47,10 @@ namespace Characters
         public void SetItemCount(string type, int count)
         {
             EnsureItemType(type);
+            if (count < 0 && photonView.IsMine)
+            {
+                ItemPopupManager.Instance?.ShowPopup($"Not Enough {type}");
+            }
             photonView.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, type, Mathf.Max(0, count));
         }
 
@@ -61,6 +65,13 @@ namespace Characters
             EnsureItemType(type);
             int oldCount = inventoryCounts[type];
             int newCount = Mathf.Max(0, count);
+
+            // Show "Not Enough" message if count is being forced below 0 and we're the local player
+            if (photonView.IsMine && count < 0 && newCount == 0 && oldCount > 0)
+            {
+                ItemPopupManager.Instance?.ShowPopup($"Not Enough {type}");
+            }
+
             inventoryCounts[type] = newCount;
 
             if (photonView.IsMine && newCount != oldCount)
@@ -74,7 +85,6 @@ namespace Characters
                 {
                     human.RefreshItemBasedOnInventory(type);
                 }
-
             }
         }
 

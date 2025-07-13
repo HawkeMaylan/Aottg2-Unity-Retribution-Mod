@@ -22,6 +22,7 @@ namespace Characters
             if (inventory == null || inventory.GetItemCount("Molotov") <= 0)
             {
                 Debug.Log("Not enough Molotovs.");
+                inventory.SetItemCount("Molotov", -1);
                 return;
             }
 

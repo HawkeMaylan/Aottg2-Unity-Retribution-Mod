@@ -19,9 +19,17 @@ namespace Characters
                 return;
 
             var inventory = human.GetComponent<HumanInventory>();
-            if (inventory == null || inventory.GetItemCount("GasBomb") <= 0)
+            if (inventory == null)
+            {
+                Debug.LogError("HumanInventory component not found!");
+                return;
+            }
+
+            // Check item count and show popup if needed
+            if (inventory.GetItemCount("GasBomb") <= 0)
             {
                 Debug.Log("Not enough Gas Bombs.");
+                inventory.SetItemCount("GasBomb", -1); // Triggers "Not Enough GasBomb" popup
                 return;
             }
 
@@ -49,13 +57,12 @@ namespace Characters
                     rb.AddForce(finalVelocity, ForceMode.VelocityChange);
                 }
 
-                // Decrease inventory
-                int newCount = Mathf.Max(0, inventory.GetItemCount("GasBomb") - 1);
-                inventory.photonView?.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, "GasBomb", newCount);
+                // Use inventory system's proper removal method
+                inventory.RemoveItem("GasBomb"); // Handles RPC and shows "-1" popup
             }
-            catch
+            catch (System.Exception e)
             {
-                Debug.LogWarning("GasBomb spawn failed.");
+                Debug.LogWarning($"GasBomb spawn failed: {e.Message}");
             }
         }
     }

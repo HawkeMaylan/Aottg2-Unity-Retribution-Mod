@@ -19,9 +19,19 @@ namespace Characters
                 return;
 
             var inventory = human.GetComponent<HumanInventory>();
-            if (inventory == null || inventory.GetItemCount("CannonGround") <= 0)
+            if (inventory == null)
+            {
+                Debug.LogError("HumanInventory component not found!");
+                return;
+            }
+
+            // Check item count and show popup if needed
+            if (inventory.GetItemCount("CannonGround") <= 0)
             {
                 Debug.Log("Not enough Cannon count to spawn.");
+
+                // Show the "Not Enough" popup through the inventory system
+                inventory.SetItemCount("CannonGround", -1); // This will trigger the popup
                 return;
             }
 
@@ -30,9 +40,8 @@ namespace Characters
                 Vector3 pos = human.Cache.Transform.position + human.Cache.Transform.forward * 3f;
                 GameObject cannonObj = PhotonNetwork.Instantiate("Buildables/CannonGround", pos, Quaternion.identity);
 
-                // Sync inventory 
-                int newCannonCount = Mathf.Max(0, inventory.GetItemCount("CannonGround") - 1);
-                inventory.photonView?.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, "CannonGround", newCannonCount);
+                // Use the proper inventory method to remove the item
+                inventory.RemoveItem("CannonGround"); // This will handle the RPC and popup automatically
             }
             catch
             {

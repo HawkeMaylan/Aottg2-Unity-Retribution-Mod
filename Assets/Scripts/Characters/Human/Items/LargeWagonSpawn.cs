@@ -22,6 +22,7 @@ namespace Characters
             if (inventory == null || inventory.GetItemCount("Wagon2") <= 0)
             {
                 Debug.Log("Not enough Wagon2 count to spawn.");
+                inventory.SetItemCount("Wagon2", -1); 
                 return;
             }
 

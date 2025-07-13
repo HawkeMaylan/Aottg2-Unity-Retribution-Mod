@@ -22,6 +22,7 @@ namespace Characters
             if (inventory == null || inventory.GetItemCount("WallCannon") <= 0)
             {
                 Debug.Log("Not enough WallCannon count to spawn.");
+                inventory.SetItemCount("WallCannon", -1);
                 return;
             }
 

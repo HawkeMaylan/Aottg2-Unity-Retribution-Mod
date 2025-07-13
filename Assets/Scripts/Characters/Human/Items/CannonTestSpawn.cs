@@ -19,9 +19,17 @@ namespace Characters
                 return;
 
             var inventory = human.GetComponent<HumanInventory>();
-            if (inventory == null || inventory.GetItemCount("Cannon") <= 0)
+            if (inventory == null)
+            {
+                Debug.LogError("HumanInventory component not found!");
+                return;
+            }
+
+            // Check item count and show popup if needed
+            if (inventory.GetItemCount("Cannon") <= 0)
             {
                 Debug.Log("Not enough Cannon count to spawn.");
+                inventory.SetItemCount("Cannon", -1); // Triggers "Not Enough Cannon" popup
                 return;
             }
 
@@ -30,13 +38,12 @@ namespace Characters
                 Vector3 pos = human.Cache.Transform.position + human.Cache.Transform.forward * 3f;
                 GameObject cannonObj = PhotonNetwork.Instantiate("Buildables/CannonTest", pos, Quaternion.identity);
 
-                // Sync inventory 
-                int newCannonCount = Mathf.Max(0, inventory.GetItemCount("Cannon") - 1);
-                inventory.photonView?.RPC("RPC_SetItemCount", RpcTarget.AllBufferedViaServer, "Cannon", newCannonCount);
+                // Use inventory system's proper removal method
+                inventory.RemoveItem("Cannon"); // Handles RPC and shows "-1" popup
             }
-            catch
+            catch (System.Exception e)
             {
-                Debug.LogWarning("Cannon spawn failed.");
+                Debug.LogWarning($"Cannon spawn failed: {e.Message}");
             }
         }
     }
