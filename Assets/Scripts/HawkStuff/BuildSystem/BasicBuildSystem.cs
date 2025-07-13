@@ -204,7 +204,8 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void UpdatePreviewMaterials()
     {
-        bool isValid = IsPreviewValid() && (_playerInventory == null || CanAffordBuild());
+        // Only check position validity for preview, not costs
+        bool isValid = IsPreviewValid();
         foreach (Renderer renderer in currentPreview.GetComponentsInChildren<Renderer>())
         {
             renderer.material = isValid ? buildableMaterial : notBuildableMaterial;
@@ -275,7 +276,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         {
             if (!CanAffordBuild())
             {
-                Debug.Log("BuildSystem: Cannot build - not enough resources");
+                // The "Not Enough X" message will be shown by the inventory system here
                 return;
             }
 
@@ -309,6 +310,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         {
             if (_playerInventory.GetItemCount(cost.itemName) < cost.amount)
             {
+                // This will trigger the "Not Enough X" message in the inventory system
                 _playerInventory.SetItemCount(cost.itemName, -1);
                 return false;
             }
@@ -353,29 +355,6 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         foreach (Transform child in obj.transform)
         {
             SetLayerRecursively(child.gameObject, layer);
-        }
-    }
-
-    // Debug function - call this with a key press to check status
-    private void DebugInventoryStatus()
-    {
-        Debug.Log("=== BuildSystem Debug ===");
-        Debug.Log($"Current _playerInventory: {_playerInventory != null}");
-
-        Human localHuman = null;
-        foreach (var human in FindObjectsOfType<Human>())
-        {
-            if (human != null && human.photonView != null && human.photonView.IsMine)
-            {
-                localHuman = human;
-                break;
-            }
-        }
-
-        Debug.Log($"Local human found: {localHuman != null}");
-        if (localHuman != null)
-        {
-            Debug.Log($"Human has inventory: {localHuman.GetComponent<HumanInventory>() != null}");
         }
     }
 }
