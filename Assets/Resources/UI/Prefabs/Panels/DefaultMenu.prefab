@@ -133,7 +133,7 @@ MonoBehaviour:
   radius: 300
   iconSize: 70
   deadZone: 0.1
-  toggleKey: 273
+  toggleKey: 274
   useMouseSelection: 1
   holdToSelectMode: 0
   radialMenuBase: {fileID: 1370462488265346918}

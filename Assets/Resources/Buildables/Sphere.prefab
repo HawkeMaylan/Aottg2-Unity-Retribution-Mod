@@ -250,6 +250,7 @@ MonoBehaviour:
   preview: {fileID: 3303310570190839526}
   collisionCheckObject: {fileID: 933685556645732565}
   gridSize: 0.5
+  menuIcon: {fileID: 21300000, guid: 9cb43c28ef580f54b83378422541fbc1, type: 3}
   offset: 0.25
   category: base
   displayName: sphere

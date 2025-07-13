@@ -239,13 +239,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 428344}
-  layer:
+  buildLayer:
     serializedVersion: 2
-    m_Bits: 59768832
-  offset: 1
-  gridSize: 2
+    m_Bits: 8388608
   buildableMaterial: {fileID: 2100000, guid: 6c892e87e0f88e94c8fe89dc47db01fe, type: 2}
   notBuildableMaterial: {fileID: 2100000, guid: f8da29cff62f1dd4d933746b476eab76, type: 2}
+  toggleKey: 96
+  buildKey: 107
+  placeKey: 273
 --- !u!114 &8067257540563114761
 MonoBehaviour:
   m_ObjectHideFlags: 0

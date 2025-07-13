@@ -133,22 +133,32 @@ public class RadialMenuController : MonoBehaviour
         prefabLookup.Clear();
         pages.Clear();
 
-        // Create a single page for all buildables
-        RadialMenuPage page = new RadialMenuPage { pageName = "Buildables" };
+        // First organize prefabs by category
+        Dictionary<string, RadialMenuPage> categoryPages = new Dictionary<string, RadialMenuPage>();
 
         foreach (GameObject prefab in buildablePrefabs)
         {
             BuildableObjectHelper helper = prefab.GetComponent<BuildableObjectHelper>();
             if (helper == null) continue;
 
-            // Add to lookup dictionary
-            prefabLookup[helper.displayName ?? prefab.name] = prefab;
+            string category = helper.category ?? "Uncategorized";
 
-            // Create menu option
+            // Get or create the page for this category
+            if (!categoryPages.TryGetValue(category, out RadialMenuPage page))
+            {
+                page = new RadialMenuPage { pageName = category };
+                categoryPages[category] = page;
+            }
+
+            // Add to lookup dictionary
+            string displayName = helper.displayName ?? prefab.name;
+            prefabLookup[displayName] = prefab;
+
+            // Create menu option - ONLY use the icon from BuildableObjectHelper
             RadialMenuOption option = new RadialMenuOption
             {
-                optionName = helper.displayName ?? prefab.name,
-                icon = helper.menuIcon
+                optionName = displayName,
+                icon = helper.menuIcon // No fallback - assumes icon is required
             };
 
             option.onSelect = new UnityEngine.Events.UnityEvent();
@@ -157,7 +167,12 @@ public class RadialMenuController : MonoBehaviour
             page.options.Add(option);
         }
 
-        pages.Add(page);
+        // Add all category pages to the main pages list
+        pages.AddRange(categoryPages.Values);
+
+        // Set default page if none selected
+        if (currentPage >= pages.Count) currentPage = 0;
+
         UpdateMenuDisplay();
     }
 

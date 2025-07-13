@@ -123,6 +123,7 @@ MonoBehaviour:
   preview: {fileID: 3819410487572659498}
   collisionCheckObject: {fileID: 5560879205574147634}
   gridSize: 1
+  menuIcon: {fileID: 21300000, guid: ee51b0d51198a4b0f8876afa38a1e942, type: 3}
   offset: 1
   category: base
   displayName: cube
