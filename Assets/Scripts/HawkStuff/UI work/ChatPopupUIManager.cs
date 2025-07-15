@@ -208,6 +208,10 @@ public class ChatPopupUIManager : MonoBehaviourPun
         panel.transform.SetParent(canvas.transform, false);
         panel.GetComponent<Image>().color = new Color(0, 0, 0, 0.5f);
 
+        // Add SelfDestroy component to the panel
+        var selfDestroy = panel.AddComponent<SelfDestroy>();
+        selfDestroy.lifetime = 15f;
+
         RectTransform panelRect = panel.GetComponent<RectTransform>();
         panelRect.anchorMin = new Vector2(0.3f, 0.1f);
         panelRect.anchorMax = new Vector2(0.7f, 0.2f);

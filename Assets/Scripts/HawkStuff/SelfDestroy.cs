@@ -4,8 +4,8 @@ using System.Collections;
 
 public class SelfDestroy : MonoBehaviourPun
 {
-    public float lifetime = 3f;
-    public float ownershipTimeout = 2f;
+    public float lifetime = 15f;
+    public float ownershipTimeout = 10f;
 
     private void Start()
     {
