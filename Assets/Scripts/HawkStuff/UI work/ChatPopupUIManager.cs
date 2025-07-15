@@ -7,6 +7,7 @@ using ApplicationManagers;
 using Settings;
 using System.Collections;
 using System.Collections.Generic;
+using UI;
 
 public class ChatPopupUIManager : MonoBehaviourPun
 {
@@ -14,6 +15,7 @@ public class ChatPopupUIManager : MonoBehaviourPun
     private InputField chatInput;
     private Button sendButton;
     private InGameManager gameManager;
+    private InGameMenu _inGameMenu;
 
     private static readonly float EmoteDuration = 15f;
     private static readonly int MaxMessages = 5;
@@ -36,22 +38,53 @@ public class ChatPopupUIManager : MonoBehaviourPun
             return;
         }
 
+        try
+        {
+            _inGameMenu = (InGameMenu)UIManager.CurrentMenu;
+        }
+        catch
+        {
+            _inGameMenu = null;
+        }
+
         CreateChatUI();
+    }
+
+    private void OnDestroy()
+    {
+        if (panel.activeSelf && _inGameMenu != null)
+        {
+            _inGameMenu.SetProxMenuActive(false);
+        }
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Slash))
+        if (Input.GetKeyDown(KeyCode.Slash) && !IsAnyMenuOpen())
             ToggleChatPanel();
 
         if (panel.activeSelf && Input.GetKeyDown(KeyCode.Return))
             SendChatPopup();
+        if (panel.activeSelf && Input.GetKeyDown(KeyCode.Escape))
+            ToggleChatPanel();
+    }
+
+    private bool IsAnyMenuOpen()
+    {
+        return InGameMenu.InMenu();
     }
 
     private void ToggleChatPanel()
     {
-        panel.SetActive(!panel.activeSelf);
-        if (panel.activeSelf)
+        bool newState = !panel.activeSelf;
+        panel.SetActive(newState);
+
+        if (_inGameMenu != null)
+        {
+            _inGameMenu.SetProxMenuActive(newState);
+        }
+
+        if (newState)
         {
             chatInput.text = "";
             chatInput.Select();
@@ -73,6 +106,11 @@ public class ChatPopupUIManager : MonoBehaviourPun
 
         chatInput.text = "";
         panel.SetActive(false);
+
+        if (_inGameMenu != null)
+        {
+            _inGameMenu.SetProxMenuActive(false);
+        }
     }
 
     [PunRPC]
@@ -102,7 +140,7 @@ public class ChatPopupUIManager : MonoBehaviourPun
 
         GameObject wrapper = new GameObject("FloatingTextWrapper", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         wrapper.transform.SetParent(canvasGO.transform, false);
-        wrapper.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.85f); // black background
+        wrapper.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.85f);
 
         GameObject textGO = new GameObject("FloatingText", typeof(RectTransform), typeof(Text));
         textGO.transform.SetParent(wrapper.transform, false);
@@ -123,7 +161,6 @@ public class ChatPopupUIManager : MonoBehaviourPun
         textComp.alignment = TextAnchor.MiddleCenter;
         textComp.color = Color.white;
 
-        // Add message to the list
         var list = activePopups[target];
         list.Add(wrapper);
         if (list.Count > MaxMessages)
