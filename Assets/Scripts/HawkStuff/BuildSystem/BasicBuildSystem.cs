@@ -16,23 +16,17 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     public KeyCode toggleKey = KeyCode.BackQuote;
     public KeyCode buildKey = KeyCode.K;
     public KeyCode placeKey = KeyCode.UpArrow;
-
-    [Header("Rotation Settings")]
-    public KeyCode rotateXKey = KeyCode.X;
-    public KeyCode rotateYKey = KeyCode.Y;
-    public KeyCode rotateZKey = KeyCode.Z;
+    public KeyCode rotateLeftKey = KeyCode.LeftArrow;
+    public KeyCode rotateRightKey = KeyCode.RightArrow;
     public KeyCode resetRotationKey = KeyCode.Space;
     public KeyCode snapToSurfaceKey = KeyCode.T;
-    public float rotationIncrement = 45f;
-    public bool forceUpAlignment = false;
-    public Vector3 forcedUpAxis = Vector3.up;
 
     // Building state
     private bool isBuilding = false;
     private bool scriptActive = false;
     private GameObject currentPreview;
     private Vector3 currentPos;
-    private Vector3 currentRot;
+    private Quaternion currentRotation;
     private List<GameObject> buildablePrefabs = new List<GameObject>();
     private int currentBuildableIndex = 0;
     private HumanInventory _playerInventory;
@@ -40,8 +34,10 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     private Dictionary<string, int> _pendingRefunds = new Dictionary<string, int>();
 
     // Rotation state
-    private RotationAxis currentRotationAxis = RotationAxis.Y;
     private Quaternion surfaceAlignmentRotation = Quaternion.identity;
+   
+    private RotationAxis currentRotationAxis = RotationAxis.Y;
+
 
     private enum RotationAxis { X, Y, Z }
 
@@ -191,8 +187,19 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             return;
         }
 
-        currentPreview = Instantiate(helper.preview, currentPos, Quaternion.Euler(currentRot));
+        // Initialize rotation
+        currentRotation = Quaternion.identity;
+
+        // Apply forced alignment if needed
+        if (helper.forceUpAlignment)
+        {
+            currentRotation = helper.GetForcedRotation();
+        }
+
+        // Create preview with initial rotation
+        currentPreview = Instantiate(helper.preview, currentPos, currentRotation);
         SetLayerRecursively(currentPreview, LayerMask.NameToLayer("Preview"));
+
         Debug.Log($"BuildSystem: Created preview for {prefab.name}");
     }
 
@@ -230,14 +237,14 @@ public class BuildSystem : MonoBehaviourPunCallbacks
                 // 1. First align with surface normal
                 // 2. Then apply the forced axis alignment
                 // 3. Finally apply any user rotation
-                currentPreview.transform.rotation = surfaceAlignmentRotation * forcedRotation * Quaternion.Euler(currentRot);
+                currentPreview.transform.rotation = surfaceAlignmentRotation * forcedRotation * currentRotation;
             }
             else
             {
                 // Standard rotation behavior:
                 // 1. Align with surface normal (if enabled)
                 // 2. Apply user rotation
-                currentPreview.transform.rotation = surfaceAlignmentRotation * Quaternion.Euler(currentRot);
+                currentPreview.transform.rotation = surfaceAlignmentRotation * currentRotation;
             }
 
             // Update preview materials based on validity
@@ -282,27 +289,21 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void HandleBuildingInput()
     {
-        // Rotation axis selection
-        if (Input.GetKeyDown(rotateXKey))
-            currentRotationAxis = RotationAxis.X;
-        if (Input.GetKeyDown(rotateYKey))
-            currentRotationAxis = RotationAxis.Y;
-        if (Input.GetKeyDown(rotateZKey))
-            currentRotationAxis = RotationAxis.Z;
-
         // Rotation application
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-            RotatePreview(rotationIncrement);
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-            RotatePreview(-rotationIncrement);
+        if (Input.GetKeyDown(rotateLeftKey))
+            RotatePreview(-1f); // Counter-clockwise
+        if (Input.GetKeyDown(rotateRightKey))
+            RotatePreview(1f); // Clockwise
 
         // Rotation reset
         if (Input.GetKeyDown(resetRotationKey))
         {
-            currentRot = Vector3.zero;
+            BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
+            currentRotation = helper.forceUpAlignment ? helper.GetForcedRotation() : Quaternion.identity;
+
             if (currentPreview != null)
             {
-                currentPreview.transform.rotation = surfaceAlignmentRotation;
+                currentPreview.transform.rotation = surfaceAlignmentRotation * currentRotation;
             }
         }
 
@@ -314,7 +315,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
                 surfaceAlignmentRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
                 if (currentPreview != null)
                 {
-                    currentPreview.transform.rotation = surfaceAlignmentRotation * Quaternion.Euler(currentRot);
+                    currentPreview.transform.rotation = surfaceAlignmentRotation * currentRotation;
                 }
             }
         }
@@ -322,6 +323,37 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         if (Input.GetKeyDown(placeKey))
         {
             Build();
+        }
+    }
+
+    void RotatePreview(float direction)
+    {
+        BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
+        if (helper == null) return;
+
+        // Get the axis to rotate around from the prefab settings
+        Vector3 axis = Vector3.up;
+        switch (helper.rotationAxis)
+        {
+            case BuildableObjectHelper.RotationAxis.X: axis = Vector3.right; break;
+            case BuildableObjectHelper.RotationAxis.Y: axis = Vector3.up; break;
+            case BuildableObjectHelper.RotationAxis.Z: axis = Vector3.forward; break;
+        }
+
+        // Apply rotation using the prefab's increment
+        currentRotation *= Quaternion.AngleAxis(direction * helper.rotationIncrement, axis);
+
+        if (currentPreview != null)
+        {
+            if (helper.forceUpAlignment)
+            {
+                Quaternion forcedRotation = helper.GetForcedRotation();
+                currentPreview.transform.rotation = surfaceAlignmentRotation * forcedRotation * currentRotation;
+            }
+            else
+            {
+                currentPreview.transform.rotation = surfaceAlignmentRotation * currentRotation;
+            }
         }
     }
 
@@ -503,39 +535,5 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         }
     }
 
-    void RotatePreview(float degrees)
-    {
-        BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
-        if (helper == null) return;
-
-        switch (currentRotationAxis)
-        {
-            case RotationAxis.X:
-                currentRot.x += degrees;
-                currentRot.x = Mathf.Repeat(currentRot.x, 360);
-                break;
-            case RotationAxis.Y:
-                currentRot.y += degrees;
-                currentRot.y = Mathf.Repeat(currentRot.y, 360);
-                break;
-            case RotationAxis.Z:
-                currentRot.z += degrees;
-                currentRot.z = Mathf.Repeat(currentRot.z, 360);
-                break;
-        }
-
-        if (currentPreview != null)
-        {
-            if (helper.forceUpAlignment)
-            {
-                // Apply forced alignment with proper forward vector
-                Quaternion forcedRotation = helper.GetForcedRotation();
-                currentPreview.transform.rotation = surfaceAlignmentRotation * forcedRotation * Quaternion.Euler(currentRot);
-            }
-            else
-            {
-                currentPreview.transform.rotation = surfaceAlignmentRotation * Quaternion.Euler(currentRot);
-            }
-        }
-    }
+    
 }

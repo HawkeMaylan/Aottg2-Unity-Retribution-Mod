@@ -29,6 +29,19 @@ public class BuildableObjectHelper : MonoBehaviour
     public AlignmentAxis forwardAxis = AlignmentAxis.Z;
     [Tooltip("Should the object snap to surface normals?")]
     public bool snapToSurface = true;
+    [Tooltip("Which axis to rotate around with arrow keys")]
+    public RotationAxis rotationAxis = RotationAxis.Y;
+    public float rotationIncrement = 45f;
+  
+
+
+
+    public enum RotationAxis { X, Y, Z }
+
+ 
+
+
+
 
     [Header("Particle Effects")]
     [Tooltip("Drag particle effect prefab here (must be in Resources folder)")]
