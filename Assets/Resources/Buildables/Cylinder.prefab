@@ -105,7 +105,7 @@ MonoBehaviour:
   category: Base
   displayName: Cylinder
   gridSize: 0.5
-  offset: 2
+  offset: 1.5
   buildCosts:
   - itemName: Resources
     amount: 1
