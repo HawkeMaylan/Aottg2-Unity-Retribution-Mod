@@ -256,9 +256,10 @@ MonoBehaviour:
   category: Prebuilt
   displayName: Watchtower
   gridSize: 1
-  offset: 25
+  offset: 20
   forceUpAlignment: 1
-  forcedUpAxis: 5
+  forcedUpAxis: 0
+  forwardAxis: 3
   snapToSurface: 0
   buildParticleEffectPrefab: {fileID: 7745491904160101421, guid: 790de9a12baf3b749adcfe29d70b4a51, type: 3}
   particleEffectOffset: {x: 0, y: 0, z: 0}
