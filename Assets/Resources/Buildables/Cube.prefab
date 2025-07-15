@@ -125,7 +125,7 @@ MonoBehaviour:
   menuIcon: {fileID: 21300000, guid: ee51b0d51198a4b0f8876afa38a1e942, type: 3}
   category: Base
   displayName: Cube
-  gridSize: 1
+  gridSize: 0.5
   offset: 1
   forceUpAlignment: 0
   forcedUpAxis: 1

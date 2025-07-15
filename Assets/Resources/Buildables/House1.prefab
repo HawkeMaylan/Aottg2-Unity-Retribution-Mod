@@ -98,7 +98,7 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -150,8 +150,14 @@ MonoBehaviour:
   menuIcon: {fileID: 21300000, guid: 52a6577b94b176a498e95c60554a44fe, type: 3}
   category: Prebuilt
   displayName: Building
-  gridSize: 22
+  gridSize: 11
   offset: 1
+  forceUpAlignment: 1
+  forcedUpAxis: 1
+  forwardAxis: 2
+  snapToSurface: 0
+  rotationAxis: 1
+  rotationIncrement: 45
   buildParticleEffectPrefab: {fileID: 7745491904160101421, guid: 790de9a12baf3b749adcfe29d70b4a51, type: 3}
   particleEffectOffset: {x: 0, y: 0, z: 0}
   particleUsePreviewRotation: 0
@@ -189,7 +195,7 @@ MonoBehaviour:
   textOffset: {x: 0, y: 50, z: 0}
   textScale: 4
   healthBarScale: {x: 10, y: 2, z: 10}
-  hitCooldown: 0.2
+  hitCooldown: 1
   flatDamageFromUnknown: 1000
   hitEffectPrefab: {fileID: 8133246511525014426, guid: ff81f97b86e830849a88d262b6a1aadc, type: 3}
   hitEffectOffset: {x: 0, y: 0, z: 0}

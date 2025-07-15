@@ -12,12 +12,12 @@ GameObject:
   - component: {fileID: 5127339748170649067}
   - component: {fileID: 6150216508671822479}
   - component: {fileID: 3151734612593719783}
-  m_Layer: 25
+  m_Layer: 23
   m_Name: Foundation1c_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &676114042731416298
 Transform:
@@ -32,7 +32,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5777797983873498891}
+  m_Father: {fileID: 5083792498399228222}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!33 &5127339748170649067
 MeshFilter:
@@ -106,7 +106,7 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 1772645920147236155, guid: 4be7b3cb2080f5649b7813f3004c6927, type: 3}
---- !u!1 &7482619893714108888
+--- !u!1 &9066408478974516325
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -114,48 +114,50 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5777797983873498891}
-  - component: {fileID: 2840316786075883301}
-  - component: {fileID: 6723020004105428119}
-  - component: {fileID: 3152265246758074919}
-  m_Layer: 25
+  - component: {fileID: 5083792498399228222}
+  - component: {fileID: 5167033863629459053}
+  - component: {fileID: 2070551721365641507}
+  - component: {fileID: 2425718948276381575}
+  - component: {fileID: 8471043892086875625}
+  - component: {fileID: 8982388048664263869}
+  m_Layer: 23
   m_Name: RaisedFoundation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5777797983873498891
+--- !u!4 &5083792498399228222
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7482619893714108888}
+  m_GameObject: {fileID: 9066408478974516325}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 4.0381937, y: -14.50505, z: -5.154897}
-  m_LocalScale: {x: 100, y: 100.00003, z: 100.00003}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.19000006, y: 0, z: 0}
+  m_LocalScale: {x: 100, y: 100.00004, z: 100.00004}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 676114042731416298}
-  m_Father: {fileID: 5083792498399228222}
-  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
---- !u!33 &2840316786075883301
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &5167033863629459053
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7482619893714108888}
+  m_GameObject: {fileID: 9066408478974516325}
   m_Mesh: {fileID: 1772645920147236155, guid: 4be7b3cb2080f5649b7813f3004c6927, type: 3}
---- !u!23 &6723020004105428119
+--- !u!23 &2070551721365641507
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7482619893714108888}
+  m_GameObject: {fileID: 9066408478974516325}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -191,17 +193,17 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &3152265246758074919
+--- !u!64 &2425718948276381575
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7482619893714108888}
+  m_GameObject: {fileID: 9066408478974516325}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -213,40 +215,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 1772645920147236155, guid: 4be7b3cb2080f5649b7813f3004c6927, type: 3}
---- !u!1 &9066408478974516325
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5083792498399228222}
-  - component: {fileID: 8471043892086875625}
-  - component: {fileID: 8982388048664263869}
-  m_Layer: 23
-  m_Name: RaisedFoundation
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5083792498399228222
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9066408478974516325}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.2281938, y: 14.50505, z: 5.154897}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 5777797983873498891}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8471043892086875625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,13 +249,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 933c6c9c0f1d54545852c9bef2ff0d6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  preview: {fileID: 7482619893714108888}
+  preview: {fileID: 9066408478974516325}
   collisionCheckObject: {fileID: 7213749043066446520}
-  menuIcon: {fileID: 21300000, guid: 6d00b55638953104ea5c815a7f53249e, type: 3}
+  menuIcon: {fileID: 21300000, guid: 52a6577b94b176a498e95c60554a44fe, type: 3}
   category: Base
   displayName: Raised Foundation
   gridSize: 1
   offset: 1
+  forceUpAlignment: 1
+  forcedUpAxis: 0
+  forwardAxis: 1
+  snapToSurface: 0
+  rotationAxis: 2
+  rotationIncrement: 15
   buildParticleEffectPrefab: {fileID: 7745491904160101421, guid: eebeec04a969e854492534bdf2d1c7a0, type: 3}
   particleEffectOffset: {x: 0, y: 0, z: 0}
   particleUsePreviewRotation: 0

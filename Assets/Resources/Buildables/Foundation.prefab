@@ -254,6 +254,12 @@ MonoBehaviour:
   displayName: Foundation
   gridSize: 0.5
   offset: 0.5
+  forceUpAlignment: 0
+  forcedUpAxis: 1
+  forwardAxis: 2
+  snapToSurface: 0
+  rotationAxis: 1
+  rotationIncrement: 45
   buildParticleEffectPrefab: {fileID: 7745491904160101421, guid: 790de9a12baf3b749adcfe29d70b4a51, type: 3}
   particleEffectOffset: {x: 0, y: 0, z: 0}
   particleUsePreviewRotation: 0
