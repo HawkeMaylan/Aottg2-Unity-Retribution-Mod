@@ -261,8 +261,8 @@ MonoBehaviour:
   gridSize: 1
   offset: 5
   forceUpAlignment: 1
-  forcedUpAxis: 1
-  forwardAxis: 0
+  forcedUpAxis: 3
+  forwardAxis: 4
   snapToSurface: 0
   rotationAxis: 2
   rotationIncrement: 15
