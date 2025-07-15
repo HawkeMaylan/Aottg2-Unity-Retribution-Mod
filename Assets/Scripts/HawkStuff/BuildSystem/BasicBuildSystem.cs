@@ -17,6 +17,16 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     public KeyCode buildKey = KeyCode.K;
     public KeyCode placeKey = KeyCode.UpArrow;
 
+    [Header("Rotation Settings")]
+    public KeyCode rotateXKey = KeyCode.X;
+    public KeyCode rotateYKey = KeyCode.Y;
+    public KeyCode rotateZKey = KeyCode.Z;
+    public KeyCode resetRotationKey = KeyCode.Space;
+    public KeyCode snapToSurfaceKey = KeyCode.T;
+    public float rotationIncrement = 45f;
+    public bool forceUpAlignment = false;
+    public Vector3 forcedUpAxis = Vector3.up;
+
     // Building state
     private bool isBuilding = false;
     private bool scriptActive = false;
@@ -28,6 +38,12 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     private HumanInventory _playerInventory;
     private bool _inventorySearchPerformed = false;
     private Dictionary<string, int> _pendingRefunds = new Dictionary<string, int>();
+
+    // Rotation state
+    private RotationAxis currentRotationAxis = RotationAxis.Y;
+    private Quaternion surfaceAlignmentRotation = Quaternion.identity;
+
+    private enum RotationAxis { X, Y, Z }
 
     private IEnumerator Start()
     {
@@ -195,8 +211,31 @@ public class BuildSystem : MonoBehaviourPunCallbacks
                 Mathf.Round(currentPos.z / gridSize) * gridSize
             );
 
+            // Calculate surface alignment
+            surfaceAlignmentRotation = helper.snapToSurface ?
+                Quaternion.FromToRotation(Vector3.up, hit.normal) :
+                Quaternion.identity;
+
             currentPreview.transform.position = currentPos;
-            currentPreview.transform.rotation = Quaternion.FromToRotation(Vector3.up, hit.normal) * Quaternion.Euler(currentRot);
+
+            // Apply rotation based on helper settings
+            if (helper.forceUpAlignment)
+            {
+                // Force the specified axis to align with world up
+                Vector3 forwardVector = Vector3.forward;
+                // Find a suitable forward vector that's perpendicular to our up axis
+                if (helper.GetForcedUpVector() == Vector3.up) forwardVector = Vector3.forward;
+                else if (helper.GetForcedUpVector() == Vector3.forward) forwardVector = Vector3.up;
+                else forwardVector = Vector3.up;
+
+                Quaternion targetRotation = Quaternion.LookRotation(forwardVector, helper.GetForcedUpVector());
+                currentPreview.transform.rotation = surfaceAlignmentRotation * targetRotation * Quaternion.Euler(currentRot);
+            }
+            else
+            {
+                // Standard rotation behavior
+                currentPreview.transform.rotation = surfaceAlignmentRotation * Quaternion.Euler(currentRot);
+            }
 
             UpdatePreviewMaterials();
         }
@@ -239,10 +278,42 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void HandleBuildingInput()
     {
+        // Rotation axis selection
+        if (Input.GetKeyDown(rotateXKey))
+            currentRotationAxis = RotationAxis.X;
+        if (Input.GetKeyDown(rotateYKey))
+            currentRotationAxis = RotationAxis.Y;
+        if (Input.GetKeyDown(rotateZKey))
+            currentRotationAxis = RotationAxis.Z;
+
+        // Rotation application
         if (Input.GetKeyDown(KeyCode.RightArrow))
-            currentRot += new Vector3(0, 45, 0);
+            RotatePreview(rotationIncrement);
         if (Input.GetKeyDown(KeyCode.LeftArrow))
-            currentRot -= new Vector3(0, 45, 0);
+            RotatePreview(-rotationIncrement);
+
+        // Rotation reset
+        if (Input.GetKeyDown(resetRotationKey))
+        {
+            currentRot = Vector3.zero;
+            if (currentPreview != null)
+            {
+                currentPreview.transform.rotation = surfaceAlignmentRotation;
+            }
+        }
+
+        // Snap to surface normal
+        if (Input.GetKeyDown(snapToSurfaceKey))
+        {
+            if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, 40, buildLayer))
+            {
+                surfaceAlignmentRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+                if (currentPreview != null)
+                {
+                    currentPreview.transform.rotation = surfaceAlignmentRotation * Quaternion.Euler(currentRot);
+                }
+            }
+        }
 
         if (Input.GetKeyDown(placeKey))
         {
@@ -425,6 +496,48 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         foreach (Transform child in obj.transform)
         {
             SetLayerRecursively(child.gameObject, layer);
+        }
+    }
+
+    void RotatePreview(float degrees)
+    {
+        switch (currentRotationAxis)
+        {
+            case RotationAxis.X:
+                currentRot.x += degrees;
+                currentRot.x = Mathf.Repeat(currentRot.x, 360);
+                break;
+            case RotationAxis.Y:
+                currentRot.y += degrees;
+                currentRot.y = Mathf.Repeat(currentRot.y, 360);
+                break;
+            case RotationAxis.Z:
+                currentRot.z += degrees;
+                currentRot.z = Mathf.Repeat(currentRot.z, 360);
+                break;
+        }
+
+        if (currentPreview != null)
+        {
+            BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
+            if (helper == null) return;
+
+            if (helper.forceUpAlignment)
+            {
+                // Force the specified axis to align with world up
+                Vector3 forwardVector = Vector3.forward;
+                // Find a suitable forward vector that's perpendicular to our up axis
+                if (helper.GetForcedUpVector() == Vector3.up) forwardVector = Vector3.forward;
+                else if (helper.GetForcedUpVector() == Vector3.forward) forwardVector = Vector3.up;
+                else forwardVector = Vector3.up;
+
+                Quaternion targetRotation = Quaternion.LookRotation(forwardVector, helper.GetForcedUpVector());
+                currentPreview.transform.rotation = surfaceAlignmentRotation * targetRotation * Quaternion.Euler(currentRot);
+            }
+            else
+            {
+                currentPreview.transform.rotation = surfaceAlignmentRotation * Quaternion.Euler(currentRot);
+            }
         }
     }
 }
