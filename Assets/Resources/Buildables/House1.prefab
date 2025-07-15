@@ -98,7 +98,7 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -150,7 +150,7 @@ MonoBehaviour:
   menuIcon: {fileID: 21300000, guid: 52a6577b94b176a498e95c60554a44fe, type: 3}
   category: Prebuilt
   displayName: Building
-  gridSize: 1
+  gridSize: 22
   offset: 1
   buildCosts:
   - itemName: Resources
@@ -187,13 +187,13 @@ MonoBehaviour:
   healthBarScale: {x: 10, y: 2, z: 10}
   hitCooldown: 0.2
   flatDamageFromUnknown: 1000
-  hitEffectPrefab: {fileID: 8133246511525014426, guid: 3ea5cddfd5a68994cab92d81cc45754e, type: 3}
+  hitEffectPrefab: {fileID: 8133246511525014426, guid: ff81f97b86e830849a88d262b6a1aadc, type: 3}
   hitEffectOffset: {x: 0, y: 0, z: 0}
   hitEffectRotation: {x: 0, y: 0, z: 0}
   deathEffectPrefab: {fileID: 0}
   deathEffectOffset: {x: 0, y: 0, z: 0}
   deathEffectRotation: {x: 0, y: 0, z: 0}
-  customCollider: {fileID: 0}
+  customCollider: {fileID: 3424102985447800960}
 --- !u!1 &8964458676437210627
 GameObject:
   m_ObjectHideFlags: 0
@@ -288,7 +288,7 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
