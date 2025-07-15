@@ -84,7 +84,6 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             return true;
         }
 
-        Debug.LogWarning("BuildSystem: Player inventory not found in this attempt");
         return false;
     }
 

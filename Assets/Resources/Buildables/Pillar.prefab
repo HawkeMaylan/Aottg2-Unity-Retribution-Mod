@@ -125,7 +125,7 @@ MonoBehaviour:
   menuIcon: {fileID: 21300000, guid: c0ed77ed26d100549b24c58459682ae3, type: 3}
   category: Base
   displayName: Pillar
-  gridSize: 2
+  gridSize: 1
   offset: 3
   buildParticleEffectPrefab: {fileID: 7745491904160101421, guid: 9225c04e9d5df4f48b0f460b88174332, type: 3}
   particleEffectOffset: {x: 0, y: 0, z: 0}
