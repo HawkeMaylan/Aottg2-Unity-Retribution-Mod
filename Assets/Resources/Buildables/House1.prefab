@@ -152,6 +152,10 @@ MonoBehaviour:
   displayName: Building
   gridSize: 22
   offset: 1
+  buildParticleEffectPrefab: {fileID: 7745491904160101421, guid: 790de9a12baf3b749adcfe29d70b4a51, type: 3}
+  particleEffectOffset: {x: 0, y: 0, z: 0}
+  particleUsePreviewRotation: 0
+  particleParentToBuilding: 0
   buildCosts:
   - itemName: Resources
     amount: 10

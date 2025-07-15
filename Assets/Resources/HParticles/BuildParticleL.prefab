@@ -4902,9 +4902,9 @@ GameObject:
   - component: {fileID: 6708751970806454313}
   - component: {fileID: 7403866088433599146}
   - component: {fileID: 7674917714259974678}
-  - component: {fileID: 4923947660762400020}
+  - component: {fileID: -166223179042934927}
   m_Layer: 0
-  m_Name: BuildParticleS
+  m_Name: BuildParticleL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4920,7 +4920,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 8, y: 8, z: 8}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5564162903237251636}
@@ -9914,7 +9914,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lifetime: 4
   ownershipTimeout: 3
---- !u!164 &4923947660762400020
+--- !u!164 &-166223179042934927
 AudioReverbFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
