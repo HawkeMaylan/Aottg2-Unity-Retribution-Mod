@@ -80,22 +80,22 @@ public class BuildableObjectHelper : MonoBehaviour
     /// </summary>
     public Quaternion GetForcedRotation()
     {
-        Vector3 up = GetAlignmentVector(forcedUpAxis);
-        Vector3 forward = GetAlignmentVector(forwardAxis);
+        // These are in WORLD SPACE
+        Vector3 worldUp = GetAlignmentVector(forcedUpAxis);
+        Vector3 worldForward = GetAlignmentVector(forwardAxis);
 
-        // Ensure forward is perpendicular to up
-        if (Mathf.Abs(Vector3.Dot(up, forward)) > 0.1f)
+        // Ensure forward is perpendicular to up in world space
+        if (Mathf.Abs(Vector3.Dot(worldUp, worldForward)) > 0.99f)
         {
-            // Find an alternative forward that's perpendicular
-            if (Mathf.Abs(up.x) < 0.9f) forward = Vector3.right;
-            else if (Mathf.Abs(up.y) < 0.9f) forward = Vector3.up;
-            else forward = Vector3.forward;
-
-            // Make sure it's actually perpendicular
-            forward = Vector3.Cross(up, Vector3.Cross(forward, up)).normalized;
+            // Find a perpendicular vector in world space
+            if (Mathf.Abs(worldUp.x) < 0.99f)
+                worldForward = Vector3.Cross(worldUp, Vector3.right).normalized;
+            else
+                worldForward = Vector3.Cross(worldUp, Vector3.forward).normalized;
         }
 
-        return Quaternion.LookRotation(forward, up);
+        // This creates a rotation from WORLD SPACE directions
+        return Quaternion.LookRotation(worldForward, worldUp);
     }
 
     /// <summary>

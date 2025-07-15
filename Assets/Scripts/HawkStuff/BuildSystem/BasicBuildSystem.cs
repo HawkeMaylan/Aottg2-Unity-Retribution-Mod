@@ -187,20 +187,33 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             return;
         }
 
-        // Initialize rotation
-        currentRotation = Quaternion.identity;
-
-        // Apply forced alignment if needed
-        if (helper.forceUpAlignment)
+        // Clean up existing preview
+        if (currentPreview != null)
         {
-            currentRotation = helper.GetForcedRotation();
+            Destroy(currentPreview);
         }
 
-        // Create preview with initial rotation
-        currentPreview = Instantiate(helper.preview, currentPos, currentRotation);
+        // Reset all rotation states
+        currentRotation = Quaternion.identity;
+        surfaceAlignmentRotation = Quaternion.identity;
+
+        // Initialize with forced alignment if enabled
+        Quaternion spawnRotation = Quaternion.identity;
+        if (helper.forceUpAlignment)
+        {
+            spawnRotation = helper.GetForcedRotation();
+            Debug.Log($"Applying forced alignment - Up: {helper.forcedUpAxis}, Forward: {helper.forwardAxis}");
+        }
+
+        // Create new preview with proper rotation
+        currentPreview = Instantiate(helper.preview, currentPos, spawnRotation);
         SetLayerRecursively(currentPreview, LayerMask.NameToLayer("Preview"));
 
-        Debug.Log($"BuildSystem: Created preview for {prefab.name}");
+
+
+        Debug.Log($"Created preview for {prefab.name} " +
+                 $"(Force Up: {helper.forceUpAlignment}, " +
+                 $"Rotation: {spawnRotation.eulerAngles})");
     }
 
     void UpdatePreview()
@@ -237,7 +250,9 @@ public class BuildSystem : MonoBehaviourPunCallbacks
                 // 1. First align with surface normal
                 // 2. Then apply the forced axis alignment
                 // 3. Finally apply any user rotation
-                currentPreview.transform.rotation = surfaceAlignmentRotation * forcedRotation * currentRotation;
+                currentPreview.transform.rotation = surfaceAlignmentRotation *
+                                      helper.GetForcedRotation() *
+                                      currentRotation;
             }
             else
             {
