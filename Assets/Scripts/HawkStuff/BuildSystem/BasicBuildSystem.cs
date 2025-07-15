@@ -253,29 +253,31 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void Build()
     {
+        // Validate build position
         if (currentPreview == null || !IsPreviewValid())
         {
             Debug.Log("Cannot build - invalid position");
             return;
         }
 
+        // Verify player inventory
         if (_playerInventory == null && !FindLocalPlayerInventory())
         {
             Debug.LogError("Player inventory not found!");
             return;
         }
 
+        // Get buildable helper
         BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
         if (helper == null) return;
 
-        // FIRST CHECK ALL RESOURCES
+        // Check resource costs
         bool canAfford = true;
         foreach (InventoryCost cost in helper.buildCosts)
         {
             int currentAmount = _playerInventory.GetItemCount(cost.itemName);
             if (currentAmount < cost.amount)
             {
-                // Use the new ShowNotEnoughMessage function
                 _playerInventory.ShowNotEnoughMessage(cost.itemName);
                 Debug.Log($"Need {cost.amount} {cost.itemName}, only have {currentAmount}");
                 canAfford = false;
@@ -284,10 +286,10 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
         if (!canAfford)
         {
-            return; // Exit before deducting anything
+            return;
         }
 
-        // DEDUCT RESOURCES
+        // Deduct resources
         foreach (InventoryCost cost in helper.buildCosts)
         {
             _playerInventory.SetItemCount(cost.itemName,
@@ -298,8 +300,78 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         GameObject prefab = buildablePrefabs[currentBuildableIndex];
         PhotonNetwork.Instantiate("Buildables/" + prefab.name, currentPos, currentPreview.transform.rotation);
 
+        // Spawn networked particle effect if specified
+        if (helper.buildParticleEffectPrefab != null)
+        {
+            SpawnBuildParticles(helper);
+        }
+
+        // Reset preview
         Destroy(currentPreview);
         CreatePreview();
+    }
+
+    private void SpawnBuildParticles(BuildableObjectHelper helper)
+    {
+        // Calculate final particle position with offset
+        Vector3 particlePosition = currentPos +
+            currentPreview.transform.TransformDirection(helper.particleEffectOffset);
+
+        // Get rotation (either from preview or use identity)
+        Quaternion particleRotation = helper.particleUsePreviewRotation ?
+            currentPreview.transform.rotation : Quaternion.identity;
+
+        // Get the resource path for Photon
+        string resourcePath = GetPrefabResourcePath(helper.buildParticleEffectPrefab);
+        if (string.IsNullOrEmpty(resourcePath))
+        {
+            Debug.LogError($"Particle prefab {helper.buildParticleEffectPrefab.name} is not in a Resources folder!");
+            return;
+        }
+
+        // Instantiate networked particle effect
+        GameObject particles = PhotonNetwork.Instantiate(resourcePath, particlePosition, particleRotation);
+
+        // Optional: Parent to the built object if needed
+        if (helper.particleParentToBuilding)
+        {
+            // Need to find the newly built object since PhotonNetwork.Instantiate is async
+            StartCoroutine(ParentParticlesAfterBuild(particles, currentPos));
+        }
+    }
+
+    private IEnumerator ParentParticlesAfterBuild(GameObject particles, Vector3 buildPosition)
+    {
+        // Wait one frame to allow building to spawn
+        yield return null;
+
+        // Find the nearest building object at our build position
+        Collider[] colliders = Physics.OverlapSphere(buildPosition, 0.5f);
+        foreach (Collider col in colliders)
+        {
+            if (col.gameObject != currentPreview && col.CompareTag("Buildable"))
+            {
+                particles.transform.SetParent(col.transform);
+                break;
+            }
+        }
+    }
+
+    // Helper method to get Resources path for a prefab
+    private string GetPrefabResourcePath(GameObject prefab)
+    {
+#if UNITY_EDITOR
+    string path = UnityEditor.AssetDatabase.GetAssetPath(prefab);
+    int resourcesIndex = path.IndexOf("Resources/");
+    if (resourcesIndex < 0) return null;
+    
+    string resourcesPath = path.Substring(resourcesIndex + "Resources/".Length);
+    return resourcesPath.Replace(".prefab", "");
+#else
+        // For runtime, we need to know the path - this is why we recommend setting it in editor
+        // and storing as a serialized field if you need it at runtime
+        return null;
+#endif
     }
 
     bool CanAffordBuild()

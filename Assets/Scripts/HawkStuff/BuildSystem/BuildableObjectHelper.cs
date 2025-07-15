@@ -20,6 +20,19 @@ public class BuildableObjectHelper : MonoBehaviour
     public float gridSize = 1.0f;
     public float offset = 1.0f;
 
+    [Header("Particle Effects")]
+    [Tooltip("Drag particle effect prefab here (must be in Resources folder)")]
+    public GameObject buildParticleEffectPrefab;
+
+    [Tooltip("Offset from build position")]
+    public Vector3 particleEffectOffset = Vector3.zero;
+
+    [Tooltip("Should particles use the building's rotation?")]
+    public bool particleUsePreviewRotation = true;
+
+    [Tooltip("Should particles be parented to the building?")]
+    public bool particleParentToBuilding = false;
+
     [Header("Inventory Cost")]
     public InventoryCost[] buildCosts;
 
@@ -36,3 +49,4 @@ public class BuildableObjectHelper : MonoBehaviour
         return sb.ToString().Trim();
     }
 }
+

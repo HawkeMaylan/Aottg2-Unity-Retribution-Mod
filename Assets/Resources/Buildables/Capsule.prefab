@@ -151,6 +151,10 @@ MonoBehaviour:
   displayName: Capsule
   gridSize: 0.5
   offset: 2
+  buildParticleEffectPrefab: {fileID: 7745491904160101421, guid: 9225c04e9d5df4f48b0f460b88174332, type: 3}
+  particleEffectOffset: {x: 0, y: 0, z: 0}
+  particleUsePreviewRotation: 0
+  particleParentToBuilding: 0
   buildCosts:
   - itemName: Resources
     amount: 1
@@ -304,4 +308,8 @@ MonoBehaviour:
   displayName: 
   gridSize: 1
   offset: 1
+  buildParticleEffectPrefab: {fileID: 0}
+  particleEffectOffset: {x: 0, y: 0, z: 0}
+  particleUsePreviewRotation: 1
+  particleParentToBuilding: 0
   buildCosts: []
