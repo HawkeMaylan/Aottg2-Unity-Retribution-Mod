@@ -425,13 +425,7 @@ namespace Characters
             _staminaBarFill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
             _staminaBarFill.fillOrigin = (int)UnityEngine.UI.Image.OriginHorizontal.Right; // This makes it drain from right to left
 
-            // Set up RectTransforms
-            var rect = _staminaBar.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 0);
-            rect.anchorMax = new Vector2(0.5f, 0);
-            rect.pivot = new Vector2(0.5f, 0);
-            rect.anchoredPosition = new Vector2(0, 100);
-            rect.sizeDelta = new Vector2(200, 20);
+            
 
             var fillRect = _staminaBarFill.GetComponent<RectTransform>();
             fillRect.anchorMin = Vector2.zero;
@@ -447,6 +441,14 @@ namespace Characters
             {
                 _staminaBarFill.fillAmount = CurrentStamina / MaxStamina;
                 _staminaBar.SetActive(IsSprinting || CurrentStamina < MaxStamina);
+                // Set up RectTransforms
+                var rect = _staminaBar.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0.5f, 0);
+                rect.anchorMax = new Vector2(0.5f, 0);
+                rect.pivot = new Vector2(0.5f, 0);
+                rect.anchoredPosition = new Vector2(0, 100);
+                rect.sizeDelta = new Vector2(2 * CurrentStamina, 20);
+
             }
         }
 
