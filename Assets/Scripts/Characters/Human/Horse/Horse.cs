@@ -68,12 +68,13 @@ namespace Characters
 
         public void Jump()
         {
-            if (_jumpCooldownLeft > 0f || !Grounded)
+            if (_jumpCooldownLeft > 0f || !Grounded || CurrentStamina<=15)
                 return;
 
             Cache.Rigidbody.AddForce(Vector3.up * JumpForce, ForceMode.VelocityChange);
             Cache.Rigidbody.AddForce(Cache.Transform.forward * JumpForce / 2, ForceMode.VelocityChange);
             _jumpCooldownLeft = 0f;
+            CurrentStamina -= StaminaDrainRate;
         }
 
         public void HorseWhistle()
@@ -187,7 +188,7 @@ namespace Characters
             UpdateStamina();
             UpdateStaminaBar();
 
-
+            
 
 
             //  Update MountedStatus automatically
@@ -248,6 +249,8 @@ namespace Characters
                 }
 
             }
+
+            
         }
 
         [PunRPC]
@@ -423,7 +426,7 @@ namespace Characters
             _staminaBarFill.color = Color.white;
             _staminaBarFill.type = UnityEngine.UI.Image.Type.Filled;
             _staminaBarFill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
-            _staminaBarFill.fillOrigin = (int)UnityEngine.UI.Image.OriginHorizontal.Right; // This makes it drain from right to left
+            _staminaBarFill.fillOrigin = (int)UnityEngine.UI.Image.OriginHorizontal.Right; 
 
             
 
@@ -448,7 +451,9 @@ namespace Characters
                 rect.pivot = new Vector2(0.5f, 0);
                 rect.anchoredPosition = new Vector2(0, 100);
                 rect.sizeDelta = new Vector2(2 * CurrentStamina, 20);
-
+                bool shouldShow = (_owner.MountState == HumanMountState.Horse) &&
+                         (IsSprinting || CurrentStamina < MaxStamina);
+                _staminaBar.SetActive(shouldShow);
             }
         }
 
