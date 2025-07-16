@@ -16,6 +16,8 @@ public class ChatPopupUIManager : MonoBehaviourPun
     private Button sendButton;
     private InGameManager gameManager;
     private InGameMenu _inGameMenu;
+    private bool _isDestroyed = false;
+    private bool _panelWasActive = false;
 
     private static readonly float EmoteDuration = 15f;
     private static readonly int MaxMessages = 5;
@@ -50,23 +52,57 @@ public class ChatPopupUIManager : MonoBehaviourPun
         CreateChatUI();
     }
 
+    private void OnEnable()
+    {
+        _panelWasActive = false;
+    }
+
+    private void OnDisable()
+    {
+        CleanupMenuState();
+    }
+
     private void OnDestroy()
     {
-        if (panel.activeSelf && _inGameMenu != null)
+        _isDestroyed = true;
+        CleanupMenuState();
+
+        // Clean up the panel if it exists
+        if (panel != null)
+        {
+            Destroy(panel);
+        }
+    }
+
+    private void CleanupMenuState()
+    {
+        if (_inGameMenu != null && _panelWasActive)
         {
             _inGameMenu.SetProxMenuActive(false);
+            _panelWasActive = false;
         }
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Slash) && !IsAnyMenuOpen())
-            ToggleChatPanel();
+        if (_isDestroyed) return;
 
-        if (panel.activeSelf && Input.GetKeyDown(KeyCode.Return))
-            SendChatPopup();
-        if (panel.activeSelf && Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Slash) && !IsAnyMenuOpen() && panel != null)
+        {
             ToggleChatPanel();
+        }
+
+        if (panel != null && panel.activeSelf)
+        {
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                SendChatPopup();
+            }
+            else if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                ToggleChatPanel();
+            }
+        }
     }
 
     private bool IsAnyMenuOpen()
@@ -76,36 +112,49 @@ public class ChatPopupUIManager : MonoBehaviourPun
 
     private void ToggleChatPanel()
     {
+        if (_isDestroyed || panel == null) return;
+
         bool newState = !panel.activeSelf;
         panel.SetActive(newState);
+        _panelWasActive = newState;
 
         if (_inGameMenu != null)
         {
             _inGameMenu.SetProxMenuActive(newState);
         }
 
-        if (newState)
+        if (newState && chatInput != null)
         {
             chatInput.text = "";
             chatInput.Select();
             chatInput.ActivateInputField();
         }
+        else
+        {
+            _panelWasActive = false;
+        }
     }
 
     private void SendChatPopup()
     {
+        if (_isDestroyed || panel == null || chatInput == null) return;
+
         string msg = chatInput.text.Trim();
         if (string.IsNullOrEmpty(msg)) return;
 
-        BaseCharacter character = gameManager.CurrentCharacter;
+        BaseCharacter character = gameManager?.CurrentCharacter;
         if (character != null)
         {
             PhotonView pv = character.Cache.PhotonView;
-            photonView.RPC("EmoteTextRPC", RpcTarget.All, pv.ViewID, msg);
+            if (pv != null && photonView != null)
+            {
+                photonView.RPC("EmoteTextRPC", RpcTarget.All, pv.ViewID, msg);
+            }
         }
 
         chatInput.text = "";
         panel.SetActive(false);
+        _panelWasActive = false;
 
         if (_inGameMenu != null)
         {
@@ -189,7 +238,7 @@ public class ChatPopupUIManager : MonoBehaviourPun
             yield return null;
         }
 
-        if (activePopups.ContainsKey(target))
+        if (target != null && activePopups.ContainsKey(target))
         {
             activePopups[target].Remove(wrapper);
         }
@@ -201,16 +250,19 @@ public class ChatPopupUIManager : MonoBehaviourPun
         GameObject canvasGO = GameObject.Find("DefaultMenu(Clone)");
         if (canvasGO == null) return;
 
+        // Check for existing chat panel and destroy it if found
+        Transform existingPanel = canvasGO.transform.Find("ChatPanel");
+        if (existingPanel != null)
+        {
+            Destroy(existingPanel.gameObject);
+        }
+
         Canvas canvas = canvasGO.GetComponent<Canvas>();
         if (canvas == null) return;
 
         panel = new GameObject("ChatPanel", typeof(RectTransform), typeof(Image));
         panel.transform.SetParent(canvas.transform, false);
         panel.GetComponent<Image>().color = new Color(0, 0, 0, 0.5f);
-
-        // Add SelfDestroy component to the panel
-        var selfDestroy = panel.AddComponent<SelfDestroy>();
-        selfDestroy.lifetime = 15f;
 
         RectTransform panelRect = panel.GetComponent<RectTransform>();
         panelRect.anchorMin = new Vector2(0.3f, 0.1f);
