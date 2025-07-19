@@ -88,6 +88,14 @@ namespace Characters
             }
         }
 
+        public void ShowNotEnoughMessage(string itemType)
+        {
+            if (photonView.IsMine)
+            {
+                ItemPopupManager.Instance?.ShowPopup($"Not Enough {itemType}");
+            }
+        }
+
         public List<string> GetItemTypes()
         {
             return new List<string>(inventoryCounts.Keys);
