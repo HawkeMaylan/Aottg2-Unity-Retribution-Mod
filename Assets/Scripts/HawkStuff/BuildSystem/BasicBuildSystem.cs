@@ -32,6 +32,10 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     private HumanInventory _playerInventory;
     private bool _inventorySearchPerformed = false;
     private Dictionary<string, int> _pendingRefunds = new Dictionary<string, int>();
+    private bool IsLocalPlayer => PhotonNetwork.LocalPlayer != null &&
+                             _playerInventory != null &&
+                             _playerInventory.photonView != null &&
+                             _playerInventory.photonView.IsMine;
 
     // Rotation state
     private Quaternion surfaceAlignmentRotation = Quaternion.identity;
@@ -374,60 +378,41 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void Build()
     {
-        // Validate build position
-        if (currentPreview == null || !IsPreviewValid())
+        // 1. Validate build position
+        if (currentPreview == null || !IsPreviewValid()) return;
+
+        // 2. Only allow the LOCAL player to build
+        if (!IsLocalPlayer)
         {
-            Debug.Log("Cannot build - invalid position");
+            Debug.Log("Not local player - skipping build logic");
             return;
         }
 
-        // Verify player inventory
-        if (_playerInventory == null && !FindLocalPlayerInventory())
-        {
-            Debug.LogError("Player inventory not found!");
-            return;
-        }
-
-        // Get buildable helper
+        // 3. Check & deduct resources (local only)
         BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
         if (helper == null) return;
 
-        // Check resource costs
-        bool canAfford = true;
         foreach (InventoryCost cost in helper.buildCosts)
         {
-            int currentAmount = _playerInventory.GetItemCount(cost.itemName);
-            if (currentAmount < cost.amount)
+            if (_playerInventory.GetItemCount(cost.itemName) < cost.amount)
             {
                 _playerInventory.ShowNotEnoughMessage(cost.itemName);
-                Debug.Log($"Need {cost.amount} {cost.itemName}, only have {currentAmount}");
-                canAfford = false;
+                return;
             }
+            _playerInventory.SetItemCount(cost.itemName, _playerInventory.GetItemCount(cost.itemName) - cost.amount);
         }
 
-        if (!canAfford)
-        {
-            return;
-        }
+        // 4. Spawn object for ALL players (but only local player pays)
+        PhotonNetwork.Instantiate(
+            "Buildables/" + buildablePrefabs[currentBuildableIndex].name,
+            currentPos,
+            currentPreview.transform.rotation
+        );
 
-        // Deduct resources
-        foreach (InventoryCost cost in helper.buildCosts)
-        {
-            _playerInventory.SetItemCount(cost.itemName,
-                _playerInventory.GetItemCount(cost.itemName) - cost.amount);
-        }
-
-        // Place the building
-        GameObject prefab = buildablePrefabs[currentBuildableIndex];
-        PhotonNetwork.Instantiate("Buildables/" + prefab.name, currentPos, currentPreview.transform.rotation);
-
-        // Spawn networked particle effect if specified
+        // 5. Local effects
         if (helper.buildParticleEffectPrefab != null)
-        {
             SpawnBuildParticles(helper);
-        }
 
-        // Reset preview
         Destroy(currentPreview);
         CreatePreview();
     }
