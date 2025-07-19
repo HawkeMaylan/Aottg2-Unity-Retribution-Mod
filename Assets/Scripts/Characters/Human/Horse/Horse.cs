@@ -5,6 +5,7 @@ using Utility;
 using Settings;
 using Photon.Pun;
 using Photon.Realtime;
+using UI;
 
 namespace Characters
 {
@@ -22,6 +23,16 @@ namespace Characters
         private float _teleportTimeLeft;
         private float _jumpCooldownLeft;
 
+        public float SprintSpeedMultiplier = 1.3f;
+        public float StaminaDrainRate = 15f; // per second while sprinting
+        public float StaminaRegenRate = 2f; // per second normally
+        public float StaminaIdleRegenBonus = 2f; // extra regen when idle
+        public float MaxStamina = 100f;
+        public float CurrentStamina = 100f;
+        public bool IsSprinting = false;
+        private GameObject _staminaBar;
+        private UnityEngine.UI.Image _staminaBarFill;
+
         private bool _isWhistleActive = false;
         private float _whistleTimer = 0f;
         private const float WhistleDuration = 8f;
@@ -35,6 +46,9 @@ namespace Characters
 
             _owner = human;
             base.Init(true, human.Team);  // Sets team and health etc
+
+            CurrentStamina = MaxStamina;
+            CreateStaminaBar();
 
             if (photonView.IsMine && Cache.Rigidbody != null)
             {
@@ -54,12 +68,13 @@ namespace Characters
 
         public void Jump()
         {
-            if (_jumpCooldownLeft > 0f || !Grounded)
+            if (_jumpCooldownLeft > 0f || !Grounded || CurrentStamina <= 15)
                 return;
 
             Cache.Rigidbody.AddForce(Vector3.up * JumpForce, ForceMode.VelocityChange);
             Cache.Rigidbody.AddForce(Cache.Transform.forward * JumpForce / 2, ForceMode.VelocityChange);
             _jumpCooldownLeft = 0f;
+            CurrentStamina -= StaminaDrainRate;
         }
 
         public void HorseWhistle()
@@ -168,15 +183,16 @@ namespace Characters
                 return;
             }
 
-           
+
+            CheckSprintInput();
+            UpdateStamina();
+            UpdateStaminaBar();
 
 
 
 
-
-
-        //  Update MountedStatus automatically
-        MountedStatus = (_owner.MountState == HumanMountState.Horse) ? 1 : 0;
+            //  Update MountedStatus automatically
+            MountedStatus = (_owner.MountState == HumanMountState.Horse) ? 1 : 0;
 
             if (_owner.MountState == HumanMountState.Horse)
             {
@@ -233,6 +249,8 @@ namespace Characters
                 }
 
             }
+
+
         }
 
         [PunRPC]
@@ -252,7 +270,35 @@ namespace Characters
 
 
 
+        private void UpdateStamina()
+        {
+            if (!IsMine()) return;
 
+            if (IsSprinting)
+            {
+                // Drain stamina while sprinting
+                CurrentStamina -= StaminaDrainRate * Time.deltaTime;
+                if (CurrentStamina <= 0)
+                {
+                    CurrentStamina = 0;
+                    ToggleSprint(false);
+                }
+            }
+            else if (CurrentStamina < MaxStamina)
+            {
+                // Regen stamina when not sprinting
+                float regenRate = StaminaRegenRate;
+
+                // Bonus regen when idle
+                if (State == HorseState.Idle || State == HorseState.ControlledIdle)
+                {
+                    regenRate += StaminaIdleRegenBonus;
+                }
+
+                CurrentStamina += regenRate * Time.deltaTime;
+                CurrentStamina = Mathf.Min(CurrentStamina, MaxStamina);
+            }
+        }
 
 
 
@@ -272,7 +318,13 @@ namespace Characters
             if (isAttachedToWagon)
             {
                 float speedTarget = (State == HorseState.ControlledRun || State == HorseState.RunToPoint) ? _owner.Stats.HorseSpeed :
-                                    (State == HorseState.ControlledWalk || State == HorseState.WalkToPoint) ? WalkSpeed : 0f;
+                                  (State == HorseState.ControlledWalk || State == HorseState.WalkToPoint) ? WalkSpeed : 0f;
+
+                // Apply sprint multiplier if sprinting
+                if (IsSprinting && speedTarget > 0 && CurrentStamina > 0)
+                {
+                    speedTarget *= SprintSpeedMultiplier;
+                }
 
                 if (speedTarget > 0f)
                 {
@@ -308,13 +360,20 @@ namespace Characters
                                 ForceMode.Acceleration);
                     }
                 }
-                else if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint || State == HorseState.ControlledWalk || State == HorseState.ControlledRun)
+                else if (State == HorseState.WalkToPoint || State == HorseState.RunToPoint ||
+                        State == HorseState.ControlledWalk || State == HorseState.ControlledRun)
                 {
                     float speed = _owner.Stats.HorseSpeed;
                     if (State == HorseState.ControlledWalk)
                         speed = WalkSpeed;
                     else if (State == HorseState.WalkToPoint)
                         speed = RunCloseSpeed;
+
+                    // Apply sprint multiplier if sprinting
+                    if (IsSprinting && speed > 0 && CurrentStamina > 0)
+                    {
+                        speed *= SprintSpeedMultiplier;
+                    }
 
                     // If following player and not mounted, rotate toward them
                     if (_owner.MountState != HumanMountState.Horse &&
@@ -333,7 +392,8 @@ namespace Characters
 
                     if (Cache.Rigidbody.velocity.magnitude >= speed)
                     {
-                        Cache.Rigidbody.AddForce((Mathf.Max(speed - Cache.Rigidbody.velocity.magnitude, -1f)) * Cache.Rigidbody.velocity.normalized, ForceMode.VelocityChange);
+                        Cache.Rigidbody.AddForce((Mathf.Max(speed - Cache.Rigidbody.velocity.magnitude, -1f)) * Cache.Rigidbody.velocity.normalized,
+                            ForceMode.VelocityChange);
                     }
                 }
             }
@@ -343,7 +403,84 @@ namespace Characters
         }
 
 
+        private void CreateStaminaBar()
+        {
+            if (!IsMine()) return;
 
+            var menu = GameObject.Find("DefaultMenu(Clone)");
+            if (menu == null) return;
+
+            // Create stamina bar parent object
+            _staminaBar = new GameObject("StaminaBar");
+            _staminaBar.transform.SetParent(menu.transform);
+
+            // Set up the background
+            var bg = _staminaBar.AddComponent<UnityEngine.UI.Image>();
+            bg.color = new Color(0.2f, 0.2f, 0.2f); // Dark gray background
+            bg.type = UnityEngine.UI.Image.Type.Sliced;
+
+            // Create fill object
+            var fillObject = new GameObject("Fill");
+            fillObject.transform.SetParent(_staminaBar.transform);
+            _staminaBarFill = fillObject.AddComponent<UnityEngine.UI.Image>();
+            _staminaBarFill.color = Color.white;
+            _staminaBarFill.type = UnityEngine.UI.Image.Type.Filled;
+            _staminaBarFill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
+            _staminaBarFill.fillOrigin = (int)UnityEngine.UI.Image.OriginHorizontal.Right;
+
+
+
+            var fillRect = _staminaBarFill.GetComponent<RectTransform>();
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.sizeDelta = Vector2.zero;
+
+            _staminaBar.SetActive(false);
+        }
+
+        private void UpdateStaminaBar()
+        {
+            if (_staminaBarFill != null)
+            {
+                _staminaBarFill.fillAmount = CurrentStamina / MaxStamina;
+                _staminaBar.SetActive(IsSprinting || CurrentStamina < MaxStamina);
+                // Set up RectTransforms
+                var rect = _staminaBar.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0.5f, 0);
+                rect.anchorMax = new Vector2(0.5f, 0);
+                rect.pivot = new Vector2(0.5f, 0);
+                rect.anchoredPosition = new Vector2(0, 100);
+                rect.sizeDelta = new Vector2(2 * CurrentStamina, 20);
+                bool shouldShow = (_owner.MountState == HumanMountState.Horse) &&
+                         (IsSprinting || CurrentStamina < MaxStamina);
+                _staminaBar.SetActive(shouldShow);
+            }
+        }
+
+        public void ToggleSprint(bool sprint)
+        {
+            if (!IsMine()) return;
+
+            // Only allow toggling sprint when mounted and moving
+            bool canSprint = _owner.MountState == HumanMountState.Horse &&
+                            (State == HorseState.ControlledRun || State == HorseState.RunToPoint);
+
+            if (!canSprint)
+            {
+                sprint = false;
+            }
+
+            IsSprinting = sprint && CurrentStamina > 0;
+
+            // Replace the array-style access with proper animation speed setting
+            Animation.SetSpeed(HorseAnimations.Run, IsSprinting ? SprintSpeedMultiplier : 1f);
+            if (_owner.MountState == HumanMountState.Horse)
+            {
+                _owner.Animation.SetSpeed(HumanAnimations.HorseRun, IsSprinting ? SprintSpeedMultiplier : 1f);
+            }
+
+            UpdateStaminaBar();
+        }
 
 
 
@@ -414,6 +551,37 @@ namespace Characters
             position.y = GetHeight(position) + 1f;
             Cache.Transform.position = position;
             _teleportTimeLeft = TeleportTime;
+        }
+
+
+        private void CheckSprintInput()
+        {
+            if (!IsMine() || _owner == null || _owner.Dead)
+                return;
+
+            // Only allow sprinting when mounted and moving
+            bool canSprint = _owner.MountState == HumanMountState.Horse &&
+                            (State == HorseState.ControlledRun || State == HorseState.RunToPoint);
+
+            if (canSprint && Input.GetKey(KeyCode.Space))
+            {
+                if (!IsSprinting && CurrentStamina > 0)
+                {
+                    ToggleSprint(true);
+                }
+            }
+            else if (IsSprinting)
+            {
+                ToggleSprint(false);
+            }
+        }
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            if (_staminaBar != null)
+            {
+                Destroy(_staminaBar);
+            }
         }
 
     }
