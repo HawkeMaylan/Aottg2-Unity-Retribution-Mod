@@ -434,30 +434,43 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     private void SpawnBuildParticles(BuildableObjectHelper helper)
     {
-        // Calculate final particle position with offset
-        Vector3 particlePosition = currentPos +
-            currentPreview.transform.TransformDirection(helper.particleEffectOffset);
-
-        // Get rotation (either from preview or use identity)
-        Quaternion particleRotation = helper.particleUsePreviewRotation ?
-            currentPreview.transform.rotation : Quaternion.identity;
-
-        // Get the resource path for Photon
-        string resourcePath = GetPrefabResourcePath(helper.buildParticleEffectPrefab);
-        if (string.IsNullOrEmpty(resourcePath))
+        if (helper.buildParticleEffectPrefab == null)
         {
-            Debug.LogError($"Particle prefab {helper.buildParticleEffectPrefab.name} is not in a Resources folder!");
+            Debug.LogError("Particle prefab is not assigned!");
             return;
         }
 
-        // Instantiate networked particle effect
-        GameObject particles = PhotonNetwork.Instantiate(resourcePath, particlePosition, particleRotation);
+        // Hardcode the path (assuming prefab is in "Resources/HParticles/")
+        string particlePrefabName = "HParticles/" + helper.buildParticleEffectPrefab.name;
 
-        // Optional: Parent to the built object if needed
+        Vector3 spawnPos = currentPos + currentPreview.transform.TransformDirection(helper.particleEffectOffset);
+        Quaternion spawnRot = helper.particleUsePreviewRotation ? currentPreview.transform.rotation : Quaternion.identity;
+
+        // Debug to verify the path (check Console in build)
+        Debug.Log($"Spawning particle: {particlePrefabName} at {spawnPos}");
+
+        // Try Photon instantiation (fallback to local if fails)
+        GameObject spawnedParticles = null;
+        if (PhotonNetwork.IsConnectedAndReady)
+        {
+            spawnedParticles = PhotonNetwork.Instantiate(particlePrefabName, spawnPos, spawnRot);
+        }
+        else
+        {
+            Debug.LogWarning("Photon not ready, spawning locally");
+            spawnedParticles = Instantiate(helper.buildParticleEffectPrefab, spawnPos, spawnRot);
+        }
+
+        if (spawnedParticles == null)
+        {
+            Debug.LogError("FAILED TO SPAWN PARTICLES!");
+            return;
+        }
+
+        // Parenting logic (if needed)
         if (helper.particleParentToBuilding)
         {
-            // Need to find the newly built object since PhotonNetwork.Instantiate is async
-            StartCoroutine(ParentParticlesAfterBuild(particles, currentPos));
+            StartCoroutine(ParentParticlesAfterBuild(spawnedParticles, currentPos));
         }
     }
 
