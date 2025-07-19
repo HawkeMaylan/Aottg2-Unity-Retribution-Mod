@@ -193,10 +193,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   distanceFog: 1
   excludeFarPixels: 1
-  useRadialDistance: 0
+  useRadialDistance: 1
   heightFog: 1
-  height: 10
-  heightDensity: 5
+  height: 10000000
+  heightDensity: 7.58
   startDistance: -200
   fogShader: {fileID: 4800000, guid: 70d8568987ac0499f952b54c7c13e265, type: 3}
 --- !u!114 &4180297297722145861
@@ -247,6 +247,10 @@ MonoBehaviour:
   toggleKey: 96
   buildKey: 107
   placeKey: 273
+  rotateLeftKey: 276
+  rotateRightKey: 275
+  resetRotationKey: 32
+  snapToSurfaceKey: 116
 --- !u!114 &8067257540563114761
 MonoBehaviour:
   m_ObjectHideFlags: 0
