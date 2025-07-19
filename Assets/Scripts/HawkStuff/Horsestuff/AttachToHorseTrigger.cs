@@ -40,7 +40,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private PhotonView pv;
     private int attachedHorseViewID = -1;
 
-    private static string currentPrompt = "";
+    private string currentPrompt = "";
     private Coroutine detachCheckCoroutine;
     private Coroutine attachPromptCoroutine;
 
@@ -103,8 +103,8 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isAttached) return; 
-
+        if (isAttached) return;
+        if (!pv.IsMine || isAttached) return;
         if (other.name == "HorseTrigger")
         {
             Transform horseRoot = other.transform.root;
@@ -123,6 +123,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
     private void OnTriggerExit(Collider other)
     {
+        if (!pv.IsMine || isAttached) return;
         if (other.name == "HorseTrigger" && other.transform.root == horseRootInContact)
         {
             horseRootInContact = null;
@@ -257,16 +258,15 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
 
     private void OnGUI()
     {
-        if (!string.IsNullOrEmpty(currentPrompt))
-        {
-            GUIStyle style = new GUIStyle(GUI.skin.label)
-            {
-                fontSize = 24,
-                alignment = TextAnchor.UpperCenter,
-                normal = { textColor = Color.white }
-            };
+        if (!pv.IsMine || string.IsNullOrEmpty(currentPrompt))
+            return;
 
-            GUI.Label(new Rect(Screen.width / 2 - 150, 50, 300, 50), currentPrompt, style);
-        }
+        GUIStyle style = new GUIStyle(GUI.skin.label)
+        {
+            fontSize = 24,
+            alignment = TextAnchor.UpperCenter,
+            normal = { textColor = Color.white }
+        };
+        GUI.Label(new Rect(Screen.width / 2 - 150, 50, 300, 50), currentPrompt, style);
     }
 }
