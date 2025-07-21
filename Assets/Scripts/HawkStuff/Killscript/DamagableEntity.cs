@@ -226,7 +226,7 @@ namespace Entities
                 return;
 
             var attacker = hitbox.Owner;
-            int damage = flatDamageFromUnknown; // Default for environment/unknown
+            int damage = flatDamageFromUnknown;
             string sourceName = "Environment";
             string type = "Collision";
 
@@ -273,17 +273,19 @@ namespace Entities
                 sourceName = titan.Name;
                 type = "Titan";
                 damage = titan.CustomDamageEnabled ? titan.CustomDamage : npcBaseDamage;
+                damage = Mathf.RoundToInt(damage * titanDamageMultiplier);
+
+                // Debug output to verify values
+                Debug.Log($"Titan attack - Base: {npcBaseDamage}, Multiplier: {titanDamageMultiplier}, Final: {damage}");
             }
 
-            // Apply final damage multipliers from our settings
+            // Apply final multipliers
             if (System.Enum.TryParse(type, out DamageType damageType))
             {
                 var multiplier = damageMultipliers.FirstOrDefault(x => x.type == damageType);
                 if (multiplier != null)
                     damage = Mathf.RoundToInt(damage * multiplier.multiplier);
             }
-
-            damage = Mathf.Max(damage, 10); // Minimum damage
 
             photonView.RPC("RequestHitRPC", RpcTarget.MasterClient,
                 sourceName,

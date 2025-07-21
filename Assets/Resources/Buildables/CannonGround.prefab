@@ -570,7 +570,7 @@ MonoBehaviour:
   healthBarScale: {x: 4, y: 0.6, z: 3}
   hitCooldown: 0.2
   flatDamageFromUnknown: 1000
-  npcBaseDamage: 1000
+  npcBaseDamage: 100
   titanDamageMultiplier: 5
   damageMultipliers:
   - type: 4

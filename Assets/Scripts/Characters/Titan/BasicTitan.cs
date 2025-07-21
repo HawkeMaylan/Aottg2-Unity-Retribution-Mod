@@ -13,6 +13,9 @@ using Photon.Pun;
 using Projectiles;
 using Spawnables;
 using Entities;
+using System.Linq;
+using Photon.Pun;
+
 
 namespace Characters
 {
@@ -1055,33 +1058,45 @@ namespace Characters
 
         public override void OnHit(BaseHitbox hitbox, object victim, Collider collider, string type, bool firstHit)
         {
-            // Declare damage ONCE at the start of the method
-            int damage = CustomDamageEnabled ? CustomDamage : 100;
-
             // Handle DamageableEntity first
             var damageable = (victim as Component)?.GetComponentInParent<DamageableEntity>();
             if (damageable != null)
             {
+                int titanDamage = CustomDamageEnabled ? CustomDamage : damageable.npcBaseDamage;
+                titanDamage = Mathf.RoundToInt(titanDamage * damageable.titanDamageMultiplier);
+
+                // Apply damage type multipliers if exists
+                if (System.Enum.TryParse("Titan", out DamageType damageType))
+                {
+                    // Add using System.Linq at top of file if missing
+                    var multiplier = damageable.damageMultipliers.FirstOrDefault(x => x.type == damageType);
+                    if (multiplier != null)
+                        titanDamage = Mathf.RoundToInt(titanDamage * multiplier.multiplier);
+                }
+
                 damageable.photonView.RPC("RequestHitRPC", RpcTarget.MasterClient,
                     Name,
-                    damage,
-                    type,
+                    titanDamage,
+                    "Titan",
                     collider.name,
                     damageable.photonView.ViewID);
                 return;
             }
 
-            // Normal damage handling
-            if (victim is CustomLogicCollisionHandler)
+            // Original titan damage handling below
+            int characterDamage = 100;
+            if (CustomDamageEnabled)
+                characterDamage = CustomDamage;
+
+            if (victim is CustomLogicCollisionHandler customHandler)
             {
-                ((CustomLogicCollisionHandler)victim).GetHit(this, Name, damage, type, hitbox.transform.position);
+                customHandler.GetHit(this, Name, characterDamage, type, hitbox.transform.position);
                 return;
             }
 
             var victimChar = (BaseCharacter)victim;
-            if (State == TitanState.Attack && IsGrabAttack() && victim is Human)
+            if (State == TitanState.Attack && IsGrabAttack() && victim is Human human)
             {
-                var human = (Human)victim;
                 if (HoldHuman == null && firstHit && !human.Dead)
                 {
                     HoldHumanLeft = hitbox == BasicCache.HandLHitbox;
@@ -1100,19 +1115,16 @@ namespace Characters
                     if (!victimChar.Dead)
                     {
                         if (IsMainCharacter())
-                            ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
-                        victimChar.GetHit(this, damage, "TitanStun", collider.name);
+                            ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(characterDamage);
+                        victimChar.GetHit(this, characterDamage, "TitanStun", collider.name);
                     }
                 }
             }
-            else
+            else if (firstHit && !victimChar.Dead)
             {
-                if (firstHit && !victimChar.Dead)
-                {
-                    if (IsMainCharacter())
-                        ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
-                    victimChar.GetHit(this, damage, "Titan", collider.name);
-                }
+                if (IsMainCharacter())
+                    ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(characterDamage);
+                victimChar.GetHit(this, characterDamage, "Titan", collider.name);
             }
         }
 
