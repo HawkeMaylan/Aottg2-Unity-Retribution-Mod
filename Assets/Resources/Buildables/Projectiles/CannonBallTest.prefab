@@ -125,6 +125,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   destroyAfterSeconds: 10
   killSourceName: Cannonball
+  useCustomCollider: 1
+  customDamageCollider: {fileID: 4645783274596728983}
   playAnimationOnCollision: 1
   collisionAnimation: {fileID: 7400000, guid: 84e9bdb990e1c7248ba9f1b302266a59, type: 2}
   animationDelayTime: 0.3
@@ -234,10 +236,10 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1530743120385670784}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3c9e395c24f5a584a88531dfb2b02c41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifetime: 11
-  ownershipTimeout: 10
+  lifetime: 1
+  ownershipTimeout: 1

@@ -13,6 +13,10 @@ public class GeneralKillScript : MonoBehaviourPunCallbacks
     public float destroyAfterSeconds = 5f;
     public string killSourceName = "Blade";
 
+    [Header("Collision Detection")]
+    public bool useCustomCollider = false;
+    public Collider customDamageCollider;
+
     [Header("Optional Collision Animation")]
     public bool playAnimationOnCollision = false;
     public AnimationClip collisionAnimation;
@@ -77,6 +81,12 @@ public class GeneralKillScript : MonoBehaviourPunCallbacks
 
         rb = GetComponent<Rigidbody>();
         selfCollider = GetComponent<Collider>();
+
+        if (useCustomCollider && customDamageCollider != null)
+        {
+            customDamageCollider.isTrigger = true;
+            customDamageCollider.enabled = true;
+        }
     }
 
     private void Update()
@@ -84,100 +94,119 @@ public class GeneralKillScript : MonoBehaviourPunCallbacks
         if (playAnimationOnCollision && Time.time - spawnTime < animationDelayTime)
             return;
 
+        if (!useCustomCollider)
+        {
+            CheckOverlapBoxDamage();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!useCustomCollider) return;
+        if (other == selfCollider || recentlyHit.Contains(other.gameObject)) return;
+
+        ProcessDamage(other.gameObject, other);
+    }
+
+    private void CheckOverlapBoxDamage()
+    {
         Collider[] hits = Physics.OverlapBox(transform.position, transform.localScale / 2f, transform.rotation);
         foreach (var other in hits)
         {
             if (other == selfCollider || recentlyHit.Contains(other.gameObject))
                 continue;
 
-            recentlyHit.Add(other.gameObject);
-            StartCoroutine(RemoveHitCooldown(other.gameObject, hitCooldown));
+            ProcessDamage(other.gameObject, other);
+        }
+    }
 
-            if (((1 << other.gameObject.layer) & animationCollisionLayers) != 0 && !animationPlayed)
+    private void ProcessDamage(GameObject otherGameObject, Collider otherCollider)
+    {
+        recentlyHit.Add(otherGameObject);
+        StartCoroutine(RemoveHitCooldown(otherGameObject, hitCooldown));
+
+        if (((1 << otherGameObject.layer) & animationCollisionLayers) != 0 && !animationPlayed)
+        {
+            photonView.RPC("RPC_PlayCollisionAnimation", RpcTarget.All);
+            animationPlayed = true;
+        }
+
+        if (spawnParticleOnCollision && !particleSpawned && collisionParticlePrefab != null)
+        {
+            photonView.RPC("RPC_SpawnParticle", RpcTarget.All, transform.position);
+            particleSpawned = true;
+        }
+
+        Human human = otherCollider.GetComponentInParent<Human>();
+        if (damageHumans && human != null && human.IsMine())
+        {
+            human.GetHit(killSourceName, humanDamage, "Collision", otherCollider.name);
+            return;
+        }
+
+        BaseTitan baseTitan = otherCollider.GetComponentInParent<BaseTitan>();
+        if (baseTitan != null && !baseTitan.Dead && baseTitan.AI)
+        {
+            BasicTitan titan = baseTitan as BasicTitan;
+            if (titan == null) return;
+
+            string hitboxName = otherCollider.name;
+            var cache = titan.BaseTitanCache;
+
+            if (blindEyes && hitboxName == cache.EyesHurtbox?.name)
             {
-                photonView.RPC("RPC_PlayCollisionAnimation", RpcTarget.All);
-                animationPlayed = true;
+                EffectSpawner.Spawn(EffectPrefabs.CriticalHit, transform.position, Quaternion.Euler(270f, 0f, 0f));
+                titan.GetHit("SmokeBomb", 0, "SmokeBomb", hitboxName);
             }
 
-            if (spawnParticleOnCollision && !particleSpawned && collisionParticlePrefab != null)
+            if (damageNape && hitboxName == cache.NapeHurtbox?.name)
             {
-                photonView.RPC("RPC_SpawnParticle", RpcTarget.All, transform.position);
-                particleSpawned = true;
+                titan.GetHit(killSourceName, titanNapeDamage, "BladeThrow", hitboxName);
             }
 
-            
-
-            Human human = other.GetComponentInParent<Human>();
-            if (damageHumans && human != null && human.IsMine())
+            if (disableArms && (hitboxName == titan.BasicCache.ForearmLHurtbox?.name || hitboxName == titan.BasicCache.ForearmRHurtbox?.name))
             {
-                human.GetHit(killSourceName, humanDamage, "Collision", other.name);
-                continue;
+                titan.GetHit(killSourceName, 0, "BladeThrow", hitboxName);
             }
 
-            BaseTitan baseTitan = other.GetComponentInParent<BaseTitan>();
-            if (baseTitan != null && !baseTitan.Dead && baseTitan.AI)
+            if (crippleLegs && (hitboxName == cache.LegLHurtbox?.name || hitboxName == cache.LegRHurtbox?.name))
             {
-                BasicTitan titan = baseTitan as BasicTitan;
-                if (titan == null) continue;
-
-                string hitboxName = other.name;
-                var cache = titan.BaseTitanCache;
-
-                if (blindEyes && hitboxName == cache.EyesHurtbox?.name)
-                {
-                    EffectSpawner.Spawn(EffectPrefabs.CriticalHit, transform.position, Quaternion.Euler(270f, 0f, 0f));
-                    titan.GetHit("SmokeBomb", 0, "SmokeBomb", hitboxName);
-                }
-
-                if (damageNape && hitboxName == cache.NapeHurtbox?.name)
-                {
-                    titan.GetHit(killSourceName, titanNapeDamage, "BladeThrow", hitboxName);
-                }
-
-                if (disableArms && (hitboxName == titan.BasicCache.ForearmLHurtbox?.name || hitboxName == titan.BasicCache.ForearmRHurtbox?.name))
-                {
-                    titan.GetHit(killSourceName, 0, "BladeThrow", hitboxName);
-                }
-
-                if (crippleLegs && (hitboxName == cache.LegLHurtbox?.name || hitboxName == cache.LegRHurtbox?.name))
-                {
-                    titan.GetHit(killSourceName, 0, "BladeThrow", hitboxName);
-                }
-
-                if (directionalStun)
-                {
-                    if (!titanKnockbackCounts.ContainsKey(baseTitan))
-                        titanKnockbackCounts[baseTitan] = 0;
-
-                    if (titanKnockbackCounts[baseTitan] < maxKnockbacksPerTitan)
-                    {
-                        Vector3 dir = (titan.Cache.Transform.position - transform.position).normalized;
-                        dir.y = 0f;
-
-                        titan.GetHit(killSourceName, 0, "TitanStun", hitboxName);
-                        titan.Cache.Rigidbody.isKinematic = false;
-                        titan.Cache.Rigidbody.AddForce(dir * knockbackForce, ForceMode.Impulse);
-                        titanKnockbackCounts[baseTitan]++;
-                    }
-                }
-
-                continue;
+                titan.GetHit(killSourceName, 0, "BladeThrow", hitboxName);
             }
 
-            DamageableEntity damageable = other.GetComponentInParent<DamageableEntity>();
-            if (damageable != null)
+            if (directionalStun)
             {
-                if (damageHumans && damageable.entityForm == EntityForm.Human)
-                {
-                    damageable.GetHit(killSourceName, humanDamage, "Collision", other.name);
-                    continue;
-                }
+                if (!titanKnockbackCounts.ContainsKey(baseTitan))
+                    titanKnockbackCounts[baseTitan] = 0;
 
-                if (damageNape && damageable.entityForm == EntityForm.Titan)
+                if (titanKnockbackCounts[baseTitan] < maxKnockbacksPerTitan)
                 {
-                    damageable.GetHit(killSourceName, titanNapeDamage, "BladeThrow", other.name);
-                    continue;
+                    Vector3 dir = (titan.Cache.Transform.position - transform.position).normalized;
+                    dir.y = 0f;
+
+                    titan.GetHit(killSourceName, 0, "TitanStun", hitboxName);
+                    titan.Cache.Rigidbody.isKinematic = false;
+                    titan.Cache.Rigidbody.AddForce(dir * knockbackForce, ForceMode.Impulse);
+                    titanKnockbackCounts[baseTitan]++;
                 }
+            }
+
+            return;
+        }
+
+        DamageableEntity damageable = otherCollider.GetComponentInParent<DamageableEntity>();
+        if (damageable != null)
+        {
+            if (damageHumans && damageable.entityForm == EntityForm.Human)
+            {
+                damageable.GetHit(killSourceName, humanDamage, "Collision", otherCollider.name);
+                return;
+            }
+
+            if (damageNape && damageable.entityForm == EntityForm.Titan)
+            {
+                damageable.GetHit(killSourceName, titanNapeDamage, "BladeThrow", otherCollider.name);
+                return;
             }
         }
     }
@@ -226,7 +255,4 @@ public class GeneralKillScript : MonoBehaviourPunCallbacks
             }
         }
     }
-
-
-
 }
