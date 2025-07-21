@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 8151622635488489972}
   - component: {fileID: -6470129852071450473}
   - component: {fileID: 2174000212667391952}
-  m_Layer: 23
+  m_Layer: 9
   m_Name: IncendiaryRound
   m_TagString: Untagged
   m_Icon: {fileID: 0}

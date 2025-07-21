@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 8151622635488489972}
   - component: {fileID: -6470129852071450473}
   - component: {fileID: -5731724395192874393}
-  m_Layer: 23
+  m_Layer: 9
   m_Name: CannonBallTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,7 +100,7 @@ SphereCollider:
   m_Material: {fileID: 13400000, guid: 997dde812a8aa7944b10a12b9b1b9df7, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8192
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -131,7 +131,7 @@ MonoBehaviour:
   makeKinematicOnCollision: 1
   animationCollisionLayers:
     serializedVersion: 2
-    m_Bits: 48238592
+    m_Bits: 46145536
   spawnParticleOnCollision: 1
   collisionParticlePrefab: {fileID: 451477915838638354, guid: 6fa95cc41f2c15f428689ba67c484391, type: 3}
   damageHumans: 1
@@ -160,7 +160,7 @@ Rigidbody:
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 12582912
+    m_Bits: 8192
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -240,4 +240,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lifetime: 11
-  ownershipTimeout: 2
+  ownershipTimeout: 10
