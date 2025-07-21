@@ -1,14 +1,18 @@
 using UnityEngine;
 using Photon.Pun;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using CustomLogic;
 using GameManagers;
 using Settings;
 using Characters;
+using System;
 
 namespace Entities
 {
     public enum EntityForm { Human, Titan }
+    public enum DamageType { Generic, Blade, AHSS, APG, Titan, Grab, Punch, Kick }
 
     [RequireComponent(typeof(Collider))]
     public class DamageableEntity : MonoBehaviourPunCallbacks, IPunInstantiateMagicCallback, IPunObservable
@@ -45,7 +49,28 @@ namespace Entities
         public float hitCooldown = 0.2f;
 
         [Header("Damage Settings")]
+        [Tooltip("Base damage when hit by environment/unknown sources")]
         public int flatDamageFromUnknown = 100;
+
+        [Header("NPC Damage Settings")]
+        [Tooltip("Base damage NPCs deal to this object")]
+        public int npcBaseDamage = 100;
+        [Tooltip("Damage multiplier for titan attacks")]
+        public float titanDamageMultiplier = 1f;
+
+        [Serializable]
+        public class DamageMultiplier
+        {
+            public DamageType type;
+            public float multiplier = 1f;
+        }
+
+        [Header("Damage Multipliers")]
+        public List<DamageMultiplier> damageMultipliers = new List<DamageMultiplier>()
+        {
+            new DamageMultiplier { type = DamageType.Titan, multiplier = 1f },
+            new DamageMultiplier { type = DamageType.Blade, multiplier = 1.5f }
+        };
 
         [Header("Effect Prefabs (Resources/HParticles)")]
         public GameObject hitEffectPrefab;
@@ -122,7 +147,7 @@ namespace Entities
             UpdateHealthBar();
         }
 
-        public void GetHit(string source, int damage, string type = "Collision", string hitbox = "")
+        public void GetHit(string source, int damage, string type = "Generic", string hitbox = "")
         {
             if (!PhotonNetwork.IsMasterClient || isDead)
                 return;
@@ -134,6 +159,8 @@ namespace Entities
             wasDamaged = true;
             currentHP -= damage;
 
+            Debug.Log($"{entityName} hit by {source} for {damage} damage (type: {type})");
+
             photonView.RPC("UpdateHealthRPC", RpcTarget.All, currentHP);
 
             if (hitEffectPrefab != null)
@@ -144,10 +171,18 @@ namespace Entities
         }
 
         [PunRPC]
-        private void RequestHitRPC(string source, int damage, string type, string hitbox, int viewID)
+        private void RequestHitRPC(string source, int damage, string type, string hitbox, int viewID, PhotonMessageInfo info)
         {
             if (!PhotonNetwork.IsMasterClient || isDead || photonView.ViewID != viewID)
                 return;
+
+            // Apply damage multipliers
+            if (System.Enum.TryParse(type, out DamageType damageType))
+            {
+                var multiplier = damageMultipliers.FirstOrDefault(x => x.type == damageType);
+                if (multiplier != null)
+                    damage = Mathf.RoundToInt(damage * multiplier.multiplier);
+            }
 
             GetHit(source, damage, type, hitbox);
         }
@@ -182,6 +217,80 @@ namespace Entities
             GameObject prefab = Resources.Load<GameObject>($"HParticles/{resourceName}");
             if (prefab != null)
                 Instantiate(prefab, position, rotation);
+        }
+
+        public void TryHitFromCollider(Collider collider)
+        {
+            var hitbox = collider.GetComponent<BaseHitbox>();
+            if (hitbox == null || !hitbox.IsActive())
+                return;
+
+            var attacker = hitbox.Owner;
+            int damage = flatDamageFromUnknown; // Default for environment/unknown
+            string sourceName = "Environment";
+            string type = "Collision";
+
+            // Player attack handling
+            if (attacker is Human human)
+            {
+                sourceName = human.Name;
+
+                // Calculate base damage from velocity
+                damage = (human.CarryState == HumanCarryState.Carry && human.Carrier != null)
+                    ? Mathf.Max((int)(human.Carrier.CarryVelocity.magnitude * 10f), 10)
+                    : Mathf.Max((int)(human.Cache.Rigidbody.velocity.magnitude * 10f), 10);
+
+                // Determine weapon type and apply multipliers
+                if (human.Weapon is BladeWeapon blade)
+                {
+                    type = "Blade";
+                    damage = (int)(damage * CharacterData.HumanWeaponInfo["Blade"]["DamageMultiplier"].AsFloat);
+
+                    // Handle blade durability
+                    blade.UseDurability(human.Stats.Perks["AdvancedAlloy"].CurrPoints == 1 && damage < 500 ?
+                        blade.CurrentDurability : 2f);
+
+                    if (blade.CurrentDurability == 0f)
+                    {
+                        human.ToggleBlades(false);
+                        human.PlaySound(HumanSounds.BladeBreak);
+                    }
+                }
+                else if (human.Weapon is AHSSWeapon ahss)
+                {
+                    type = "AHSS";
+                    damage = (int)(damage * CharacterData.HumanWeaponInfo["AHSS"]["DamageMultiplier"].AsFloat);
+                }
+                else if (human.Weapon is APGWeapon apg)
+                {
+                    type = "APG";
+                    damage = (int)(damage * CharacterData.HumanWeaponInfo["APG"]["DamageMultiplier"].AsFloat);
+                }
+            }
+            // NPC attack handling
+            else if (attacker is BaseTitan titan)
+            {
+                sourceName = titan.Name;
+                type = "Titan";
+                damage = titan.CustomDamageEnabled ? titan.CustomDamage : npcBaseDamage;
+            }
+
+            // Apply final damage multipliers from our settings
+            if (System.Enum.TryParse(type, out DamageType damageType))
+            {
+                var multiplier = damageMultipliers.FirstOrDefault(x => x.type == damageType);
+                if (multiplier != null)
+                    damage = Mathf.RoundToInt(damage * multiplier.multiplier);
+            }
+
+            damage = Mathf.Max(damage, 10); // Minimum damage
+
+            photonView.RPC("RequestHitRPC", RpcTarget.MasterClient,
+                sourceName,
+                damage,
+                type,
+                collider.name,
+                photonView.ViewID);
         }
 
         private void CreateBillboard()
@@ -283,22 +392,6 @@ namespace Entities
             if (customCollider == null)
                 TryHitFromCollider(collision.collider);
         }
-
-        public void TryHitFromCollider(Collider collider)
-        {
-            var hitbox = collider.GetComponent<BaseHitbox>();
-            var attacker = hitbox?.Owner;
-
-            if (hitbox == null || !hitbox.IsActive())
-                return;
-
-            // Only apply fallback flat damage if no attacker exists (e.g., environment collision)
-            if (attacker == null)
-            {
-                photonView.RPC("RequestHitRPC", RpcTarget.MasterClient, "Unknown", flatDamageFromUnknown, "Collision", collider.name, photonView.ViewID);
-            }
-        }
-
     }
 
     public class ColliderEventForwarder : MonoBehaviour

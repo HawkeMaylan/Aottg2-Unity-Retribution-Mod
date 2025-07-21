@@ -12,6 +12,7 @@ using CustomLogic;
 using Photon.Pun;
 using Projectiles;
 using Spawnables;
+using Entities;
 
 namespace Characters
 {
@@ -1051,16 +1052,32 @@ namespace Characters
             }
         }
 
+
         public override void OnHit(BaseHitbox hitbox, object victim, Collider collider, string type, bool firstHit)
         {
-            int damage = 100;
-            if (CustomDamageEnabled)
-                damage = CustomDamage;
+            // Declare damage ONCE at the start of the method
+            int damage = CustomDamageEnabled ? CustomDamage : 100;
+
+            // Handle DamageableEntity first
+            var damageable = (victim as Component)?.GetComponentInParent<DamageableEntity>();
+            if (damageable != null)
+            {
+                damageable.photonView.RPC("RequestHitRPC", RpcTarget.MasterClient,
+                    Name,
+                    damage,
+                    type,
+                    collider.name,
+                    damageable.photonView.ViewID);
+                return;
+            }
+
+            // Normal damage handling
             if (victim is CustomLogicCollisionHandler)
             {
                 ((CustomLogicCollisionHandler)victim).GetHit(this, Name, damage, type, hitbox.transform.position);
                 return;
             }
+
             var victimChar = (BaseCharacter)victim;
             if (State == TitanState.Attack && IsGrabAttack() && victim is Human)
             {
@@ -1096,6 +1113,21 @@ namespace Characters
                         ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
                     victimChar.GetHit(this, damage, "Titan", collider.name);
                 }
+            }
+        }
+
+        protected virtual void HandleDamageableEntity(Collider collider, string type)
+        {
+            var entity = collider.GetComponentInParent<DamageableEntity>();
+            if (entity != null)
+            {
+                int damage = CustomDamageEnabled ? CustomDamage : 100;
+                entity.photonView.RPC("RequestHitRPC", RpcTarget.MasterClient,
+                    Name,
+                    damage,
+                    type,
+                    collider.name,
+                    entity.photonView.ViewID);
             }
         }
 
