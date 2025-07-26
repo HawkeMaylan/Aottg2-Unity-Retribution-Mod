@@ -366,21 +366,29 @@ namespace Characters
         {
             if (State != TitanState.Blind && State != TitanState.SitBlind && AI && _disableCooldownLeft <= 0f)
             {
-                if (State == TitanState.SitCripple || State == TitanState.SitIdle)
+                // Check for ANY sitting state instead of just SitCripple/SitIdle
+                if (State == TitanState.SitCripple || State == TitanState.SitIdle ||
+                    State == TitanState.SitDown || State == TitanState.SitFall)
                 {
                     if (BaseTitanAnimations.SitBlind != "")
                     {
-                        StateAction(TitanState.SitBlind, BaseTitanAnimations.SitBlind);
+                        float animLength = Animation.GetLength(BaseTitanAnimations.SitBlind);
+                        float speed = 0.60f;
+                        StateActionWithTime(TitanState.SitBlind, BaseTitanAnimations.SitBlind, animLength / speed, 0.1f);
+                        Animation.SetSpeed(BaseTitanAnimations.SitBlind, speed);
                         DamagedGrunt();
+                        return; // Exit after handling sitting case
                     }
                 }
-                else
+
+                // Regular blind for non-sitting states
+                if (BaseTitanAnimations.Blind != "")
                 {
-                    if (BaseTitanAnimations.Blind != "")
-                    {
-                        StateAction(TitanState.Blind, BaseTitanAnimations.Blind);
-                        DamagedGrunt();
-                    }
+                    float animLength = Animation.GetLength(BaseTitanAnimations.Blind);
+                    float speed = 0.60f;
+                    StateActionWithTime(TitanState.Blind, BaseTitanAnimations.Blind, animLength / speed, 0.1f);
+                    Animation.SetSpeed(BaseTitanAnimations.Blind, speed);
+                    DamagedGrunt();
                 }
             }
         }
