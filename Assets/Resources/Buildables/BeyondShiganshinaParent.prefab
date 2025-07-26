@@ -67,6 +67,10 @@ PrefabInstance:
       propertyPath: sceneViewId
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1051096568906695570, guid: 1418c04daff0ebc4f89198edfa3bd15f, type: 3}
+      propertyPath: m_MaterialTemplate
+      value: 
+      objectReference: {fileID: 2100000, guid: 88caa5e49f80eae4889d99e9616ff0e9, type: 2}
     - target: {fileID: 5739497718606617112, guid: 1418c04daff0ebc4f89198edfa3bd15f, type: 3}
       propertyPath: m_Name
       value: BeyondShiganshina
