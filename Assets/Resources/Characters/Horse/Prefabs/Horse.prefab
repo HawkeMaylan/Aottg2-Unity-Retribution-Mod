@@ -80,9 +80,9 @@ MonoBehaviour:
   HasDirection: 0
   State: 0
   SprintSpeedMultiplier: 1.3
-  StaminaDrainRate: 15
-  StaminaRegenRate: 2
-  StaminaIdleRegenBonus: 2
+  StaminaDrainRate: 2.5
+  StaminaRegenRate: 0.5
+  StaminaIdleRegenBonus: 1.5
   MaxStamina: 100
   CurrentStamina: 100
   IsSprinting: 0
