@@ -45,10 +45,13 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     private string _lastCachedKey = "";
 
     private Collider _triggerCollider;
-    private const float MaxDistanceBuffer = 4.5f;
+    private const float MaxDistanceBuffer = 40.5f;
 
     [Header("Trigger Validation")]
-public float maxTriggerDistance = 5.5f; // Adjustable distance to validate trigger stay
+public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trigger stay
+
+
+    private int isOccupied = 0;
 
 
     private void Start()
@@ -67,6 +70,8 @@ public float maxTriggerDistance = 5.5f; // Adjustable distance to validate trigg
 
     private void OnTriggerEnter(Collider other)
     {
+        if (isOccupied == 1) return; // Don't proceed if already occupied
+
         Human human = other.GetComponentInParent<Human>();
         if (human != null && human.IsMine())
         {
@@ -196,6 +201,8 @@ public float maxTriggerDistance = 5.5f; // Adjustable distance to validate trigg
         if (humanInTrigger == null || mountPoint == null)
             return;
 
+        isOccupied = 1; // Set to occupied
+
         humanInTrigger.MountedTransform = mountPoint;
         humanInTrigger.MountedMapObject = null;
         humanInTrigger.MountedPositionOffset = positionOffset;
@@ -226,6 +233,8 @@ public float maxTriggerDistance = 5.5f; // Adjustable distance to validate trigg
     {
         if (humanInTrigger == null)
             return;
+
+        isOccupied = 0; // Set to available
 
         humanInTrigger.Unmount(true);
 
