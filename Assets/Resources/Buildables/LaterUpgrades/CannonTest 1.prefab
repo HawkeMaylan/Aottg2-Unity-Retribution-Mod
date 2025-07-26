@@ -341,7 +341,7 @@ GameObject:
   - component: {fileID: 571775962164752643}
   - component: {fileID: 6220481555832558666}
   m_Layer: 31
-  m_Name: CannonTest
+  m_Name: CannonTest 1
   m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -466,6 +466,21 @@ MonoBehaviour:
   turnSpeed: 90
   firePoint: {fileID: 6748738809391093893}
   projectileOptions:
+  - name: HEV Round
+    prefab: {fileID: 1530743120385670784, guid: ce9a789b3a6e05f4d9274ecbe59a82fa, type: 3}
+    launchForce: 7000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: 767baf0b056438247ad07c329aef9c38, type: 3}
+    fireCooldown: 5
+    projectileCount: 1
+    spreadAngle: 0
+    BarrelRecoil: 1
+    RecoilDistance: 2
+    barrelRecoilAngle: 8
+    RecoilSpeed: 5
+    Knockback: 1
+    knockbackForce: 400
+    startingAmmo: 15
   - name: Cannonball
     prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
     launchForce: 7000
@@ -481,6 +496,21 @@ MonoBehaviour:
     Knockback: 1
     knockbackForce: 100
     startingAmmo: 100
+  - name: ScatterShot
+    prefab: {fileID: 1530743120385670784, guid: 7768ae2aad8283749a1e9f35b3db5ca6, type: 3}
+    launchForce: 7000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: 1346a755a2bce3e40bcc49ba7a11d95e, type: 3}
+    fireCooldown: 3
+    projectileCount: 10
+    spreadAngle: 8
+    BarrelRecoil: 1
+    RecoilDistance: 1
+    barrelRecoilAngle: 7
+    RecoilSpeed: 5
+    Knockback: 1
+    knockbackForce: 50
+    startingAmmo: 15
   muzzleFlashPrefab: {fileID: 5235915867927116546, guid: b5a419a416d428e49babef468d99702e, type: 3}
   projectileUIPrefab: {fileID: 3976318980140897857, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
   flipHoldTime: 1.5

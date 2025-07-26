@@ -466,21 +466,6 @@ MonoBehaviour:
   turnSpeed: 90
   firePoint: {fileID: 6748738809391093893}
   projectileOptions:
-  - name: Incendiary
-    prefab: {fileID: 1530743120385670784, guid: 150fb050d130a9348b23bb69ee086949, type: 3}
-    launchForce: 4000
-    upwardForce: 250
-    sprite: {fileID: 21300000, guid: ee51b0d51198a4b0f8876afa38a1e942, type: 3}
-    fireCooldown: 5
-    projectileCount: 1
-    spreadAngle: 0
-    BarrelRecoil: 1
-    RecoilDistance: 2
-    barrelRecoilAngle: 8
-    RecoilSpeed: 5
-    Knockback: 1
-    knockbackForce: 1000
-    startingAmmo: 3
   - name: Cannonball
     prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
     launchForce: 4000
@@ -496,21 +481,6 @@ MonoBehaviour:
     Knockback: 1
     knockbackForce: 1000
     startingAmmo: 15
-  - name: Fletchette
-    prefab: {fileID: 1530743120385670784, guid: fc85a5f74d7f5f54db0a98ab011a3647, type: 3}
-    launchForce: 4000
-    upwardForce: 250
-    sprite: {fileID: 21300000, guid: e4b40a4f2fcbae6428abc383fd308620, type: 3}
-    fireCooldown: 5
-    projectileCount: 20
-    spreadAngle: 15
-    BarrelRecoil: 1
-    RecoilDistance: 2
-    barrelRecoilAngle: 8
-    RecoilSpeed: 5
-    Knockback: 1
-    knockbackForce: 1000
-    startingAmmo: 10
   muzzleFlashPrefab: {fileID: 5235915867927116546, guid: b5a419a416d428e49babef468d99702e, type: 3}
   projectileUIPrefab: {fileID: 3976318980140897857, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
   flipHoldTime: 1.5

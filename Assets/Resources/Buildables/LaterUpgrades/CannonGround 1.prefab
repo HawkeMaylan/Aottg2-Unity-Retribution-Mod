@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 634978088069123415}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.0614, z: 0.1965}
+  m_LocalPosition: {x: 0, y: 0.0663, z: 0.2341}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -76,7 +76,7 @@ GameObject:
   - component: {fileID: 3220079208113851252}
   - component: {fileID: 5282501006801672838}
   - component: {fileID: 2897443115194336176}
-  - component: {fileID: 6384847412277034888}
+  - component: {fileID: 1223366086935870054}
   m_Layer: 31
   m_Name: Model
   m_TagString: HookFollow
@@ -172,7 +172,7 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 8196794144788827650, guid: fc274fb81ce41c04497f998f85e2c028, type: 3}
---- !u!114 &6384847412277034888
+--- !u!114 &1223366086935870054
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -338,10 +338,10 @@ GameObject:
   - component: {fileID: 563461578649577}
   - component: {fileID: 4543013416111928623}
   - component: {fileID: 6734433899248431384}
-  - component: {fileID: 571775962164752643}
-  - component: {fileID: 6220481555832558666}
+  - component: {fileID: 2757737978400501149}
+  - component: {fileID: 2064780420139344010}
   m_Layer: 31
-  m_Name: CannonTest
+  m_Name: CannonGround 1
   m_TagString: HookFollow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -357,7 +357,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4803130740205183532}
@@ -413,8 +413,8 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 4543013416111928623}
   - {fileID: 6734433899248431384}
-  - {fileID: 6220481555832558666}
-  - {fileID: 6384847412277034888}
+  - {fileID: 2064780420139344010}
+  - {fileID: 1223366086935870054}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -458,36 +458,66 @@ MonoBehaviour:
   disableMassOnMount: 1
   mountedMass: 0.1
   CannonBarrel: {fileID: 881619391039496635}
-  rotationSpeed: 5
+  rotationSpeed: 15
   maxHorizontalAngle: 10
-  maxVerticalAngle: 30
+  maxVerticalAngle: 50
   MoveTarget: {fileID: 485101760791666370}
-  moveSpeed: 5
+  moveSpeed: 15
   turnSpeed: 90
   firePoint: {fileID: 6748738809391093893}
   projectileOptions:
-  - name: Cannonball
-    prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
-    launchForce: 7000
+  - name: Incendiary
+    prefab: {fileID: 1530743120385670784, guid: 150fb050d130a9348b23bb69ee086949, type: 3}
+    launchForce: 4000
     upwardForce: 250
-    sprite: {fileID: 21300000, guid: 653d78db20fc46c4f882c304f181bcb5, type: 3}
-    fireCooldown: 1
+    sprite: {fileID: 21300000, guid: ee51b0d51198a4b0f8876afa38a1e942, type: 3}
+    fireCooldown: 5
     projectileCount: 1
     spreadAngle: 0
     BarrelRecoil: 1
-    RecoilDistance: 0.5
-    barrelRecoilAngle: 4
+    RecoilDistance: 2
+    barrelRecoilAngle: 8
     RecoilSpeed: 5
     Knockback: 1
-    knockbackForce: 100
-    startingAmmo: 100
+    knockbackForce: 1000
+    startingAmmo: 3
+  - name: Cannonball
+    prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
+    launchForce: 4000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: 653d78db20fc46c4f882c304f181bcb5, type: 3}
+    fireCooldown: 5
+    projectileCount: 1
+    spreadAngle: 0
+    BarrelRecoil: 1
+    RecoilDistance: 2
+    barrelRecoilAngle: 8
+    RecoilSpeed: 5
+    Knockback: 1
+    knockbackForce: 1000
+    startingAmmo: 15
+  - name: Fletchette
+    prefab: {fileID: 1530743120385670784, guid: fc85a5f74d7f5f54db0a98ab011a3647, type: 3}
+    launchForce: 4000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: e4b40a4f2fcbae6428abc383fd308620, type: 3}
+    fireCooldown: 5
+    projectileCount: 20
+    spreadAngle: 15
+    BarrelRecoil: 1
+    RecoilDistance: 2
+    barrelRecoilAngle: 8
+    RecoilSpeed: 5
+    Knockback: 1
+    knockbackForce: 1000
+    startingAmmo: 10
   muzzleFlashPrefab: {fileID: 5235915867927116546, guid: b5a419a416d428e49babef468d99702e, type: 3}
   projectileUIPrefab: {fileID: 3976318980140897857, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
   flipHoldTime: 1.5
   flipSpeed: 5
   cooldownSound: {fileID: 8300000, guid: 74cd0d8dab1107e4385aa43b2d2d4875, type: 3}
   movementSound: {fileID: 8300000, guid: 3ccf53bacc5133d4fa8470397644db38, type: 3}
---- !u!65 &571775962164752643
+--- !u!65 &2757737978400501149
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -506,9 +536,9 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 4, y: 5, z: 4}
+  m_Size: {x: 4, y: 4, z: 4}
   m_Center: {x: 0, y: 2, z: 0}
---- !u!114 &6220481555832558666
+--- !u!114 &2064780420139344010
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -521,8 +551,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entityName: Damageable
-  maxHP: 10000
-  currentHP: 10000
+  maxHP: 5000
+  currentHP: 5000
   team: Human
   entityForm: 0
   showKillFeed: 1
@@ -541,7 +571,7 @@ MonoBehaviour:
   hitCooldown: 0.2
   flatDamageFromUnknown: 1000
   npcBaseDamage: 100
-  titanDamageMultiplier: 1
+  titanDamageMultiplier: 5
   damageMultipliers:
   - type: 4
     multiplier: 1
@@ -617,10 +647,6 @@ PrefabInstance:
     - target: {fileID: 3206440060741063117, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: m_Layer
       value: 31
-      objectReference: {fileID: 0}
-    - target: {fileID: 3206440060741063117, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
-      propertyPath: m_TagString
-      value: HookFollow
       objectReference: {fileID: 0}
     - target: {fileID: 7078169958427403154, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: sceneViewId

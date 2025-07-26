@@ -22,7 +22,7 @@ namespace Characters
         public float CurrentGas = -1f;
         public float MaxGas = -1f;
         public float GasUsage = 0.2f;
-        public float HorseSpeed = 45f;
+        public float HorseSpeed = 35f;
         public float RunSpeed;
         protected Human _human;
 
