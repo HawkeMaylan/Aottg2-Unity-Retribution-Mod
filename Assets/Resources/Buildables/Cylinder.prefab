@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -22.873207, y: 0, z: -108.57378}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 4, y: 4, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3948607967641695408}
@@ -104,8 +104,8 @@ MonoBehaviour:
   menuIcon: {fileID: 21300000, guid: d35852e0e2f78c74cb3e9e38e308985d, type: 3}
   category: Base
   displayName: Cylinder
-  gridSize: 0.5
-  offset: 1.5
+  gridSize: 1
+  offset: 3
   forceUpAlignment: 0
   forcedUpAxis: 1
   forwardAxis: 2

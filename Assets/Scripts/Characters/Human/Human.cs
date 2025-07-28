@@ -461,7 +461,7 @@ namespace Characters
                 _targetRotation = GetTargetRotation();
                 CrossFade(HumanAnimations.Dodge, 0.1f);
                 PlaySound(HumanSounds.Dodge);
-                CurrentStamina -= 15f;// Stamina loss
+                CurrentStamina -= 10f;// Stamina loss
                 _canRegenStamina = false; /// Force Cooldown
                 _timeSinceLastStaminaUse = 0f; /// Force Cooldown
                 ToggleSparks(false);
