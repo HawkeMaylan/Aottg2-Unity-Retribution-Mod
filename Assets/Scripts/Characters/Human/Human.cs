@@ -147,6 +147,9 @@ namespace Characters
         public bool IsSprinting = false;
         private GameObject _staminaBar;
         private UnityEngine.UI.Image _staminaBarFill;
+        public float StaminaRegenCooldown = 2f; // Time after action before regen starts
+        private float _staminaCooldownTimer = 0f;
+        private bool _isOnCooldown = false;
 
         private void CreateStaminaBar()
         {
@@ -179,13 +182,7 @@ namespace Characters
             fillRect.anchorMax = Vector2.one;
             fillRect.sizeDelta = Vector2.zero;
 
-            // Positioning (same as horse)
-            var rect = _staminaBar.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 0);
-            rect.anchorMax = new Vector2(0.5f, 0);
-            rect.pivot = new Vector2(0.5f, 0);
-            rect.anchoredPosition = new Vector2(0, 150); // Same position as horse
-            rect.sizeDelta = new Vector2(200, 10); // Same size as horse
+            
 
             _staminaBar.SetActive(false);
         }
@@ -196,6 +193,13 @@ namespace Characters
             {
                 _staminaBarFill.fillAmount = CurrentStamina / MaxStamina;
                 _staminaBar.SetActive(IsSprinting || CurrentStamina < MaxStamina);
+                // Positioning (same as horse)
+                var rect = _staminaBar.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0.5f, 0);
+                rect.anchorMax = new Vector2(0.5f, 0);
+                rect.pivot = new Vector2(0.5f, 0);
+                rect.anchoredPosition = new Vector2(0, 150); // Same position as horse
+                rect.sizeDelta = new Vector2(2 * CurrentStamina, 10); // Same size as horse
             }
         }
 
@@ -1564,7 +1568,7 @@ namespace Characters
             if (IsSprinting)
             {
                 CurrentStamina -= StaminaDrainRate * Time.deltaTime;
-                if (CurrentStamina <= 0)
+                if (CurrentStamina <= 5)
                 {
                     CurrentStamina = 0;
                     ToggleSprint(false);
