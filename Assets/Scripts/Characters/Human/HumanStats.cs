@@ -152,11 +152,11 @@ namespace Characters
 
         public bool Validate()
         {
-            if (Speed + Gas + Ammunition + Acceleration > 320) return false;
-            if (Speed < 50 || Speed > 100) return false;
-            if (Gas < 50 || Gas > 100) return false;
-            if (Ammunition < 50 || Ammunition > 100) return false;
-            if (Acceleration < 50 || Acceleration > 100) return false;
+            if (Speed + Gas + Ammunition + Acceleration > 500) return false;
+            if (Speed < 50 || Speed > 125) return false;
+            if (Gas < 50 || Gas > 125) return false;
+            if (Ammunition < 50 || Ammunition > 125) return false;
+            if (Acceleration < 50 || Acceleration > 125) return false;
             foreach (var perk in Perks.Values)
             {
                 if (!perk.Validate(Perks))
