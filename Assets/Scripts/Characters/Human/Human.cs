@@ -454,13 +454,16 @@ namespace Characters
 
         public void Dodge(float targetAngle)
         {
-            if (CanDodge)
+            if (CanDodge && CurrentStamina >= 15f)
             {
                 State = HumanState.GroundDodge;
                 TargetAngle = targetAngle;
                 _targetRotation = GetTargetRotation();
                 CrossFade(HumanAnimations.Dodge, 0.1f);
                 PlaySound(HumanSounds.Dodge);
+                CurrentStamina -= 15f;// Stamina loss
+                _canRegenStamina = false; /// Force Cooldown
+                _timeSinceLastStaminaUse = 0f; /// Force Cooldown
                 ToggleSparks(false);
             }
         }
@@ -1657,6 +1660,7 @@ namespace Characters
                 ToggleSprint(false);
             }
         }
+        
         protected override void FixedUpdate()
         {
             base.FixedUpdate();
@@ -1754,10 +1758,12 @@ namespace Characters
                     }
                     if (State == HumanState.GroundDodge)
                     {
+
                         if (Animation.GetNormalizedTime(HumanAnimations.Dodge) >= 0.2f && Animation.GetNormalizedTime(HumanAnimations.Dodge) < 0.8f)
                             newVelocity = -Cache.Transform.forward * 2.4f * Stats.RunSpeed;
                         else if (Animation.GetNormalizedTime(HumanAnimations.Dodge) > 0.8f)
                             newVelocity = Cache.Rigidbody.velocity * 0.9f;
+                        
                     }
                     else if (State == HumanState.Idle)
                     {
@@ -1965,6 +1971,7 @@ namespace Characters
                         {
                             if (State == HumanState.Attack)
                                 targetDirection = Vector3.zero;
+                               
                         }
                         else
                             _targetRotation = GetTargetRotation();
