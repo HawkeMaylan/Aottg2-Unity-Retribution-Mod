@@ -138,6 +138,67 @@ namespace Characters
         private bool _isReelingOut;
         private Dictionary<BaseTitan, float> _lastNapeHitTimes = new Dictionary<BaseTitan, float>();
 
+        ///Stamina Addons
+        public float SprintSpeedMultiplier = 1.3f;
+        public float StaminaDrainRate = 20f; 
+        public float StaminaRegenRate = 10f; 
+        public float MaxStamina = 100f;
+        public float CurrentStamina = 100f;
+        public bool IsSprinting = false;
+        private GameObject _staminaBar;
+        private UnityEngine.UI.Image _staminaBarFill;
+
+        private void CreateStaminaBar()
+        {
+            
+
+            var menu = GameObject.Find("DefaultMenu(Clone)");
+            
+
+            // Create stamina bar parent object
+            _staminaBar = new GameObject("StaminaBar");
+            _staminaBar.transform.SetParent(menu.transform);
+
+            // Set up the background (same as horse)
+            var bg = _staminaBar.AddComponent<UnityEngine.UI.Image>();
+            bg.color = new Color(0.2f, 0.2f, 0.2f); // Dark gray background (no transparency)
+            bg.type = UnityEngine.UI.Image.Type.Sliced;
+
+            // Create fill object (same as horse)
+            var fillObject = new GameObject("Fill");
+            fillObject.transform.SetParent(_staminaBar.transform);
+            _staminaBarFill = fillObject.AddComponent<UnityEngine.UI.Image>();
+            _staminaBarFill.color = Color.white; // Same white color as horse
+            _staminaBarFill.type = UnityEngine.UI.Image.Type.Filled;
+            _staminaBarFill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
+            _staminaBarFill.fillOrigin = (int)UnityEngine.UI.Image.OriginHorizontal.Right;
+
+            // Set fill rectangle to stretch (same as horse)
+            var fillRect = _staminaBarFill.GetComponent<RectTransform>();
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.sizeDelta = Vector2.zero;
+
+            // Positioning (same as horse)
+            var rect = _staminaBar.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0);
+            rect.anchorMax = new Vector2(0.5f, 0);
+            rect.pivot = new Vector2(0.5f, 0);
+            rect.anchoredPosition = new Vector2(0, 150); // Same position as horse
+            rect.sizeDelta = new Vector2(200, 10); // Same size as horse
+
+            _staminaBar.SetActive(false);
+        }
+
+        private void UpdateStaminaBar()
+        {
+            if (_staminaBarFill != null)
+            {
+                _staminaBarFill.fillAmount = CurrentStamina / MaxStamina;
+                _staminaBar.SetActive(IsSprinting || CurrentStamina < MaxStamina);
+            }
+        }
+
 
 
         protected override void CreateDetection()
@@ -1097,7 +1158,9 @@ namespace Characters
 
         protected override void Awake()
         {
-
+            
+                CreateStaminaBar();
+            
             ItemSpriteMap["Cannon"] = Resources.Load<Sprite>("Sprites/Items/Cannon");
             ItemSpriteMap["WallCannon"] = Resources.Load<Sprite>("Sprites/Items/WallCannon");
             //Add more to list
@@ -1297,6 +1360,8 @@ namespace Characters
         {
             if (IsMine() && !Dead)
             {
+                UpdateStamina(); ///
+                CheckSprintInput(); ///
                 _stateTimeLeft -= Time.deltaTime;
                 _dashCooldownLeft -= Time.deltaTime;
                 _reloadCooldownLeft -= Time.deltaTime;
@@ -1488,8 +1553,76 @@ namespace Characters
                 Cache.Transform.position = GrabHand.transform.position;
                 Cache.Transform.rotation = GrabHand.transform.rotation;
             }
+
+
         }
 
+        private void UpdateStamina()
+        {
+            if (!IsMine()) return;
+
+            if (IsSprinting)
+            {
+                CurrentStamina -= StaminaDrainRate * Time.deltaTime;
+                if (CurrentStamina <= 0)
+                {
+                    CurrentStamina = 0;
+                    ToggleSprint(false);
+                }
+            }
+            else if (CurrentStamina < MaxStamina)
+            {
+                // Faster regen when standing still
+                float regenMultiplier = (State == HumanState.Idle && !HasDirection) ? 1.5f : 1f;
+                CurrentStamina += StaminaRegenRate * regenMultiplier * Time.deltaTime;
+                CurrentStamina = Mathf.Min(CurrentStamina, MaxStamina);
+            }
+
+            UpdateStaminaBar();
+        }
+
+        public void ToggleSprint(bool sprint)
+{
+    if (!IsMine()) return;
+
+    // Only allow sprinting when grounded and moving
+    bool canSprint = Grounded && HasDirection && CurrentStamina > 0;
+
+    if (!canSprint)
+        sprint = false;
+
+    // Only change state if different
+    if (IsSprinting != sprint)
+    {
+        IsSprinting = sprint;
+        // Update animation speeds for all relevant animations
+        if (Animation.IsPlaying(HumanAnimations.Run))
+            Animation.SetSpeed(HumanAnimations.Run, IsSprinting ? SprintSpeedMultiplier : 1f);
+        if (Animation.IsPlaying(HumanAnimations.RunTS))
+            Animation.SetSpeed(HumanAnimations.RunTS, IsSprinting ? SprintSpeedMultiplier : 1f);
+        if (Animation.IsPlaying(HumanAnimations.RunBuffed))
+            Animation.SetSpeed(HumanAnimations.RunBuffed, IsSprinting ? SprintSpeedMultiplier : 1f);
+    }
+}
+
+        private void CheckSprintInput()
+        {
+            if (!IsMine() || Dead || MountState != HumanMountState.None)
+                return;
+
+            // Sprint when Shift is held while moving on ground
+            bool wantToSprint = Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.RightShift);
+
+            if (wantToSprint && Grounded && HasDirection && CurrentStamina > 0)
+            {
+                if (!IsSprinting)
+                    ToggleSprint(true);
+            }
+            else if (IsSprinting)
+            {
+                ToggleSprint(false);
+            }
+        }
         protected override void FixedUpdate()
         {
             base.FixedUpdate();
@@ -1597,7 +1730,8 @@ namespace Characters
                         newVelocity = Vector3.zero;
                         if (HasDirection)
                         {
-                            newVelocity = GetTargetDirection() * TargetMagnitude * Stats.RunSpeed;
+                            float speed = Stats.RunSpeed * (IsSprinting ? SprintSpeedMultiplier : 1f);
+                            newVelocity = GetTargetDirection() * TargetMagnitude * speed;///
                             if (!Animation.IsPlaying(HumanAnimations.Run) && !Animation.IsPlaying(HumanAnimations.Jump) &&
                                 !Animation.IsPlaying(HumanAnimations.RunBuffed) && (!Animation.IsPlaying(HumanAnimations.HorseMount) ||
                                 Animation.GetNormalizedTime(HumanAnimations.HorseMount) >= 0.5f))
@@ -1608,6 +1742,7 @@ namespace Characters
                             if (!Animation.IsPlaying(HumanAnimations.WallRun))
                                 _targetRotation = GetTargetRotation();
                         }
+                    
                         else if (!(Animation.IsPlaying(StandAnimation) || State == HumanState.Land || Animation.IsPlaying(HumanAnimations.Jump) || Animation.IsPlaying(HumanAnimations.HorseMount) || Animation.IsPlaying(HumanAnimations.Grabbed)))
                         {
                             CrossFade(StandAnimation, 0.1f);
