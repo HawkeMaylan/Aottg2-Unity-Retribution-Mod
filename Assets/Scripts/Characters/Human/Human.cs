@@ -147,9 +147,10 @@ namespace Characters
         public bool IsSprinting = false;
         private GameObject _staminaBar;
         private UnityEngine.UI.Image _staminaBarFill;
-        public float StaminaRegenCooldown = 2f; // Time after action before regen starts
-        private float _staminaCooldownTimer = 0f;
-        private bool _isOnCooldown = false;
+        private float _staminaRegenDelay = 1.5f; // Time before regen starts after using stamina
+        private float _timeSinceLastStaminaUse;
+        private bool _canRegenStamina = true;
+
 
         private void CreateStaminaBar()
         {
@@ -198,8 +199,8 @@ namespace Characters
                 rect.anchorMin = new Vector2(0.5f, 0);
                 rect.anchorMax = new Vector2(0.5f, 0);
                 rect.pivot = new Vector2(0.5f, 0);
-                rect.anchoredPosition = new Vector2(0, 150); // Same position as horse
-                rect.sizeDelta = new Vector2(2 * CurrentStamina, 10); // Same size as horse
+                rect.anchoredPosition = new Vector2(0, 150); 
+                rect.sizeDelta = new Vector2(2 * CurrentStamina, 10);
             }
         }
 
@@ -1565,16 +1566,36 @@ namespace Characters
         {
             if (!IsMine()) return;
 
+            // Handle stamina regeneration delay
+            if (!_canRegenStamina)
+            {
+                _timeSinceLastStaminaUse += Time.deltaTime;
+                if (_timeSinceLastStaminaUse >= _staminaRegenDelay)
+                {
+                    _canRegenStamina = true;
+                }
+            }
+
             if (IsSprinting)
             {
+                // Prevent sprinting if stamina is depleted
+                if (CurrentStamina <= 0)
+                {
+                    ToggleSprint(false);
+                    return;
+                }
+
                 CurrentStamina -= StaminaDrainRate * Time.deltaTime;
-                if (CurrentStamina <= 5)
+                _canRegenStamina = false;
+                _timeSinceLastStaminaUse = 0f;
+
+                if (CurrentStamina <= 0)
                 {
                     CurrentStamina = 0;
                     ToggleSprint(false);
                 }
             }
-            else if (CurrentStamina < MaxStamina)
+            else if (CurrentStamina < MaxStamina && _canRegenStamina)
             {
                 // Faster regen when standing still
                 float regenMultiplier = (State == HumanState.Idle && !HasDirection) ? 1.5f : 1f;
@@ -1586,28 +1607,28 @@ namespace Characters
         }
 
         public void ToggleSprint(bool sprint)
-{
-    if (!IsMine()) return;
+        {
+            if (!IsMine()) return;
 
-    // Only allow sprinting when grounded and moving
-    bool canSprint = Grounded && HasDirection && CurrentStamina > 0;
+            // Only allow sprinting when grounded, moving, and has sufficient stamina
+            bool canSprint = Grounded && HasDirection && CurrentStamina > 0;
 
-    if (!canSprint)
-        sprint = false;
+            if (!canSprint)
+                sprint = false;
 
-    // Only change state if different
-    if (IsSprinting != sprint)
-    {
-        IsSprinting = sprint;
-        // Update animation speeds for all relevant animations
-        if (Animation.IsPlaying(HumanAnimations.Run))
-            Animation.SetSpeed(HumanAnimations.Run, IsSprinting ? SprintSpeedMultiplier : 1f);
-        if (Animation.IsPlaying(HumanAnimations.RunTS))
-            Animation.SetSpeed(HumanAnimations.RunTS, IsSprinting ? SprintSpeedMultiplier : 1f);
-        if (Animation.IsPlaying(HumanAnimations.RunBuffed))
-            Animation.SetSpeed(HumanAnimations.RunBuffed, IsSprinting ? SprintSpeedMultiplier : 1f);
-    }
-}
+            // Only change state if different
+            if (IsSprinting != sprint)
+            {
+                IsSprinting = sprint;
+                // Update animation speeds for all relevant animations
+                if (Animation.IsPlaying(HumanAnimations.Run))
+                    Animation.SetSpeed(HumanAnimations.Run, IsSprinting ? SprintSpeedMultiplier : 1f);
+                if (Animation.IsPlaying(HumanAnimations.RunTS))
+                    Animation.SetSpeed(HumanAnimations.RunTS, IsSprinting ? SprintSpeedMultiplier : 1f);
+                if (Animation.IsPlaying(HumanAnimations.RunBuffed))
+                    Animation.SetSpeed(HumanAnimations.RunBuffed, IsSprinting ? SprintSpeedMultiplier : 1f);
+            }
+        }
 
         private void CheckSprintInput()
         {
@@ -1617,6 +1638,7 @@ namespace Characters
             // Sprint when Shift is held while moving on ground
             bool wantToSprint = Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.RightShift);
 
+            // Additional check for stamina here to prevent toggling sprint when empty
             if (wantToSprint && Grounded && HasDirection && CurrentStamina > 0)
             {
                 if (!IsSprinting)
