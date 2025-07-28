@@ -1050,7 +1050,7 @@ namespace Characters
             else
             {
                 bool isBellyFlop = _currentStateAnimation == BasicAnimations.AttackBellyFlop || _currentStateAnimation == BasicAnimations.AttackBellyFlopGetup;
-                if (!isBellyFlop)
+                
                     base.Cripple(time);
             }
         }
