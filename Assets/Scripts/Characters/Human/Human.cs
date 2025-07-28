@@ -140,8 +140,8 @@ namespace Characters
 
         ///Stamina Addons
         public float SprintSpeedMultiplier = 1.3f;
-        public float StaminaDrainRate = 20f; 
-        public float StaminaRegenRate = 10f; 
+        public float StaminaDrainRate = 20f;
+        public float StaminaRegenRate = 10f;
         public float MaxStamina = 100f;
         public float CurrentStamina = 100f;
         public bool IsSprinting = false;
@@ -154,10 +154,10 @@ namespace Characters
 
         private void CreateStaminaBar()
         {
-            
+
 
             var menu = GameObject.Find("DefaultMenu(Clone)");
-            
+
 
             // Create stamina bar parent object
             _staminaBar = new GameObject("StaminaBar");
@@ -183,7 +183,7 @@ namespace Characters
             fillRect.anchorMax = Vector2.one;
             fillRect.sizeDelta = Vector2.zero;
 
-            
+
 
             _staminaBar.SetActive(false);
         }
@@ -199,7 +199,7 @@ namespace Characters
                 rect.anchorMin = new Vector2(0.5f, 0);
                 rect.anchorMax = new Vector2(0.5f, 0);
                 rect.pivot = new Vector2(0.5f, 0);
-                rect.anchoredPosition = new Vector2(0, 150); 
+                rect.anchoredPosition = new Vector2(0, 150);
                 rect.sizeDelta = new Vector2(2 * CurrentStamina, 10);
             }
         }
@@ -454,13 +454,16 @@ namespace Characters
 
         public void Dodge(float targetAngle)
         {
-            if (CanDodge)
+            if (CanDodge && CurrentStamina >= 15f)
             {
                 State = HumanState.GroundDodge;
                 TargetAngle = targetAngle;
                 _targetRotation = GetTargetRotation();
                 CrossFade(HumanAnimations.Dodge, 0.1f);
                 PlaySound(HumanSounds.Dodge);
+                CurrentStamina -= 15f;// Stamina loss
+                _canRegenStamina = false; /// Force Cooldown
+                _timeSinceLastStaminaUse = 0f; /// Force Cooldown
                 ToggleSparks(false);
             }
         }
@@ -543,7 +546,7 @@ namespace Characters
                 CrossFade(HumanAnimations.Dash, 0.1f, 0.1f);
                 State = HumanState.AirDodge;
                 FalseAttack();
-                Cache.Rigidbody.AddForce(Vector3.up * 40f, ForceMode.VelocityChange); 
+                Cache.Rigidbody.AddForce(Vector3.up * 40f, ForceMode.VelocityChange);
                 _dashCooldownLeft = 0.2f;
                 ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.ShakeGas();
             }
@@ -588,7 +591,7 @@ namespace Characters
                 State = HumanState.AirDodge;
                 FalseAttack();
 
-      
+
                 Cache.Rigidbody.AddForce(-Cache.Transform.right * 45f, ForceMode.VelocityChange);
 
                 _dashCooldownLeft = 0.2f;
@@ -613,7 +616,7 @@ namespace Characters
                 State = HumanState.AirDodge;
                 FalseAttack();
 
-    
+
                 Cache.Rigidbody.AddForce(Cache.Transform.right * 45f, ForceMode.VelocityChange);
 
                 _dashCooldownLeft = 0.2f;
@@ -1163,9 +1166,9 @@ namespace Characters
 
         protected override void Awake()
         {
-            
-                CreateStaminaBar();
-            
+
+            CreateStaminaBar();
+
             ItemSpriteMap["Cannon"] = Resources.Load<Sprite>("Sprites/Items/Cannon");
             ItemSpriteMap["WallCannon"] = Resources.Load<Sprite>("Sprites/Items/WallCannon");
             //Add more to list
@@ -1576,7 +1579,7 @@ namespace Characters
                 }
             }
 
-            if (CurrentStamina <= 0) 
+            if (CurrentStamina <= 0)
             {
                 _staminaRegenDelay = 5f;
             }
@@ -1657,6 +1660,7 @@ namespace Characters
                 ToggleSprint(false);
             }
         }
+
         protected override void FixedUpdate()
         {
             base.FixedUpdate();
@@ -1697,7 +1701,7 @@ namespace Characters
                 if (_hookHuman != null && !_hookHuman.Dead)
                 {
                     Vector3 vector2 = _hookHuman.Cache.Transform.position - Cache.Transform.position;
-                    float magnitude = vector2.magnitude +30;
+                    float magnitude = vector2.magnitude + 30;
                     // Temporarily remove until a rework is done as this completely breaks hook physics
                     /*if (magnitude > 2f)
                         Cache.Rigidbody.AddForce((vector2.normalized * Mathf.Pow(magnitude, 0.15f) * 30f) - (Cache.Rigidbody.velocity * 0.95f), ForceMode.VelocityChange);*/
@@ -1754,10 +1758,12 @@ namespace Characters
                     }
                     if (State == HumanState.GroundDodge)
                     {
+
                         if (Animation.GetNormalizedTime(HumanAnimations.Dodge) >= 0.2f && Animation.GetNormalizedTime(HumanAnimations.Dodge) < 0.8f)
                             newVelocity = -Cache.Transform.forward * 2.4f * Stats.RunSpeed;
                         else if (Animation.GetNormalizedTime(HumanAnimations.Dodge) > 0.8f)
                             newVelocity = Cache.Rigidbody.velocity * 0.9f;
+
                     }
                     else if (State == HumanState.Idle)
                     {
@@ -1776,7 +1782,7 @@ namespace Characters
                             if (!Animation.IsPlaying(HumanAnimations.WallRun))
                                 _targetRotation = GetTargetRotation();
                         }
-                    
+
                         else if (!(Animation.IsPlaying(StandAnimation) || State == HumanState.Land || Animation.IsPlaying(HumanAnimations.Jump) || Animation.IsPlaying(HumanAnimations.HorseMount) || Animation.IsPlaying(HumanAnimations.Grabbed)))
                         {
                             CrossFade(StandAnimation, 0.1f);
@@ -1965,6 +1971,7 @@ namespace Characters
                         {
                             if (State == HumanState.Attack)
                                 targetDirection = Vector3.zero;
+
                         }
                         else
                             _targetRotation = GetTargetRotation();
@@ -2447,7 +2454,7 @@ namespace Characters
                     v = position - (Cache.Rigidbody.position - new Vector3(0, 0.020f, 0)); // 0.020F gives the player the original aottg1 clipping required for bounce.
                 }
             }
-           
+
             float reelAxis = GetReelAxis();
             if (reelAxis > 0f)
             {
@@ -2929,20 +2936,20 @@ namespace Characters
         public void SetupItems()
         {
 
-            
+
             itemList1.Add(new FlareItem(this, "Green", new Color(0f, 1f, 0f, 0.7f), 300f));
             itemList1.Add(new FlareItem(this, "Red", new Color(1f, 0f, 0f, 0.7f), 300f));
             itemList1.Add(new FlareItem(this, "Black", new Color(0f, 0f, 0f, 0.7f), 300f));
             itemList1.Add(new FlareItem(this, "Purple", new Color(153f / 255, 0f, 204f / 255, 0.7f), 300f));
             itemList1.Add(new FlareItem(this, "Blue", new Color(0f, 102f / 255, 204f / 255, 0.7f), 300f));
             itemList1.Add(new FlareItem(this, "Yellow", new Color(1f, 1f, 0f, 0.7f), 300f));
-            itemList1.Add(new FlareItem(this, "Cyan", new Color(0f, 255f / 252, 255f / 255, 0.8f), 300f));
-            itemList1.Add(new FlareItem(this, "Indigo", Color.blue, 300f));
+            ///itemList1.Add(new FlareItem(this, "Cyan", new Color(0f, 255f / 252, 255f / 255, 0.8f), 300f));
+            ///itemList1.Add(new FlareItem(this, "Indigo", Color.blue, 300f));
             itemList2.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
-            itemList2.Add(new FlareItem3(this, "Acoustic Flare", Color.grey, 300f));
-            itemList2.Add(new HorseWhistleItem(this, "Whistle", 5f));
-           
-            
+            ///itemList2.Add(new FlareItem3(this, "Acoustic Flare", Color.grey, 300f));
+            itemList2.Add(new HorseWhistleItem(this, "Whistle", 20f));
+
+
 
 
             var inventory = GetComponent<HumanInventory>();
@@ -2958,7 +2965,7 @@ namespace Characters
                 if (inventory.GetItemCount("GasBomb") > 0)
                     itemList2.Add(new GasBombSpawn(this, "Gas Bomb", 1f)); // 'this' is the owner
 
-                
+
             }
 
 
@@ -2973,19 +2980,19 @@ namespace Characters
             itemList3.Add(new CannonTestSpawn(this, "Cannon", 5f));
             itemList3.Add(new WallCannonSpawn(this, "Wall Cannon", 5f));
             itemList3.Add(new CannonGroundSpawn(this, "Ground Cannon", 5f));
-            
+
             if (PhotonNetwork.IsMasterClient)
             {
                 itemList4.Add(new Daycycle(this, "DayCycle", 5f));
                 itemList4.Add(new DaycycleDelete(this, "DeleteDayCycle", 15f));
 
-                itemList4.Add(new ShigGateSpawn(this, "ShigGateSpawn", 1f));
+                ///itemList4.Add(new ShigGateSpawn(this, "ShigGateSpawn", 1f));
                 itemList4.Add(new PickupGroundCannon(this, "Field Cannon Item", 1f));
                 itemList4.Add(new Stable2Spawn(this, "Stables", 1f));
-                itemList4.Add(new PastVarreosaSpawn(this, "PastVarreosa", 1f));
-                itemList4.Add(new Act0MissionSpawn(this, "Act0MissionSpawn", 1f));
-                itemList4.Add(new WorkerLogSpawn(this, "WorkerLogSpawn", 1f));
-                
+                itemList4.Add(new PastVarreosaSpawn(this, "Shiganshina", 1f));
+                ///itemList4.Add(new Act0MissionSpawn(this, "Act0MissionSpawn", 1f));
+                ///itemList4.Add(new WorkerLogSpawn(this, "WorkerLogSpawn", 1f));
+
 
 
 
