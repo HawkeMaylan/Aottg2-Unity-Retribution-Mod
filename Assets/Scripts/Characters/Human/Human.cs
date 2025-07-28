@@ -1576,6 +1576,14 @@ namespace Characters
                 }
             }
 
+            if (CurrentStamina <= 0) 
+            {
+                _staminaRegenDelay = 5f;
+            }
+            else
+            {
+                _staminaRegenDelay = 2f;
+            }
             if (IsSprinting)
             {
                 // Prevent sprinting if stamina is depleted
