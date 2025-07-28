@@ -16679,7 +16679,7 @@ MonoBehaviour:
   _attackRelease: 0
   _attackButtonRelease: 0
   _reelInWaitForRelease: 0
-  SprintSpeedMultiplier: 1.6
+  SprintSpeedMultiplier: 1.5
   StaminaDrainRate: 10
   StaminaRegenRate: 5
   MaxStamina: 100

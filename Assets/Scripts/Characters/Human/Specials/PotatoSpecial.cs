@@ -12,7 +12,7 @@ namespace Characters
 
         public PotatoSpecial(BaseCharacter owner): base(owner)
         {
-            Cooldown = 45f;
+            Cooldown = 120f;
         }
 
         protected override void Activate()
