@@ -40,7 +40,7 @@ namespace Settings
         public ColorSetting ForceBackgroundColor = new ColorSetting(new Utility.Color255(0, 0, 0, 100));
         public IntSetting MinNameLength = new IntSetting(0, minValue: 0, maxValue: 100);
         public IntSetting MaxNameLength = new IntSetting(20, minValue: 0, maxValue: 100);
-        public BoolSetting FadeMainMenu = new BoolSetting(true);
+        ///public BoolSetting FadeMainMenu = new BoolSetting(true);
         public BoolSetting FadeLoadscreen = new BoolSetting(true);
         public IntSetting ChatWidth = new IntSetting(320, minValue: 0, maxValue: 1000);
         public IntSetting ChatHeight = new IntSetting(295, minValue: 0, maxValue: 500);

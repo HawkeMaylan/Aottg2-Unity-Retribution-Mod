@@ -48,7 +48,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     private const float MaxDistanceBuffer = 40.5f;
 
     [Header("Trigger Validation")]
-    public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trigger stay
+public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trigger stay
 
 
     private int isOccupied = 0;

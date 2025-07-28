@@ -4,7 +4,7 @@ using Characters; // Assuming Human is in Characters namespace
 public class WaterZone : MonoBehaviour
 {
     public float floatStrength = 3f;
-
+    public float floatStrength2 = 3f;
     private void OnTriggerEnter(Collider other)
     {
         Human human = other.GetComponentInParent<Human>();
@@ -53,7 +53,12 @@ public class WaterZone : MonoBehaviour
         Rigidbody rb = human.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.AddForce(Vector3.up * floatStrength, ForceMode.Acceleration); // Float upward
+            // Float upward (global Y-axis)
+            rb.AddForce(Vector3.up * floatStrength, ForceMode.Acceleration);
+
+            // Push forward (relative to player's facing direction)
+            Vector3 playerForward = human.transform.forward;
+            rb.AddForce(playerForward * floatStrength2, ForceMode.Acceleration);
         }
     }
 

@@ -33,7 +33,7 @@ namespace Characters
         public float BellyFlopTime = 5.5f;
         protected float _leftArmDisabledTimeLeft;
         protected float _rightArmDisabledTimeLeft;
-        protected float ArmDisableTime = 12f;
+        protected float ArmDisableTime = 18f;
         public float RockThrow1Speed = 140f;
         protected Vector3 _rockThrowTarget;
         protected float _originalCapsuleValue;
@@ -1050,7 +1050,7 @@ namespace Characters
             else
             {
                 bool isBellyFlop = _currentStateAnimation == BasicAnimations.AttackBellyFlop || _currentStateAnimation == BasicAnimations.AttackBellyFlopGetup;
-                
+
                     base.Cripple(time);
             }
         }
