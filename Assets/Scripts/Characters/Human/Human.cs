@@ -138,6 +138,72 @@ namespace Characters
         private bool _isReelingOut;
         private Dictionary<BaseTitan, float> _lastNapeHitTimes = new Dictionary<BaseTitan, float>();
 
+        ///Stamina Addons
+        public float SprintSpeedMultiplier = 1.3f;
+        public float StaminaDrainRate = 20f;
+        public float StaminaRegenRate = 10f;
+        public float MaxStamina = 100f;
+        public float CurrentStamina = 100f;
+        public bool IsSprinting = false;
+        private GameObject _staminaBar;
+        private UnityEngine.UI.Image _staminaBarFill;
+        private float _staminaRegenDelay = 1.5f; // Time before regen starts after using stamina
+        private float _timeSinceLastStaminaUse;
+        private bool _canRegenStamina = true;
+
+
+        private void CreateStaminaBar()
+        {
+
+
+            var menu = GameObject.Find("DefaultMenu(Clone)");
+
+
+            // Create stamina bar parent object
+            _staminaBar = new GameObject("StaminaBar");
+            _staminaBar.transform.SetParent(menu.transform);
+
+            // Set up the background (same as horse)
+            var bg = _staminaBar.AddComponent<UnityEngine.UI.Image>();
+            bg.color = new Color(0.2f, 0.2f, 0.2f); // Dark gray background (no transparency)
+            bg.type = UnityEngine.UI.Image.Type.Sliced;
+
+            // Create fill object (same as horse)
+            var fillObject = new GameObject("Fill");
+            fillObject.transform.SetParent(_staminaBar.transform);
+            _staminaBarFill = fillObject.AddComponent<UnityEngine.UI.Image>();
+            _staminaBarFill.color = Color.white; // Same white color as horse
+            _staminaBarFill.type = UnityEngine.UI.Image.Type.Filled;
+            _staminaBarFill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
+            _staminaBarFill.fillOrigin = (int)UnityEngine.UI.Image.OriginHorizontal.Right;
+
+            // Set fill rectangle to stretch (same as horse)
+            var fillRect = _staminaBarFill.GetComponent<RectTransform>();
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.sizeDelta = Vector2.zero;
+
+
+
+            _staminaBar.SetActive(false);
+        }
+
+        private void UpdateStaminaBar()
+        {
+            if (_staminaBarFill != null)
+            {
+                _staminaBarFill.fillAmount = CurrentStamina / MaxStamina;
+                _staminaBar.SetActive(IsSprinting || CurrentStamina < MaxStamina);
+                // Positioning (same as horse)
+                var rect = _staminaBar.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0.5f, 0);
+                rect.anchorMax = new Vector2(0.5f, 0);
+                rect.pivot = new Vector2(0.5f, 0);
+                rect.anchoredPosition = new Vector2(0, 150);
+                rect.sizeDelta = new Vector2(2 * CurrentStamina, 10);
+            }
+        }
+
 
 
         protected override void CreateDetection()
@@ -388,13 +454,16 @@ namespace Characters
 
         public void Dodge(float targetAngle)
         {
-            if (CanDodge)
+            if (CanDodge && CurrentStamina >= 15f)
             {
                 State = HumanState.GroundDodge;
                 TargetAngle = targetAngle;
                 _targetRotation = GetTargetRotation();
                 CrossFade(HumanAnimations.Dodge, 0.1f);
                 PlaySound(HumanSounds.Dodge);
+                CurrentStamina -= 15f;// Stamina loss
+                _canRegenStamina = false; /// Force Cooldown
+                _timeSinceLastStaminaUse = 0f; /// Force Cooldown
                 ToggleSparks(false);
             }
         }
@@ -477,7 +546,7 @@ namespace Characters
                 CrossFade(HumanAnimations.Dash, 0.1f, 0.1f);
                 State = HumanState.AirDodge;
                 FalseAttack();
-                Cache.Rigidbody.AddForce(Vector3.up * 40f, ForceMode.VelocityChange); 
+                Cache.Rigidbody.AddForce(Vector3.up * 40f, ForceMode.VelocityChange);
                 _dashCooldownLeft = 0.2f;
                 ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.ShakeGas();
             }
@@ -522,7 +591,7 @@ namespace Characters
                 State = HumanState.AirDodge;
                 FalseAttack();
 
-      
+
                 Cache.Rigidbody.AddForce(-Cache.Transform.right * 45f, ForceMode.VelocityChange);
 
                 _dashCooldownLeft = 0.2f;
@@ -547,7 +616,7 @@ namespace Characters
                 State = HumanState.AirDodge;
                 FalseAttack();
 
-    
+
                 Cache.Rigidbody.AddForce(Cache.Transform.right * 45f, ForceMode.VelocityChange);
 
                 _dashCooldownLeft = 0.2f;
@@ -1098,6 +1167,8 @@ namespace Characters
         protected override void Awake()
         {
 
+            CreateStaminaBar();
+
             ItemSpriteMap["Cannon"] = Resources.Load<Sprite>("Sprites/Items/Cannon");
             ItemSpriteMap["WallCannon"] = Resources.Load<Sprite>("Sprites/Items/WallCannon");
             //Add more to list
@@ -1297,6 +1368,8 @@ namespace Characters
         {
             if (IsMine() && !Dead)
             {
+                UpdateStamina(); ///
+                CheckSprintInput(); ///
                 _stateTimeLeft -= Time.deltaTime;
                 _dashCooldownLeft -= Time.deltaTime;
                 _reloadCooldownLeft -= Time.deltaTime;
@@ -1488,6 +1561,104 @@ namespace Characters
                 Cache.Transform.position = GrabHand.transform.position;
                 Cache.Transform.rotation = GrabHand.transform.rotation;
             }
+
+
+        }
+
+        private void UpdateStamina()
+        {
+            if (!IsMine()) return;
+
+            // Handle stamina regeneration delay
+            if (!_canRegenStamina)
+            {
+                _timeSinceLastStaminaUse += Time.deltaTime;
+                if (_timeSinceLastStaminaUse >= _staminaRegenDelay)
+                {
+                    _canRegenStamina = true;
+                }
+            }
+
+            if (CurrentStamina <= 0)
+            {
+                _staminaRegenDelay = 5f;
+            }
+            else
+            {
+                _staminaRegenDelay = 2f;
+            }
+            if (IsSprinting)
+            {
+                // Prevent sprinting if stamina is depleted
+                if (CurrentStamina <= 0)
+                {
+                    ToggleSprint(false);
+                    return;
+                }
+
+                CurrentStamina -= StaminaDrainRate * Time.deltaTime;
+                _canRegenStamina = false;
+                _timeSinceLastStaminaUse = 0f;
+
+                if (CurrentStamina <= 0)
+                {
+                    CurrentStamina = 0;
+                    ToggleSprint(false);
+                }
+            }
+            else if (CurrentStamina < MaxStamina && _canRegenStamina)
+            {
+                // Faster regen when standing still
+                float regenMultiplier = (State == HumanState.Idle && !HasDirection) ? 1.5f : 1f;
+                CurrentStamina += StaminaRegenRate * regenMultiplier * Time.deltaTime;
+                CurrentStamina = Mathf.Min(CurrentStamina, MaxStamina);
+            }
+
+            UpdateStaminaBar();
+        }
+
+        public void ToggleSprint(bool sprint)
+        {
+            if (!IsMine()) return;
+
+            // Only allow sprinting when grounded, moving, and has sufficient stamina
+            bool canSprint = Grounded && HasDirection && CurrentStamina > 0;
+
+            if (!canSprint)
+                sprint = false;
+
+            // Only change state if different
+            if (IsSprinting != sprint)
+            {
+                IsSprinting = sprint;
+                // Update animation speeds for all relevant animations
+                if (Animation.IsPlaying(HumanAnimations.Run))
+                    Animation.SetSpeed(HumanAnimations.Run, IsSprinting ? SprintSpeedMultiplier : 1f);
+                if (Animation.IsPlaying(HumanAnimations.RunTS))
+                    Animation.SetSpeed(HumanAnimations.RunTS, IsSprinting ? SprintSpeedMultiplier : 1f);
+                if (Animation.IsPlaying(HumanAnimations.RunBuffed))
+                    Animation.SetSpeed(HumanAnimations.RunBuffed, IsSprinting ? SprintSpeedMultiplier : 1f);
+            }
+        }
+
+        private void CheckSprintInput()
+        {
+            if (!IsMine() || Dead || MountState != HumanMountState.None)
+                return;
+
+            // Sprint when Shift is held while moving on ground
+            bool wantToSprint = Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.RightShift);
+
+            // Additional check for stamina here to prevent toggling sprint when empty
+            if (wantToSprint && Grounded && HasDirection && CurrentStamina > 0)
+            {
+                if (!IsSprinting)
+                    ToggleSprint(true);
+            }
+            else if (IsSprinting)
+            {
+                ToggleSprint(false);
+            }
         }
 
         protected override void FixedUpdate()
@@ -1530,7 +1701,7 @@ namespace Characters
                 if (_hookHuman != null && !_hookHuman.Dead)
                 {
                     Vector3 vector2 = _hookHuman.Cache.Transform.position - Cache.Transform.position;
-                    float magnitude = vector2.magnitude +30;
+                    float magnitude = vector2.magnitude + 30;
                     // Temporarily remove until a rework is done as this completely breaks hook physics
                     /*if (magnitude > 2f)
                         Cache.Rigidbody.AddForce((vector2.normalized * Mathf.Pow(magnitude, 0.15f) * 30f) - (Cache.Rigidbody.velocity * 0.95f), ForceMode.VelocityChange);*/
@@ -1587,17 +1758,20 @@ namespace Characters
                     }
                     if (State == HumanState.GroundDodge)
                     {
+
                         if (Animation.GetNormalizedTime(HumanAnimations.Dodge) >= 0.2f && Animation.GetNormalizedTime(HumanAnimations.Dodge) < 0.8f)
                             newVelocity = -Cache.Transform.forward * 2.4f * Stats.RunSpeed;
                         else if (Animation.GetNormalizedTime(HumanAnimations.Dodge) > 0.8f)
                             newVelocity = Cache.Rigidbody.velocity * 0.9f;
+
                     }
                     else if (State == HumanState.Idle)
                     {
                         newVelocity = Vector3.zero;
                         if (HasDirection)
                         {
-                            newVelocity = GetTargetDirection() * TargetMagnitude * Stats.RunSpeed;
+                            float speed = Stats.RunSpeed * (IsSprinting ? SprintSpeedMultiplier : 1f);
+                            newVelocity = GetTargetDirection() * TargetMagnitude * speed;///
                             if (!Animation.IsPlaying(HumanAnimations.Run) && !Animation.IsPlaying(HumanAnimations.Jump) &&
                                 !Animation.IsPlaying(HumanAnimations.RunBuffed) && (!Animation.IsPlaying(HumanAnimations.HorseMount) ||
                                 Animation.GetNormalizedTime(HumanAnimations.HorseMount) >= 0.5f))
@@ -1608,6 +1782,7 @@ namespace Characters
                             if (!Animation.IsPlaying(HumanAnimations.WallRun))
                                 _targetRotation = GetTargetRotation();
                         }
+
                         else if (!(Animation.IsPlaying(StandAnimation) || State == HumanState.Land || Animation.IsPlaying(HumanAnimations.Jump) || Animation.IsPlaying(HumanAnimations.HorseMount) || Animation.IsPlaying(HumanAnimations.Grabbed)))
                         {
                             CrossFade(StandAnimation, 0.1f);
@@ -1796,6 +1971,7 @@ namespace Characters
                         {
                             if (State == HumanState.Attack)
                                 targetDirection = Vector3.zero;
+
                         }
                         else
                             _targetRotation = GetTargetRotation();
@@ -2278,7 +2454,7 @@ namespace Characters
                     v = position - (Cache.Rigidbody.position - new Vector3(0, 0.020f, 0)); // 0.020F gives the player the original aottg1 clipping required for bounce.
                 }
             }
-           
+
             float reelAxis = GetReelAxis();
             if (reelAxis > 0f)
             {
@@ -2760,7 +2936,7 @@ namespace Characters
         public void SetupItems()
         {
 
-            
+
             itemList1.Add(new FlareItem(this, "Green", new Color(0f, 1f, 0f, 0.7f), 300f));
             itemList1.Add(new FlareItem(this, "Red", new Color(1f, 0f, 0f, 0.7f), 300f));
             itemList1.Add(new FlareItem(this, "Black", new Color(0f, 0f, 0f, 0.7f), 300f));
@@ -2772,8 +2948,8 @@ namespace Characters
             itemList2.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
             ///itemList2.Add(new FlareItem3(this, "Acoustic Flare", Color.grey, 300f));
             itemList2.Add(new HorseWhistleItem(this, "Whistle", 20f));
-           
-            
+
+
 
 
             var inventory = GetComponent<HumanInventory>();
@@ -2789,7 +2965,7 @@ namespace Characters
                 if (inventory.GetItemCount("GasBomb") > 0)
                     itemList2.Add(new GasBombSpawn(this, "Gas Bomb", 1f)); // 'this' is the owner
 
-                
+
             }
 
 
@@ -2804,7 +2980,7 @@ namespace Characters
             itemList3.Add(new CannonTestSpawn(this, "Cannon", 5f));
             itemList3.Add(new WallCannonSpawn(this, "Wall Cannon", 5f));
             itemList3.Add(new CannonGroundSpawn(this, "Ground Cannon", 5f));
-            
+
             if (PhotonNetwork.IsMasterClient)
             {
                 itemList4.Add(new Daycycle(this, "DayCycle", 5f));

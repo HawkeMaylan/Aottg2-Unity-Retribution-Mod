@@ -143,7 +143,7 @@ namespace UI
                 {
                     colorMultiplier = 1f,
                     fadeDuration = 0.1f,
-                    normalColor = new Color(0.9f, 0.9f, 0.9f),
+                    normalColor = new Color(0.1f, 0.1f, 0.1f),
                     highlightedColor = new Color(0.75f, 0.75f, 0.75f),
                     pressedColor = new Color(0.5f, 0.5f, 0.5f),
                     disabledColor = new Color(0.5f, 0.5f, 0.5f)
