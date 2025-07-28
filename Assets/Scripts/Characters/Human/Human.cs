@@ -1651,7 +1651,7 @@ namespace Characters
 
 
             // Sprint when Shift is held while moving on ground
-            bool wantToSprint = Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.RightShift);
+            bool wantToSprint = (SettingsManager.InputSettings.Human.HumanSprint.GetKey());
 
 
             // Additional check for stamina here to prevent toggling sprint when empty
