@@ -16681,11 +16681,10 @@ MonoBehaviour:
   _reelInWaitForRelease: 0
   SprintSpeedMultiplier: 1.3
   StaminaDrainRate: 10
-  StaminaRegenRate: 2
+  StaminaRegenRate: 5
   MaxStamina: 100
   CurrentStamina: 100
   IsSprinting: 0
-  StaminaRegenCooldown: 2
 --- !u!114 &11414280
 MonoBehaviour:
   m_ObjectHideFlags: 0
