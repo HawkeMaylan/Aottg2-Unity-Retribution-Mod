@@ -480,7 +480,7 @@ MonoBehaviour:
     RecoilSpeed: 5
     Knockback: 1
     knockbackForce: 100
-    startingAmmo: 100
+    startingAmmo: 50
   muzzleFlashPrefab: {fileID: 5235915867927116546, guid: b5a419a416d428e49babef468d99702e, type: 3}
   projectileUIPrefab: {fileID: 3976318980140897857, guid: 1bbb58f7e27b08841828333060216bc2, type: 3}
   flipHoldTime: 1.5
