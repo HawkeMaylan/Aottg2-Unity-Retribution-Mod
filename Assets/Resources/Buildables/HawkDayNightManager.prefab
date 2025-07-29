@@ -43,7 +43,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.2688679, g: 0.54850656, b: 1, a: 1}
   m_Intensity: 0
   m_Range: 10
   m_SpotAngle: 30
@@ -144,10 +144,10 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 1
+    m_Type: 2
     m_Resolution: 0
     m_CustomResolution: -1
-    m_Strength: 1
+    m_Strength: 0.698
     m_Bias: 0.19
     m_NormalBias: 0.4
     m_NearPlane: 0.74
@@ -237,17 +237,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sun: {fileID: 42349908458179679}
   moon: {fileID: 4745114026488916793}
-  dayDuration: 3600
+  dayDuration: 36
   sunriseDuration: 0.1
   middayDuration: 0.5
   sunsetDuration: 0.1
   nightDuration: 0.3
-  maxSunIntensity: 0.8
-  maxMoonIntensity: 0.09
+  maxSunIntensity: 0.9
+  maxMoonIntensity: 0.2
   minimumNightExposure: 0.23
   maximumDayExposure: 1.3
-  sunriseIntensityMultiplier: 1.2
-  sunsetIntensityMultiplier: 1.2
+  sunriseIntensityMultiplier: 1.05
+  sunsetIntensityMultiplier: 1.05
   sunriseSunsetSaturationBoost: 0.219
   giUpdateInterval: 1
   materialUpdateInterval: 1
