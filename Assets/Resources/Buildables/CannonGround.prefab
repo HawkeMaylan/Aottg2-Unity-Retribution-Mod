@@ -475,7 +475,7 @@ MonoBehaviour:
     projectileCount: 1
     spreadAngle: 0
     BarrelRecoil: 1
-    RecoilDistance: 2
+    RecoilDistance: 0.5
     barrelRecoilAngle: 8
     RecoilSpeed: 5
     Knockback: 1

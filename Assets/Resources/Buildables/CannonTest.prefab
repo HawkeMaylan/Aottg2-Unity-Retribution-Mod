@@ -462,7 +462,7 @@ MonoBehaviour:
   maxHorizontalAngle: 10
   maxVerticalAngle: 30
   MoveTarget: {fileID: 485101760791666370}
-  moveSpeed: 5
+  moveSpeed: 7
   turnSpeed: 90
   firePoint: {fileID: 6748738809391093893}
   projectileOptions:
@@ -471,7 +471,7 @@ MonoBehaviour:
     launchForce: 7000
     upwardForce: 250
     sprite: {fileID: 21300000, guid: 653d78db20fc46c4f882c304f181bcb5, type: 3}
-    fireCooldown: 1
+    fireCooldown: 2
     projectileCount: 1
     spreadAngle: 0
     BarrelRecoil: 1
