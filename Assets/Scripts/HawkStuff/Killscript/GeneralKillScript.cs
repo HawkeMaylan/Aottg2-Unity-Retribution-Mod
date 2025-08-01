@@ -51,7 +51,7 @@ public class GeneralKillScript : MonoBehaviourPunCallbacks
 
     private Dictionary<BaseTitan, int> titanKnockbackCounts = new Dictionary<BaseTitan, int>();
     private HashSet<GameObject> recentlyHit = new HashSet<GameObject>();
-    private float hitCooldown = 0.2f;
+    public float hitCooldown = 0.002f;
 
     private void Start()
     {

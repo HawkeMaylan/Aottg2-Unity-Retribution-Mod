@@ -100,13 +100,13 @@ SphereCollider:
   m_Material: {fileID: 13400000, guid: 997dde812a8aa7944b10a12b9b1b9df7, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 8192
+    m_Bits: 2147483255
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
@@ -146,6 +146,7 @@ MonoBehaviour:
   directionalStun: 0
   knockbackForce: 3000
   maxKnockbacksPerTitan: 1
+  hitCooldown: 0.002
 --- !u!54 &8348118042904691061
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -162,10 +163,10 @@ Rigidbody:
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 8192
+    m_Bits: 2147483255
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
