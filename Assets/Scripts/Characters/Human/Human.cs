@@ -461,7 +461,7 @@ namespace Characters
                 _targetRotation = GetTargetRotation();
                 CrossFade(HumanAnimations.Dodge, 0.1f);
                 PlaySound(HumanSounds.Dodge);
-                CurrentStamina -= 15f;// Stamina loss
+                CurrentStamina -= 10f;// Stamina loss
                 _canRegenStamina = false; /// Force Cooldown
                 _timeSinceLastStaminaUse = 0f; /// Force Cooldown
                 ToggleSparks(false);
@@ -1368,8 +1368,7 @@ namespace Characters
         {
             if (IsMine() && !Dead)
             {
-                UpdateStamina(); ///
-                CheckSprintInput(); ///
+                
                 _stateTimeLeft -= Time.deltaTime;
                 _dashCooldownLeft -= Time.deltaTime;
                 _reloadCooldownLeft -= Time.deltaTime;
@@ -1562,7 +1561,8 @@ namespace Characters
                 Cache.Transform.rotation = GrabHand.transform.rotation;
             }
 
-
+            UpdateStamina(); ///
+            CheckSprintInput(); ///
         }
 
         private void UpdateStamina()
@@ -1646,8 +1646,10 @@ namespace Characters
             if (!IsMine() || Dead || MountState != HumanMountState.None)
                 return;
 
+
             // Sprint when Shift is held while moving on ground
             bool wantToSprint = Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.RightShift);
+
 
             // Additional check for stamina here to prevent toggling sprint when empty
             if (wantToSprint && Grounded && HasDirection && CurrentStamina > 0)

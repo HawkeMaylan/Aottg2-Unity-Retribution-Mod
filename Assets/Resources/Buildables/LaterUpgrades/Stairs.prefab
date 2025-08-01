@@ -163,6 +163,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: d8028a3f16693b94caa869eaec65d767, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: d8028a3f16693b94caa869eaec65d767, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: d8028a3f16693b94caa869eaec65d767, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: d8028a3f16693b94caa869eaec65d767, type: 3}
       propertyPath: m_LocalPosition.x
       value: 36.05917
       objectReference: {fileID: 0}
@@ -356,8 +368,14 @@ MonoBehaviour:
   menuIcon: {fileID: 21300000, guid: 442d59a20dfa49b4b9fb2c030926606a, type: 3}
   category: Base
   displayName: Ramp
-  gridSize: 1
-  offset: 1
+  gridSize: 2
+  offset: 2
+  forceUpAlignment: 0
+  forcedUpAxis: 1
+  forwardAxis: 2
+  snapToSurface: 1
+  rotationAxis: 1
+  rotationIncrement: 45
   buildParticleEffectPrefab: {fileID: 7745491904160101421, guid: eebeec04a969e854492534bdf2d1c7a0, type: 3}
   particleEffectOffset: {x: 0, y: 0, z: 0}
   particleUsePreviewRotation: 0

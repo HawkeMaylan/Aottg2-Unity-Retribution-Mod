@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 454802}
   - component: {fileID: 19854802}
   - component: {fileID: 19954802}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: TitanDie2Effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4786,7 +4786,7 @@ GameObject:
   - component: {fileID: 6256726524979762953}
   - component: {fileID: 6346208025997138302}
   - component: {fileID: 51365657294169419}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: TitanDie2Effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9556,6 +9556,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 454802}
     m_Modifications:
+    - target: {fileID: 751194793992867892, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 815180024702549616, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
       propertyPath: stopAction
       value: 2
@@ -9595,10 +9599,22 @@ PrefabInstance:
     - target: {fileID: 857547804905561845, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
       propertyPath: InitialModule.startColor.maxColor.r
       value: 0.6698113
+      objectReference: {fileID: 0}
+    - target: {fileID: 2198151331486948195, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2355188440858266862, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 2624827397599894304, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
       propertyPath: m_Name
       value: TitanSkeleEffect
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624827397599894304, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 2624827397599894304, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
       propertyPath: m_IsActive
@@ -9656,6 +9672,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4843103258082934309, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6401914407784639172, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 6973536539837213233, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
       propertyPath: stopAction
       value: 2
@@ -9695,6 +9719,10 @@ PrefabInstance:
     - target: {fileID: 7882017679066652729, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
       propertyPath: InitialModule.startColor.maxColor.r
       value: 0.6698113
+      objectReference: {fileID: 0}
+    - target: {fileID: 8479803297213623077, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 9146233794315162082, guid: 13c3ad5aa12d08b4d9ea7d9261e049b3, type: 3}
       propertyPath: stopAction
