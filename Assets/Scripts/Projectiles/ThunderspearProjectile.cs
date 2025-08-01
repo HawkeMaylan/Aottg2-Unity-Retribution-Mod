@@ -230,7 +230,13 @@ namespace Projectiles
                             soundPriority = Mathf.Max(soundPriority, (int)TSKillType.ArmorHit);
                     }
                 }
-            }
+                if (titan != null && titan != _owner && !TeamInfo.SameTeam(titan, _team) && !titan.Dead)
+                {
+                    if (collider == titan.BaseTitanCache.EyesHurtbox)
+                        titan.GetHit(_owner, 0, "Thunderspear", collider.name);
+                }
+                
+                }
             return soundPriority;
         }
 
