@@ -2950,6 +2950,8 @@ namespace Characters
             itemList2.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
             ///itemList2.Add(new FlareItem3(this, "Acoustic Flare", Color.grey, 300f));
             itemList2.Add(new HorseWhistleItem(this, "Whistle", 20f));
+            itemList2.Add(new Airburst1Spawn(this, "Airburst Compressor", 1f));
+            
 
 
 

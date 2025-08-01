@@ -16784,6 +16784,7 @@ MonoBehaviour:
   - Molotov
   - GasBomb
   - Resources
+  - AirburstCompressorLvl1
 --- !u!114 &-5803597552919391511
 MonoBehaviour:
   m_ObjectHideFlags: 0
