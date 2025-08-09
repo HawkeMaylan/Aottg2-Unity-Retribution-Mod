@@ -78,8 +78,6 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Update()
     {
-
-
         timeOfDay += Time.deltaTime / dayDuration;
         if (timeOfDay > 1f) timeOfDay -= 1f;
 
@@ -101,8 +99,6 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
 
         UpdateSunAndMoon();
         UpdateLighting();
-
-       
     }
 
     private void NormalizeDurations()
@@ -148,7 +144,6 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
             return Mathf.Lerp(180f, 360f, (time - sunsetEnd) / nightTime);
     }
 
-
     private void UpdateLighting()
     {
         float sunAngle = GetSunAngle(timeOfDay);
@@ -182,17 +177,42 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
         }
 
         float boostedIntensity = 0f;
+        float currentSunAngle = sunAngle % 360f;
 
-        if (sunAngle < 15f)
-            boostedIntensity = Mathf.Lerp(0f, maxSunIntensity * sunriseIntensityMultiplier, Mathf.InverseLerp(0f, 15f, sunAngle));
-        else if (sunAngle < 30f)
-            boostedIntensity = Mathf.Lerp(maxSunIntensity * sunriseIntensityMultiplier, maxSunIntensity, Mathf.InverseLerp(15f, 30f, sunAngle));
-        else if (sunAngle >= 150f && sunAngle < 165f)
-            boostedIntensity = Mathf.Lerp(maxSunIntensity, maxSunIntensity * sunsetIntensityMultiplier, Mathf.InverseLerp(150f, 165f, sunAngle));
-        else if (sunAngle >= 165f && sunAngle < 180f)
-            boostedIntensity = Mathf.Lerp(maxSunIntensity * sunsetIntensityMultiplier, 0f, Mathf.InverseLerp(165f, 180f, sunAngle));
+        // Sunrise boost (0-15 degrees)
+        if (currentSunAngle < 15f)
+        {
+            float sunriseProgress = currentSunAngle / 15f;
+            boostedIntensity = Mathf.Lerp(0f, maxSunIntensity * sunriseIntensityMultiplier, sunriseProgress);
+        }
+        // Transition from sunrise boost to normal (15-30 degrees)
+        else if (currentSunAngle < 30f)
+        {
+            float transitionProgress = (currentSunAngle - 15f) / 15f;
+            boostedIntensity = Mathf.Lerp(maxSunIntensity * sunriseIntensityMultiplier, maxSunIntensity, transitionProgress);
+        }
+        // Normal midday intensity (30-150 degrees)
+        else if (currentSunAngle < 150f)
+        {
+            boostedIntensity = maxSunIntensity;
+        }
+        // Transition to sunset boost (150-165 degrees)
+        else if (currentSunAngle < 165f)
+        {
+            float transitionProgress = (currentSunAngle - 150f) / 15f;
+            boostedIntensity = Mathf.Lerp(maxSunIntensity, maxSunIntensity * sunsetIntensityMultiplier, transitionProgress);
+        }
+        // Sunset boost (165-180 degrees)
+        else if (currentSunAngle < 180f)
+        {
+            float sunsetProgress = (currentSunAngle - 165f) / 15f;
+            boostedIntensity = Mathf.Lerp(maxSunIntensity * sunsetIntensityMultiplier, 0f, sunsetProgress);
+        }
+        // Night time (180-360 degrees)
         else
-            boostedIntensity = Mathf.Clamp01(Vector3.Dot(sun.transform.forward, Vector3.down)) * maxSunIntensity;
+        {
+            boostedIntensity = 0f;
+        }
 
         sun.intensity = boostedIntensity;
         moon.intensity = Mathf.Clamp01(-Vector3.Dot(sun.transform.forward, Vector3.down)) * maxMoonIntensity;
@@ -267,7 +287,6 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
                 sb.material = null;
         }
     }
-
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {

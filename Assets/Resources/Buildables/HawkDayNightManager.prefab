@@ -237,12 +237,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sun: {fileID: 42349908458179679}
   moon: {fileID: 4745114026488916793}
-  dayDuration: 3600
+  dayDuration: 36
   sunriseDuration: 0.1
   middayDuration: 0.5
   sunsetDuration: 0.1
   nightDuration: 0.3
-  maxSunIntensity: 0.9
+  maxSunIntensity: 1.1
   maxMoonIntensity: 0.2
   minimumNightExposure: 0.23
   maximumDayExposure: 1.3
