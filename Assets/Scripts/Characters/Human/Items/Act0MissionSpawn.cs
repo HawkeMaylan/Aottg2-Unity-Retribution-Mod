@@ -20,24 +20,25 @@ namespace Characters
 
             try
             {
-                Vector3 pos = Vector3.zero; // Always spawn at (0, 0, 0)
-
                 GameObject fay = GameObject.Find("Fay(Clone)");
                 if (fay != null && PhotonNetwork.IsMasterClient)
                 {
                     PhotonNetwork.Destroy(fay);
                 }
-                GameObject Mission = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Cape5", pos, Quaternion.identity);
-                ///GameObject Mission = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Act05_1", pos, Quaternion.identity);
-                ///GameObject Mission1 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Act05_2", pos, Quaternion.identity);
-                ///GameObject Mission2 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Act05_3", pos, Quaternion.identity);
-                ///GameObject Mission3 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Act05_4", pos, Quaternion.identity);
-                ///GameObject Mission4 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Act05_5", pos, Quaternion.identity);
-                ///GameObject Mission5 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Act05_6", pos, Quaternion.identity);
-                ///GameObject Mission6 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/Act05_7", pos, Quaternion.identity);
-                // GameObject ShigGateS = PhotonNetwork.Instantiate("Buildables/ShigGateSouth", pos, Quaternion.identity);
-                /// GameObject Varreosa = PhotonNetwork.Instantiate("Buildables/PastVarreosa", pos, Quaternion.identity);
-                /// GameObject WaterBase = PhotonNetwork.Instantiate("Buildables/WaterEmpty", pos, Quaternion.identity);
+
+                // Load prefabs to get their default positions
+                GameObject soldier1Prefab = Resources.Load<GameObject>("Buildables/NPCS/Preset/StrandedSoldier1");
+                GameObject soldier2Prefab = Resources.Load<GameObject>("Buildables/NPCS/Preset/StrandedSoldier2");
+                GameObject soldier3Prefab = Resources.Load<GameObject>("Buildables/NPCS/Preset/StrandedSoldier3");
+
+                // Spawn soldiers at their prefab positions (fallback to Vector3.zero if prefab missing)
+                Vector3 pos1 = soldier1Prefab != null ? soldier1Prefab.transform.position : Vector3.zero;
+                Vector3 pos2 = soldier2Prefab != null ? soldier2Prefab.transform.position : Vector3.zero;
+                Vector3 pos3 = soldier3Prefab != null ? soldier3Prefab.transform.position : Vector3.zero;
+
+                GameObject Mission = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/StrandedSoldier1", pos1, Quaternion.identity);
+                GameObject Mission2 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/StrandedSoldier2", pos2, Quaternion.identity);
+                GameObject Mission3 = PhotonNetwork.Instantiate("Buildables/NPCS/Preset/StrandedSoldier3", pos3, Quaternion.identity);
             }
             catch { /* Silently ignore errors if any occur */ }
         }
