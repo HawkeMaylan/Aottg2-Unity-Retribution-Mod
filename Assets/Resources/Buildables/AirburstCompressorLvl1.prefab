@@ -147,7 +147,7 @@ MonoBehaviour:
   disableArms: 1
   crippleLegs: 1
   blindEyes: 1
-  directionalStun: 1
+  directionalStun: 0
   knockbackForce: 30
   maxKnockbacksPerTitan: 1
   hitCooldown: 0.002
