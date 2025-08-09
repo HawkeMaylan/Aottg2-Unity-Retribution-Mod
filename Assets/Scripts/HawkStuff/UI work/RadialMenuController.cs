@@ -113,7 +113,7 @@ public class RadialMenuController : MonoBehaviour
         else
         {
             // Original toggle behavior
-            if (SettingsManager.InputSettings.General.BuildMenuRadial.GetKey()) 
+            if (SettingsManager.InputSettings.General.BuildMenuRadial.GetKeyDown()) 
             {
                 if (menuActive)
                 {
