@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 439252}
   - component: {fileID: 19839252}
   - component: {fileID: 19939252}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Circles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4739,7 +4739,7 @@ GameObject:
   - component: {fileID: 439254}
   - component: {fileID: 19839254}
   - component: {fileID: 19939254}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: NapeBloodParticle2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9471,7 +9471,7 @@ GameObject:
   - component: {fileID: 8225578718598351099}
   - component: {fileID: 1472568138056846584}
   - component: {fileID: 2558568567161687701}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Circles (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14199,7 +14199,7 @@ GameObject:
   - component: {fileID: 969875324673242243}
   - component: {fileID: 736373819719497539}
   - component: {fileID: 5373282555061284222}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: melon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19105,7 +19105,7 @@ GameObject:
   - component: {fileID: 5240738801272043319}
   - component: {fileID: 911595138593726542}
   - component: {fileID: 4629691627216087998}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Circles (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

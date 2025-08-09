@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 439252}
   - component: {fileID: 19839252}
   - component: {fileID: 19939252}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Circles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4739,7 +4739,7 @@ GameObject:
   - component: {fileID: 439254}
   - component: {fileID: 19839254}
   - component: {fileID: 19939254}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: NapeBloodParticle3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9469,7 +9469,7 @@ GameObject:
   - component: {fileID: 1489287816299796649}
   - component: {fileID: 924923508738138296}
   - component: {fileID: 1315622891570500221}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: watermelon
   m_TagString: Untagged
   m_Icon: {fileID: 0}

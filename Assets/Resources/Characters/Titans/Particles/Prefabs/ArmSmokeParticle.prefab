@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 408882}
   - component: {fileID: 19808882}
   - component: {fileID: 19908882}
-  m_Layer: 12
+  m_Layer: 8
   m_Name: ArmSmokeParticle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4812,7 +4812,7 @@ GameObject:
   - component: {fileID: 5744510413582091888}
   - component: {fileID: 1908210908262392234}
   - component: {fileID: 8393822686642746875}
-  m_Layer: 12
+  m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
