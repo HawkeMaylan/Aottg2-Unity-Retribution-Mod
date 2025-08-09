@@ -7154,6 +7154,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5801033945792118813, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5801033945792118813, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       propertyPath: runSpeedThreshold
       value: 2
       objectReference: {fileID: 0}
@@ -7180,10 +7184,47 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5223992177507188782}
   m_SourcePrefab: {fileID: 100100000, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
 --- !u!4 &4069547822707845733 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 712921334650953466, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
   m_PrefabInstance: {fileID: 3575081865169466527}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &5451743952980953147 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+  m_PrefabInstance: {fileID: 3575081865169466527}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6095151424201755602 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+  m_PrefabInstance: {fileID: 3575081865169466527}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5223992177507188782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6095151424201755602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3b4ef7952e2faf408281aab791ec1b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mountPoint: {fileID: 5451743952980953147}
+  positionOffset: {x: 0, y: 0, z: 0}
+  rotationOffset: {x: 0, y: 0, z: 0}
+  promptDuration: 5
+  mountText: Press {0} to Mount
+  unmountText: Press {0} to Unmount
+  useHorseAnimations: 1
+  enableRunAnimation: 0
+  runSpeedThreshold: 15
+  disableGravityOnMount: 0
+  adjustMassOnMount: 0
+  mountedMass: 0.1
