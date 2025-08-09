@@ -243,7 +243,7 @@ MonoBehaviour:
   sunsetDuration: 0.1
   nightDuration: 0.3
   maxSunIntensity: 1.1
-  maxMoonIntensity: 0.3
+  maxMoonIntensity: 0.2
   minimumNightExposure: 0.23
   maximumDayExposure: 1.3
   sunriseIntensityMultiplier: 1.05
