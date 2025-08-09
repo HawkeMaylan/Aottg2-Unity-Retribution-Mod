@@ -3,6 +3,8 @@ using Photon.Pun;
 using System.Collections.Generic;
 using Characters;
 using System.Collections;
+using GameManagers;
+using UI;
 
 public class BuildSystem : MonoBehaviourPunCallbacks
 {
@@ -162,7 +164,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void HandleBuildingToggle()
     {
-        if (Input.GetKeyDown(buildKey))
+        if (Input.GetKeyDown(buildKey) && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
             isBuilding = !isBuilding;
 
@@ -327,7 +329,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         }
 
         // Snap to surface normal
-        if (Input.GetKeyDown(snapToSurfaceKey))
+        if (Input.GetKeyDown(snapToSurfaceKey) && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
             if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, 40, buildLayer))
             {
