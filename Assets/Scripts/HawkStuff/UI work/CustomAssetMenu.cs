@@ -31,7 +31,7 @@ public class CustomAssetMenu : MonoBehaviourPun
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.BackQuote))
+        if (Input.GetKeyDown(KeyCode.BackQuote) && PhotonNetwork.IsMasterClient)
         {
             menuOpen = !menuOpen;
             Cursor.visible = menuOpen;
