@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
 using UI;
+using Settings;
 
 public class RadialMenuController : MonoBehaviour
 {
@@ -112,7 +113,7 @@ public class RadialMenuController : MonoBehaviour
         else
         {
             // Original toggle behavior
-            if (Input.GetKeyDown(toggleKey))
+            if (SettingsManager.InputSettings.General.BuildMenuRadial.GetKey()) 
             {
                 if (menuActive)
                 {

@@ -326,6 +326,9 @@ namespace Characters
             CrossFade(HumanAnimations.Jump, 0.1f);
             PlaySound(HumanSounds.Jump);
             ToggleSparks(false);
+            CurrentStamina -= 5f;// Stamina loss
+            _canRegenStamina = false; /// Force Cooldown
+            _timeSinceLastStaminaUse = 0f; /// Force Cooldown
         }
 
         public void Mount(Transform transform, Vector3 positionOffset, Vector3 rotationOffset)
@@ -1648,7 +1651,7 @@ namespace Characters
 
 
             // Sprint when Shift is held while moving on ground
-            bool wantToSprint = Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.RightShift);
+            bool wantToSprint = (SettingsManager.InputSettings.Human.HumanSprint.GetKey());
 
 
             // Additional check for stamina here to prevent toggling sprint when empty
