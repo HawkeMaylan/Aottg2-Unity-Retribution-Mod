@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 8401524309799838033}
   - component: {fileID: 2129585168252026103}
   - component: {fileID: 1288867058869700286}
-  m_Layer: 23
+  m_Layer: 14
   m_Name: AirburstCompressorLvl1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -255,7 +255,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5970914536532479213}
   - component: {fileID: 4876098273488724360}
-  - component: {fileID: 678062773591199908}
   m_Layer: 23
   m_Name: ExplosionAudio
   m_TagString: Untagged
@@ -374,30 +373,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!167 &678062773591199908
-AudioReverbZone:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2678261004539310399}
-  m_Enabled: 1
-  m_MinDistance: 7500
-  m_MaxDistance: 15000
-  m_ReverbPreset: 9
-  m_Room: -1000
-  m_RoomHF: 0
-  m_DecayTime: 2.91
-  m_DecayHFRatio: 1.3
-  m_Reflections: -602
-  m_ReflectionsDelay: 0.015
-  m_Reverb: -302
-  m_ReverbDelay: 0.022
-  m_HFReference: 5000
-  m_Diffusion: 100
-  m_Density: 100
-  m_LFReference: 250
-  m_RoomLF: 0
 --- !u!1 &3336496785239126562
 GameObject:
   m_ObjectHideFlags: 0
