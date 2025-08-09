@@ -44,12 +44,6 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private Coroutine detachCheckCoroutine;
     private Coroutine attachPromptCoroutine;
 
-    private void Awake()
-    {
-        wagon = transform.root;
-        rb = wagon.GetComponent<Rigidbody>();
-        pv = wagon.GetComponent<PhotonView>(); // Initialize early
-    }
     private void Start()
     {
         wagon = transform.root;
@@ -110,19 +104,15 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private void OnTriggerEnter(Collider other)
     {
         if (isAttached) return;
-        if (pv == null || !pv.IsMine) return; // Ensure PhotonView exists and is owned
-
+        if (!pv.IsMine || isAttached) return;
         if (other.name == "HorseTrigger")
         {
             Transform horseRoot = other.transform.root;
-            if (horseRoot == null) return; // Ensure root exists
-
             PhotonView horseView = horseRoot.GetComponentInParent<PhotonView>();
             Horse horseComponent = horseRoot.GetComponentInParent<Horse>();
 
-            if (horseView == null || horseComponent == null) return; // Skip if missing components
-
-            if (horseView.Owner == PhotonNetwork.LocalPlayer && horseComponent.MountedStatus == 1)
+            if (horseView != null && horseComponent != null &&
+                horseView.Owner == PhotonNetwork.LocalPlayer && horseComponent.MountedStatus == 1)
             {
                 horseRootInContact = horseRoot;
                 SetPrompt($"Press {SettingsManager.InputSettings.Interaction.Interact2.ToString()} to Attach", 3f);
