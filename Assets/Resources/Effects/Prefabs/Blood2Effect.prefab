@@ -19480,6 +19480,10 @@ PrefabInstance:
       value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: CollisionModule.collisionMessages
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: InitialModule.startSize.minScalar
       value: 0.1
       objectReference: {fileID: 0}
@@ -19500,6 +19504,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: CollisionModule.collidesWith.m_Bits
+      value: 133174273
+      objectReference: {fileID: 0}
+    - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: InitialModule.startLifetime.minScalar
       value: 30
       objectReference: {fileID: 0}
@@ -19508,8 +19516,16 @@ PrefabInstance:
       value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: SubModule.subEmitters.Array.data[0].emitter
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: CollisionModule.m_EnergyLossOnCollision.scalar
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.scalar
-      value: 40
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 2185616777163764283, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: lengthInSec
@@ -19604,6 +19620,9 @@ PrefabInstance:
     - {fileID: 6745166490371712577, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 132634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1890254688826673239}
     - targetCorrespondingSourceObject: {fileID: 7964444156024003765, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7598662801742819701}
@@ -19642,6 +19661,40 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 432634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
   m_PrefabInstance: {fileID: 6712210483026834883}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6712210483026703321 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 132634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+  m_PrefabInstance: {fileID: 6712210483026834883}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1890254688826673239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6712210483026703321}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b372d442d5bbb004cbe7998f14f057f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prints:
+  - {fileID: 6351462225988822593, guid: f665bc7a03e190947902320cad05e606, type: 3}
+  printLayers:
+  - serializedVersion: 2
+    m_Bits: 0
+  printTags:
+  - 
+  printMethod: 0
+  poolID: 0
+  parent: 1
+  printBehaviours: 0
+  destroyOnPrint: 0
+  frequencyTime: 0
+  frequencyDistance: 0
+  overlaps: []
+  rotationSource: 0
+  ratio: 1
 --- !u!198 &6712210483041610489 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
