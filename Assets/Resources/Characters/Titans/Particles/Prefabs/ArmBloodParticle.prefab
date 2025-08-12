@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 432634}
   - component: {fileID: 19832634}
   - component: {fileID: 19932634}
+  - component: {fileID: 5928883941378849424}
   m_Layer: 8
   m_Name: ArmBloodParticle
   m_TagString: Untagged
@@ -3816,11 +3817,11 @@ ParticleSystem:
     radiusScale: 0.1
     collidesWith:
       serializedVersion: 2
-      m_Bits: 133169153
+      m_Bits: 1743782913
     maxCollisionShapes: 10000
     quality: 0
     voxelSize: 0.5
-    collisionMessages: 0
+    collisionMessages: 1
     collidesWithDynamic: 1
     interiorCollisions: 0
   TriggerModule:
@@ -4854,6 +4855,55 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &5928883941378849424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b372d442d5bbb004cbe7998f14f057f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prints:
+  - {fileID: 6351462225988822593, guid: f665bc7a03e190947902320cad05e606, type: 3}
+  - {fileID: 6351462225988822593, guid: ce0125731b6d32d499210f666888ca32, type: 3}
+  - {fileID: 6351462225988822593, guid: f1dc7516a23cedb40a7c28bb3dac1037, type: 3}
+  - {fileID: 6351462225988822593, guid: 182d17e7f034a8c4a8ff2189540729fd, type: 3}
+  - {fileID: 6351462225988822593, guid: bff0e1a0143bed74dbb9a8cefa979473, type: 3}
+  - {fileID: 6351462225988822593, guid: 62955c4346824034c853f8b277e6b465, type: 3}
+  printLayers:
+  - serializedVersion: 2
+    m_Bits: 0
+  - serializedVersion: 2
+    m_Bits: 0
+  - serializedVersion: 2
+    m_Bits: 0
+  - serializedVersion: 2
+    m_Bits: 0
+  - serializedVersion: 2
+    m_Bits: 0
+  - serializedVersion: 2
+    m_Bits: 0
+  printTags:
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  printMethod: 1
+  poolID: 0
+  parent: 1
+  printBehaviours: 0
+  destroyOnPrint: 0
+  frequencyTime: 0
+  frequencyDistance: 0
+  overlaps: []
+  rotationSource: 0
+  ratio: 1
 --- !u!1001 &1916208176037465308
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4965,6 +5015,10 @@ PrefabInstance:
     - target: {fileID: 343227733051145959, guid: e957aed1b629cf14ea1081d64de5c7dc, type: 3}
       propertyPath: SubModule.subEmitters.Array.data[0].emitProbability
       value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4784541641687266120, guid: e957aed1b629cf14ea1081d64de5c7dc, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4784541641687266120, guid: e957aed1b629cf14ea1081d64de5c7dc, type: 3}
       propertyPath: m_SortMode

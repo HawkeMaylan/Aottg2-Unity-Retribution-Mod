@@ -19521,7 +19521,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: CollisionModule.collidesWith.m_Bits
-      value: 1743918593
+      value: 1743920641
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: InitialModule.startLifetime.minScalar
