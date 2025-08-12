@@ -19476,6 +19476,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: InitialModule.maxNumParticles
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: InitialModule.startSize.scalar
       value: 0.8
       objectReference: {fileID: 0}
@@ -19489,7 +19493,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: InitialModule.startSpeed.scalar
-      value: 15
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: CollisionModule.collisionMessages
@@ -19513,7 +19517,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: InitialModule.startSpeed.minScalar
-      value: 1
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: CollisionModule.collidesWith.m_Bits
@@ -19696,12 +19700,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prints:
   - {fileID: 6351462225988822593, guid: f665bc7a03e190947902320cad05e606, type: 3}
+  - {fileID: 6351462225988822593, guid: ce0125731b6d32d499210f666888ca32, type: 3}
+  - {fileID: 6351462225988822593, guid: f1dc7516a23cedb40a7c28bb3dac1037, type: 3}
+  - {fileID: 6351462225988822593, guid: 182d17e7f034a8c4a8ff2189540729fd, type: 3}
+  - {fileID: 6351462225988822593, guid: bff0e1a0143bed74dbb9a8cefa979473, type: 3}
+  - {fileID: 6351462225988822593, guid: 62955c4346824034c853f8b277e6b465, type: 3}
   printLayers:
+  - serializedVersion: 2
+    m_Bits: 0
+  - serializedVersion: 2
+    m_Bits: 0
+  - serializedVersion: 2
+    m_Bits: 0
+  - serializedVersion: 2
+    m_Bits: 0
+  - serializedVersion: 2
+    m_Bits: 0
   - serializedVersion: 2
     m_Bits: 0
   printTags:
   - 
-  printMethod: 0
+  - 
+  - 
+  - 
+  - 
+  - 
+  printMethod: 1
   poolID: 0
   parent: 1
   printBehaviours: 0

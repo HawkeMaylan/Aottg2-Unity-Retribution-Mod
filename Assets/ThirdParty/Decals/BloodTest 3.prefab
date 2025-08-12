@@ -10,9 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1224603043429372951}
   - component: {fileID: 6351462225988822593}
-  - component: {fileID: 9073275049886915376}
   m_Layer: 8
-  m_Name: BloodTest
+  m_Name: BloodTest 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,12 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ba303429bf6dcd489303c045ead295f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projection: {fileID: 11400000, guid: b8d66eeb20d5bac469c0024f831cb649, type: 2}
+  projection: {fileID: 11400000, guid: 5ca84fd551640114e891525f6239efae, type: 2}
   properties:
   - name: Albedo
     nameID: 162
     type: 0
-    color: {r: 0.254717, g: 0, b: 0, a: 1}
+    color: {r: 0.41509432, g: 0, b: 0, a: 1}
     value: 0
     enabled: 0
   - name: Emission
@@ -63,21 +62,7 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   maskMethod: 0
   masks: 00000000
-  _TilingOffset: 1124
-  _MaskBase: 1125
-  _MaskLayers: 1126
-  instanceID: 828056
---- !u!114 &9073275049886915376
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6429571899386498063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06ea30bc8d14ac14faabff20b2fbdcc6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  frequency: 0
-  cullTime: 4
+  _TilingOffset: 1664
+  _MaskBase: 1662
+  _MaskLayers: 1663
+  instanceID: -299996
