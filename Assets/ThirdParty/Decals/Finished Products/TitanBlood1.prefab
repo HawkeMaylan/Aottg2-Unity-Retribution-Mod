@@ -10,9 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 1224603043429372951}
   - component: {fileID: 6351462225988822593}
-  - component: {fileID: -7710141767694204790}
+  - component: {fileID: -8955641150388494759}
+  - component: {fileID: -6997373018593116313}
+  - component: {fileID: 6374412754986355358}
   m_Layer: 8
-  m_Name: BloodTest 4
+  m_Name: TitanBlood1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,12 +47,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ba303429bf6dcd489303c045ead295f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projection: {fileID: 11400000, guid: 198f8c151100be04ebf23951c7b6081a, type: 2}
+  projection: {fileID: 11400000, guid: a7bdb6583a79a0d46a48b0ea1f4e83aa, type: 2}
   properties:
   - name: Albedo
     nameID: 162
     type: 0
-    color: {r: 0.41509432, g: 0, b: 0, a: 1}
+    color: {r: 0.8396226, g: 0, b: 0, a: 1}
     value: 0
     enabled: 0
   - name: Emission
@@ -67,7 +69,7 @@ MonoBehaviour:
   _MaskBase: 1662
   _MaskLayers: 1663
   instanceID: -299996
---- !u!114 &-7710141767694204790
+--- !u!114 &-8955641150388494759
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -81,3 +83,57 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   frequency: 2
   cullTime: 1
+--- !u!114 &-6997373018593116313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6429571899386498063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c9e395c24f5a584a88531dfb2b02c41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lifetime: 5
+  ownershipTimeout: 5
+--- !u!114 &6374412754986355358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6429571899386498063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1998db89cdc03074aa0689a5a00cb639, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frequency: 0
+  type: 0
+  wrapMode: 0
+  fade:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  fadeLength: 5

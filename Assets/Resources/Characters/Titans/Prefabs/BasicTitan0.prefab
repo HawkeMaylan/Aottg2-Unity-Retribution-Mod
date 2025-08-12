@@ -121,7 +121,7 @@ GameObject:
   - component: {fileID: 5405542}
   - component: {fileID: 7580768216817431424}
   - component: {fileID: 4806116717347376359}
-  m_Layer: 11
+  m_Layer: 29
   m_Name: BasicTitan0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -273,7 +273,7 @@ Rigidbody:
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0

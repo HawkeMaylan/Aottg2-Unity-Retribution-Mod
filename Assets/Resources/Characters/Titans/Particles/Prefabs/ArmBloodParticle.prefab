@@ -3656,7 +3656,7 @@ ParticleSystem:
     m_Dampen:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.8
+      scalar: 1
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -3709,7 +3709,7 @@ ParticleSystem:
     m_Bounce:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.3
+      scalar: 0
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -4868,12 +4868,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prints:
-  - {fileID: 6351462225988822593, guid: f665bc7a03e190947902320cad05e606, type: 3}
-  - {fileID: 6351462225988822593, guid: ce0125731b6d32d499210f666888ca32, type: 3}
-  - {fileID: 6351462225988822593, guid: f1dc7516a23cedb40a7c28bb3dac1037, type: 3}
-  - {fileID: 6351462225988822593, guid: 182d17e7f034a8c4a8ff2189540729fd, type: 3}
-  - {fileID: 6351462225988822593, guid: bff0e1a0143bed74dbb9a8cefa979473, type: 3}
-  - {fileID: 6351462225988822593, guid: 62955c4346824034c853f8b277e6b465, type: 3}
+  - {fileID: 6351462225988822593, guid: 9dd1e2c51de6c9a43ad9932e1b5b7069, type: 3}
+  - {fileID: 6351462225988822593, guid: 25bae4151bb30a84f884f2b822779e64, type: 3}
+  - {fileID: 6351462225988822593, guid: cfb0ea66ceb02c843a635b817c8e7b7e, type: 3}
+  - {fileID: 6351462225988822593, guid: d9a580e398320124db11f0c8bd8bafd3, type: 3}
+  - {fileID: 6351462225988822593, guid: 6d1e466bb399d774c869c0fc422cc8ff, type: 3}
+  - {fileID: 6351462225988822593, guid: 07b52ef9363390d44b2fed546f44956d, type: 3}
   printLayers:
   - serializedVersion: 2
     m_Bits: 0

@@ -79,5 +79,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06ea30bc8d14ac14faabff20b2fbdcc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  frequency: 0
-  cullTime: 4
+  frequency: 2
+  cullTime: 1
