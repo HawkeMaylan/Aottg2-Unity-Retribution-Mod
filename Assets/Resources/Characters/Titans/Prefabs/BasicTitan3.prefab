@@ -333,7 +333,7 @@ GameObject:
   - component: {fileID: 5439734}
   - component: {fileID: 262362862039945830}
   - component: {fileID: 8749544044919362032}
-  m_Layer: 29
+  m_Layer: 11
   m_Name: BasicTitan3
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -16,8 +16,8 @@ MonoBehaviour:
   instanced: 1
   forceForward: 0
   priority: 2
-  transparencyType: 1
-  cutoff: 0.01
+  transparencyType: 0
+  cutoff: 0.016
   tiling: {x: 0, y: 0}
   offset: {x: 0, y: 0}
   maskMethod: 0

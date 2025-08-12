@@ -19631,6 +19631,34 @@ PrefabInstance:
       propertyPath: ColorModule.gradient.maxGradient.m_ColorSpace
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5928883941378849424, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: overlaps.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5928883941378849424, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: 'prints.Array.data[0]'
+      value: 
+      objectReference: {fileID: 6351462225988822593, guid: f665bc7a03e190947902320cad05e606, type: 3}
+    - target: {fileID: 5928883941378849424, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: 'prints.Array.data[1]'
+      value: 
+      objectReference: {fileID: 6351462225988822593, guid: ce0125731b6d32d499210f666888ca32, type: 3}
+    - target: {fileID: 5928883941378849424, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: 'prints.Array.data[2]'
+      value: 
+      objectReference: {fileID: 6351462225988822593, guid: f1dc7516a23cedb40a7c28bb3dac1037, type: 3}
+    - target: {fileID: 5928883941378849424, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: 'prints.Array.data[3]'
+      value: 
+      objectReference: {fileID: 6351462225988822593, guid: 182d17e7f034a8c4a8ff2189540729fd, type: 3}
+    - target: {fileID: 5928883941378849424, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: 'prints.Array.data[4]'
+      value: 
+      objectReference: {fileID: 6351462225988822593, guid: bff0e1a0143bed74dbb9a8cefa979473, type: 3}
+    - target: {fileID: 5928883941378849424, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: 'prints.Array.data[5]'
+      value: 
+      objectReference: {fileID: 6351462225988822593, guid: 62955c4346824034c853f8b277e6b465, type: 3}
     - target: {fileID: 7964444156024003765, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: m_Name
       value: HumanBloodSplat

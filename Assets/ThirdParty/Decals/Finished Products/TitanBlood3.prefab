@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1224603043429372951}
   - component: {fileID: 6351462225988822593}
-  - component: {fileID: -5749099825360736052}
   - component: {fileID: -6372861524754513617}
   - component: {fileID: 2079804244801912503}
   m_Layer: 8
@@ -30,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.032396305, z: 0, w: 0.9994751}
   m_LocalPosition: {x: -37.488, y: 92.652, z: 49.598}
-  m_LocalScale: {x: 2, y: 2, z: 3}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -47,12 +46,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ba303429bf6dcd489303c045ead295f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projection: {fileID: 11400000, guid: 5ca84fd551640114e891525f6239efae, type: 2}
+  projection: {fileID: 11400000, guid: c3e674bd00deedd4fad8d1f107565a2a, type: 2}
   properties:
   - name: Albedo
     nameID: 162
     type: 0
-    color: {r: 0.41509432, g: 0, b: 0, a: 1}
+    color: {r: 0.735849, g: 0, b: 0, a: 1}
     value: 0
     enabled: 0
   - name: Emission
@@ -69,20 +68,6 @@ MonoBehaviour:
   _MaskBase: 1662
   _MaskLayers: 1663
   instanceID: -299996
---- !u!114 &-5749099825360736052
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6429571899386498063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06ea30bc8d14ac14faabff20b2fbdcc6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  frequency: 2
-  cullTime: 1
 --- !u!114 &-6372861524754513617
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,8 +80,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c9e395c24f5a584a88531dfb2b02c41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifetime: 5
-  ownershipTimeout: 5
+  lifetime: 15
+  ownershipTimeout: 15
 --- !u!114 &2079804244801912503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,4 +121,4 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  fadeLength: 5
+  fadeLength: 15

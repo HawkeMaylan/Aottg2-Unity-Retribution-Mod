@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf5f969f960bef8449fee2204a37e5a3, type: 3}
-  m_Name: Demo_GooYellow 4
+  m_Name: TitanBlood1
   m_EditorClassIdentifier: 
   type: 0
   instanced: 1
   forceForward: 0
-  priority: 5
+  priority: 2
   transparencyType: 1
   cutoff: 0.01
   tiling: {x: 0, y: 0}
@@ -28,14 +28,14 @@ MonoBehaviour:
   _MaskBase: 1125
   _MaskLayers: 1126
   albedo:
-    texture: {fileID: 2800000, guid: e7c1bb84763b8524b92343ea74721285, type: 3}
-    color: {r: 0.41509432, g: 0, b: 0, a: 1}
+    texture: {fileID: 2800000, guid: 46a88d0140154d949a2d22b4d4b5de3a, type: 3}
+    color: {r: 0.4811321, g: 0, b: 0, a: 1}
     _MainTex: 17
     _Color: 162
   metallic:
     texture: {fileID: 0}
-    metallicity: 0.886
-    glossiness: 0.264
+    metallicity: 0.8
+    glossiness: 0.1
     _MetallicGlossMap: 464
     _Metallic: 463
     _Glossiness: 422

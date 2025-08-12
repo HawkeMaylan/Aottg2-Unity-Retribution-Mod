@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1224603043429372951}
   - component: {fileID: 6351462225988822593}
-  - component: {fileID: 9073275049886915376}
   m_Layer: 8
   m_Name: BloodTest
   m_TagString: Untagged
@@ -66,18 +65,4 @@ MonoBehaviour:
   _TilingOffset: 1124
   _MaskBase: 1125
   _MaskLayers: 1126
-  instanceID: 828056
---- !u!114 &9073275049886915376
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6429571899386498063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06ea30bc8d14ac14faabff20b2fbdcc6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  frequency: 2
-  cullTime: 1
+  instanceID: 873862
