@@ -3091,6 +3091,11 @@ namespace Characters
 
             RegisterSprite("ShigGateSpawn", "Sprites/Items/ShigGate");
             RegisterSprite("Field Cannon Item", "Sprites/Items/FieldCannon");
+
+            RegisterSprite("Resupply", "Sprites/Items/SupplyStationicon");
+            RegisterSprite("Airburst Compressor", "Sprites/Items/AirburstCompressorLvl1");
+            
+            
         }
 
 
