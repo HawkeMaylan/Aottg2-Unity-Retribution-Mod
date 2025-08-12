@@ -19407,6 +19407,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: HumanBloodParticle
       objectReference: {fileID: 0}
+    - target: {fileID: 132634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
     - target: {fileID: 432634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.6131859
@@ -19461,7 +19465,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: CollisionModule.radiusScale
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: EmissionModule.m_BurstCount
@@ -19474,6 +19478,14 @@ PrefabInstance:
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: InitialModule.startSize.scalar
       value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: CollisionModule.m_Bounce.scalar
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: CollisionModule.m_Dampen.scalar
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: InitialModule.startSpeed.scalar
@@ -19505,7 +19517,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: CollisionModule.collidesWith.m_Bits
-      value: 133174273
+      value: 1743918593
       objectReference: {fileID: 0}
     - target: {fileID: 19832634, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: InitialModule.startLifetime.minScalar
@@ -19614,6 +19626,10 @@ PrefabInstance:
     - target: {fileID: 7964444156024003765, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
       propertyPath: m_Name
       value: HumanBloodSplat
+      objectReference: {fileID: 0}
+    - target: {fileID: 7964444156024003765, guid: c612a9ff1a735684ba62017d5ab2efa6, type: 3}
+      propertyPath: m_Layer
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
