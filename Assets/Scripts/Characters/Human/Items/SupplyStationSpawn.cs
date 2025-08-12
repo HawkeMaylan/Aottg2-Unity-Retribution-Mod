@@ -4,9 +4,9 @@ using Photon.Pun;
 
 namespace Characters
 {
-    class Airburst1Spawn : SimpleUseable
+    class SupplyStationSpawn : SimpleUseable
     {
-        public Airburst1Spawn(BaseCharacter owner, string name, float cooldown) : base(owner)
+        public SupplyStationSpawn(BaseCharacter owner, string name, float cooldown) : base(owner)
         {
             Name = name;
             Cooldown = cooldown;
@@ -26,24 +26,26 @@ namespace Characters
             }
 
             // Check item count and show popup if needed
-            if (inventory.GetItemCount("Airburst Compressor Lvl 1") <= 0)
+            if (inventory.GetItemCount("Supply Station") <= 0)
             {
                 Debug.Log("Not enough Cannon count to spawn.");
-                inventory.SetItemCount("Airburst Compressor Lvl 1", -1); // Triggers "Not Enough Cannon" popup
+
+                // Show the "Not Enough" popup through the inventory system
+                inventory.SetItemCount("Supply Station", -1); // This will trigger the popup
                 return;
             }
 
             try
             {
                 Vector3 pos = human.Cache.Transform.position + human.Cache.Transform.forward * 3f;
-                GameObject cannonObj = PhotonNetwork.Instantiate("Buildables/AirburstCompressorLvl1", pos, Quaternion.identity);
+                GameObject cannonObj = PhotonNetwork.Instantiate("Buildables/SupplyStation", pos, Quaternion.identity);
 
-                // Use inventory system's proper removal method
-                inventory.RemoveItem("Airburst Compressor Lvl 1"); // Handles RPC and shows "-1" popup
+                // Use the proper inventory method to remove the item
+                inventory.RemoveItem("Supply Station"); // This will handle the RPC and popup automatically
             }
-            catch (System.Exception e)
+            catch
             {
-                Debug.LogWarning($"AirburstCompressorLvl1 spawn failed: {e.Message}");
+                Debug.LogWarning("Cannon spawn failed.");
             }
         }
     }

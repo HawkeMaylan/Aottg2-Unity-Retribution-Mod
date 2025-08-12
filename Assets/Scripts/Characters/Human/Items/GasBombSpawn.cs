@@ -26,10 +26,10 @@ namespace Characters
             }
 
             // Check item count and show popup if needed
-            if (inventory.GetItemCount("GasBomb") <= 0)
+            if (inventory.GetItemCount("Gas Bomb") <= 0)
             {
                 Debug.Log("Not enough Gas Bombs.");
-                inventory.SetItemCount("GasBomb", -1); // Triggers "Not Enough GasBomb" popup
+                inventory.SetItemCount("Gas Bomb", -1); // Triggers "Not Enough GasBomb" popup
                 return;
             }
 
@@ -58,7 +58,7 @@ namespace Characters
                 }
 
                 // Use inventory system's proper removal method
-                inventory.RemoveItem("GasBomb"); // Handles RPC and shows "-1" popup
+                inventory.RemoveItem("Gas Bomb"); // Handles RPC and shows "-1" popup
             }
             catch (System.Exception e)
             {

@@ -16782,9 +16782,10 @@ MonoBehaviour:
   - CannonGround
   - WorkerLog
   - Molotov
-  - GasBomb
+  - Gas Bomb
   - Resources
-  - AirburstCompressorLvl1
+  - Airburst Compressor Lvl 1
+  - Supply Station
 --- !u!114 &-5803597552919391511
 MonoBehaviour:
   m_ObjectHideFlags: 0
