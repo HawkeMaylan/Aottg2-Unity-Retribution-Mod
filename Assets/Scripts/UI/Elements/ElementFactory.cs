@@ -256,13 +256,21 @@ namespace UI
             return inputSetting;
         }
 
-        public static GameObject CreateSliderInputSetting(Transform parent, ElementStyle style, BaseSetting setting, string title, string tooltip = "",
-            float sliderWidth = 150f, float sliderHeight = 16f, float inputWidth = 70f,
-            float inputHeight = 40f, int decimalPlaces = 2)
+        public static GameObject CreateSliderInputSetting(Transform parent, ElementStyle style, BaseSetting setting,
+        string title, string tooltip = "", float sliderWidth = 150f, float sliderHeight = 16f,
+        float inputWidth = 70f, float inputHeight = 40f, int decimalPlaces = 2,
+        UnityAction onValueChanged = null)
         {
             GameObject sliderInputSetting = InstantiateAndBind(parent, "Prefabs/Elements/SliderInputSetting");
             SliderInputSettingElement element = sliderInputSetting.AddComponent<SliderInputSettingElement>();
-            element.Setup(setting, style, title, tooltip, sliderWidth, sliderHeight, inputWidth, inputHeight, decimalPlaces);
+            element.Setup(setting, style, title, tooltip, sliderWidth, sliderHeight, inputWidth,
+                inputHeight, decimalPlaces);
+            if (onValueChanged != null)
+            {
+                var slider = sliderInputSetting.GetComponentInChildren<Slider>(true);
+                if (slider != null)
+                    slider.onValueChanged.AddListener((value) => onValueChanged());
+            }
             return sliderInputSetting;
         }
 

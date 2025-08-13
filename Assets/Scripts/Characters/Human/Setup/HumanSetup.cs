@@ -189,6 +189,10 @@ namespace Characters
                 CurrentCostume = CostumeInfo["Female"][CustomSet.Costume.Value];
             }
             string hair = CustomSet.Hair.Value;
+
+            float height = (float)CustomSet.Height.Value / 100;
+            transform.localScale = Vector3.one * height;
+
             if (hair.StartsWith("HairM"))
                 CurrentHair = HairInfo["Male"][int.Parse(hair.Substring(5))];
             else if (hair.StartsWith("HairF"))
@@ -444,6 +448,9 @@ namespace Characters
             {
                 _part_head_decor = ResourceManager.InstantiateAsset<GameObject>(ResourcePaths.Characters, HumanSetupPrefabs.GetHeadPrefab(head), cached: true);
                 AttachToMount(_part_head_decor, _mount_head_decor, true);
+
+                float height = (float)CustomSet.Height.Value / 100;
+                _part_head_decor.transform.localScale *= (1 - height);
             }
         }
 
@@ -580,8 +587,19 @@ namespace Characters
             obj.transform.SetParent(mount.transform);
             obj.transform.localPosition = Vector3.zero;
             obj.transform.localRotation = Quaternion.identity;
+            float height = (float)CustomSet.Height.Value / 100;
             if (setScale)
                 obj.transform.localScale = Vector3.one;
+
+            else
+            {
+                obj.transform.localScale *= height;
+            }
+
+
+
+
+
         }
 
         private void DestroyIfExists(GameObject go)

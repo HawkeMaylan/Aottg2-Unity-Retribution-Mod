@@ -29,6 +29,8 @@ namespace Settings
 		public ColorSetting BootsColor = new ColorSetting(new Color255(49, 36, 33));
         public StringSetting Stats = new StringSetting(string.Empty);
 
+        public IntSetting Height = new IntSetting(85, 85, 115);
+
         protected override bool Validate()
         {
             if (Sex.Value == 0 && Costume.Value >= HumanSetup.CostumeMCount)
