@@ -563,8 +563,9 @@ namespace Characters
             bool canSprint = _owner.MountState == HumanMountState.Horse &&
                             (State == HorseState.ControlledRun || State == HorseState.RunToPoint);
 
-            if (canSprint && Input.GetKey(KeyCode.Space))
+            if (canSprint && SettingsManager.InputSettings.Human.HorseSprint.GetKey())
             {
+                
                 if (!IsSprinting && CurrentStamina > 0)
                 {
                     ToggleSprint(true);

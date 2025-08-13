@@ -27,6 +27,7 @@
         public KeybindSetting ChangeAmmoL = new KeybindSetting(new string[] { "LeftArrow", "None" });
         public KeybindSetting ChangeAmmoR = new KeybindSetting(new string[] { "RightArrow", "None" });
         public KeybindSetting Inventory = new KeybindSetting(new string[] { "RightAlt", "None" });
+        public KeybindSetting HorseSprint = new KeybindSetting(new string[] { "Space", "None" });
         public BoolSetting DoubleHookPan = new BoolSetting(false);
         public BoolSetting DashDoubleTap = new BoolSetting(true);
         public BoolSetting WallSlideDash = new BoolSetting(true);
