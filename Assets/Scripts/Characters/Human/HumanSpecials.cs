@@ -83,7 +83,7 @@ namespace Characters
             "BladeThrow" => new BladeThrowSpecial(owner),
             "Stock" => new StockSpecial(owner),
             "None" => new NoneSpecial(owner),
-            "Supply" => new SupplySpecial(owner),
+            //"Supply" => new SupplySpecial(owner),
             "SmokeBomb" => new SmokeBombSpecial(owner),
             "Carry" => new CarrySpecial(owner),
             "AHSSTwinShot" => new AHSSTwinShot(owner),
