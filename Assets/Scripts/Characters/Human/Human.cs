@@ -151,7 +151,8 @@ namespace Characters
         private float _timeSinceLastStaminaUse;
         private bool _canRegenStamina = true;
 
-
+        // Body Drop Addons
+        [SerializeField] private GameObject corpsePrefab;
         private void CreateStaminaBar()
         {
 
@@ -1143,6 +1144,7 @@ namespace Characters
             EffectSpawner.Spawn(EffectPrefabs.Blood2, Cache.Transform.position, Cache.Transform.rotation);
             yield return new WaitForSeconds(2f);
             PhotonNetwork.Destroy(gameObject);
+            PhotonNetwork.Instantiate("corpse", Cache.Transform.position, Cache.Transform.rotation);
         }
 
         public void Init(bool ai, string team, InGameCharacterSettings settings)

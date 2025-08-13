@@ -3,7 +3,17 @@ guid: 65d92b4fed4bf3b41b3222f4457d158b
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - MovementSync: {instanceID: 0}
+  - Horse: {instanceID: 0}
+  - Setup: {instanceID: 0}
+  - Grabber: {instanceID: 0}
+  - GrabHand: {instanceID: 0}
+  - Carrier: {instanceID: 0}
+  - CarryBack: {instanceID: 0}
+  - BackHuman: {instanceID: 0}
+  - MountedTransform: {instanceID: 0}
+  - corpsePrefab: {fileID: 919132149155446097, guid: 4d686105afab75d4ea58394963a09e66, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
