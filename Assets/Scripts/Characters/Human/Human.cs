@@ -1244,7 +1244,7 @@ namespace Characters
                 return;
             if (type == "TitanEat")
             {
-                base.GetHitRPC(viewId, name, damage, type, collider);
+                base.GetHitRPC(viewId, "Grabbed And Eaten", damage, type, collider);
                 if (!Dead)
                     Ungrab(false, true);
             }
