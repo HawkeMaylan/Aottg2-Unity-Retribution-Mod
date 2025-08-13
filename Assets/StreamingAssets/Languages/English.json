@@ -383,6 +383,7 @@
 		"Keybinds.General.Autorun": "Autorun",
 		"Keybinds.General.MCMenu": "MCMenu",
 		"Keybinds.General.BuildMenuRadial": "Open Buildables Radial Menu",
+		"Keybinds.General.CustomAssetMenu": "Custom Asset Menu",
 		"Keybinds.General.Pause": "Pause",
 		"Keybinds.General.HideUI": "Hide UI",
 		"Keybinds.General.RestartGame": "Restart game",

@@ -31,5 +31,7 @@ namespace Settings
         public KeybindSetting HideUI = new KeybindSetting(new string[] { "F6", "None" });
         public KeybindSetting MCMenu = new KeybindSetting(new string[] { "RightControl", "None" });
         public KeybindSetting BuildMenuRadial = new KeybindSetting(new string[] { "DownArrow", "None" });
+        public KeybindSetting CustomAssetMenu = new KeybindSetting(new string[] { "BackQuote", "None" });
+        
     }
 }

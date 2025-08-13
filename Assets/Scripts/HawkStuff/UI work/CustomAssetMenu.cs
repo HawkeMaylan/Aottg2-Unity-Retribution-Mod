@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using ApplicationManagers;
 using UI;
 using GameManagers;
+using Settings;
 
 public class CustomAssetMenu : MonoBehaviourPun
 {
@@ -31,7 +32,7 @@ public class CustomAssetMenu : MonoBehaviourPun
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.BackQuote) && PhotonNetwork.IsMasterClient)
+        if (SettingsManager.InputSettings.General.CustomAssetMenu.GetKeyDown() && PhotonNetwork.IsMasterClient)
         {
             menuOpen = !menuOpen;
             Cursor.visible = menuOpen;
