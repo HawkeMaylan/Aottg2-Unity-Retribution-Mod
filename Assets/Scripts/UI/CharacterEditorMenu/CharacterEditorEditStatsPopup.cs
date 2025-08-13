@@ -21,10 +21,10 @@ namespace UI
         protected override float VerticalSpacing => 20f;
         protected override int HorizontalPadding => 25;
         protected override int VerticalPadding => 25;
-        protected IntSetting Speed = new IntSetting(80, 50, 125);
-        protected IntSetting Acceleration = new IntSetting(80, 50, 125);
-        protected IntSetting Ammunition = new IntSetting(80, 50, 125);
-        protected IntSetting Gas = new IntSetting(80, 50, 125);
+        protected IntSetting Speed = new IntSetting(80, 50, 110);
+        protected IntSetting Acceleration = new IntSetting(80, 50, 110);
+        protected IntSetting Ammunition = new IntSetting(80, 50, 110);
+        protected IntSetting Gas = new IntSetting(80, 50, 110);
 
         private Text _pointsLeftLabel;
 
