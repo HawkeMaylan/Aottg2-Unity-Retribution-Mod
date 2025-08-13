@@ -429,6 +429,7 @@
 		"Keybinds.Human.FireCannon": "Fire Cannon",
 		"Keybinds.Human.ChangeAmmoL": "Change Munition Left",
 		"Keybinds.Human.ChangeAmmoR": "Change Munition Right",
+		"Keybinds.Human.Inventory": "Inventory Toggle",
 		"Keybinds.Human.DashDoubleTap": "Double-tap to dash",
 		"Keybinds.Human.WallSlideDash": "Wall slide jump",
 		"Keybinds.Human.WallSlideDashTooltip": "Hold away from the wall to jump off",

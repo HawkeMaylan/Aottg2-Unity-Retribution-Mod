@@ -1,7 +1,8 @@
 using UnityEngine;
 using Characters;
 using System.Collections.Generic;
-
+using Settings;
+using GameManagers;
 public class InventoryDisplay : MonoBehaviour
 {
     private bool _showInventory = false;
@@ -11,7 +12,9 @@ public class InventoryDisplay : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.RightAlt))
+        
+        if (SettingsManager.InputSettings.Human.Inventory.GetKeyDown())
+
         {
             ToggleInventoryDisplay();
         }

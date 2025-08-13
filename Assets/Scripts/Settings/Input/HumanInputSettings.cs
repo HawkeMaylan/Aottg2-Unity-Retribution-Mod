@@ -26,6 +26,7 @@
         public KeybindSetting FireCannon = new KeybindSetting(new string[] { "Mouse0", "None" });
         public KeybindSetting ChangeAmmoL = new KeybindSetting(new string[] { "LeftArrow", "None" });
         public KeybindSetting ChangeAmmoR = new KeybindSetting(new string[] { "RightArrow", "None" });
+        public KeybindSetting Inventory = new KeybindSetting(new string[] { "RightAlt", "None" });
         public BoolSetting DoubleHookPan = new BoolSetting(false);
         public BoolSetting DashDoubleTap = new BoolSetting(true);
         public BoolSetting WallSlideDash = new BoolSetting(true);
