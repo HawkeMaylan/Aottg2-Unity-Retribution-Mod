@@ -27,7 +27,7 @@ namespace Characters
     {
         // setup
         public HumanComponentCache HumanCache;
-        public BaseUseable Special;
+
         public BaseUseable Weapon;
         public HookUseable HookLeft;
         public HookUseable HookRight;
@@ -54,7 +54,7 @@ namespace Characters
 
         // state
         private HumanState _state = HumanState.Idle;
-        public string CurrentSpecial;
+  
         public BaseTitan Grabber;
         public Transform GrabHand;
         public Human Carrier;
@@ -150,6 +150,16 @@ namespace Characters
         private float _staminaRegenDelay = 1.5f; // Time before regen starts after using stamina
         private float _timeSinceLastStaminaUse;
         private bool _canRegenStamina = true;
+
+
+        //Specials Addon
+
+        public BaseUseable Special;
+        public BaseUseable Special2;
+        public BaseUseable Special3;
+        public string CurrentSpecial;
+        public float SkillCycleNum;
+
 
 
         private void CreateStaminaBar()
@@ -1360,7 +1370,7 @@ namespace Characters
             }
         }
 
-
+        
 
 
 
@@ -1377,6 +1387,8 @@ namespace Characters
                 _reloadCooldownLeft -= Time.deltaTime;
                 UpdateIFrames();
                 UpdateBladeFire();
+
+               
                 if (_needFinishReload)
                 {
                     _reloadTimeLeft -= Time.deltaTime;
@@ -1566,6 +1578,11 @@ namespace Characters
 
             UpdateStamina(); ///
             CheckSprintInput(); ///
+            if (IsMine() && Input.GetKeyDown(KeyCode.O))
+            {
+                CycleSpecial();
+            }
+
         }
 
         private void UpdateStamina()
@@ -2858,7 +2875,11 @@ namespace Characters
             {
                 SetupWeapon(humanWeapon);
                 SetupItems();
+
                 SetSpecial(SettingsManager.InGameCharacterSettings.Special.Value);
+                SetSpecial2(SettingsManager.InGameCharacterSettings.Special2.Value);
+                SetSpecial3(SettingsManager.InGameCharacterSettings.Special3.Value);
+
             }
             FinishSetup = true;
             // ignore if name contains char_eyes, char_face, char_glasses
@@ -3106,6 +3127,49 @@ namespace Characters
             CurrentSpecial = special;
             Special = HumanSpecials.GetSpecialUseable(this, special);
             ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(HumanSpecials.GetSpecialIcon(special));
+            SkillCycleNum = 1;
+        }
+
+        public void SetSpecial2(string special2)
+        {
+   
+            Special2 = HumanSpecials.GetSpecialUseable(this, special2);  
+            ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(HumanSpecials.GetSpecialIcon(special2));
+        }
+
+        public void SetSpecial3(string special3)
+        {
+   
+            Special3 = HumanSpecials.GetSpecialUseable(this, special3);  
+            ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(HumanSpecials.GetSpecialIcon(special3));
+        }
+
+        public void CycleSpecial()
+        {
+            if (SkillCycleNum == 1)
+            {
+                CurrentSpecial = SettingsManager.InGameCharacterSettings.Special2.Value;
+                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(
+                    HumanSpecials.GetSpecialIcon(CurrentSpecial) // Use the string, not the object
+                );
+                SkillCycleNum = 2;
+            }
+            else if (SkillCycleNum == 2)
+            {
+                CurrentSpecial = SettingsManager.InGameCharacterSettings.Special3.Value;
+                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(
+                    HumanSpecials.GetSpecialIcon(CurrentSpecial) // Use the string, not the object
+                );
+                SkillCycleNum = 3;
+            }
+            else if (SkillCycleNum == 3)
+            {
+                CurrentSpecial = SettingsManager.InGameCharacterSettings.Special.Value;
+                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(
+                    HumanSpecials.GetSpecialIcon(CurrentSpecial) // Use the string, not the object
+                );
+                SkillCycleNum = 1;
+            }
         }
 
         protected void LoadSkin(Player player = null)
