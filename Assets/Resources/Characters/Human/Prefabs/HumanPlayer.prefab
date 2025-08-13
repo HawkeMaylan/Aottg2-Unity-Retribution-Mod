@@ -16685,6 +16685,7 @@ MonoBehaviour:
   MaxStamina: 100
   CurrentStamina: 100
   IsSprinting: 0
+  corpsePrefab: {fileID: 0}
 --- !u!114 &11414280
 MonoBehaviour:
   m_ObjectHideFlags: 0
