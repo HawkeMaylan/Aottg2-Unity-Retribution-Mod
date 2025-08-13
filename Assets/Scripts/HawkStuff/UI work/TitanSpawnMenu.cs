@@ -6,6 +6,7 @@ using Characters;
 using System.Collections;
 using System.IO;
 using System;
+using Settings;
 
 public class TitanSpawnMenu : MonoBehaviourPun
 {
@@ -69,7 +70,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftAlt) && PhotonNetwork.IsMasterClient)
+        if (SettingsManager.InputSettings.General.TitanSpawnMenu.GetKeyDown() && PhotonNetwork.IsMasterClient)
         {
             menuOpen = !menuOpen;
             Cursor.visible = menuOpen;
