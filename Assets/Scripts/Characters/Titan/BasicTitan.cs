@@ -15,6 +15,7 @@ using Spawnables;
 using Entities;
 using System.Linq;
 using Photon.Pun;
+using GameManagers;
 
 
 namespace Characters
@@ -976,6 +977,7 @@ namespace Characters
                     var tempHoldHuman = HoldHuman;
                     Ungrab();
                     tempHoldHuman.GetHit(this, damage, "TitanEat", "");
+                    PhotonNetwork.LocalPlayer.SetCustomProperty(PlayerProperty.Deaths, PhotonNetwork.LocalPlayer.GetIntProperty(PlayerProperty.Deaths) + 1); ///crona Addition
                 }
             }
             if (!AI && HoldHuman && !HoldHuman.Dead && !HoldHumanLeft && (Input.anyKeyDown || State == TitanState.HumanThrow))
