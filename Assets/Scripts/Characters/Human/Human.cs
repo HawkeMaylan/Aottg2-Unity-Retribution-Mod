@@ -1585,6 +1585,10 @@ namespace Characters
             {
                 CycleSpecial();
             }
+            if (IsMine() && Input.GetKeyDown(KeyCode.I))
+            {
+                CycleSpecialBackwards();
+            }
 
         }
 
@@ -3197,6 +3201,24 @@ namespace Characters
                   (SpecialsArray[nextIndex] == null || string.IsNullOrEmpty(CurrentSpecials[nextIndex])))
             {
                 nextIndex = (nextIndex + 1) % 3;
+            }
+
+            if (nextIndex != CurrentSpecialIndex)
+            {
+                SetCurrentSpecial(nextIndex);
+            }
+        }
+
+        public void CycleSpecialBackwards()
+        {
+            // Calculate previous index with wrap-around
+            int nextIndex = (CurrentSpecialIndex - 1 + 3) % 3;
+
+            // Find previous available special (skip empty slots)
+            while (nextIndex != CurrentSpecialIndex &&
+                  (SpecialsArray[nextIndex] == null || string.IsNullOrEmpty(CurrentSpecials[nextIndex])))
+            {
+                nextIndex = (nextIndex - 1 + 3) % 3;
             }
 
             if (nextIndex != CurrentSpecialIndex)
