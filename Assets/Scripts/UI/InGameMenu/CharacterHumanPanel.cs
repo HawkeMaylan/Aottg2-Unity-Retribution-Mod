@@ -128,6 +128,8 @@ namespace UI
             CreateStatBar(UIManager.GetLocale(cat, sub, "Speed"), stats.Speed);
             CreateStatBar(UIManager.GetLocale(cat, sub, "Gas"), stats.Gas);
             CreateStatBar(UIManager.GetLocale(cat, sub, "Ammunition"), stats.Ammunition);
+            CreateStatBar(UIManager.GetLocale(cat, sub, "Expertise"), stats.Expertise);
+            
         }
 
         protected void CreateStatBar(string title, int value)
