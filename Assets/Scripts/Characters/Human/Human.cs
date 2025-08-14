@@ -1581,11 +1581,11 @@ namespace Characters
 
             UpdateStamina(); ///
             CheckSprintInput(); ///
-            if (IsMine() && Input.GetKeyDown(KeyCode.O))
+            if (IsMine() && SettingsManager.InputSettings.Human.CycleSpecials.GetKeyDown())
             {
                 CycleSpecial();
             }
-            if (IsMine() && Input.GetKeyDown(KeyCode.I))
+            if (IsMine() && SettingsManager.InputSettings.Human.CycleSpecialsBackwards.GetKeyDown())
             {
                 CycleSpecialBackwards();
             }

@@ -28,6 +28,8 @@
         public KeybindSetting ChangeAmmoR = new KeybindSetting(new string[] { "RightArrow", "None" });
         public KeybindSetting Inventory = new KeybindSetting(new string[] { "RightAlt", "None" });
         public KeybindSetting HorseSprint = new KeybindSetting(new string[] { "Space", "None" });
+        public KeybindSetting CycleSpecials = new KeybindSetting(new string[] { "O", "None" });
+        public KeybindSetting CycleSpecialsBackwards = new KeybindSetting(new string[] { "I", "None" });
         public BoolSetting DoubleHookPan = new BoolSetting(false);
         public BoolSetting DashDoubleTap = new BoolSetting(true);
         public BoolSetting WallSlideDash = new BoolSetting(true);
