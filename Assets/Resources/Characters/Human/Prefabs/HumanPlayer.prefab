@@ -16649,7 +16649,6 @@ MonoBehaviour:
   Horse: {fileID: 0}
   Setup: {fileID: 0}
   FinishSetup: 0
-  CurrentSpecial: 
   Grabber: {fileID: 0}
   GrabHand: {fileID: 0}
   Carrier: {fileID: 0}
@@ -16685,6 +16684,13 @@ MonoBehaviour:
   MaxStamina: 100
   CurrentStamina: 100
   IsSprinting: 0
+  CurrentSpecial: 
+  SkillCycleNum: 0
+  CurrentSpecials:
+  - 
+  - 
+  - 
+  CurrentSpecialIndex: 0
 --- !u!114 &11414280
 MonoBehaviour:
   m_ObjectHideFlags: 0
