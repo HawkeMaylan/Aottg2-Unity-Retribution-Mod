@@ -3144,8 +3144,26 @@ namespace Characters
 
         public void SetCurrentSpecial(int index)
         {
+            // Check if the index is valid and the special exists
             if (index < 0 || index >= 3 || SpecialsArray[index] == null)
                 return;
+
+            // Check expertise requirements based on the special index
+            switch (index)
+            {
+                case 0: // First special requires 80+ expertise
+                    if (Stats.Expertise < 80)
+                        return;
+                    break;
+                case 1: // Second special requires 100+ expertise
+                    if (Stats.Expertise < 100)
+                        return;
+                    break;
+                case 2: // Third special requires 120+ expertise
+                    if (Stats.Expertise < 120)
+                        return;
+                    break;
+            }
 
             CurrentSpecialIndex = index;
             CurrentSpecial = CurrentSpecials[index];
