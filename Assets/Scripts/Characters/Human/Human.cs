@@ -159,6 +159,9 @@ namespace Characters
         public BaseUseable Special3;
         public string CurrentSpecial;
         public float SkillCycleNum;
+        public BaseUseable[] SpecialsArray = new BaseUseable[3];
+        public string[] CurrentSpecials = new string[3];
+        public int CurrentSpecialIndex = 0;
 
 
 
@@ -2876,9 +2879,10 @@ namespace Characters
                 SetupWeapon(humanWeapon);
                 SetupItems();
 
-                SetSpecial(SettingsManager.InGameCharacterSettings.Special.Value);
-                SetSpecial2(SettingsManager.InGameCharacterSettings.Special2.Value);
-                SetSpecial3(SettingsManager.InGameCharacterSettings.Special3.Value);
+                InitializeSpecials(
+            SettingsManager.InGameCharacterSettings.Special.Value,
+            SettingsManager.InGameCharacterSettings.Special2.Value,
+            SettingsManager.InGameCharacterSettings.Special3.Value);
 
             }
             FinishSetup = true;
@@ -3122,53 +3126,62 @@ namespace Characters
 
 
 
+        public void InitializeSpecials(string special1, string special2, string special3)
+        {
+            CurrentSpecials[0] = special1;
+            CurrentSpecials[1] = special2;
+            CurrentSpecials[2] = special3;
+
+            SpecialsArray[0] = HumanSpecials.GetSpecialUseable(this, special1);
+            SpecialsArray[1] = !string.IsNullOrEmpty(special2) ? HumanSpecials.GetSpecialUseable(this, special2) : null;
+            SpecialsArray[2] = !string.IsNullOrEmpty(special3) ? HumanSpecials.GetSpecialUseable(this, special3) : null;
+
+            // Automatically set first special as active
+            SetCurrentSpecial(0);
+        }
+
+        public void SetCurrentSpecial(int index)
+        {
+            if (index < 0 || index >= 3 || SpecialsArray[index] == null)
+                return;
+
+            CurrentSpecialIndex = index;
+            CurrentSpecial = CurrentSpecials[index];
+            Special = SpecialsArray[index];
+
+            // Update UI
+            ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(HumanSpecials.GetSpecialIcon(CurrentSpecial));
+
+            // Reset animation if needed
+            if (State != HumanState.Die && State != HumanState.Grab &&
+                State != HumanState.MountingHorse && State != HumanState.Stun &&
+                State != HumanState.GroundDodge)
+            {
+                State = HumanState.Idle;
+            }
+        }
         public void SetSpecial(string special)
+
         {
             CurrentSpecial = special;
             Special = HumanSpecials.GetSpecialUseable(this, special);
             ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(HumanSpecials.GetSpecialIcon(special));
             SkillCycleNum = 1;
         }
-
-        public void SetSpecial2(string special2)
-        {
-   
-            Special2 = HumanSpecials.GetSpecialUseable(this, special2);  
-            ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(HumanSpecials.GetSpecialIcon(special2));
-        }
-
-        public void SetSpecial3(string special3)
-        {
-   
-            Special3 = HumanSpecials.GetSpecialUseable(this, special3);  
-            ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(HumanSpecials.GetSpecialIcon(special3));
-        }
-
         public void CycleSpecial()
         {
-            if (SkillCycleNum == 1)
+            int nextIndex = (CurrentSpecialIndex + 1) % 3;
+
+            // Find next available special (skip empty slots)
+            while (nextIndex != CurrentSpecialIndex &&
+                  (SpecialsArray[nextIndex] == null || string.IsNullOrEmpty(CurrentSpecials[nextIndex])))
             {
-                CurrentSpecial = SettingsManager.InGameCharacterSettings.Special2.Value;
-                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(
-                    HumanSpecials.GetSpecialIcon(CurrentSpecial) // Use the string, not the object
-                );
-                SkillCycleNum = 2;
+                nextIndex = (nextIndex + 1) % 3;
             }
-            else if (SkillCycleNum == 2)
+
+            if (nextIndex != CurrentSpecialIndex)
             {
-                CurrentSpecial = SettingsManager.InGameCharacterSettings.Special3.Value;
-                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(
-                    HumanSpecials.GetSpecialIcon(CurrentSpecial) // Use the string, not the object
-                );
-                SkillCycleNum = 3;
-            }
-            else if (SkillCycleNum == 3)
-            {
-                CurrentSpecial = SettingsManager.InGameCharacterSettings.Special.Value;
-                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(
-                    HumanSpecials.GetSpecialIcon(CurrentSpecial) // Use the string, not the object
-                );
-                SkillCycleNum = 1;
+                SetCurrentSpecial(nextIndex);
             }
         }
 

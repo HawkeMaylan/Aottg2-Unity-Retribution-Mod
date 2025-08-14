@@ -21,6 +21,8 @@ namespace Controllers
         protected static LayerMask HookMask = PhysicsLayer.GetMask(PhysicsLayer.TitanMovebox, PhysicsLayer.TitanPushbox,
             PhysicsLayer.MapObjectEntities, PhysicsLayer.MapObjectProjectiles, PhysicsLayer.MapObjectAll);
 
+        public KeybindSetting CycleSpecial = new KeybindSetting(new string[] { "Keyboard/0" });
+
         protected override void Awake()
         {
             base.Awake();
@@ -267,6 +269,7 @@ namespace Controllers
             UpdateDashDown(inMenu);
             UpdateDashRight(inMenu);
             UpdateDashLeft(inMenu);
+            UpdateCycleSpecial(inMenu);
 
 
             bool canWeapon = _human.MountState == HumanMountState.None && !_illegalWeaponStates.Contains(_human.State) && !inMenu && !_human.Dead;
@@ -374,8 +377,14 @@ namespace Controllers
             }
         }
 
+        void UpdateCycleSpecial(bool inMenu)
+        {
+            if (Input.GetKeyDown(KeyCode.O)) 
+            {
+                _human.CycleSpecial();
 
-
+            }
+        }
         void UpdateReelInput(bool inMenu)
         {
             _reelOutScrollTimeLeft -= Time.deltaTime;
