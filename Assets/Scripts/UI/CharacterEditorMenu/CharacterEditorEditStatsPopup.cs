@@ -25,7 +25,7 @@ namespace UI
         protected IntSetting Acceleration = new IntSetting(80, 50, 110);
         protected IntSetting Ammunition = new IntSetting(80, 50, 110);
         protected IntSetting Gas = new IntSetting(80, 50, 110);
-        protected IntSetting Expertise = new IntSetting(70, 50, 110);
+        protected IntSetting Expertise = new IntSetting(80, 60, 120);
         
 
         private Text _pointsLeftLabel;

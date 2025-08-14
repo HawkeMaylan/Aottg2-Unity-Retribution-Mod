@@ -163,7 +163,7 @@ namespace Characters
             if (Gas < 40 || Gas > 110) return false;
             if (Ammunition < 40 || Ammunition > 110) return false;
             if (Acceleration < 40 || Acceleration > 110) return false;
-            if (Expertise <40 || Expertise > 110) return false;
+            if (Expertise <40 || Expertise > 120) return false;
             foreach (var perk in Perks.Values)
             {
                 if (!perk.Validate(Perks))
