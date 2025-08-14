@@ -2851,6 +2851,7 @@ namespace Characters
                 Stats.Speed = 75;
                 Stats.Gas = 75;
                 Stats.Ammunition = 70;
+                Stats.Expertise = 80;
                 Stats.ResetGas();
                 Stats.UpdateStats();
             }
@@ -2880,6 +2881,7 @@ namespace Characters
                 SetupItems();
 
                 InitializeSpecials(
+
             SettingsManager.InGameCharacterSettings.Special.Value,
             SettingsManager.InGameCharacterSettings.Special2.Value,
             SettingsManager.InGameCharacterSettings.Special3.Value);
@@ -4040,12 +4042,13 @@ namespace Characters
         }
 
         [PunRPC]
-        public void RPC_SetStats(int speed, int gas, int ammo, int acceleration, float horseSpeed)
+        public void RPC_SetStats(int speed, int gas, int ammo, int acceleration, int Expertise, float horseSpeed)
         {
             Stats.Speed = speed;
             Stats.Gas = gas;
             Stats.Ammunition = ammo;
             Stats.Acceleration = acceleration;
+            Stats.Expertise = Expertise;
             Stats.HorseSpeed = horseSpeed;
 
             Stats.ResetGas();
