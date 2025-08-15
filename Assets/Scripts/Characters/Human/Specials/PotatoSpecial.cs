@@ -18,7 +18,7 @@ namespace Characters
         protected override void Activate()
         {
             _oldSpeed = _human.Stats.RunSpeed;
-            _currentSpeed = _oldSpeed * 2.8f;
+            _currentSpeed = _oldSpeed * 1.4f;
             _human.RunAnimation = HumanAnimations.RunBuffed;
             _human.EmoteAnimation(HumanAnimations.SpecialSasha);
         }

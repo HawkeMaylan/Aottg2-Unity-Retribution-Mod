@@ -1581,11 +1581,11 @@ namespace Characters
 
             UpdateStamina(); ///
             CheckSprintInput(); ///
-            if (IsMine() && SettingsManager.InputSettings.Human.CycleSpecials.GetKeyDown())
+            if (IsMine() && SettingsManager.InputSettings.Human.CycleSpecials.GetKeyDown() && State != HumanState.SpecialAction && State != HumanState.SpecialAttack)
             {
                 CycleSpecial();
             }
-            if (IsMine() && SettingsManager.InputSettings.Human.CycleSpecialsBackwards.GetKeyDown())
+            if (IsMine() && SettingsManager.InputSettings.Human.CycleSpecialsBackwards.GetKeyDown() && State != HumanState.SpecialAction && State != HumanState.SpecialAttack)
             {
                 CycleSpecialBackwards();
             }
@@ -3194,6 +3194,10 @@ namespace Characters
         }
         public void CycleSpecial()
         {
+            if (State == HumanState.SpecialAction || State == HumanState.SpecialAttack)
+            {
+                return;
+            }
             int nextIndex = (CurrentSpecialIndex + 1) % 3;
 
             // Find next available special (skip empty slots)
@@ -3211,6 +3215,10 @@ namespace Characters
 
         public void CycleSpecialBackwards()
         {
+            if (State == HumanState.SpecialAction)
+            {
+                return;
+            }
             // Calculate previous index with wrap-around
             int nextIndex = (CurrentSpecialIndex - 1 + 3) % 3;
 

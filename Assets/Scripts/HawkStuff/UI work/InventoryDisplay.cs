@@ -48,7 +48,8 @@ public class InventoryDisplay : MonoBehaviour
         GUI.Label(new Rect(topX + 10, topY + 50, 200, 20), $"Gas: {_stats.Gas}");
         GUI.Label(new Rect(topX + 10, topY + 70, 200, 20), $"Ammo: {_stats.Ammunition}");
         GUI.Label(new Rect(topX + 10, topY + 90, 200, 20), $"Accel: {_stats.Acceleration}");
-        GUI.Label(new Rect(topX + 10, topY + 110, 200, 20), $"HorseSpeed: {_stats.HorseSpeed}");
+        GUI.Label(new Rect(topX + 10, topY + 110, 200, 20), $"Expertise: {_stats.Expertise}");
+        GUI.Label(new Rect(topX + 10, topY + 130, 200, 20), $"HorseSpeed: {_stats.HorseSpeed}");
 
         // Then, draw the inventory panel below it
         List<string> items = _inventory.GetItemTypes();

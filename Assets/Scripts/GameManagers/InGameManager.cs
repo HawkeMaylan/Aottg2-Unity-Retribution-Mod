@@ -558,6 +558,10 @@ namespace GameManagers
                 var specials = HumanSpecials.GetSpecialNames(settings.Loadout.Value, miscSettings.AllowShifterSpecials.Value);
                 if (!specials.Contains(settings.Special.Value))
                     settings.Special.Value = HumanSpecials.DefaultSpecial;
+                if (!specials.Contains(settings.Special2.Value))
+                    settings.Special.Value = HumanSpecials.DefaultSpecial;
+                if (!specials.Contains(settings.Special3.Value))
+                    settings.Special.Value = HumanSpecials.DefaultSpecial;
                 var human = (Human)CharacterSpawner.Spawn(CharacterPrefabs.Human, position, rotation);
                 human.Init(false, GetPlayerTeam(false), SettingsManager.InGameCharacterSettings);
                 CurrentCharacter = human;
