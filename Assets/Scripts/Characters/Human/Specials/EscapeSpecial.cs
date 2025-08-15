@@ -33,13 +33,13 @@ namespace Characters
 
             if (_human.Weapon is AmmoWeapon ammo)
             {
-                ammo.AmmoLeft = Mathf.Max(1, ammo.AmmoLeft / 2);
-                ammo.RoundLeft = Mathf.Max(1, ammo.RoundLeft / 2);
+                ammo.AmmoLeft = Mathf.Max(0, ammo.AmmoLeft / 2);
+                ammo.RoundLeft = Mathf.Max(0, ammo.RoundLeft / 2);
             }
             if (_human.Weapon is BladeWeapon bladeWeapon)
             {
-                bladeWeapon.BladesLeft = Mathf.Max(1, bladeWeapon.BladesLeft / 2);
-                bladeWeapon.CurrentDurability = Mathf.Max(1f, bladeWeapon.CurrentDurability / 2f);
+                bladeWeapon.BladesLeft = Mathf.Max(0, bladeWeapon.BladesLeft / 2);
+                bladeWeapon.CurrentDurability = Mathf.Max(0f, bladeWeapon.CurrentDurability / 2f);
             }
         }
 
