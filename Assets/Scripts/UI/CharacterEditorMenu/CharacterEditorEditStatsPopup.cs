@@ -55,7 +55,7 @@ namespace UI
                 onValueChanged: () => OnStatChanged(Gas));
             ElementFactory.CreateIncrementSetting(SinglePanel, style, Ammunition, UIManager.GetLocale(cat, sub, "Ammunition"),
                onValueChanged: () => OnStatChanged(Ammunition));
-            ElementFactory.CreateIncrementSetting(SinglePanel, style, Expertise, UIManager.GetLocale(cat, sub, "Expertise"),
+            ElementFactory.CreateIncrementSetting(SinglePanel, style, Expertise, UIManager.GetLocale(cat, sub, "Expertise", "Controls amounts of skills     0 < 80    1 at 80    2 at 100    3 at 120"),
                onValueChanged: () => OnStatChanged(Expertise));
             
 

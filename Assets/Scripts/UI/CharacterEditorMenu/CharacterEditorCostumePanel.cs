@@ -54,7 +54,7 @@ namespace UI
             ElementFactory.CreateDropdownSetting(SinglePanel, style, set.Sex, UIManager.GetLocale(cat, sub, "Sex"), new string[] { "Male", "Female" }, 
                 elementWidth: dropdownWidth, onDropdownOptionSelect: () => OnSexChanged());
 
-            ElementFactory.CreateSliderInputSetting(SinglePanel, style, set.Height, "Height", "Character Height",
+            ElementFactory.CreateSliderInputSetting(SinglePanel, style, set.Height, "Height",
                 onValueChanged: () => _menu.ResetCharacter());
 
             string[] options = GetOptions("Eye", HumanSetup.EyeCount);

@@ -35,7 +35,7 @@ namespace UI
             CreateStatBar(UIManager.GetLocale(cat, sub, "Speed"), stats.Speed);
             CreateStatBar(UIManager.GetLocale(cat, sub, "Gas"), stats.Gas);
             CreateStatBar(UIManager.GetLocale(cat, sub, "Ammunition"), stats.Ammunition);
-            CreateStatBar(UIManager.GetLocale(cat, sub, "Expertise"), stats.Expertise);
+            CreateStatBar(UIManager.GetLocale(cat, sub, "Expert"), stats.Expertise);
             
             ElementFactory.CreateTextButton(BottomBar, style, UIManager.GetLocale(cat, sub, "EditStats"), onClick: () => OnButtonClick("EditStats"));
             ElementFactory.CreateTextButton(BottomBar, style, UIManager.GetLocale(cat, sub, "EditPerks"), onClick: () => OnButtonClick("EditPerks"));
