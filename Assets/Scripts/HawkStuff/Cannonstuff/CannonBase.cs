@@ -221,6 +221,12 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
             else
                 SetPrompt(UnmountPromptText);
         }
+        if (isMounted && humanInTrigger != null && IsHumanGrabbed())
+        {
+            Debug.Log("CannonBase: Detaching due to player being grabbed.");
+            DetachHuman();
+            return;
+        }
         HandleMountInput();
         HandleUnmountPromptTimer();
         HandleRunAnimation();
@@ -577,11 +583,12 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         bool isTooFar = Vector3.Distance(transform.position, humanInTrigger.transform.position) > 40f;
         bool isDead = humanInTrigger.Dead;
+        bool isGrabbed = IsHumanGrabbed(); // Check if player is grabbed
 
-        if (isTooFar || isDead)
+        if (isTooFar || isDead || isGrabbed) // Added isGrabbed condition
         {
-            Debug.LogWarning("CannonBase: Detaching due to distance or death.");
-            DetachHuman(); // Force detach on death
+            Debug.LogWarning("CannonBase: Detaching due to distance, death, or grab.");
+            DetachHuman(); // Force detach on death/grab
             ClearPrompt();
         }
     }
@@ -1024,11 +1031,16 @@ public class CannonBase : MonoBehaviourPunCallbacks, IPunObservable
 
         bool isDead = humanInTrigger.Dead || !humanInTrigger.gameObject.activeInHierarchy;
         bool isNotMine = !humanInTrigger.IsMine();
+        bool isGrabbed = IsHumanGrabbed(); // Check if grabbed
 
-        return !(isDead || isNotMine);
+        return !(isDead || isNotMine || isGrabbed); // Added isGrabbed
     }
 
 
+    private bool IsHumanGrabbed()
+    {
+        return humanInTrigger != null && humanInTrigger.State == HumanState.Grab;
+    }
 
     private void UpdatePromptTexts()
     {
