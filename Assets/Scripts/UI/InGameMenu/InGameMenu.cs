@@ -619,11 +619,11 @@ namespace UI
             if (SettingsManager.UISettings.ShowKeybindTip.Value)
             {
                 var settings = SettingsManager.InputSettings;
-                if (str != "")
-                    str += ", ";
-                str += "Pause: " + ChatManager.GetColorString(settings.General.Pause.ToString(), ChatTextColor.System);
-                str += ", " + "Scoreboard: " + ChatManager.GetColorString(settings.General.ToggleScoreboard.ToString(), ChatTextColor.System);
-                str += ", " + "Change Char: " + ChatManager.GetColorString(settings.General.ChangeCharacter.ToString(), ChatTextColor.System);
+                ///if (str != "")
+                ///    str += ", ";
+                ///str += "Pause: " + ChatManager.GetColorString(settings.General.Pause.ToString(), ChatTextColor.System);
+                ///str += ", " + "Scoreboard: " + ChatManager.GetColorString(settings.General.ToggleScoreboard.ToString(), ChatTextColor.System);
+                ///str += ", " + "Change Char: " + ChatManager.GetColorString(settings.General.ChangeCharacter.ToString(), ChatTextColor.System);
             }
             if (SettingsManager.UISettings.Coordinates.Value == (int)CoordinateMode.BottomRight)
             {
