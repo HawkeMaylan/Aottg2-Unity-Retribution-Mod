@@ -273,31 +273,39 @@ namespace Characters
             DestroyIfExists(_part_belt);
             DestroyIfExists(_part_gas_l);
             DestroyIfExists(_part_gas_r);
+
             Material material = HumanSetupMaterials.GetPartMaterial(_textures.Get3dmgTexture());
+
+            // Spawn 3DMG and preserve its prefab position
             _part_3dmg = ResourceManager.InstantiateAsset<GameObject>(ResourcePaths.Characters, _meshes.Get3dmgMesh(), cached: true);
-            AttachToMount(_part_3dmg, _mount_3dmg);
+            _part_3dmg.transform.SetParent(_mount_3dmg.transform, false); // 'false' keeps prefab local position
             _part_3dmg.GetComponentInChildren<Renderer>().material = material;
+
+            // Spawn belt (default behavior, zeroed position)
             string beltMesh = _meshes.GetBeltMesh();
             if (beltMesh != string.Empty)
             {
                 _part_belt = ResourceManager.InstantiateAsset<GameObject>(ResourcePaths.Characters, beltMesh, cached: true);
                 _part_belt.GetComponent<Renderer>().material = material;
-                AttachToMount(_part_belt, _mount_3dmg);
+                _part_belt.transform.SetParent(_mount_3dmg.transform); // Default: localPosition = (0,0,0)
             }
+
+            // Spawn gas canisters and preserve their prefab positions
             if (Weapon != HumanWeapon.APG)
             {
                 _part_gas_l = ResourceManager.InstantiateAsset<GameObject>(ResourcePaths.Characters, _meshes.GetGasMesh(left: true), cached: true);
                 _part_gas_l.GetComponent<Renderer>().material = material;
-                if (Weapon == HumanWeapon.AHSS)
-                    AttachToMount(_part_gas_l, _mount_gun_mag_l);
-                else
-                    AttachToMount(_part_gas_l, _mount_gas_l);
+                _part_gas_l.transform.SetParent(
+                    Weapon == HumanWeapon.AHSS ? _mount_gun_mag_l.transform : _mount_gas_l.transform,
+                    false // Preserve prefab position
+                );
+
                 _part_gas_r = ResourceManager.InstantiateAsset<GameObject>(ResourcePaths.Characters, _meshes.GetGasMesh(left: false), cached: true);
                 _part_gas_r.GetComponent<Renderer>().material = material;
-                if (Weapon == HumanWeapon.AHSS)
-                    AttachToMount(_part_gas_r, _mount_gun_mag_r);
-                else
-                    AttachToMount(_part_gas_r, _mount_gas_r);
+                _part_gas_r.transform.SetParent(
+                    Weapon == HumanWeapon.AHSS ? _mount_gun_mag_r.transform : _mount_gas_r.transform,
+                    false // Preserve prefab position
+                );
             }
         }
 
