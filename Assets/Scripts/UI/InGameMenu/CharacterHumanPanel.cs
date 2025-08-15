@@ -73,10 +73,10 @@ namespace UI
                 options, GetSpecialIcons(options), UIManager.CurrentMenu.IconPickPopup, tooltips: GetSpecialTooltips(options), elementWidth: 180f, elementHeight: 40f, tooltipPopup: maybeTooltip);
 
             ElementFactory.CreateIconPickSetting(DoublePanelLeft, dropdownStyle, charSettings.Special2, UIManager.GetLocale(LocaleCategory, sub, "Special 2"),
-                options, GetSpecialIcons(options), UIManager.CurrentMenu.IconPickPopup, tooltips: GetSpecialTooltips(options), elementWidth: 180f, elementHeight: 40f, tooltipPopup: maybeTooltip);
+                options, GetSpecialIcons(options), UIManager.CurrentMenu.IconPickPopup, tooltips: GetSpecialTooltips(options), elementWidth: 180f, elementHeight: 40f, tooltipPopup: maybeTooltip, onSelect: () => SaveSpecials());
 
             ElementFactory.CreateIconPickSetting(DoublePanelLeft, dropdownStyle, charSettings.Special3, UIManager.GetLocale(LocaleCategory, sub, "Special 3"),
-                options, GetSpecialIcons(options), UIManager.CurrentMenu.IconPickPopup, tooltips: GetSpecialTooltips(options), elementWidth: 180f, elementHeight: 40f, tooltipPopup: maybeTooltip);
+                options, GetSpecialIcons(options), UIManager.CurrentMenu.IconPickPopup, tooltips: GetSpecialTooltips(options), elementWidth: 180f, elementHeight: 40f, tooltipPopup: maybeTooltip, onSelect: () => SaveSpecials());
 
             if (miscSettings.PVP.Value == (int)PVPMode.Team)
             {
@@ -173,6 +173,19 @@ namespace UI
             foreach (string option in options)
                 icons.Add(ResourcePaths.UI + "/Icons/Specials/" + HumanSpecials.GetSpecialIcon(option));
             return icons.ToArray();
+        }
+
+        private void SaveSpecials()
+        {
+            InGameCharacterSettings charSettings = SettingsManager.InGameCharacterSettings;
+            InGameCharacterSettings lastCharSettings = SettingsManager.InGameSettings.LastCharacter;
+
+            lastCharSettings.Special.Value = charSettings.Special.Value;
+            lastCharSettings.Special2.Value = charSettings.Special2.Value;
+            lastCharSettings.Special3.Value = charSettings.Special3.Value;
+            lastCharSettings.Loadout.Value = charSettings.Loadout.Value;
+            lastCharSettings.Costume.Value = charSettings.Costume.Value;
+            lastCharSettings.CustomSet.Value = charSettings.CustomSet.Value;
         }
 
         protected string[] GetSpecialTooltips(string[] options) =>
