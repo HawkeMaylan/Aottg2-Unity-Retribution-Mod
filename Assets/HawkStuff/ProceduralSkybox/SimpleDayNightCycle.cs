@@ -15,6 +15,12 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
     [Range(0, 1)] public float sunsetDuration = 0.05f;
     [Range(0, 1)] public float nightDuration = 0.4f;
 
+    [Header("Time Control")]
+    [Tooltip("Current time of day (0-1)")]
+    [Range(0, 1)] public float timeOfDay = 0f;
+    public bool isTimePaused = false;
+    [SerializeField] private bool allowTimeEditingInRuntime = true;
+
     [Header("Lighting Settings")]
     public float maxSunIntensity = 1.0f;
     public float maxMoonIntensity = 0.2f;
@@ -51,14 +57,18 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
     private float _lastMaterialUpdate = 0f;
     private float _lastSkyboxCheck = 0f;
 
-    private float timeOfDay;
     [SerializeField] private Material skyboxMaterial;
     private Color lastSkyTint, lastGroundColor;
+    private float lastSentTimeOfDay = -1f;
 
     private void Start()
     {
         NormalizeDurations();
+        InitializeSkybox();
+    }
 
+    private void InitializeSkybox()
+    {
         if (skyboxMaterial == null)
             skyboxMaterial = Resources.Load<Material>("HawkProcedural");
 
@@ -78,15 +88,37 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Update()
     {
-        timeOfDay += Time.deltaTime / dayDuration;
-        if (timeOfDay > 1f) timeOfDay -= 1f;
+        // Only update time if not paused and we're master client or in single player
+        if (!isTimePaused && (PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected))
+        {
+            timeOfDay += Time.deltaTime / dayDuration;
+            if (timeOfDay > 1f) timeOfDay -= 1f;
+        }
 
-        if (PhotonNetwork.IsMasterClient && Time.time - _lastSyncTime >= syncInterval)
+        // Check if time was manually edited in inspector
+        if (allowTimeEditingInRuntime && lastSentTimeOfDay != timeOfDay)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                photonView.RPC("SyncLightingToClients", RpcTarget.All, timeOfDay);
+            }
+            lastSentTimeOfDay = timeOfDay;
+        }
+        // Regular sync for master client
+        else if (PhotonNetwork.IsMasterClient && Time.time - _lastSyncTime >= syncInterval)
         {
             photonView.RPC("SyncLightingToClients", RpcTarget.Others, timeOfDay);
             _lastSyncTime = Time.time;
+            lastSentTimeOfDay = timeOfDay;
         }
 
+        UpdateSkyboxCheck();
+        UpdateSunAndMoon();
+        UpdateLighting();
+    }
+
+    private void UpdateSkyboxCheck()
+    {
         if (skyboxMaterial != null && Time.time - _lastSkyboxCheck >= skyboxReapplyInterval)
         {
             if (RenderSettings.skybox != skyboxMaterial)
@@ -96,9 +128,6 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
             }
             _lastSkyboxCheck = Time.time;
         }
-
-        UpdateSunAndMoon();
-        UpdateLighting();
     }
 
     private void NormalizeDurations()
@@ -261,8 +290,32 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     private void SyncLightingToClients(float masterTime)
     {
-        timeOfDay = masterTime;
-        ReapplySkybox();
+        // Only update if we're not the master client (unless it's our own RPC)
+        if (!PhotonNetwork.IsMasterClient || masterTime == timeOfDay)
+        {
+            timeOfDay = masterTime;
+            lastSentTimeOfDay = timeOfDay;
+            ReapplySkybox();
+        }
+    }
+
+    public void SetTimeOfDay(float newTime, bool sync = true)
+    {
+        timeOfDay = Mathf.Clamp01(newTime);
+        if (sync && PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC("SyncLightingToClients", RpcTarget.All, timeOfDay);
+        }
+    }
+
+    public void PauseTime(bool paused)
+    {
+        isTimePaused = paused;
+    }
+
+    public void ToggleTimePause()
+    {
+        isTimePaused = !isTimePaused;
     }
 
     private void ReapplySkybox()
@@ -291,8 +344,14 @@ public class SimpleDayNightCycle : MonoBehaviourPunCallbacks, IPunObservable
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting && PhotonNetwork.IsMasterClient)
+        {
             stream.SendNext(timeOfDay);
+            stream.SendNext(isTimePaused);
+        }
         else
+        {
             timeOfDay = (float)stream.ReceiveNext();
+            isTimePaused = (bool)stream.ReceiveNext();
+        }
     }
 }
