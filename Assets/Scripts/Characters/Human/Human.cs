@@ -1143,6 +1143,10 @@ namespace Characters
             }
             EffectSpawner.Spawn(EffectPrefabs.Blood2, Cache.Transform.position, Cache.Transform.rotation);
             GameObject corpse = PhotonNetwork.Instantiate("corpse", Cache.Transform.position, Cache.Transform.rotation);
+            int actorNumber = Cache.PhotonView.OwnerActorNr;
+            Debug.Log($"Corpse assigned to player ActorNumber: {actorNumber}");
+//            PhotonView corpsePV = corpse.GetComponent<PhotonView>();
+//            corpsePV.RPC("SetOwner", RpcTarget.AllBuffered, actorNumber);
             corpse.GetComponent<Rigidbody>().velocity = Cache.Rigidbody.velocity;
             yield return new WaitForSeconds(2f);
             PhotonNetwork.Destroy(gameObject);

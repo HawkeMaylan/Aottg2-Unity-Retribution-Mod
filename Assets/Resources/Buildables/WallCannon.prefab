@@ -201,6 +201,7 @@ GameObject:
   - component: {fileID: 2843010682291069575}
   - component: {fileID: 659009459093803472}
   - component: {fileID: 9087174453081477372}
+  - component: {fileID: -6927212774413343848}
   m_Layer: 31
   m_Name: WallCannon
   m_TagString: Untagged
@@ -416,6 +417,18 @@ MonoBehaviour:
   deathEffectOffset: {x: 0, y: 0, z: 0}
   deathEffectRotation: {x: 0, y: 0, z: 0}
   customCollider: {fileID: 0}
+--- !u!114 &-6927212774413343848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4859669245983106058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d584dce56ff9eaf48aa24f6aaf8424a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4961432146797875497
 GameObject:
   m_ObjectHideFlags: 0
