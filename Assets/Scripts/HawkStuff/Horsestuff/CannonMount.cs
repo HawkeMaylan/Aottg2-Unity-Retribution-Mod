@@ -7,7 +7,7 @@ using GameManagers;
 using ApplicationManagers;
 using System.Collections;
 
-public class CannonMount: MonoBehaviourPunCallbacks
+public class CannonMount : MonoBehaviourPunCallbacks, IPunObservable
 {
     [Header("Mount Target")]
     public Transform mountPoint;
@@ -50,8 +50,22 @@ public class CannonMount: MonoBehaviourPunCallbacks
     [Header("Trigger Validation")]
     public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trigger stay
 
-    private int isOccupied = 0;
     private PhotonView _photonView;
+    private int _mountedPlayerId = -1; // Track which player is mounted
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(isMounted);
+            stream.SendNext(_mountedPlayerId);
+        }
+        else
+        {
+            isMounted = (bool)stream.ReceiveNext();
+            _mountedPlayerId = (int)stream.ReceiveNext();
+        }
+    }
 
     private void Start()
     {
@@ -70,7 +84,9 @@ public class CannonMount: MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isOccupied == 1) return; // Don't proceed if already occupied
+        // Don't allow mounting if already occupied by another player
+        if (isMounted && _mountedPlayerId != -1 && _mountedPlayerId != PhotonNetwork.LocalPlayer.ActorNumber)
+            return;
 
         Human human = other.GetComponentInParent<Human>();
         if (human != null && human.IsMine())
@@ -80,7 +96,10 @@ public class CannonMount: MonoBehaviourPunCallbacks
             hasExitedAfterUnmount = false;
 
             UpdatePromptTexts();
-            SetPrompt(MountPromptText);
+
+            // Only show mount prompt if not already mounted or if this player is the one mounted
+            if (!isMounted || _mountedPlayerId == PhotonNetwork.LocalPlayer.ActorNumber)
+                SetPrompt(MountPromptText);
         }
     }
 
@@ -89,7 +108,7 @@ public class CannonMount: MonoBehaviourPunCallbacks
         Human human = other.GetComponentInParent<Human>();
         if (human != null && human == humanInTrigger)
         {
-            if (!isMounted)
+            if (!isMounted || _mountedPlayerId != PhotonNetwork.LocalPlayer.ActorNumber)
             {
                 hasExitedAfterUnmount = true;
                 humanInTrigger = null;
@@ -111,7 +130,7 @@ public class CannonMount: MonoBehaviourPunCallbacks
                 _lastCachedKey = currentKey;
                 UpdatePromptTexts();
 
-                if (!isMounted)
+                if (!isMounted || _mountedPlayerId != PhotonNetwork.LocalPlayer.ActorNumber)
                     SetPrompt(MountPromptText);
                 else
                     SetPrompt(UnmountPromptText);
@@ -144,13 +163,15 @@ public class CannonMount: MonoBehaviourPunCallbacks
         if (humanInTrigger == null)
             return;
 
-        if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
+        // Only allow interaction if this player owns the mount or it's not mounted
+        if ((!isMounted || _mountedPlayerId == PhotonNetwork.LocalPlayer.ActorNumber) &&
+            !InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
             if (SettingsManager.InputSettings.Interaction.Interact.GetKeyDown())
             {
                 if (!isMounted && !hasExitedAfterUnmount)
                     AttachHuman();
-                else if (isMounted)
+                else if (isMounted && _mountedPlayerId == PhotonNetwork.LocalPlayer.ActorNumber)
                     DetachHuman();
             }
         }
@@ -201,60 +222,81 @@ public class CannonMount: MonoBehaviourPunCallbacks
         if (humanInTrigger == null || mountPoint == null)
             return;
 
-        isOccupied = 1; // Set to occupied
+        // Request ownership before mounting
+        if (!_photonView.IsMine)
+            _photonView.RequestOwnership();
 
-        // Use the new mount system
-        humanInTrigger.MountState = HumanMountState.MapObject;
-        humanInTrigger.MountedTransform = mountPoint;
-        humanInTrigger.MountedPositionOffset = positionOffset;
-        humanInTrigger.MountedRotationOffset = rotationOffset;
-        humanInTrigger.SetInterpolation(false);
+        // Use RPC to synchronize mounting across network
+        _photonView.RPC("RPC_AttachHuman", RpcTarget.All, PhotonNetwork.LocalPlayer.ActorNumber);
+    }
 
-        if (humanRigidbody != null)
-        {
-            originalMass = humanRigidbody.mass;
-            originalUseGravity = humanRigidbody.useGravity;
-
-            if (disableGravityOnMount)
-                humanRigidbody.useGravity = false;
-            if (disableMassOnMount)
-                humanRigidbody.mass = mountedMass;
-        }
-
+    [PunRPC]
+    private void RPC_AttachHuman(int playerId)
+    {
+        // Set mounted state and track which player is mounted
         isMounted = true;
-        hasExitedAfterUnmount = false;
+        _mountedPlayerId = playerId;
 
-        SetPrompt(UnmountPromptText);
-        lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
-        humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.2f);
+        // Only execute mount logic for the actual mounted player
+        if (playerId == PhotonNetwork.LocalPlayer.ActorNumber && humanInTrigger != null)
+        {
+            humanInTrigger.MountState = HumanMountState.MapObject;
+            humanInTrigger.MountedTransform = mountPoint;
+            humanInTrigger.MountedPositionOffset = positionOffset;
+            humanInTrigger.MountedRotationOffset = rotationOffset;
+            humanInTrigger.SetInterpolation(false);
+
+            if (humanRigidbody != null)
+            {
+                originalMass = humanRigidbody.mass;
+                originalUseGravity = humanRigidbody.useGravity;
+
+                if (disableGravityOnMount)
+                    humanRigidbody.useGravity = false;
+                if (disableMassOnMount)
+                    humanRigidbody.mass = mountedMass;
+            }
+
+            hasExitedAfterUnmount = false;
+            SetPrompt(UnmountPromptText);
+            lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
+            humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.2f);
+        }
     }
 
     private void DetachHuman()
     {
-        if (humanInTrigger == null)
-            return;
+        // Use RPC to synchronize unmounting across network
+        _photonView.RPC("RPC_DetachHuman", RpcTarget.All);
+    }
 
-        isOccupied = 0; // Set to available
-
-        // Use the new unmount system
-        humanInTrigger.Unmount(true);
-
-        if (humanRigidbody != null)
+    [PunRPC]
+    private void RPC_DetachHuman()
+    {
+        // Only execute unmount logic for the mounted player
+        if (_mountedPlayerId == PhotonNetwork.LocalPlayer.ActorNumber && humanInTrigger != null)
         {
-            humanRigidbody.useGravity = originalUseGravity;
-            humanRigidbody.mass = originalMass;
+            humanInTrigger.Unmount(true);
+
+            if (humanRigidbody != null)
+            {
+                humanRigidbody.useGravity = originalUseGravity;
+                humanRigidbody.mass = originalMass;
+            }
+
+            if (humanInTrigger != null && !hasExitedAfterUnmount)
+            {
+                SetPrompt(MountPromptText);
+            }
+            else
+            {
+                ClearPrompt();
+            }
         }
 
+        // Reset mounted state for all clients
         isMounted = false;
-
-        if (humanInTrigger != null && !hasExitedAfterUnmount)
-        {
-            SetPrompt(MountPromptText);
-        }
-        else
-        {
-            ClearPrompt();
-        }
+        _mountedPlayerId = -1;
     }
 
     private string GetIdleAnimation()
