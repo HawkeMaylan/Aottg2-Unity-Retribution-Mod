@@ -659,6 +659,9 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 4915449211714290812}
   - {fileID: 2692196865389084917}
+  - {fileID: 3591770443698364839}
+  - {fileID: 687496905830320061}
+  - {fileID: 353216448372850049}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -1573,15 +1576,13 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 353216448372850049}
+    - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 338584956248400673}
   m_SourcePrefab: {fileID: 100100000, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
 --- !u!4 &2613566326842082576 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 712921334650953466, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
-  m_PrefabInstance: {fileID: 3288065982768258026}
-  m_PrefabAsset: {fileID: 0}
---- !u!135 &3597988994069235253 stripped
-SphereCollider:
-  m_CorrespondingSourceObject: {fileID: 2039868374014598623, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
   m_PrefabInstance: {fileID: 3288065982768258026}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &5236247628545287335 stripped
@@ -1601,15 +1602,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 759e6e23a9e068e4a810d34a996f0b07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionZone: {fileID: 3597988994069235253}
   mountPoint: {fileID: 6310894006079268686}
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
   unmountPromptDuration: 5
-  projectileUIPrefab: {fileID: 0}
-  animationType: 2
+  useHorseIdle: 1
   enableRunAnimation: 1
   runSpeedThreshold: 4
+  disableGravityOnMount: 1
+  disableMassOnMount: 1
+  mountedMass: 0
+--- !u!114 &338584956248400673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236247628545287335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 0
+  ObservedComponents:
+  - {fileID: 0}
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!4 &6310894006079268686 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
@@ -1707,12 +1732,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3591770443698364839}
+    - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2482637835335245708}
   m_SourcePrefab: {fileID: 100100000, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
---- !u!135 &2960304349480840814 stripped
-SphereCollider:
-  m_CorrespondingSourceObject: {fileID: 2039868374014598623, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
-  m_PrefabInstance: {fileID: 3844398861529969585}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4377149503900364107 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 712921334650953466, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
@@ -1740,15 +1763,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 759e6e23a9e068e4a810d34a996f0b07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionZone: {fileID: 2960304349480840814}
   mountPoint: {fileID: 5723879805097955093}
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
   unmountPromptDuration: 5
-  projectileUIPrefab: {fileID: 0}
-  animationType: 2
+  useHorseIdle: 1
   enableRunAnimation: 1
   runSpeedThreshold: 4
+  disableGravityOnMount: 1
+  disableMassOnMount: 1
+  mountedMass: 0
+--- !u!114 &2482637835335245708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5787514249802026236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 0
+  ObservedComponents:
+  - {fileID: 0}
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1001 &5051646842675629268
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1845,6 +1892,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 687496905830320061}
+    - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 414474637025062591}
   m_SourcePrefab: {fileID: 100100000, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
 --- !u!1 &2526629236622062489 stripped
 GameObject:
@@ -1863,15 +1913,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 759e6e23a9e068e4a810d34a996f0b07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionZone: {fileID: 6508861942819852555}
   mountPoint: {fileID: 4336487293396856944}
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
   unmountPromptDuration: 5
-  projectileUIPrefab: {fileID: 0}
-  animationType: 2
+  useHorseIdle: 1
   enableRunAnimation: 1
   runSpeedThreshold: 4
+  disableGravityOnMount: 1
+  disableMassOnMount: 1
+  mountedMass: 0
+--- !u!114 &414474637025062591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2526629236622062489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 0
+  ObservedComponents:
+  - {fileID: 0}
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!4 &4336487293396856944 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8806017481850076324, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
@@ -1880,11 +1954,6 @@ Transform:
 --- !u!4 &5764537312613323310 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 712921334650953466, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
-  m_PrefabInstance: {fileID: 5051646842675629268}
-  m_PrefabAsset: {fileID: 0}
---- !u!135 &6508861942819852555 stripped
-SphereCollider:
-  m_CorrespondingSourceObject: {fileID: 2039868374014598623, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
   m_PrefabInstance: {fileID: 5051646842675629268}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8028675796675278350

@@ -7230,7 +7230,6 @@ MonoBehaviour:
   disableGravityOnMount: 1
   disableMassOnMount: 1
   mountedMass: 0.1
-  maxTriggerDistance: 40.5
 --- !u!114 &1250985119454210882
 MonoBehaviour:
   m_ObjectHideFlags: 0

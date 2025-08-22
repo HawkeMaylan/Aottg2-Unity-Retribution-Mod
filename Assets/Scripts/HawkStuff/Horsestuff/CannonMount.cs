@@ -35,7 +35,7 @@ public class CannonMount : MonoBehaviourPunCallbacks, IPunObservable
     private float originalMass;
     private bool originalUseGravity;
 
-    private string currentPrompt = ""; // Changed from static to instance variable
+    private string currentPrompt = "";
     private float unmountPromptTimer = 0f;
     private Vector3 lastMountedWorldPos = Vector3.zero;
     private bool isCurrentlyRunning = false;
@@ -47,11 +47,8 @@ public class CannonMount : MonoBehaviourPunCallbacks, IPunObservable
     private Collider _triggerCollider;
     private const float MaxDistanceBuffer = 40.5f;
 
-    [Header("Trigger Validation")]
-    public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trigger stay
-
     private PhotonView _photonView;
-    private int _mountedPlayerId = -1; // Track which player is mounted
+    private int _mountedPlayerId = -1;
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
@@ -244,7 +241,9 @@ public class CannonMount : MonoBehaviourPunCallbacks, IPunObservable
             humanInTrigger.MountedTransform = mountPoint;
             humanInTrigger.MountedPositionOffset = positionOffset;
             humanInTrigger.MountedRotationOffset = rotationOffset;
-            humanInTrigger.SetInterpolation(false);
+
+            // KEY FIX: Keep interpolation enabled to prevent physics conflicts with joints
+            humanInTrigger.SetInterpolation(true);
 
             if (humanRigidbody != null)
             {
