@@ -7181,14 +7181,20 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0.481
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5801033945792118813, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5223992177507188782}
+      addedObject: {fileID: 2076411828051331933}
   m_SourcePrefab: {fileID: 100100000, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+--- !u!135 &3301753676605712704 stripped
+SphereCollider:
+  m_CorrespondingSourceObject: {fileID: 2039868374014598623, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
+  m_PrefabInstance: {fileID: 3575081865169466527}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4069547822707845733 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 712921334650953466, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
@@ -7204,7 +7210,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7281034093886635853, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
   m_PrefabInstance: {fileID: 3575081865169466527}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5223992177507188782
+--- !u!114 &2076411828051331933
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -7213,18 +7219,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 6095151424201755602}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3b4ef7952e2faf408281aab791ec1b6, type: 3}
+  m_Script: {fileID: 11500000, guid: 759e6e23a9e068e4a810d34a996f0b07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactionZone: {fileID: 3301753676605712704}
   mountPoint: {fileID: 5451743952980953147}
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
-  promptDuration: 5
-  mountText: Press {0} to Mount
-  unmountText: Press {0} to Unmount
-  useHorseAnimations: 1
-  enableRunAnimation: 0
-  runSpeedThreshold: 15
-  disableGravityOnMount: 0
-  adjustMassOnMount: 0
-  mountedMass: 0.1
+  disableGravityOnMount: 1
+  disableMassOnMount: 1
+  mountedMass: 0
+  unmountPromptDuration: 5
+  projectileUIPrefab: {fileID: 0}
