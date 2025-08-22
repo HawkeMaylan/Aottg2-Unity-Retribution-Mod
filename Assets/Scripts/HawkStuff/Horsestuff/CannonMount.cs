@@ -6,174 +6,159 @@ using Settings;
 using GameManagers;
 using ApplicationManagers;
 using System.Collections;
-using UnityEngine.UI;
 
-public class CannonMount : MonoBehaviourPunCallbacks
+public class CannonMount: MonoBehaviourPunCallbacks
 {
-    [Header("Interaction Settings")]
-    public Collider interactionZone;
-
     [Header("Mount Target")]
     public Transform mountPoint;
     public Vector3 positionOffset;
     public Vector3 rotationOffset;
 
-    [Header("UI Settings")]
+    [Header("Unmount Prompt Settings")]
     public float unmountPromptDuration = 5f;
-    public GameObject projectileUIPrefab;
 
     [Header("Animation Settings")]
-    public MountAnimationType animationType = MountAnimationType.Sitting;
-    public bool enableRunAnimation = false;
+    public bool useHorseIdle = true;
+    public bool enableRunAnimation = true;
     public float runSpeedThreshold = 4f;
 
+    [Header("Rigidbody Settings")]
+    public bool disableGravityOnMount = true;
+    public bool disableMassOnMount = true;
+    public float mountedMass = 0.1f;
+
     private Human humanInTrigger;
+    private Rigidbody humanRigidbody;
     private bool isMounted = false;
     private bool hasExitedAfterUnmount = false;
-    private bool isCurrentlyRunning = false;
-    private Vector3 lastMountedWorldPos = Vector3.zero;
+
+    private float originalMass;
+    private bool originalUseGravity;
 
     private static string currentPrompt = "";
     private float unmountPromptTimer = 0f;
-
-    private GameObject currentUIImage;
-    private Image currentUIImageRenderer;
+    private Vector3 lastMountedWorldPos = Vector3.zero;
+    private bool isCurrentlyRunning = false;
 
     private string MountPromptText;
     private string UnmountPromptText;
     private string _lastCachedKey = "";
-    private float mountPromptExpireTime = -1f;
 
-    public enum MountAnimationType
-    {
-        Sitting,
-        Standing,
-        HorseIdle,
-        Custom
-    }
+    private Collider _triggerCollider;
+    private const float MaxDistanceBuffer = 40.5f;
+
+    [Header("Trigger Validation")]
+    public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trigger stay
+
+    private int isOccupied = 0;
+    private PhotonView _photonView;
 
     private void Start()
     {
+        _triggerCollider = GetComponent<Collider>();
+        _photonView = GetComponent<PhotonView>();
         UpdatePromptTexts();
         ClearPrompt();
     }
 
+    private void UpdatePromptTexts()
+    {
+        string key = SettingsManager.InputSettings.Interaction.Interact.ToString().Replace("Alpha", "");
+        MountPromptText = $"Press {key} to Mount";
+        UnmountPromptText = $"Press {key} to Unmount";
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (isOccupied == 1) return; // Don't proceed if already occupied
+
+        Human human = other.GetComponentInParent<Human>();
+        if (human != null && human.IsMine())
+        {
+            humanInTrigger = human;
+            humanRigidbody = human.GetComponent<Rigidbody>();
+            hasExitedAfterUnmount = false;
+
+            UpdatePromptTexts();
+            SetPrompt(MountPromptText);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        Human human = other.GetComponentInParent<Human>();
+        if (human != null && human == humanInTrigger)
+        {
+            if (!isMounted)
+            {
+                hasExitedAfterUnmount = true;
+                humanInTrigger = null;
+                humanRigidbody = null;
+                ClearPrompt();
+            }
+        }
+    }
+
     private void Update()
     {
-        string currentKey = SettingsManager.InputSettings.Interaction.Interact.ToString();
-        if (_lastCachedKey != currentKey)
+        if (humanInTrigger != null)
         {
-            _lastCachedKey = currentKey;
-            UpdatePromptTexts();
-            if (!isMounted)
-                SetPrompt(MountPromptText);
-            else
-                SetPrompt(UnmountPromptText);
-        }
+            CheckIfStillInsideCollider();
 
-        // Check for grab state and auto-dismount if grabbed
-        if (isMounted && humanInTrigger != null && IsHumanGrabbed())
-        {
-            Debug.Log("Detaching due to player being grabbed.");
-            DetachHuman();
-            return;
+            string currentKey = SettingsManager.InputSettings.Interaction.Interact.ToString();
+            if (_lastCachedKey != currentKey)
+            {
+                _lastCachedKey = currentKey;
+                UpdatePromptTexts();
+
+                if (!isMounted)
+                    SetPrompt(MountPromptText);
+                else
+                    SetPrompt(UnmountPromptText);
+            }
         }
 
         HandleMountInput();
         HandleUnmountPromptTimer();
-        CheckDistanceOrAliveStatus();
-
-        // Handle run animation if enabled
-        if (isMounted && enableRunAnimation)
-        {
-            HandleRunAnimation();
-        }
-
-        // Only detect nearby humans if not already mounted
-        if (!isMounted)
-        {
-            DetectNearbyHuman();
-        }
+        HandleRunAnimation();
     }
 
-    private void DetectNearbyHuman()
+    private void CheckIfStillInsideCollider()
     {
-        // Auto-clear prompt if it times out
-        if (mountPromptExpireTime > 0f && Time.time > mountPromptExpireTime)
-        {
-            ClearPrompt();
-            mountPromptExpireTime = -1f;
-            humanInTrigger = null;
+        if (humanInTrigger == null || _triggerCollider == null)
             return;
-        }
 
-        // Detect nearby human using interactionZone
-        bool playerFound = false;
+        Vector3 closest = _triggerCollider.ClosestPoint(humanInTrigger.transform.position);
+        float dist = Vector3.Distance(humanInTrigger.transform.position, closest);
 
-        if (humanInTrigger == null && interactionZone != null)
+        if (dist > MaxDistanceBuffer)
         {
-            Collider[] hits = Physics.OverlapBox(
-                interactionZone.bounds.center,
-                interactionZone.bounds.extents,
-                interactionZone.transform.rotation
-            );
-
-            foreach (var hit in hits)
-            {
-                Human h = hit.GetComponentInParent<Human>();
-                if (h != null && h.IsMine())
-                {
-                    humanInTrigger = h;
-                    SetPrompt(MountPromptText);
-                    mountPromptExpireTime = Time.time + 10f;
-                    playerFound = true;
-                    break;
-                }
-            }
-        }
-
-        // Clear if player leaves zone (only when not mounted)
-        if (!playerFound && humanInTrigger != null && !isMounted)
-        {
-            float dist = Vector3.Distance(humanInTrigger.transform.position, transform.position);
-            if (dist > 40f || !interactionZone.bounds.Contains(humanInTrigger.transform.position))
-            {
-                humanInTrigger = null;
-                ClearPrompt();
-                mountPromptExpireTime = -1f;
-            }
+            humanInTrigger = null;
+            humanRigidbody = null;
+            ClearPrompt();
         }
     }
 
     private void HandleMountInput()
     {
-        // When mounted, we can still use the stored humanInTrigger reference
-        if (humanInTrigger == null && !isMounted) return;
-
-        // Prevent mount/unmount if player is no longer actually at this mount point
-        if (isMounted && humanInTrigger != null && humanInTrigger.MountedTransform != mountPoint)
+        if (humanInTrigger == null)
             return;
 
         if (!InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
             if (SettingsManager.InputSettings.Interaction.Interact.GetKeyDown())
             {
-                if (!isMounted && !hasExitedAfterUnmount && humanInTrigger != null)
-                {
+                if (!isMounted && !hasExitedAfterUnmount)
                     AttachHuman();
-                }
                 else if (isMounted)
-                {
                     DetachHuman();
-                    mountPromptExpireTime = -1f;
-                }
             }
         }
     }
 
     private void HandleUnmountPromptTimer()
     {
-        if (isMounted && unmountPromptTimer > 0f)
+        if (!string.IsNullOrEmpty(currentPrompt))
         {
             unmountPromptTimer -= Time.deltaTime;
             if (unmountPromptTimer <= 0f)
@@ -183,7 +168,10 @@ public class CannonMount : MonoBehaviourPunCallbacks
 
     private void HandleRunAnimation()
     {
-        if (!isMounted || humanInTrigger == null || humanInTrigger.MountedTransform == null)
+        if (!isMounted || humanInTrigger == null || !enableRunAnimation)
+            return;
+
+        if (humanInTrigger.MountedTransform == null)
             return;
 
         Vector3 currentWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
@@ -208,210 +196,93 @@ public class CannonMount : MonoBehaviourPunCallbacks
         }
     }
 
-    private void CheckDistanceOrAliveStatus()
-    {
-        if (!isMounted || humanInTrigger == null) return;
-
-        bool isTooFar = Vector3.Distance(transform.position, humanInTrigger.transform.position) > 40f;
-        bool isDead = humanInTrigger.Dead;
-        bool isGrabbed = IsHumanGrabbed();
-
-        if (isTooFar || isDead || isGrabbed)
-        {
-            Debug.LogWarning("Detaching due to distance, death, or grab.");
-            DetachHuman();
-            ClearPrompt();
-        }
-    }
-
     private void AttachHuman()
     {
-        if (!ValidateHumanInTrigger()) return;
-
-        if (humanInTrigger == null || mountPoint == null || isMounted)
-        {
-            Debug.LogWarning("Invalid mount attempt - missing human or already mounted.");
+        if (humanInTrigger == null || mountPoint == null)
             return;
-        }
 
-        if (!photonView.IsMine)
-        {
-            Debug.Log("Requesting ownership before mounting.");
-            photonView.RequestOwnership();
-        }
+        isOccupied = 1; // Set to occupied
 
-        // Confirm human isn't already mounted to something else
-        if (humanInTrigger.MountState != HumanMountState.None && humanInTrigger.MountedTransform != mountPoint)
-        {
-            Debug.LogWarning("Human is already mounted elsewhere.");
-            return;
-        }
-
-        // Use the human's built-in mounting system - HumanMovementSync will handle the rest
+        // Use the new mount system
+        humanInTrigger.MountState = HumanMountState.MapObject;
         humanInTrigger.MountedTransform = mountPoint;
         humanInTrigger.MountedPositionOffset = positionOffset;
         humanInTrigger.MountedRotationOffset = rotationOffset;
-        humanInTrigger.MountState = HumanMountState.MapObject;
+        humanInTrigger.SetInterpolation(false);
+
+        if (humanRigidbody != null)
+        {
+            originalMass = humanRigidbody.mass;
+            originalUseGravity = humanRigidbody.useGravity;
+
+            if (disableGravityOnMount)
+                humanRigidbody.useGravity = false;
+            if (disableMassOnMount)
+                humanRigidbody.mass = mountedMass;
+        }
 
         isMounted = true;
         hasExitedAfterUnmount = false;
 
-        // Play the appropriate animation
-        humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.2f);
-        lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
-
-        Debug.Log("Human mounted successfully.");
-
-        ClearPrompt();
         SetPrompt(UnmountPromptText);
-        mountPromptExpireTime = Time.time + unmountPromptDuration;
-        unmountPromptTimer = unmountPromptDuration;
-
-        // Show UI when mounted
-        ShowMountUI();
+        lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
+        humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.2f);
     }
 
     private void DetachHuman()
     {
-        if (humanInTrigger == null) return;
-
-        // Remove UI when dismounting
-        HideMountUI();
-
-        if (!ValidateHumanInTrigger())
-        {
-            humanInTrigger = null;
-            isMounted = false;
+        if (humanInTrigger == null)
             return;
-        }
 
-        // Simply unmount - HumanMovementSync will handle the physics restoration
+        isOccupied = 0; // Set to available
+
+        // Use the new unmount system
         humanInTrigger.Unmount(true);
 
-        isMounted = false;
-        isCurrentlyRunning = false;
-
-        // After dismounting, check if player is still in range
-        if (humanInTrigger != null)
+        if (humanRigidbody != null)
         {
-            float dist = Vector3.Distance(humanInTrigger.transform.position, transform.position);
-            if (dist <= 40f && interactionZone.bounds.Contains(humanInTrigger.transform.position))
-            {
-                SetPrompt(MountPromptText);
-                mountPromptExpireTime = Time.time + 10f;
-            }
-            else
-            {
-                humanInTrigger = null;
-                ClearPrompt();
-                mountPromptExpireTime = -1f;
-            }
+            humanRigidbody.useGravity = originalUseGravity;
+            humanRigidbody.mass = originalMass;
+        }
+
+        isMounted = false;
+
+        if (humanInTrigger != null && !hasExitedAfterUnmount)
+        {
+            SetPrompt(MountPromptText);
         }
         else
         {
             ClearPrompt();
         }
-
-        unmountPromptTimer = 0f;
     }
 
     private string GetIdleAnimation()
     {
-        switch (animationType)
-        {
-
-            case MountAnimationType.Standing:
-                return HumanAnimations.IdleM;
-            case MountAnimationType.HorseIdle:
-                return HumanAnimations.HorseIdle;
-            case MountAnimationType.Custom:
-                // You can add custom animation name field if needed
-                return HumanAnimations.IdleM;
-            default:
-                return HumanAnimations.IdleM;
-        }
-    }
-
-    private void ShowMountUI()
-    {
-        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
-
-        GameObject menu = GameObject.Find("DefaultMenu(Clone)");
-        if (menu == null || projectileUIPrefab == null) return;
-
-        // Create simple UI element to show mounted state
-        currentUIImage = Instantiate(projectileUIPrefab, menu.transform);
-        currentUIImageRenderer = currentUIImage.GetComponent<Image>();
-
-        // Position the UI
-        RectTransform rt = currentUIImage.GetComponent<RectTransform>();
-        rt.anchoredPosition = new Vector2(-180f, 100f);
-        rt.sizeDelta = new Vector2(130f, 130f);
-        rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-
-        // You can set a specific sprite or color for mounted state
-        currentUIImageRenderer.color = Color.green;
-    }
-
-    private void HideMountUI()
-    {
-        if (currentUIImage != null)
-        {
-            Destroy(currentUIImage);
-            currentUIImageRenderer = null;
-        }
-    }
-
-    private bool ValidateHumanInTrigger()
-    {
-        if (humanInTrigger == null)
-            return false;
-
-        bool isDead = humanInTrigger.Dead || !humanInTrigger.gameObject.activeInHierarchy;
-        bool isNotMine = !humanInTrigger.IsMine();
-        bool isGrabbed = IsHumanGrabbed();
-
-        return !(isDead || isNotMine || isGrabbed);
-    }
-
-    private bool IsHumanGrabbed()
-    {
-        return humanInTrigger != null && humanInTrigger.State == HumanState.Grab;
-    }
-
-    private void SetPrompt(string text)
-    {
-        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
-        currentPrompt = text;
-    }
-
-    private void ClearPrompt()
-    {
-        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
-        currentPrompt = "";
-    }
-
-    private void UpdatePromptTexts()
-    {
-        string key = SettingsManager.InputSettings.Interaction.Interact.ToString().Replace("Alpha", "");
-        MountPromptText = $"Press {key} to Mount";
-        UnmountPromptText = $"Press {key} to Unmount";
+        return useHorseIdle ? HumanAnimations.HorseIdle : HumanAnimations.IdleM;
     }
 
     private void OnGUI()
     {
-        if (humanInTrigger == null || !humanInTrigger.IsMine()) return;
-
         if (!string.IsNullOrEmpty(currentPrompt))
         {
-            GUIStyle style = new GUIStyle(GUI.skin.label)
-            {
-                fontSize = 24,
-                alignment = TextAnchor.UpperCenter,
-                normal = { textColor = Color.white }
-            };
-            GUI.Label(new Rect(Screen.width / 2 - 150, 10, 300, 50), currentPrompt, style);
+            GUIStyle style = new GUIStyle(GUI.skin.label);
+            style.fontSize = 24;
+            style.alignment = TextAnchor.UpperCenter;
+            style.normal.textColor = Color.white;
+
+            GUI.Label(new Rect(Screen.width / 2 - 200, 10, 400, 50), currentPrompt, style);
         }
+    }
+
+    private void SetPrompt(string text)
+    {
+        currentPrompt = text;
+        unmountPromptTimer = unmountPromptDuration;
+    }
+
+    private void ClearPrompt()
+    {
+        currentPrompt = "";
     }
 }

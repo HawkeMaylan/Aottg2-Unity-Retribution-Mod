@@ -7190,11 +7190,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2076411828051331933}
   m_SourcePrefab: {fileID: 100100000, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
---- !u!135 &3301753676605712704 stripped
-SphereCollider:
-  m_CorrespondingSourceObject: {fileID: 2039868374014598623, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
-  m_PrefabInstance: {fileID: 3575081865169466527}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4069547822707845733 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 712921334650953466, guid: cb02f5dec12e4d24897ed5eba267788d, type: 3}
@@ -7222,12 +7217,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 759e6e23a9e068e4a810d34a996f0b07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionZone: {fileID: 3301753676605712704}
   mountPoint: {fileID: 5451743952980953147}
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
   unmountPromptDuration: 5
-  projectileUIPrefab: {fileID: 0}
-  animationType: 2
+  useHorseIdle: 1
   enableRunAnimation: 1
   runSpeedThreshold: 4
+  disableGravityOnMount: 1
+  disableMassOnMount: 1
+  mountedMass: 0.1
+  maxTriggerDistance: 40.5
