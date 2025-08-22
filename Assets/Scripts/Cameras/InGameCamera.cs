@@ -479,9 +479,11 @@ namespace Cameras
                 }
                 Vector3 direction = Vector3.zero;
 
-                float speed = 200f;
+                float speed = 10;
                 if (_input.Modifier.GetKey())
-                    speed *= 2f;
+                    speed = 35;
+                if (Input.GetKey(KeyCode.Comma))
+                    speed = 1;
 
                 if (_input.Forward.GetKey())
                     direction += Cache.Transform.forward;
