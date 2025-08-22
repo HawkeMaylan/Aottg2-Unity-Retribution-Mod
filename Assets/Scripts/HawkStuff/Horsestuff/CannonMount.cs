@@ -35,7 +35,7 @@ public class CannonMount : MonoBehaviourPunCallbacks, IPunObservable
     private float originalMass;
     private bool originalUseGravity;
 
-    private static string currentPrompt = "";
+    private string currentPrompt = ""; // Changed from static to instance variable
     private float unmountPromptTimer = 0f;
     private Vector3 lastMountedWorldPos = Vector3.zero;
     private bool isCurrentlyRunning = false;
@@ -306,7 +306,8 @@ public class CannonMount : MonoBehaviourPunCallbacks, IPunObservable
 
     private void OnGUI()
     {
-        if (!string.IsNullOrEmpty(currentPrompt))
+        // Only show prompt if this is the local player's cannon interaction
+        if (!string.IsNullOrEmpty(currentPrompt) && humanInTrigger != null && humanInTrigger.IsMine())
         {
             GUIStyle style = new GUIStyle(GUI.skin.label);
             style.fontSize = 24;
@@ -319,12 +320,20 @@ public class CannonMount : MonoBehaviourPunCallbacks, IPunObservable
 
     private void SetPrompt(string text)
     {
-        currentPrompt = text;
-        unmountPromptTimer = unmountPromptDuration;
+        // Only set prompt for local player
+        if (humanInTrigger != null && humanInTrigger.IsMine())
+        {
+            currentPrompt = text;
+            unmountPromptTimer = unmountPromptDuration;
+        }
     }
 
     private void ClearPrompt()
     {
-        currentPrompt = "";
+        // Only clear prompt for local player
+        if (humanInTrigger != null && humanInTrigger.IsMine())
+        {
+            currentPrompt = "";
+        }
     }
 }
