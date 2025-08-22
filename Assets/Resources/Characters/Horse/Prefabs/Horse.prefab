@@ -7226,8 +7226,8 @@ MonoBehaviour:
   mountPoint: {fileID: 5451743952980953147}
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
-  disableGravityOnMount: 1
-  disableMassOnMount: 1
-  mountedMass: 0
   unmountPromptDuration: 5
   projectileUIPrefab: {fileID: 0}
+  animationType: 2
+  enableRunAnimation: 1
+  runSpeedThreshold: 4

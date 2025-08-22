@@ -18,22 +18,20 @@ public class CannonMount : MonoBehaviourPunCallbacks
     public Vector3 positionOffset;
     public Vector3 rotationOffset;
 
-    [Header("Rigidbody Settings")]
-    public bool disableGravityOnMount = true;
-    public bool disableMassOnMount = true;
-    public float mountedMass = 0.1f;
-
     [Header("UI Settings")]
     public float unmountPromptDuration = 5f;
     public GameObject projectileUIPrefab;
 
+    [Header("Animation Settings")]
+    public MountAnimationType animationType = MountAnimationType.Sitting;
+    public bool enableRunAnimation = false;
+    public float runSpeedThreshold = 4f;
+
     private Human humanInTrigger;
-    private Rigidbody humanRigidbody;
     private bool isMounted = false;
     private bool hasExitedAfterUnmount = false;
-
-    private float originalMass;
-    private bool originalUseGravity;
+    private bool isCurrentlyRunning = false;
+    private Vector3 lastMountedWorldPos = Vector3.zero;
 
     private static string currentPrompt = "";
     private float unmountPromptTimer = 0f;
@@ -45,6 +43,14 @@ public class CannonMount : MonoBehaviourPunCallbacks
     private string UnmountPromptText;
     private string _lastCachedKey = "";
     private float mountPromptExpireTime = -1f;
+
+    public enum MountAnimationType
+    {
+        Sitting,
+        Standing,
+        HorseIdle,
+        Custom
+    }
 
     private void Start()
     {
@@ -77,6 +83,12 @@ public class CannonMount : MonoBehaviourPunCallbacks
         HandleUnmountPromptTimer();
         CheckDistanceOrAliveStatus();
 
+        // Handle run animation if enabled
+        if (isMounted && enableRunAnimation)
+        {
+            HandleRunAnimation();
+        }
+
         // Only detect nearby humans if not already mounted
         if (!isMounted)
         {
@@ -92,7 +104,6 @@ public class CannonMount : MonoBehaviourPunCallbacks
             ClearPrompt();
             mountPromptExpireTime = -1f;
             humanInTrigger = null;
-            humanRigidbody = null;
             return;
         }
 
@@ -113,7 +124,6 @@ public class CannonMount : MonoBehaviourPunCallbacks
                 if (h != null && h.IsMine())
                 {
                     humanInTrigger = h;
-                    humanRigidbody = h.GetComponent<Rigidbody>();
                     SetPrompt(MountPromptText);
                     mountPromptExpireTime = Time.time + 10f;
                     playerFound = true;
@@ -129,7 +139,6 @@ public class CannonMount : MonoBehaviourPunCallbacks
             if (dist > 40f || !interactionZone.bounds.Contains(humanInTrigger.transform.position))
             {
                 humanInTrigger = null;
-                humanRigidbody = null;
                 ClearPrompt();
                 mountPromptExpireTime = -1f;
             }
@@ -172,6 +181,33 @@ public class CannonMount : MonoBehaviourPunCallbacks
         }
     }
 
+    private void HandleRunAnimation()
+    {
+        if (!isMounted || humanInTrigger == null || humanInTrigger.MountedTransform == null)
+            return;
+
+        Vector3 currentWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
+        float speed = (currentWorldPos - lastMountedWorldPos).magnitude / Time.deltaTime;
+        lastMountedWorldPos = currentWorldPos;
+
+        if (speed > runSpeedThreshold)
+        {
+            if (!isCurrentlyRunning)
+            {
+                humanInTrigger.CrossFadeIfNotPlaying(HumanAnimations.HorseRun, 0.23f);
+                isCurrentlyRunning = true;
+            }
+        }
+        else
+        {
+            if (isCurrentlyRunning)
+            {
+                humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.1f);
+                isCurrentlyRunning = false;
+            }
+        }
+    }
+
     private void CheckDistanceOrAliveStatus()
     {
         if (!isMounted || humanInTrigger == null) return;
@@ -211,25 +247,18 @@ public class CannonMount : MonoBehaviourPunCallbacks
             return;
         }
 
-        // Sync mount
+        // Use the human's built-in mounting system - HumanMovementSync will handle the rest
         humanInTrigger.MountedTransform = mountPoint;
-        humanInTrigger.MountedMapObject = null;
         humanInTrigger.MountedPositionOffset = positionOffset;
         humanInTrigger.MountedRotationOffset = rotationOffset;
         humanInTrigger.MountState = HumanMountState.MapObject;
-        humanInTrigger.SetInterpolation(false);
-
-        if (humanRigidbody != null)
-        {
-            originalMass = humanRigidbody.mass;
-            originalUseGravity = humanRigidbody.useGravity;
-
-            if (disableGravityOnMount) humanRigidbody.useGravity = false;
-            if (disableMassOnMount) humanRigidbody.mass = mountedMass;
-        }
 
         isMounted = true;
         hasExitedAfterUnmount = false;
+
+        // Play the appropriate animation
+        humanInTrigger.CrossFadeIfNotPlaying(GetIdleAnimation(), 0.2f);
+        lastMountedWorldPos = humanInTrigger.MountedTransform.TransformPoint(humanInTrigger.MountedPositionOffset);
 
         Debug.Log("Human mounted successfully.");
 
@@ -252,20 +281,15 @@ public class CannonMount : MonoBehaviourPunCallbacks
         if (!ValidateHumanInTrigger())
         {
             humanInTrigger = null;
-            humanRigidbody = null;
             isMounted = false;
             return;
         }
 
+        // Simply unmount - HumanMovementSync will handle the physics restoration
         humanInTrigger.Unmount(true);
 
-        if (humanRigidbody != null)
-        {
-            humanRigidbody.useGravity = originalUseGravity;
-            humanRigidbody.mass = originalMass;
-        }
-
         isMounted = false;
+        isCurrentlyRunning = false;
 
         // After dismounting, check if player is still in range
         if (humanInTrigger != null)
@@ -279,7 +303,6 @@ public class CannonMount : MonoBehaviourPunCallbacks
             else
             {
                 humanInTrigger = null;
-                humanRigidbody = null;
                 ClearPrompt();
                 mountPromptExpireTime = -1f;
             }
@@ -290,6 +313,23 @@ public class CannonMount : MonoBehaviourPunCallbacks
         }
 
         unmountPromptTimer = 0f;
+    }
+
+    private string GetIdleAnimation()
+    {
+        switch (animationType)
+        {
+
+            case MountAnimationType.Standing:
+                return HumanAnimations.IdleM;
+            case MountAnimationType.HorseIdle:
+                return HumanAnimations.HorseIdle;
+            case MountAnimationType.Custom:
+                // You can add custom animation name field if needed
+                return HumanAnimations.IdleM;
+            default:
+                return HumanAnimations.IdleM;
+        }
     }
 
     private void ShowMountUI()
