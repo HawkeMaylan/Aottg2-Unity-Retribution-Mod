@@ -39,6 +39,9 @@ public class BuildSystem : MonoBehaviourPunCallbacks
                              _playerInventory.photonView != null &&
                              _playerInventory.photonView.IsMine;
 
+    private float _lastInventoryCheckTime = 0f;
+    private float _inventoryCheckCooldown = 2f;
+
     // Rotation state
     private Quaternion surfaceAlignmentRotation = Quaternion.identity;
    
@@ -65,10 +68,12 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     private bool FindLocalPlayerInventory()
     {
+        _playerInventory = null;
+
         // Method 1: Find by PhotonView ownership (most reliable)
         foreach (var human in FindObjectsOfType<Human>())
         {
-            if (human != null && human.photonView != null && human.photonView.IsMine)
+            if (human != null && !human.Equals(null) && human.photonView != null && human.photonView.IsMine)
             {
                 _playerInventory = human.GetComponent<HumanInventory>();
                 if (_playerInventory != null)
@@ -80,9 +85,9 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             }
         }
 
-        // Method 2: Fallback to tag search
+        // Method 2: Fallback to tag search with null check
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        if (player != null && !player.Equals(null))
         {
             _playerInventory = player.GetComponentInChildren<HumanInventory>(true);
             if (_playerInventory != null)
@@ -93,13 +98,17 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             }
         }
 
-        // Method 3: Final fallback
-        _playerInventory = FindObjectOfType<HumanInventory>();
-        if (_playerInventory != null)
+        // Method 3: Final fallback with null check
+        HumanInventory[] allInventories = FindObjectsOfType<HumanInventory>();
+        foreach (HumanInventory inventory in allInventories)
         {
-            Debug.Log("BuildSystem: Found player inventory via scene search");
-            _inventorySearchPerformed = true;
-            return true;
+            if (inventory != null && !inventory.Equals(null) && inventory.photonView != null && inventory.photonView.IsMine)
+            {
+                _playerInventory = inventory;
+                Debug.Log("BuildSystem: Found player inventory via scene search");
+                _inventorySearchPerformed = true;
+                return true;
+            }
         }
 
         return false;
@@ -107,6 +116,38 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void Update()
     {
+        // Periodically check for inventory with cooldown
+        if (_playerInventory == null || _playerInventory.gameObject == null)
+        {
+            if (Time.time - _lastInventoryCheckTime >= _inventoryCheckCooldown)
+            {
+                _lastInventoryCheckTime = Time.time;
+                if (!FindLocalPlayerInventory())
+                {
+                    Debug.LogWarning("BuildSystem: Waiting for player inventory...");
+                    // Disable building until we have a valid inventory
+                    if (isBuilding)
+                    {
+                        isBuilding = false;
+                        if (currentPreview != null)
+                        {
+                            Destroy(currentPreview);
+                        }
+                    }
+                    return;
+                }
+                else
+                {
+                    Debug.Log("BuildSystem: Successfully reconnected to player inventory");
+                }
+            }
+            else
+            {
+                // Still waiting for cooldown, skip update
+                return;
+            }
+        }
+
         HandleSystemToggle();
         if (!scriptActive) return;
 
