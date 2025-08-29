@@ -3,8 +3,8 @@
 	"SpawnRates": {
 		"Training": { "Normal": 1.0 },
 		"Easy": {
-			"Normal": 0.9,
-			"Abnormal": 0.1
+			"Normal": 0.8,
+			"Abnormal": 0.2
 		},
 		"Normal": {
 			"Normal": 0.67,
@@ -274,7 +274,7 @@
 		"FocusTimeMax": 60.0,
 
 		"TurnAngleMin": 45,
-		"TurnAngleMax": 200,
+		"TurnAngleMax": 60,
 
 		"TurnSpeedMin": 1.3,
 		"TurnSpeedMax": 6.0,
@@ -541,11 +541,77 @@
 
 		},
 		"Easy": {
-			"TurnPause": 1.0,
-			"AttackWait": 1.0,
-			"AttackPause": 1.0,
-			"ActionPause": 1.0,
-			"AttackSpeedMultiplier": 0.8
+			"DetectRange": 0,
+			"FocusRange": 0,
+			"RunAnimationMin": 0.6,
+			"RunAnimationMax": 0.9,
+
+			"WalkSpeedBaseMin": 10.0,
+			"WalkSpeedBaseMax": 15.0,
+
+			"WalkSpeedPerLevelMin": 1.0,
+			"WalkSpeedPerLevelMax": 2.0,
+
+			"RunSpeedBaseMin": 15.0,
+			"RunSpeedBaseMax": 20.0,
+
+			"RunSpeedPerLevelMin": 4.0,
+			"RunSpeedPerLevelMax": 6.0,
+
+			"JumpForceMin": 150,
+			"JumpForceMax": 300,
+
+			"RotateSpeedMin": 0.7,
+			"RotateSpeedMax": 0.9,
+
+
+			"ChaseAngleTimeMin": 0.15,
+			"ChaseAngleTimeMax": 0.50,
+			"ChaseAngleMinRange": 50,
+
+			"DetectRangeMin": 30000,
+			"DetectRangeMax": 40200,
+
+			"FocusRangeMin": 15000,
+			"FocusRangeMax": 30200,
+
+			"FocusTimeMin": 5.0,
+			"FocusTimeMax": 60.0,
+
+			"TurnAngleMin": 45,
+			"TurnAngleMax": 200,
+
+			"TurnSpeedMin": 0.6,
+			"TurnSpeedMax": 0.9,
+
+			"TurnPauseMin": 0.1,
+			"TurnPauseMax": 0.2,
+
+			"CloseAttackRangeMin": 11,
+			"CloseAttackRangeMax": 13,
+
+			"FarAttackMinRangeMin": 10,
+			"FarAttackMinRangeMax": 20,
+
+			"FarAttackMaxRangeMin": 30,
+			"FarAttackMaxRangeMax": 400,
+
+			"FarAttackCooldownMin": 1.0,
+			"FarAttackCooldownMax": 6.0,
+
+			"AttackWaitMin": 0.5,
+			"AttackWaitMax": 0.5,
+
+			"AttackPauseMin": 0.1,
+			"AttackPauseMax": 0.5,
+
+			"ActionPauseMin": 0.1,
+			"ActionPauseMax": 0.5,
+
+			"ChaseAngleMinRangeMin": 20,
+			"ChaseAngleMinRangeMax": 60,
+			"AttackSpeedMultiplierMin": 0.5,
+			"AttackSpeedMultiplierMax": 1.0
 		},
 		"Normal": {
 
@@ -602,7 +668,79 @@
 			"AttackWait": 1.0,
 			"AttackPause": 1.0,
 			"ActionPause": 1.0,
-			"AttackSpeedMultiplier": 0.8
+			"AttackSpeedMultiplier": 0.8,
+
+			"DetectRange": 0,
+			"FocusRange": 0,
+			"RunAnimationMin": 0.6,
+			"RunAnimationMax": 0.9,
+
+			"WalkSpeedBaseMin": 10.0,
+			"WalkSpeedBaseMax": 15.0,
+
+			"WalkSpeedPerLevelMin": 1.0,
+			"WalkSpeedPerLevelMax": 2.0,
+
+			"RunSpeedBaseMin": 15.0,
+			"RunSpeedBaseMax": 20.0,
+
+			"RunSpeedPerLevelMin": 4.0,
+			"RunSpeedPerLevelMax": 6.0,
+
+			"JumpForceMin": 150,
+			"JumpForceMax": 300,
+
+			"RotateSpeedMin": 0.7,
+			"RotateSpeedMax": 0.9,
+
+
+			"ChaseAngleTimeMin": 0.15,
+			"ChaseAngleTimeMax": 0.50,
+			"ChaseAngleMinRange": 50,
+
+			"DetectRangeMin": 30000,
+			"DetectRangeMax": 40200,
+
+			"FocusRangeMin": 15000,
+			"FocusRangeMax": 30200,
+
+			"FocusTimeMin": 5.0,
+			"FocusTimeMax": 60.0,
+
+			"TurnAngleMin": 30,
+			"TurnAngleMax": 60,
+
+			"TurnSpeedMin": 0.6,
+			"TurnSpeedMax": 0.9,
+
+			"TurnPauseMin": 0.1,
+			"TurnPauseMax": 0.2,
+
+			"CloseAttackRangeMin": 11,
+			"CloseAttackRangeMax": 13,
+
+			"FarAttackMinRangeMin": 10,
+			"FarAttackMinRangeMax": 20,
+
+			"FarAttackMaxRangeMin": 30,
+			"FarAttackMaxRangeMax": 400,
+
+			"FarAttackCooldownMin": 1.0,
+			"FarAttackCooldownMax": 6.0,
+
+			"AttackWaitMin": 0.5,
+			"AttackWaitMax": 0.5,
+
+			"AttackPauseMin": 0.1,
+			"AttackPauseMax": 0.5,
+
+			"ActionPauseMin": 0.1,
+			"ActionPauseMax": 0.5,
+
+			"ChaseAngleMinRangeMin": 20,
+			"ChaseAngleMinRangeMax": 60,
+			"AttackSpeedMultiplierMin": 0.5,
+			"AttackSpeedMultiplierMax": 1.0
 		},
 		"Normal": {
 			"FocusTimeMin": 5.0,
@@ -641,8 +779,8 @@
 				"AttackStomp": 0.1,
 				"AttackJump": 0.5
 			},
-			"TurnAngleMin": 90,
-			"TurnAngleMax": 250,
+			"TurnAngleMin": 30,
+			"TurnAngleMax": 50,
 
 			"TurnSpeedMin": 4.3,
 			"TurnSpeedMax": 6.0,
@@ -722,8 +860,8 @@
 			"FocusTimeMin": 5.0,
 			"FocusTimeMax": 60.0,
 
-			"TurnAngleMin": 90,
-			"TurnAngleMax": 250,
+			"TurnAngleMin": 30,
+			"TurnAngleMax": 50,
 
 			"TurnSpeedMin": 4.3,
 			"TurnSpeedMax": 6.0,
@@ -936,8 +1074,8 @@
 			"FocusTimeMin": 1.0,
 			"FocusTimeMax": 3.0,
 
-			"TurnAngleMin": 90,
-			"TurnAngleMax": 250,
+			"TurnAngleMin": 30,
+			"TurnAngleMax": 50,
 
 			"TurnSpeedMin": 4.3,
 			"TurnSpeedMax": 6.0,
