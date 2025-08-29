@@ -259,6 +259,66 @@ MonoBehaviour:
   turnSpeed: 15
   firePoint: {fileID: 9003288087720832598}
   projectileOptions:
+  - name: HEV
+    prefab: {fileID: 1530743120385670784, guid: ce9a789b3a6e05f4d9274ecbe59a82fa, type: 3}
+    launchForce: 12000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: 767baf0b056438247ad07c329aef9c38, type: 3}
+    fireCooldown: 2
+    projectileCount: 1
+    spreadAngle: 0
+    BarrelRecoil: 1
+    RecoilDistance: 0.5
+    barrelRecoilAngle: 20
+    RecoilSpeed: 5
+    Knockback: 0
+    knockbackForce: 0
+    startingAmmo: 150
+  - name: Scatter
+    prefab: {fileID: 1530743120385670784, guid: 7768ae2aad8283749a1e9f35b3db5ca6, type: 3}
+    launchForce: 10000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: 1346a755a2bce3e40bcc49ba7a11d95e, type: 3}
+    fireCooldown: 2
+    projectileCount: 16
+    spreadAngle: 8
+    BarrelRecoil: 1
+    RecoilDistance: 0.5
+    barrelRecoilAngle: 20
+    RecoilSpeed: 5
+    Knockback: 0
+    knockbackForce: 0
+    startingAmmo: 150
+  - name: Fletchette
+    prefab: {fileID: 1530743120385670784, guid: fc85a5f74d7f5f54db0a98ab011a3647, type: 3}
+    launchForce: 5000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: e4b40a4f2fcbae6428abc383fd308620, type: 3}
+    fireCooldown: 2
+    projectileCount: 30
+    spreadAngle: 15
+    BarrelRecoil: 1
+    RecoilDistance: 0.5
+    barrelRecoilAngle: 20
+    RecoilSpeed: 5
+    Knockback: 0
+    knockbackForce: 0
+    startingAmmo: 1500
+  - name: Incendiary
+    prefab: {fileID: 1530743120385670784, guid: 150fb050d130a9348b23bb69ee086949, type: 3}
+    launchForce: 10000
+    upwardForce: 250
+    sprite: {fileID: 21300000, guid: 40397bc5f86659644b305a0e0a3ea797, type: 3}
+    fireCooldown: 1
+    projectileCount: 1
+    spreadAngle: 0
+    BarrelRecoil: 1
+    RecoilDistance: 0.5
+    barrelRecoilAngle: 20
+    RecoilSpeed: 5
+    Knockback: 0
+    knockbackForce: 0
+    startingAmmo: 1500
   - name: Cannonball
     prefab: {fileID: 1530743120385670784, guid: e3b80400c082b744a96fffd4d57c61f8, type: 3}
     launchForce: 10000
@@ -402,13 +462,6 @@ MonoBehaviour:
   healthBarScale: {x: 5, y: 0.8, z: 4}
   hitCooldown: 0.2
   flatDamageFromUnknown: 1000
-  npcBaseDamage: 100
-  titanDamageMultiplier: 1
-  damageMultipliers:
-  - type: 4
-    multiplier: 1
-  - type: 1
-    multiplier: 1.5
   hitEffectPrefab: {fileID: 4725709683707712150, guid: 48f23525ac2a8714b898cd6ca5a55c49, type: 3}
   hitEffectOffset: {x: 0, y: 0, z: 0}
   hitEffectRotation: {x: -90, y: 0, z: 0}
