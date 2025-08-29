@@ -3125,8 +3125,10 @@ namespace Characters
 
             RegisterSprite("Resupply", "Sprites/Items/SupplyStationicon");
             RegisterSprite("Airburst Compressor", "Sprites/Items/AirburstCompressorLvl1");
-            
-            
+            RegisterSprite("Gas Bomb", "Sprites/Items/GasBombSprite");
+            RegisterSprite("Molotov", "Sprites/Items/MolotovSprite");
+
+
         }
 
 
