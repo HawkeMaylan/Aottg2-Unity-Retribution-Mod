@@ -14,7 +14,7 @@ namespace Characters
 
         public Spin2Special(BaseCharacter owner): base(owner)
         {
-            Cooldown = 5f;
+            Cooldown = 2f;
         }
 
         protected override void Activate()

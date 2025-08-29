@@ -15,7 +15,7 @@ namespace Characters
 
         public EscapeSpecial(BaseCharacter owner) : base(owner)
         {
-            UsesLeft = MaxUses = 1;
+            UsesLeft = MaxUses = 3;
             _human = (Human)owner;
         }
 
