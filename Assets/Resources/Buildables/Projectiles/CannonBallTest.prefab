@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 8151622635488489972}
   - component: {fileID: -6470129852071450473}
   - component: {fileID: -5731724395192874393}
-  m_Layer: 9
+  m_Layer: 14
   m_Name: CannonBallTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129,7 +129,7 @@ MonoBehaviour:
   customDamageCollider: {fileID: 4645783274596728983}
   playAnimationOnCollision: 1
   collisionAnimation: {fileID: 7400000, guid: 84e9bdb990e1c7248ba9f1b302266a59, type: 2}
-  animationDelayTime: 0.3
+  animationDelayTime: 0.1
   makeKinematicOnCollision: 1
   animationCollisionLayers:
     serializedVersion: 2
