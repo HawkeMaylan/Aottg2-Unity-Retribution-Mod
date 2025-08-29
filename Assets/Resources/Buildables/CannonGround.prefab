@@ -470,7 +470,7 @@ MonoBehaviour:
     prefab: {fileID: 1530743120385670784, guid: 150fb050d130a9348b23bb69ee086949, type: 3}
     launchForce: 4000
     upwardForce: 250
-    sprite: {fileID: 21300000, guid: ee51b0d51198a4b0f8876afa38a1e942, type: 3}
+    sprite: {fileID: 21300000, guid: 40397bc5f86659644b305a0e0a3ea797, type: 3}
     fireCooldown: 5
     projectileCount: 1
     spreadAngle: 0
