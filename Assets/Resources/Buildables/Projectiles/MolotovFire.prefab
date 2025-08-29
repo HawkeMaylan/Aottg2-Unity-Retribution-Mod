@@ -5146,6 +5146,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   destroyAfterSeconds: 35
   killSourceName: Fire
+  useCustomCollider: 0
+  customDamageCollider: {fileID: 0}
   playAnimationOnCollision: 0
   collisionAnimation: {fileID: 0}
   animationDelayTime: 0
@@ -5165,6 +5167,7 @@ MonoBehaviour:
   directionalStun: 0
   knockbackForce: 30
   maxKnockbacksPerTitan: 1
+  hitCooldown: 0.002
 --- !u!1 &6217111546089393739
 GameObject:
   m_ObjectHideFlags: 0

@@ -3000,9 +3000,9 @@ namespace Characters
                 if (inventory.GetItemCount("Molotov") > 0)
                     itemList2.Add(new MolotovSpawn(this, "Molotov", 1f)); // 'this' is the owner
 
-                inventory.SetItemCount("GasBomb", inventory.GetItemCount("GasBomb")); // ensure key exists
+                inventory.SetItemCount("Gas Bomb", inventory.GetItemCount("Gas Bomb")); // ensure key exists
 
-                if (inventory.GetItemCount("GasBomb") > 0)
+                if (inventory.GetItemCount("Gas Bomb") > 0)
                     itemList2.Add(new GasBombSpawn(this, "Gas Bomb", 1f)); // 'this' is the owner
 
 
@@ -3027,7 +3027,7 @@ namespace Characters
                 itemList4.Add(new DaycycleDelete(this, "DeleteDayCycle", 15f));
 
                 ///itemList4.Add(new ShigGateSpawn(this, "ShigGateSpawn", 1f));
-                itemList4.Add(new PickupGroundCannon(this, "Field Cannon Item", 1f));
+                ///itemList4.Add(new PickupGroundCannon(this, "Field Cannon Item", 1f));
                 itemList4.Add(new Stable2Spawn(this, "Stables", 1f));
                 ///itemList4.Add(new PastVarreosaSpawn(this, "Shiganshina", 1f));
                 ///itemList4.Add(new Act0MissionSpawn(this, "Act3MissionSpawn", 1f));
@@ -3081,7 +3081,7 @@ namespace Characters
                         itemList2.Add(new MolotovSpawn(this, itemName, 1f));
                         break;
 
-                    case "GasBomb":
+                    case "Gas Bomb":
                         itemList2.Add(new GasBombSpawn(this, itemName, 1f));
                         break;
 
