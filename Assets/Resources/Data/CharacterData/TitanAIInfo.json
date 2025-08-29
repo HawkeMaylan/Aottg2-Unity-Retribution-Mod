@@ -26,7 +26,8 @@
 			"Jumper": 0.38,
 			"Crawler": 0.07,
 			"Punk": 0.11,
-			"Thrower": 0.06
+			"Thrower": 0.03,
+			"Aberrant":  0.03
 		}
 	},
 	"AttackInfo": {
@@ -467,7 +468,77 @@
 		},
 		"Training": {
 			"DetectRange": 0,
-			"FocusRange": 0
+			"FocusRange": 0,
+			"RunAnimationMin": 0.3,
+			"RunAnimationMax": 0.4,
+
+			"WalkSpeedBaseMin": 5.0,
+			"WalkSpeedBaseMax": 10.0,
+
+			"WalkSpeedPerLevelMin": 1.0,
+			"WalkSpeedPerLevelMax": 2.0,
+
+			"RunSpeedBaseMin": 5.0,
+			"RunSpeedBaseMax": 10.0,
+
+			"RunSpeedPerLevelMin": 4.0,
+			"RunSpeedPerLevelMax": 6.0,
+
+			"JumpForceMin": 150,
+			"JumpForceMax": 300,
+
+			"RotateSpeedMin": 0.3,
+			"RotateSpeedMax": 0.4,
+
+
+			"ChaseAngleTimeMin": 0.15,
+			"ChaseAngleTimeMax": 0.50,
+			"ChaseAngleMinRange": 50,
+
+			"DetectRangeMin": 30000,
+			"DetectRangeMax": 40200,
+
+			"FocusRangeMin": 15000,
+			"FocusRangeMax": 30200,
+
+			"FocusTimeMin": 5.0,
+			"FocusTimeMax": 60.0,
+
+			"TurnAngleMin": 45,
+			"TurnAngleMax": 200,
+
+			"TurnSpeedMin": 0.3,
+			"TurnSpeedMax": 0.4,
+
+			"TurnPauseMin": 0.1,
+			"TurnPauseMax": 1.2,
+
+			"CloseAttackRangeMin": 11,
+			"CloseAttackRangeMax": 13,
+
+			"FarAttackMinRangeMin": 10,
+			"FarAttackMinRangeMax": 20,
+
+			"FarAttackMaxRangeMin": 30,
+			"FarAttackMaxRangeMax": 400,
+
+			"FarAttackCooldownMin": 1.0,
+			"FarAttackCooldownMax": 6.0,
+
+			"AttackWaitMin": 0.5,
+			"AttackWaitMax": 1.5,
+
+			"AttackPauseMin": 0.1,
+			"AttackPauseMax": 1.5,
+
+			"ActionPauseMin": 0.1,
+			"ActionPauseMax": 1.5,
+
+			"ChaseAngleMinRangeMin": 20,
+			"ChaseAngleMinRangeMax": 60,
+			"AttackSpeedMultiplierMin": 0.3,
+			"AttackSpeedMultiplierMax": 0.5
+
 		},
 		"Easy": {
 			"TurnPause": 1.0,
