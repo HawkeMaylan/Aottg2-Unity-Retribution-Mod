@@ -7227,8 +7227,8 @@ MonoBehaviour:
   useHorseIdle: 1
   enableRunAnimation: 1
   runSpeedThreshold: 4
-  disableGravityOnMount: 1
-  disableMassOnMount: 1
+  disableGravityOnMount: 0
+  disableMassOnMount: 0
   mountedMass: 0.1
 --- !u!114 &1250985119454210882
 MonoBehaviour:

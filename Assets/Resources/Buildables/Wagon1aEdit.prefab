@@ -758,6 +758,9 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 4915449211714290812}
   - {fileID: 8166951849109919319}
+  - {fileID: 3639310387433628558}
+  - {fileID: 324530911259289697}
+  - {fileID: 5614561641391269552}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -1359,8 +1362,8 @@ MonoBehaviour:
   useHorseIdle: 1
   enableRunAnimation: 1
   runSpeedThreshold: 4
-  disableGravityOnMount: 1
-  disableMassOnMount: 1
+  disableGravityOnMount: 0
+  disableMassOnMount: 0
   mountedMass: 0.1
 --- !u!4 &9016812888720980757 stripped
 Transform:
@@ -1488,8 +1491,8 @@ MonoBehaviour:
   useHorseIdle: 1
   enableRunAnimation: 1
   runSpeedThreshold: 4
-  disableGravityOnMount: 1
-  disableMassOnMount: 1
+  disableGravityOnMount: 0
+  disableMassOnMount: 0
   mountedMass: 0.1
 --- !u!4 &4259209029063387262 stripped
 Transform:
@@ -1615,8 +1618,8 @@ MonoBehaviour:
   useHorseIdle: 1
   enableRunAnimation: 1
   runSpeedThreshold: 4
-  disableGravityOnMount: 1
-  disableMassOnMount: 1
+  disableGravityOnMount: 0
+  disableMassOnMount: 0
   mountedMass: 0.1
 --- !u!4 &8831335058220992547 stripped
 Transform:
