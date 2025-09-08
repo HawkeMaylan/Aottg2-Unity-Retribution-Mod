@@ -324,7 +324,7 @@
 		"UI.FeedConsoleTooltip": "Show game feed in separate window.",
 		"UI.ShowKDR": "Show KDR",
 		"UI.KDR": "KDR",
-		"UI.KDROptions": [ "Off", "Mine", "All" ],
+		"UI.KDROptions": [ "Off" ],
 		"UI.ShowKDRTooltip": "Show your KDR at the top left.",
 		"UI.JoinNotifications": "Join notifications",
 		"UI.JoinNotificationsTooltip": "Show player join and leave notifications in chat.",

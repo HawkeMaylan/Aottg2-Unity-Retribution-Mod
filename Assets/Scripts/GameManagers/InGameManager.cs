@@ -725,6 +725,7 @@ namespace GameManagers
                     float thrower = crawler + settings.TitanSpawnThrower.Value / 100f;
                     float punk = thrower + settings.TitanSpawnPunk.Value / 100f;
                     float aberrant = punk + settings.TitanSpawnAberrant.Value / 100f;
+                    float Strider = aberrant + settings.TitanSpawnStrider.Value / 100f;
                     if (roll < normal)
                         type = "Normal";
                     else if (roll < abnormal)
@@ -739,11 +740,13 @@ namespace GameManagers
                         type = "Punk";
                     else if (roll < aberrant)
                         type = "Aberrant";
+                    else if (roll < Strider)
+                        type = "Strider";
                 }
             }
             else if (type == "Random")
             {
-                string[] types = new string[]{ "Normal", "Abnormal", "Jumper", "Crawler", "Thrower", "Aberrant" };
+                string[] types = new string[]{ "Normal", "Abnormal", "Jumper", "Crawler", "Thrower", "Aberrant", "Strider" };
                 type = types[UnityEngine.Random.Range(0, types.Length)];
             }
             var data = CharacterData.GetTitanAI((GameDifficulty)SettingsManager.InGameCurrent.General.Difficulty.Value, type);

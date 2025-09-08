@@ -12,7 +12,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
 {
     private bool menuOpen = false;
 
-    private string[] titanTypes = new string[] { "Normal", "Abnormal", "Jumper", "Crawler", "Thrower", "Punk", "Aberrant" };
+    private string[] titanTypes = new string[] { "Normal", "Abnormal", "Jumper", "Crawler", "Thrower", "Punk", "Aberrant", "Strider" };
     private int selectedTypeIndex = 0;
 
     private string inputX = "0", inputY = "0", inputZ = "0", inputCount = "1";
@@ -23,7 +23,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
 
 
     private bool useRandomWeights = false;
-    private string[] weightInputs = new string[] { "10", "10", "10", "10", "10", "10", "10" };
+    private string[] weightInputs = new string[] { "10", "10", "10", "10", "10", "10", "10", "10" };
 
     private bool overrideSize = false, overrideHP = false, overrideSpeed = false, overrideAnimSpeed = false;
     private string minSize = "1", maxSize = "1";
