@@ -28,8 +28,8 @@ namespace UI
             ElementFactory.CreateToggleSetting(DoublePanelLeft, style, SettingsManager.UISettings.ShowStylebar, UIManager.GetLocale(cat, sub, "ShowStylebar"));
             //ElementFactory.CreateToggleSetting(DoublePanelLeft, style, SettingsManager.UISettings.GameFeed, UIManager.GetLocale(cat, sub, "GameFeed"), tooltip: UIManager.GetLocale(cat, sub, "GameFeedTooltip"));
             //ElementFactory.CreateToggleSetting(DoublePanelLeft, style, SettingsManager.UISettings.FeedConsole, UIManager.GetLocale(cat, sub, "FeedConsole"), tooltip: UIManager.GetLocale(cat, sub, "FeedConsoleTooltip"));
-            ElementFactory.CreateDropdownSetting(DoublePanelLeft, style, SettingsManager.UISettings.KDR, UIManager.GetLocale(cat, sub, "KDR"),
-                               UIManager.GetLocaleArray(cat, sub, "KDROptions"), elementWidth: 160f);
+            //ElementFactory.CreateDropdownSetting(DoublePanelLeft, style, SettingsManager.UISettings.KDR, UIManager.GetLocale(cat, sub, "KDR"),
+            //                   UIManager.GetLocaleArray(cat, sub, "KDROptions"), elementWidth: 160f);
             ElementFactory.CreateToggleSetting(DoublePanelLeft, style, SettingsManager.UISettings.JoinNotifications, UIManager.GetLocale(cat, sub, "JoinNotifications"), tooltip: UIManager.GetLocale(cat, sub, "JoinNotificationsTooltip"));
             ElementFactory.CreateToggleSetting(DoublePanelLeft, style, SettingsManager.UISettings.ShowPing, UIManager.GetLocale(cat, sub, "ShowPing"));
             ElementFactory.CreateToggleSetting(DoublePanelLeft, style, SettingsManager.UISettings.ShowGameTime, UIManager.GetLocale(cat, sub, "ShowGameTime"));

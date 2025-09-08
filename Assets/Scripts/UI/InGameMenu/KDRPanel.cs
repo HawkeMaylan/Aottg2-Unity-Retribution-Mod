@@ -199,7 +199,7 @@ namespace UI
 
             AddPlayer(PhotonNetwork.LocalPlayer, isVisible: isVisible);
 
-            isVisible = isVisible && SettingsManager.UISettings.KDR.Value != (int)KDRMode.Mine;
+            ///isVisible = isVisible && SettingsManager.UISettings.KDR.Value != (int)KDRMode.Mine;
             // Create rows for all other players and set them
             foreach (var player in PhotonNetwork.PlayerListOthers)
             {
@@ -211,20 +211,20 @@ namespace UI
 
         public void OnPlayerEnteredRoom(Player newPlayer)
         {
-            bool isVisible = !(SettingsManager.UISettings.KDR.Value != (int)KDRMode.All || newPlayer == null);
-            AddPlayer(newPlayer, redoLayout: true, isVisible);
+            //bool isVisible = !(SettingsManager.UISettings.KDR.Value != (int)KDRMode.All || newPlayer == null);
+            //AddPlayer(newPlayer, redoLayout: true, isVisible);
         }
 
         public void OnPlayerLeftRoom(Player otherPlayer)
         {
-            if (SettingsManager.UISettings.KDR.Value != (int)KDRMode.All || otherPlayer == null)
-                return;
+            //if (SettingsManager.UISettings.KDR.Value != (int)KDRMode.All || otherPlayer == null)
+              //  return;
             RemovePlayer(otherPlayer, redoLayout: true);
         }
 
         public void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
         {
-            bool isVisible = SettingsManager.UISettings.KDR.Value != (int)KDRMode.Off && (SettingsManager.UISettings.KDR.Value != (int)KDRMode.Mine || targetPlayer == PhotonNetwork.LocalPlayer);
+            //bool isVisible = SettingsManager.UISettings.KDR.Value != (int)KDRMode.Off && (SettingsManager.UISettings.KDR.Value != (int)KDRMode.Mine || targetPlayer == PhotonNetwork.LocalPlayer);
 
             // if hashtable contains team prop, swap team
             changedProps.TryGetValue(PlayerProperty.Team, out object team);
@@ -232,14 +232,14 @@ namespace UI
             if (team != null)
             {
                 RemovePlayer(targetPlayer);
-                AddPlayer(targetPlayer, redoLayout: true, isVisible);
+                //AddPlayer(targetPlayer, redoLayout: true, isVisible);
             }
             else
             {
-                if (!targetPlayer.IsLocal && SettingsManager.UISettings.KDR.Value != (int)KDRMode.All)
-                {
-                    return;
-                }
+                //if (!targetPlayer.IsLocal && SettingsManager.UISettings.KDR.Value != (int)KDRMode.All)
+                //{
+                //    return;
+                //}
 
                 // Update player row
                 if (_players.ContainsKey(targetPlayer.ActorNumber))

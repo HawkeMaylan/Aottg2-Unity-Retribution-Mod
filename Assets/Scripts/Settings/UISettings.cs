@@ -27,6 +27,7 @@ namespace Settings
         public BoolSetting ShowInterpolation = new BoolSetting(false);
         public BoolSetting ShowCrosshairArrows = new BoolSetting(false);
         public IntSetting KDR = new IntSetting((int)KDRMode.Off);
+
         public BoolSetting ShowPing = new BoolSetting(false);
         public BoolSetting ShowEmotes = new BoolSetting(true);
         public BoolSetting ShowKeybindTip = new BoolSetting(true);
@@ -60,9 +61,9 @@ namespace Settings
                 {
                     InGameMenu igm = (InGameMenu)UIManager.CurrentMenu;
                     igm.ApplyUISettings();
-
+                    // Force KDR mode to Off
+                    KDR.Value = (int)KDRMode.Off;
                 }
-
             }
         }
     }
@@ -90,9 +91,7 @@ namespace Settings
 
     public enum KDRMode
     {
-        Off,
-        Mine,
-        All
+        Off
     }
 
     public enum CoordinateMode
