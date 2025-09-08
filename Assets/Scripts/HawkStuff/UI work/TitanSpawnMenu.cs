@@ -121,7 +121,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
         else
         {
             GUI.Label(new Rect(30, 210, 400, 20), "Titan Type:");
-            selectedTypeIndex = GUI.Toolbar(new Rect(30, 240, 340, 30), selectedTypeIndex, titanTypes);
+            selectedTypeIndex = GUI.SelectionGrid(new Rect(60, 240, 340, 60), selectedTypeIndex, titanTypes,4);
         }
 
         int baseY = 440;
