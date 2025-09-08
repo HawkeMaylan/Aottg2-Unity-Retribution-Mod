@@ -179,11 +179,11 @@ namespace UI
 
         private void SetupChat()
         {
-            if (SettingsManager.UISettings.FeedConsole.Value && SettingsManager.UISettings.GameFeed.Value)
-            {
-                FeedPanel = ElementFactory.InstantiateAndSetupPanel<FeedPanel>(_bottomRightLabel.transform, "Prefabs/InGame/FeedPanel", true).GetComponent<FeedPanel>();
-                ElementFactory.SetAnchor(FeedPanel.gameObject, TextAnchor.UpperRight, TextAnchor.UpperRight, new Vector2(0f, -50f));
-            }
+           // if (SettingsManager.UISettings.FeedConsole.Value && SettingsManager.UISettings.GameFeed.Value)
+            //{
+            //    FeedPanel = ElementFactory.InstantiateAndSetupPanel<FeedPanel>(_bottomRightLabel.transform, "Prefabs/InGame/FeedPanel", true).GetComponent<FeedPanel>();
+            //    ElementFactory.SetAnchor(FeedPanel.gameObject, TextAnchor.UpperRight, TextAnchor.UpperRight, new Vector2(0f, -50f));
+            //}
             if (SettingsManager.SoundSettings.VoiceChatInput.Value != (int)VoiceChatInputMode.Off)
             {
                 VoiceChatPanel = ElementFactory.InstantiateAndSetupPanel<VoiceChatPanel>(transform, "Prefabs/InGame/VoiceChatPanel", true).GetComponent<VoiceChatPanel>();

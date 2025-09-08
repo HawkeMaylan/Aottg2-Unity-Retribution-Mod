@@ -850,12 +850,12 @@ namespace GameManagers
                 EndTimeLeft = time;
                 if (PhotonNetwork.IsMasterClient)
                     StartCoroutine(WaitAndEndGame(time));
-                if (SettingsManager.UISettings.GameFeed.Value)
-                {
-                    float timestamp = CustomLogicManager.Evaluator.CurrentTime;
-                    string feed = ChatManager.GetColorString("(" + Util.FormatFloat(timestamp, 2) + ")", ChatTextColor.System) + " Round ended.";
-                    ChatManager.AddFeed(feed);
-                }
+                ///if (SettingsManager.UISettings.GameFeed.Value)
+                ///{
+                 ///   float timestamp = CustomLogicManager.Evaluator.CurrentTime;
+                 //   string feed = ChatManager.GetColorString("(" + Util.FormatFloat(timestamp, 2) + ")", ChatTextColor.System) + " Round ended.";
+                 //   ChatManager.AddFeed(feed);
+                ///}
             }
         }
 
@@ -1057,12 +1057,12 @@ namespace GameManagers
                 _needSendPlayerInfo = false;
             }
             SpawnPlayer(false);
-            if (SettingsManager.UISettings.GameFeed.Value)
-            {
-                float time = CustomLogicManager.Evaluator.CurrentTime;
-                string feed = ChatManager.GetColorString("(" + Util.FormatFloat(time, 2) + ")", ChatTextColor.System) + " Round started.";
-                ChatManager.AddFeed(feed);
-            }
+            //if (SettingsManager.UISettings.GameFeed.Value)
+            //{
+             //   float time = CustomLogicManager.Evaluator.CurrentTime;
+             //   string feed = ChatManager.GetColorString("(" + Util.FormatFloat(time, 2) + ")", ChatTextColor.System) + " Round started.";
+             //   ChatManager.AddFeed(feed);
+            //}
         }
 
         private void UpdateInput()

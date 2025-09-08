@@ -549,15 +549,15 @@ namespace Characters
             if (CustomLogicManager.Evaluator == null)
                 return;
             CustomLogicManager.Evaluator.OnCharacterDamaged(this, killer, name, damage);
-            if (SettingsManager.UISettings.GameFeed.Value)
-            {
-                string keyword = " killed ";
-                if (CurrentHealth > 0)
-                    keyword = " damaged ";
-                string feed = ChatManager.GetColorString("(" + Util.FormatFloat(CustomLogicManager.Evaluator.CurrentTime, 2) + ") ", ChatTextColor.System) + name +
-                    keyword + Name + " (" + damage.ToString() + ")";
-                ChatManager.AddFeed(feed);
-            }
+            //if (SettingsManager.UISettings.GameFeed.Value)
+           // {
+            //    string keyword = " killed ";
+             //   if (CurrentHealth > 0)
+              //      keyword = " damaged ";
+             //   string feed = ChatManager.GetColorString("(" + Util.FormatFloat(CustomLogicManager.Evaluator.CurrentTime, 2) + ") ", ChatTextColor.System) + name +
+             //       keyword + Name + " (" + damage.ToString() + ")";
+             //   ChatManager.AddFeed(feed);
+            //}
         }
 
         public virtual void GetHit(BaseCharacter enemy, int damage, string type, string collider)

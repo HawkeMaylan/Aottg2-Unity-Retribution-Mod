@@ -9,7 +9,7 @@ namespace Settings
     {
         protected override string FileName { get { return "UI.json"; } }
         public StringSetting UITheme = new StringSetting("Dark");
-        public BoolSetting GameFeed = new BoolSetting(false);
+        private BoolSetting GameFeed = new BoolSetting(false);
         public BoolSetting FeedConsole = new BoolSetting(false);
         public BoolSetting ShowStylebar = new BoolSetting(true);
         public FloatSetting UIMasterScale = new FloatSetting(1f, minValue: 0.75f, maxValue: 1.5f);
@@ -60,6 +60,7 @@ namespace Settings
                 {
                     InGameMenu igm = (InGameMenu)UIManager.CurrentMenu;
                     igm.ApplyUISettings();
+
                 }
 
             }
