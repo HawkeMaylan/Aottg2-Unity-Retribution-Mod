@@ -1505,5 +1505,125 @@
 			"WalkSpeedBase": 10.0,
 			"RunSpeedBase": 20.0
 		}
+	},
+	"Sedentary": {
+		"Default": {
+			"Name": "Sedentary",
+			"IsRun": false,
+
+			"FarAttackMaxRange": 800,
+			"Attacks": {
+
+				"AttackJumpCrawler": 0.1,
+				"AttackJump": 0.1,
+				"AttackSlam": 0.1,
+				"AttackKick": 0.1,
+				"AttackStomp": 0.1,
+				"AttackBite*": 0.1,
+				"AttackSwing*": 0.1,
+				"AttackHit*": 0.1
+
+			},
+
+			"ChaseAngleMinRangeMin": 0.4,
+			"ChaseAngleMinRangeMax": 0.6,
+			"HealthMin": 1000,
+			"HealthMax": 1500,
+
+
+			"AttackWaitMin": 0.0003,
+			"AttackWaitMax": 0.0002,
+
+			"AttackPauseMin": 0.001,
+			"AttackPauseMax": 0.02,
+
+
+			"ChaseAngleTimeMin": 0.050,
+			"ChaseAngleTimeMax": 0.050,
+			"ChaseAngleMinRange": 100,
+
+			"DetectRangeMin": 80000,
+			"DetectRangeMax": 80200,
+
+			"FocusRangeMin": 75000,
+			"FocusRangeMax": 80200,
+
+			"FocusTimeMin": 0.001,
+			"FocusTimeMax": 0.004,
+
+			"TurnAngleMin": 14,
+			"TurnAngleMax": 15,
+
+			"TurnSpeedMin": 35.3,
+			"TurnSpeedMax": 36.0,
+
+			"TurnPauseMin": 0.001,
+			"TurnPauseMax": 0.002,
+
+
+
+
+
+			"RunAnimationMin": 9.5,
+			"RunAnimationMax": 10.7,
+
+			"WalkSpeedBaseMin": 15.0,
+			"WalkSpeedBaseMax": 25.0,
+
+			"WalkSpeedPerLevelMin": 1.0,
+			"WalkSpeedPerLevelMax": 2.0,
+
+			"RunSpeedBaseMin": 80.0,
+			"RunSpeedBaseMax": 95.0,
+
+			"RunSpeedPerLevelMin": 4.0,
+			"RunSpeedPerLevelMax": 6.0,
+
+			"JumpForceMin": 350,
+			"JumpForceMax": 400,
+
+			"RotateSpeedMin": 2.6,
+			"RotateSpeedMax": 3,
+
+
+
+			"AttackSpeedMultiplierMin": 1.3,
+			"AttackSpeedMultiplierMax": 1.4,
+			"TurnSpeed": 3.3
+
+
+		},
+		"Training": {
+			"DetectRange": 0,
+			"FocusRange": 0
+		},
+		"Easy": {
+			"TurnPause": 1.0,
+			"AttackWait": 1.0,
+			"AttackPause": 1.0,
+			"ActionPause": 1.0,
+			"AttackSpeedMultiplier": 0.8
+		},
+		"Normal": {
+
+		},
+		"Hard": {
+			"TurnPause": 0.3,
+			"AttackWait": 0.5,
+			"AttackPause": 0.3,
+			"ActionPause": 0.3,
+			"RotateSpeed": 2.0
+		},
+		"Abnormal": {
+			"TurnPause": 0.2,
+			"AttackWait": 0.3,
+			"AttackPause": 0.2,
+			"ActionPause": 0.2,
+			"RotateSpeed": 4.0,
+			"WalkSpeedBase": 10.0,
+			"RunSpeedBase": 20.0
+		}
 	}
 }
+
+	

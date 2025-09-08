@@ -12,7 +12,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
 {
     private bool menuOpen = false;
 
-    private string[] titanTypes = new string[] { "Normal", "Abnormal", "Jumper", "Crawler", "Thrower", "Punk", "Aberrant", "Strider", "Twin", "Twitcher" };
+    private string[] titanTypes = new string[] { "Normal", "Abnormal", "Jumper", "Crawler", "Thrower", "Punk", "Aberrant", "Strider", "Twin", "Twitcher", "Sedentary" };
     private int selectedTypeIndex = 0;
 
     private string inputX = "0", inputY = "0", inputZ = "0", inputCount = "1";
@@ -23,7 +23,7 @@ public class TitanSpawnMenu : MonoBehaviourPun
 
 
     private bool useRandomWeights = false;
-    private string[] weightInputs = new string[] { "10", "10", "10", "10", "10", "10", "10", "10", "10", "10" };
+    private string[] weightInputs = new string[] { "10", "10", "10", "10", "10", "10", "10", "10", "10", "10", "10" };
 
     private bool overrideSize = false, overrideHP = false, overrideSpeed = false, overrideAnimSpeed = false;
     private string minSize = "1", maxSize = "1";
@@ -107,20 +107,20 @@ public class TitanSpawnMenu : MonoBehaviourPun
 
 
 
-        useRandomWeights = GUI.Toggle(new Rect(30, 180, 200, 20), useRandomWeights, " Use Weighted Random");
+        useRandomWeights = GUI.Toggle(new Rect(30, 180, 400, 20), useRandomWeights, " Use Weighted Random");
 
         if (useRandomWeights)
         {
-            GUI.Label(new Rect(30, 210, 200, 20), "Titan Type Weights (%):");
+            GUI.Label(new Rect(300, 210, 400, 20), "Titan Type Weights (%):");
             for (int i = 0; i < titanTypes.Length; i++)
             {
-                GUI.Label(new Rect(30, 240 + i * 25, 80, 20), titanTypes[i]);
-                weightInputs[i] = GUI.TextField(new Rect(110, 240 + i * 25, 60, 20), weightInputs[i]);
+                GUI.Label(new Rect(300, 240 + i * 25, 80, 20), titanTypes[i]);
+                weightInputs[i] = GUI.TextField(new Rect(350, 240 + i * 25, 60, 20), weightInputs[i]);
             }
         }
         else
         {
-            GUI.Label(new Rect(30, 210, 100, 20), "Titan Type:");
+            GUI.Label(new Rect(30, 210, 400, 20), "Titan Type:");
             selectedTypeIndex = GUI.Toolbar(new Rect(30, 240, 340, 30), selectedTypeIndex, titanTypes);
         }
 
