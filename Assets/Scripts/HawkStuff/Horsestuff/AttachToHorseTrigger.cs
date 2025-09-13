@@ -43,6 +43,8 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private string currentPrompt = "";
     private Coroutine detachCheckCoroutine;
     private Coroutine attachPromptCoroutine;
+    private GUIStyle _promptStyle;
+    private bool _isApplicationQuitting = false;
 
     private void Start()
     {
@@ -52,9 +54,33 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         ClearPrompt();
     }
 
+    private void OnApplicationQuit()
+    {
+        _isApplicationQuitting = true;
+    }
+
+    private void OnDestroy()
+    {
+        if (_isApplicationQuitting) return;
+
+        // Clean up coroutines
+        if (detachCheckCoroutine != null)
+            StopCoroutine(detachCheckCoroutine);
+
+        if (attachPromptCoroutine != null)
+            StopCoroutine(attachPromptCoroutine);
+    }
+
     private void Update()
     {
         if (ChatManager.IsChatActive()) return;
+
+        // Validate horseRootInContact is still valid
+        if (horseRootInContact != null && horseRootInContact.gameObject == null)
+        {
+            horseRootInContact = null;
+            ClearPrompt();
+        }
 
         if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown() && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
@@ -119,7 +145,6 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
             }
         }
     }
-
 
     private void OnTriggerExit(Collider other)
     {
@@ -210,7 +235,7 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
             detachCheckCoroutine = null;
         }
 
-        SetPrompt($"Press {SettingsManager.InputSettings.Interaction.Interact2.ToString()} to Attach", 3f);
+        ClearPrompt();
     }
 
     private IEnumerator AutoDetachCheck()
@@ -254,6 +279,11 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
     private void ClearPrompt()
     {
         currentPrompt = "";
+        if (attachPromptCoroutine != null)
+        {
+            StopCoroutine(attachPromptCoroutine);
+            attachPromptCoroutine = null;
+        }
     }
 
     private void OnGUI()
@@ -261,12 +291,16 @@ public class AttachToHorseTrigger : MonoBehaviourPunCallbacks
         if (!pv.IsMine || string.IsNullOrEmpty(currentPrompt))
             return;
 
-        GUIStyle style = new GUIStyle(GUI.skin.label)
+        if (_promptStyle == null)
         {
-            fontSize = 24,
-            alignment = TextAnchor.UpperCenter,
-            normal = { textColor = Color.white }
-        };
-        GUI.Label(new Rect(Screen.width / 2 - 150, 50, 300, 50), currentPrompt, style);
+            _promptStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 24,
+                alignment = TextAnchor.UpperCenter,
+                normal = { textColor = Color.white }
+            };
+        }
+
+        GUI.Label(new Rect(Screen.width / 2 - 150, 50, 300, 50), currentPrompt, _promptStyle);
     }
 }
