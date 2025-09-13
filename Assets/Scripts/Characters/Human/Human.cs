@@ -2973,17 +2973,17 @@ namespace Characters
         {
 
 
-            itemList1.Add(new FlareItem(this, "Green", new Color(0f, 1f, 0f, 0.7f), 120f));
-            itemList1.Add(new FlareItem(this, "Red", new Color(1f, 0f, 0f, 0.7f), 120f));
-            itemList1.Add(new FlareItem(this, "Black", new Color(0f, 0f, 0f, 0.7f), 120f));
-            itemList1.Add(new FlareItem(this, "Purple", new Color(153f / 255, 0f, 204f / 255, 0.7f), 120f));
-            itemList1.Add(new FlareItem(this, "Blue", new Color(0f, 102f / 255, 204f / 255, 0.7f), 120f));
-            itemList1.Add(new FlareItem(this, "Yellow", new Color(1f, 1f, 0f, 0.7f), 120f));
-            itemList1.Add(new FlareItem(this, "Cyan", new Color(0f, 255f / 252, 255f / 255, 0.8f), 120f));
-            itemList1.Add(new FlareItem(this, "Indigo", Color.blue, 120f));
-            itemList2.Add(new FlareItem1(this, "Flash Flare", Color.white, 100f));
-            itemList2.Add(new FlareItem3(this, "Acoustic Flare", Color.grey, 120f));
-            itemList2.Add(new HorseWhistleItem(this, "Whistle", 10f));
+            itemList1.Add(new FlareItem(this, "Green", new Color(0f, 1f, 0f, 0.7f), 300f));
+            itemList1.Add(new FlareItem(this, "Red", new Color(1f, 0f, 0f, 0.7f), 300f));
+            itemList1.Add(new FlareItem(this, "Black", new Color(0f, 0f, 0f, 0.7f), 300f));
+            itemList1.Add(new FlareItem(this, "Purple", new Color(153f / 255, 0f, 204f / 255, 0.7f), 300f));
+            itemList1.Add(new FlareItem(this, "Blue", new Color(0f, 102f / 255, 204f / 255, 0.7f), 300f));
+            itemList1.Add(new FlareItem(this, "Yellow", new Color(1f, 1f, 0f, 0.7f), 300f));
+            ///itemList1.Add(new FlareItem(this, "Cyan", new Color(0f, 255f / 252, 255f / 255, 0.8f), 300f));
+            ///itemList1.Add(new FlareItem(this, "Indigo", Color.blue, 300f));
+            itemList2.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
+            ///itemList2.Add(new FlareItem3(this, "Acoustic Flare", Color.grey, 300f));
+            itemList2.Add(new HorseWhistleItem(this, "Whistle", 20f));
             itemList2.Add(new Airburst1Spawn(this, "Airburst Compressor", 1f));
 
             itemList2.Add(new SupplyStationSpawn(this, "Resupply", 1f));
@@ -3029,9 +3029,9 @@ namespace Characters
                 ///itemList4.Add(new ShigGateSpawn(this, "ShigGateSpawn", 1f));
                 ///itemList4.Add(new PickupGroundCannon(this, "Field Cannon Item", 1f));
                 itemList4.Add(new Stable2Spawn(this, "Stables", 1f));
-                ///itemList4.Add(new PastVarreosaSpawn(this, "Shiganshina", 1f));
-                ///itemList4.Add(new Act0MissionSpawn(this, "Act3MissionSpawn", 1f));
-                ///itemList4.Add(new Act2MissionDespawn(this, "Act3MissionDespawn", 1f));
+                itemList4.Add(new PastVarreosaSpawn(this, "Shiganshina", 1f));
+                itemList4.Add(new Act0MissionSpawn(this, "Act3MissionSpawn", 1f));
+                itemList4.Add(new Act2MissionDespawn(this, "Act3MissionDespawn", 1f));
                 ///itemList4.Add(new WorkerLogSpawn(this, "WorkerLogSpawn", 1f));
 
 
