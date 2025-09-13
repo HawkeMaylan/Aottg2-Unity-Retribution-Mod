@@ -12,14 +12,14 @@ namespace Characters
 
         public SwitchbackSpecial(BaseCharacter owner): base(owner)
         {
-            Cooldown = 4f;
+            Cooldown = 7f;
         }
 
         public bool RegisterCollision(Human human, Collision collision, float speed)
         {
             if (IsActive)
             {
-                human.Cache.Rigidbody.velocity = collision.contacts[0].normal.normalized * Mathf.Max((speed * 0.8f), 50f);
+                human.Cache.Rigidbody.velocity = collision.contacts[0].normal.normalized * Mathf.Max((speed * 0.4f), 20f);
                 _activeTimeLeft = 0f;
                 IsActive = false;
                 human.PlaySound(HumanSounds.Switchback);

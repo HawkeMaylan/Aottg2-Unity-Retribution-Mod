@@ -15,7 +15,7 @@ namespace Characters
 
         public SmellSpecial(BaseCharacter owner): base(owner)
         {
-            Cooldown = 30f;
+            Cooldown = 300f;
         }
 
         protected override void Activate()

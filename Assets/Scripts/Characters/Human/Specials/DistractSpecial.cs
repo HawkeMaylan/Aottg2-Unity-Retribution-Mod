@@ -13,7 +13,7 @@ namespace Characters
 
         public DistractSpecial(BaseCharacter owner ): base(owner)
         {
-            Cooldown = 30f;
+            Cooldown = 180f;
         }
 
         protected override void Activate()

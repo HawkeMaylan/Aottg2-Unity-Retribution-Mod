@@ -10,7 +10,7 @@ namespace Characters
 
         public DownStrikeSpecial(BaseCharacter owner): base(owner)
         {
-            Cooldown = 1f;
+            Cooldown = 5f;
         }
 
         protected override void Activate()
