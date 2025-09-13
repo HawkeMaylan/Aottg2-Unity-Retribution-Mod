@@ -274,6 +274,8 @@
 		"Graphics.InterpolationEnabledTooltip": "Smooth character movement but increase input delay.",
 		"Graphics.ShowFPS": "Show FPS",
 		"Graphics.RenderDistance": "Render distance",
+		"Graphics.MemoryCap": "Memory Cap (MB)",
+
 		"Graphics.RenderDistanceTooltip": "Default setting is 1500.",
 		"Graphics.TextureQuality": "Texture quality",
 		"Graphics.TextureQualityOptions": [ "Very low", "Low", "Medium", "High" ],
@@ -433,7 +435,7 @@
 		"Keybinds.Human.ChangeAmmoR": "Change Munition Right",
 		"Keybinds.Human.Inventory": "Inventory Toggle",
 		"Keybinds.Human.CycleSpecials": "Cycle Specials",
-		"Keybinds.Human.CycleSpecialsBackwards": "Cycle Specials Backwards"
+		"Keybinds.Human.CycleSpecialsBackwards": "Cycle Specials Backwards",
 		"Keybinds.Human.DashDoubleTap": "Double-tap to dash",
 		"Keybinds.Human.WallSlideDash": "Wall slide jump",
 		"Keybinds.Human.WallSlideDashTooltip": "Hold away from the wall to jump off",
