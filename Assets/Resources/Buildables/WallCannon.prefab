@@ -462,13 +462,6 @@ MonoBehaviour:
   healthBarScale: {x: 5, y: 0.8, z: 4}
   hitCooldown: 0.2
   flatDamageFromUnknown: 1000
-  npcBaseDamage: 100
-  titanDamageMultiplier: 1
-  damageMultipliers:
-  - type: 4
-    multiplier: 1
-  - type: 1
-    multiplier: 1.5
   hitEffectPrefab: {fileID: 4725709683707712150, guid: 48f23525ac2a8714b898cd6ca5a55c49, type: 3}
   hitEffectOffset: {x: 0, y: 0, z: 0}
   hitEffectRotation: {x: -90, y: 0, z: 0}

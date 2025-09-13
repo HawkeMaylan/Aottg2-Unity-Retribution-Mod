@@ -125,8 +125,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   destroyAfterSeconds: 10
   killSourceName: Cannonball
-  useCustomCollider: 0
-  customDamageCollider: {fileID: 0}
   playAnimationOnCollision: 1
   collisionAnimation: {fileID: 7400000, guid: 84e9bdb990e1c7248ba9f1b302266a59, type: 2}
   animationDelayTime: 1
@@ -146,7 +144,6 @@ MonoBehaviour:
   directionalStun: 0
   knockbackForce: 3000
   maxKnockbacksPerTitan: 1
-  hitCooldown: 0.002
 --- !u!54 &8348118042904691061
 Rigidbody:
   m_ObjectHideFlags: 0
