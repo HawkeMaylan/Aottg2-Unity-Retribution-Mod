@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 917208276996229448}
   m_Layer: 0
-  m_Name: Back8
+  m_Name: Back13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 7891874026401506196}
   - component: {fileID: 2666648942923269454}
   m_Layer: 0
-  m_Name: Back8
+  m_Name: Back13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -93,7 +93,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 01b81b662743f9c42a976134315ff2eb, type: 2}
+  - {fileID: 2100000, guid: d6ee7c176d453694c89f43a1577fa7a2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
