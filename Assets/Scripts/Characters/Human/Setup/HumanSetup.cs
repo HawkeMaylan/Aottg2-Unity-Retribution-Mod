@@ -457,8 +457,8 @@ namespace Characters
                 _part_head_decor = ResourceManager.InstantiateAsset<GameObject>(ResourcePaths.Characters, HumanSetupPrefabs.GetHeadPrefab(head), cached: true);
                 AttachToMount(_part_head_decor, _mount_head_decor, true);
 
-                float height = (float)CustomSet.Height.Value / 100;
-                _part_head_decor.transform.localScale *= (1 - height);
+                ///float height = (float)CustomSet.Height.Value / 100;
+                ///_part_head_decor.transform.localScale *= (1 - height);
             }
         }
 
