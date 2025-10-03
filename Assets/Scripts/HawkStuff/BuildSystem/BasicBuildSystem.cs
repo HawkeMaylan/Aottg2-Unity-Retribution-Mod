@@ -42,11 +42,13 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     private float _lastInventoryCheckTime = 0f;
     private float _inventoryCheckCooldown = 2f;
 
+    // Cached references for performance
+    private BuildableObjectHelper _currentHelper;
+    private RadialMenuController _cachedRadialMenu;
+    private Coroutine _parentParticlesCoroutine;
+
     // Rotation state
     private Quaternion surfaceAlignmentRotation = Quaternion.identity;
-   
-    private RotationAxis currentRotationAxis = RotationAxis.Y;
-
 
     private enum RotationAxis { X, Y, Z }
 
@@ -71,9 +73,10 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         _playerInventory = null;
 
         // Method 1: Find by PhotonView ownership (most reliable)
-        foreach (var human in FindObjectsOfType<Human>())
+        var humans = FindObjectsOfType<Human>();
+        foreach (var human in humans)
         {
-            if (human != null && !human.Equals(null) && human.photonView != null && human.photonView.IsMine)
+            if (human != null && human.photonView != null && human.photonView.IsMine)
             {
                 _playerInventory = human.GetComponent<HumanInventory>();
                 if (_playerInventory != null)
@@ -85,9 +88,9 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             }
         }
 
-        // Method 2: Fallback to tag search with null check
+        // Method 2: Fallback to tag search
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null && !player.Equals(null))
+        if (player != null)
         {
             _playerInventory = player.GetComponentInChildren<HumanInventory>(true);
             if (_playerInventory != null)
@@ -98,11 +101,11 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             }
         }
 
-        // Method 3: Final fallback with null check
+        // Method 3: Final fallback
         HumanInventory[] allInventories = FindObjectsOfType<HumanInventory>();
         foreach (HumanInventory inventory in allInventories)
         {
-            if (inventory != null && !inventory.Equals(null) && inventory.photonView != null && inventory.photonView.IsMine)
+            if (inventory != null && inventory.photonView != null && inventory.photonView.IsMine)
             {
                 _playerInventory = inventory;
                 Debug.Log("BuildSystem: Found player inventory via scene search");
@@ -117,7 +120,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     void Update()
     {
         // Periodically check for inventory with cooldown
-        if (_playerInventory == null || _playerInventory.gameObject == null)
+        if (_playerInventory == null)
         {
             if (Time.time - _lastInventoryCheckTime >= _inventoryCheckCooldown)
             {
@@ -129,10 +132,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
                     if (isBuilding)
                     {
                         isBuilding = false;
-                        if (currentPreview != null)
-                        {
-                            Destroy(currentPreview);
-                        }
+                        CleanupPreview();
                     }
                     return;
                 }
@@ -180,10 +180,14 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void InitializeRadialMenu()
     {
-        RadialMenuController radialMenu = FindObjectOfType<RadialMenuController>();
-        if (radialMenu != null)
+        if (_cachedRadialMenu == null)
         {
-            radialMenu.InitializeWithBuildables(buildablePrefabs);
+            _cachedRadialMenu = FindObjectOfType<RadialMenuController>();
+        }
+
+        if (_cachedRadialMenu != null)
+        {
+            _cachedRadialMenu.InitializeWithBuildables(buildablePrefabs);
             Debug.Log("BuildSystem: Radial menu initialized");
         }
     }
@@ -196,9 +200,9 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             isBuilding = false;
             ToggleCursor(!scriptActive);
 
-            if (!scriptActive && currentPreview != null)
+            if (!scriptActive)
             {
-                Destroy(currentPreview);
+                CleanupPreview();
             }
         }
     }
@@ -209,11 +213,11 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         {
             isBuilding = !isBuilding;
 
-            if (!isBuilding && currentPreview != null)
+            if (!isBuilding)
             {
-                Destroy(currentPreview);
+                CleanupPreview();
             }
-            else if (isBuilding && currentPreview == null)
+            else if (currentPreview == null)
             {
                 CreatePreview();
             }
@@ -226,19 +230,16 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             return;
 
         GameObject prefab = buildablePrefabs[currentBuildableIndex];
-        BuildableObjectHelper helper = prefab.GetComponent<BuildableObjectHelper>();
+        _currentHelper = prefab.GetComponent<BuildableObjectHelper>();
 
-        if (helper == null || helper.preview == null)
+        if (_currentHelper == null || _currentHelper.preview == null)
         {
             Debug.LogError("BuildSystem: Missing BuildableObjectHelper or preview");
             return;
         }
 
         // Clean up existing preview
-        if (currentPreview != null)
-        {
-            Destroy(currentPreview);
-        }
+        CleanupPreview();
 
         // Reset all rotation states
         currentRotation = Quaternion.identity;
@@ -246,20 +247,18 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
         // Initialize with forced alignment if enabled
         Quaternion spawnRotation = Quaternion.identity;
-        if (helper.forceUpAlignment)
+        if (_currentHelper.forceUpAlignment)
         {
-            spawnRotation = helper.GetForcedRotation();
-            Debug.Log($"Applying forced alignment - Up: {helper.forcedUpAxis}, Forward: {helper.forwardAxis}");
+            spawnRotation = _currentHelper.GetForcedRotation();
+            Debug.Log($"Applying forced alignment - Up: {_currentHelper.forcedUpAxis}, Forward: {_currentHelper.forwardAxis}");
         }
 
         // Create new preview with proper rotation
-        currentPreview = Instantiate(helper.preview, currentPos, spawnRotation);
+        currentPreview = Instantiate(_currentHelper.preview, currentPos, spawnRotation);
         SetLayerRecursively(currentPreview, LayerMask.NameToLayer("Preview"));
 
-
-
         Debug.Log($"Created preview for {prefab.name} " +
-                 $"(Force Up: {helper.forceUpAlignment}, " +
+                 $"(Force Up: {_currentHelper.forceUpAlignment}, " +
                  $"Rotation: {spawnRotation.eulerAngles})");
     }
 
@@ -267,12 +266,11 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     {
         if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, 40, buildLayer))
         {
-            BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
-            if (helper == null) return;
+            if (_currentHelper == null) return;
 
             // Calculate grid-aligned position
-            float gridSize = helper.gridSize;
-            currentPos = hit.point + hit.normal * helper.offset;
+            float gridSize = _currentHelper.gridSize;
+            currentPos = hit.point + hit.normal * _currentHelper.offset;
             currentPos = new Vector3(
                 Mathf.Round(currentPos.x / gridSize) * gridSize,
                 Mathf.Round(currentPos.y / gridSize) * gridSize,
@@ -280,7 +278,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             );
 
             // Calculate surface alignment
-            surfaceAlignmentRotation = helper.snapToSurface ?
+            surfaceAlignmentRotation = _currentHelper.snapToSurface ?
                 Quaternion.FromToRotation(Vector3.up, hit.normal) :
                 Quaternion.identity;
 
@@ -288,24 +286,19 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             currentPreview.transform.position = currentPos;
 
             // Apply rotation based on helper settings
-            if (helper.forceUpAlignment)
+            if (_currentHelper.forceUpAlignment)
             {
                 // Get the forced rotation from helper
-                Quaternion forcedRotation = helper.GetForcedRotation();
+                Quaternion forcedRotation = _currentHelper.GetForcedRotation();
 
                 // Combine rotations:
-                // 1. First align with surface normal
-                // 2. Then apply the forced axis alignment
-                // 3. Finally apply any user rotation
                 currentPreview.transform.rotation = surfaceAlignmentRotation *
-                                      helper.GetForcedRotation() *
+                                      forcedRotation *
                                       currentRotation;
             }
             else
             {
-                // Standard rotation behavior:
-                // 1. Align with surface normal (if enabled)
-                // 2. Apply user rotation
+                // Standard rotation behavior
                 currentPreview.transform.rotation = surfaceAlignmentRotation * currentRotation;
             }
 
@@ -327,14 +320,12 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     bool IsPreviewValid()
     {
         if (currentPreview == null) return false;
+        if (_currentHelper == null || _currentHelper.collisionCheckObject == null) return false;
 
-        BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
-        if (helper == null || helper.collisionCheckObject == null) return false;
-
-        Vector3 checkPos = currentPreview.transform.position + helper.collisionCheckObject.transform.localPosition;
+        Vector3 checkPos = currentPreview.transform.position + _currentHelper.collisionCheckObject.transform.localPosition;
         Collider[] colliders = Physics.OverlapBox(
             checkPos,
-            helper.collisionCheckObject.GetComponent<Collider>().bounds.extents,
+            _currentHelper.collisionCheckObject.GetComponent<Collider>().bounds.extents,
             currentPreview.transform.rotation,
             buildLayer | (1 << LayerMask.NameToLayer("Player"))
         );
@@ -360,12 +351,14 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         // Rotation reset
         if (Input.GetKeyDown(resetRotationKey))
         {
-            BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
-            currentRotation = helper.forceUpAlignment ? helper.GetForcedRotation() : Quaternion.identity;
-
-            if (currentPreview != null)
+            if (_currentHelper != null)
             {
-                currentPreview.transform.rotation = surfaceAlignmentRotation * currentRotation;
+                currentRotation = _currentHelper.forceUpAlignment ? _currentHelper.GetForcedRotation() : Quaternion.identity;
+
+                if (currentPreview != null)
+                {
+                    currentPreview.transform.rotation = surfaceAlignmentRotation * currentRotation;
+                }
             }
         }
 
@@ -390,12 +383,11 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     void RotatePreview(float direction)
     {
-        BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
-        if (helper == null) return;
+        if (_currentHelper == null) return;
 
         // Get the axis to rotate around from the prefab settings
         Vector3 axis = Vector3.up;
-        switch (helper.rotationAxis)
+        switch (_currentHelper.rotationAxis)
         {
             case BuildableObjectHelper.RotationAxis.X: axis = Vector3.right; break;
             case BuildableObjectHelper.RotationAxis.Y: axis = Vector3.up; break;
@@ -403,13 +395,13 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         }
 
         // Apply rotation using the prefab's increment
-        currentRotation *= Quaternion.AngleAxis(direction * helper.rotationIncrement, axis);
+        currentRotation *= Quaternion.AngleAxis(direction * _currentHelper.rotationIncrement, axis);
 
         if (currentPreview != null)
         {
-            if (helper.forceUpAlignment)
+            if (_currentHelper.forceUpAlignment)
             {
-                Quaternion forcedRotation = helper.GetForcedRotation();
+                Quaternion forcedRotation = _currentHelper.GetForcedRotation();
                 currentPreview.transform.rotation = surfaceAlignmentRotation * forcedRotation * currentRotation;
             }
             else
@@ -432,10 +424,9 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         }
 
         // 3. Check & deduct resources (local only)
-        BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
-        if (helper == null) return;
+        if (_currentHelper == null) return;
 
-        foreach (InventoryCost cost in helper.buildCosts)
+        foreach (InventoryCost cost in _currentHelper.buildCosts)
         {
             if (_playerInventory.GetItemCount(cost.itemName) < cost.amount)
             {
@@ -453,31 +444,21 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         );
 
         // 5. Local effects
-        if (helper.buildParticleEffectPrefab != null)
-            SpawnBuildParticles(helper);
+        if (_currentHelper.buildParticleEffectPrefab != null)
+            SpawnBuildParticles(_currentHelper);
 
-        Destroy(currentPreview);
+        CleanupPreview();
         CreatePreview();
     }
 
     private void SpawnBuildParticles(BuildableObjectHelper helper)
     {
-        if (helper.buildParticleEffectPrefab == null)
-        {
-            Debug.LogError("Particle prefab is not assigned!");
-            return;
-        }
+        if (helper.buildParticleEffectPrefab == null) return;
 
-        // Hardcode the path (assuming prefab is in "Resources/HParticles/")
         string particlePrefabName = "HParticles/" + helper.buildParticleEffectPrefab.name;
-
         Vector3 spawnPos = currentPos + currentPreview.transform.TransformDirection(helper.particleEffectOffset);
         Quaternion spawnRot = helper.particleUsePreviewRotation ? currentPreview.transform.rotation : Quaternion.identity;
 
-        // Debug to verify the path (check Console in build)
-        Debug.Log($"Spawning particle: {particlePrefabName} at {spawnPos}");
-
-        // Try Photon instantiation (fallback to local if fails)
         GameObject spawnedParticles = null;
         if (PhotonNetwork.IsConnectedAndReady)
         {
@@ -489,16 +470,17 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             spawnedParticles = Instantiate(helper.buildParticleEffectPrefab, spawnPos, spawnRot);
         }
 
-        if (spawnedParticles == null)
-        {
-            Debug.LogError("FAILED TO SPAWN PARTICLES!");
-            return;
-        }
+        if (spawnedParticles == null) return;
 
-        // Parenting logic (if needed)
+        // Parenting logic
         if (helper.particleParentToBuilding)
         {
-            StartCoroutine(ParentParticlesAfterBuild(spawnedParticles, currentPos));
+            // Stop any existing coroutine
+            if (_parentParticlesCoroutine != null)
+            {
+                StopCoroutine(_parentParticlesCoroutine);
+            }
+            _parentParticlesCoroutine = StartCoroutine(ParentParticlesAfterBuild(spawnedParticles, currentPos));
         }
     }
 
@@ -506,6 +488,9 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     {
         // Wait one frame to allow building to spawn
         yield return null;
+
+        // Check if objects are still valid
+        if (this == null || particles == null) yield break;
 
         // Find the nearest building object at our build position
         Collider[] colliders = Physics.OverlapSphere(buildPosition, 0.5f);
@@ -517,31 +502,16 @@ public class BuildSystem : MonoBehaviourPunCallbacks
                 break;
             }
         }
-    }
 
-    // Helper method to get Resources path for a prefab
-    private string GetPrefabResourcePath(GameObject prefab)
-    {
-#if UNITY_EDITOR
-    string path = UnityEditor.AssetDatabase.GetAssetPath(prefab);
-    int resourcesIndex = path.IndexOf("Resources/");
-    if (resourcesIndex < 0) return null;
-    
-    string resourcesPath = path.Substring(resourcesIndex + "Resources/".Length);
-    return resourcesPath.Replace(".prefab", "");
-#else
-        // For runtime, we need to know the path - this is why we recommend setting it in editor
-        // and storing as a serialized field if you need it at runtime
-        return null;
-#endif
+        _parentParticlesCoroutine = null;
     }
 
     bool CanAffordBuild()
     {
         if (_playerInventory == null) return false;
+        if (_currentHelper == null) return false;
 
-        BuildableObjectHelper helper = buildablePrefabs[currentBuildableIndex].GetComponent<BuildableObjectHelper>();
-        foreach (InventoryCost cost in helper.buildCosts)
+        foreach (InventoryCost cost in _currentHelper.buildCosts)
         {
             if (_playerInventory.GetItemCount(cost.itemName) < cost.amount)
             {
@@ -561,10 +531,11 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         }
 
         currentBuildableIndex = index;
+        _currentHelper = prefab.GetComponent<BuildableObjectHelper>();
 
         if (isBuilding)
         {
-            if (currentPreview != null) Destroy(currentPreview);
+            CleanupPreview();
             CreatePreview();
         }
         else
@@ -591,5 +562,44 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         }
     }
 
-    
+    private void CleanupPreview()
+    {
+        if (currentPreview != null)
+        {
+            Destroy(currentPreview);
+            currentPreview = null;
+        }
+    }
+
+    private void OnDisable()
+    {
+        // Clean up all coroutines
+        if (_parentParticlesCoroutine != null)
+        {
+            StopCoroutine(_parentParticlesCoroutine);
+            _parentParticlesCoroutine = null;
+        }
+
+        StopAllCoroutines();
+        CleanupPreview();
+
+        // Clear cached references
+        _currentHelper = null;
+        _cachedRadialMenu = null;
+    }
+
+    private void OnDestroy()
+    {
+        // Additional cleanup
+        CleanupPreview();
+        buildablePrefabs.Clear();
+        _pendingRefunds.Clear();
+
+        // Ensure all coroutines are stopped
+        if (_parentParticlesCoroutine != null)
+        {
+            StopCoroutine(_parentParticlesCoroutine);
+            _parentParticlesCoroutine = null;
+        }
+    }
 }
