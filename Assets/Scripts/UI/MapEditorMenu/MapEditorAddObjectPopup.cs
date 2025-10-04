@@ -40,7 +40,7 @@ namespace UI
         protected virtual string[] GetCategories()
         {
             return new string[] { "All", "General", "Interact", "Geometry", "Buildings", "Nature", "Decor", 
-                "Arenas", "Terrain", "FX", "Custom" };
+                "Arenas", "Terrain", "FX", "Custom", "HawkStuff" };
         }
 
         public override float GetPanelVerticalOffset()
