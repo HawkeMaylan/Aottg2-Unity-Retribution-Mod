@@ -341,15 +341,20 @@ namespace GameManagers
             }
         }
 
-        // Helper method to find the local player's ProximityChatText component
         private static ProximityChatText GetLocalPlayerProximityChat()
         {
-            // Adjust this based on how you find the local player in your game
-            GameObject localPlayer = GameObject.FindGameObjectWithTag("Player");
-            if (localPlayer != null)
+            // Find all ProximityChatText components in the scene
+            ProximityChatText[] allProximityChats = GameObject.FindObjectsOfType<ProximityChatText>();
+
+            foreach (ProximityChatText proxChat in allProximityChats)
             {
-                return localPlayer.GetComponentInChildren<ProximityChatText>();
+                // Check if this component belongs to the local player
+                if (proxChat.photonView != null && proxChat.photonView.IsMine)
+                {
+                    return proxChat;
+                }
             }
+
             return null;
         }
 

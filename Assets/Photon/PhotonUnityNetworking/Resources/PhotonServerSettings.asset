@@ -184,6 +184,7 @@ MonoBehaviour:
   - RPC_RequestDestruction
   - RPC_AttachHuman
   - RPC_DetachHuman
+  - RPC_ShowMessage
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
