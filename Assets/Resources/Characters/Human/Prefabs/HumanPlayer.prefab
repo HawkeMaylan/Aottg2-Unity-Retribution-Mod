@@ -17025,7 +17025,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47ac177b5428f7e4d8dfeed212bfc396, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  messageDuration: 5
+  messageDuration: 20
   fadeTime: 2
   referenceCamera: {fileID: 0}
 --- !u!1 &8618271432415042918
