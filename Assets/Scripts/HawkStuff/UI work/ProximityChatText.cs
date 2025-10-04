@@ -9,6 +9,9 @@ public class ProximityChatText : MonoBehaviourPun
     public float messageDuration = 3f;
     public float fadeTime = 1f;
 
+    [Header("Billboard Settings")]
+    public Camera referenceCamera;
+
     private TextMesh textMesh;
     private float fadeTimer = -1f;
     private Color baseColor;
@@ -27,6 +30,10 @@ public class ProximityChatText : MonoBehaviourPun
         // Initialize with empty text
         textMesh.text = "";
         baseColor = textMesh.color;
+
+        // Get camera reference
+        if (referenceCamera == null)
+            referenceCamera = Camera.main;
     }
 
     // Public function to be called from outside sources
@@ -65,6 +72,19 @@ public class ProximityChatText : MonoBehaviourPun
     private void FixedUpdate()
     {
         if (textMesh == null) return;
+
+        // Billboard effect - always face the camera
+        if (referenceCamera == null)
+            referenceCamera = Camera.main;
+
+        if (referenceCamera != null)
+        {
+            // Make the text face the camera while maintaining up direction
+            transform.rotation = Quaternion.LookRotation(transform.position - referenceCamera.transform.position);
+
+            // Alternative method if you want to maintain world up:
+            // transform.LookAt(2 * transform.position - referenceCamera.transform.position);
+        }
 
         // Handle fade out
         if (fadeTimer > 0f)
