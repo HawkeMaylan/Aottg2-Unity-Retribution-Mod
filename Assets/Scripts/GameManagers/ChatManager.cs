@@ -316,6 +316,43 @@ namespace GameManagers
             }
         }
 
+        [CommandAttribute("o", "/o [message]: Set proximity chat message")]
+        private static void SetProximityChat(string[] args)
+        {
+            if (args.Length > 1)
+            {
+                string message = string.Join(' ', args, 1, args.Length - 1);
+
+                // Get the local player's ProximityChatText component
+                ProximityChatText proximityChat = GetLocalPlayerProximityChat();
+                if (proximityChat != null)
+                {
+                    proximityChat.SetMessage(message);
+                    AddLine("Proximity chat set: " + message);
+                }
+                else
+                {
+                    AddLine("Error: Proximity chat not found on player");
+                }
+            }
+            else
+            {
+                AddLine("Usage: /o [message] - Set your proximity chat text");
+            }
+        }
+
+        // Helper method to find the local player's ProximityChatText component
+        private static ProximityChatText GetLocalPlayerProximityChat()
+        {
+            // Adjust this based on how you find the local player in your game
+            GameObject localPlayer = GameObject.FindGameObjectWithTag("Player");
+            if (localPlayer != null)
+            {
+                return localPlayer.GetComponentInChildren<ProximityChatText>();
+            }
+            return null;
+        }
+
         private IEnumerator WaitAndLeave()
         {
             yield return new WaitForSeconds(2f);
