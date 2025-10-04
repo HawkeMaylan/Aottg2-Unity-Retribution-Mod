@@ -6,6 +6,15 @@
 		"OzanMainMenu1",
 		"OzanMainMenu2",
 		"OzanMainMenu3",
+		"OzanMainMenu4",
+		"OzanMainMenu5",
+		"OzanMainMenu6",
+		"OzanMainMenu7",
+		"OzanMainMenu8",
+		"OzanMainMenu9",
+		"OzanMainMenu10",
+		"OzanMainMenu11",
+		"TimMainMenu1",
 		"LichtMainMenu1",
 		"RitisMainMenu2",
 		"RitisMainMenu3",
@@ -66,7 +75,10 @@
 		"DisclosedInfo5",
 		"DisclosedInfo6",
 
-		"RitisMainMenu1"
+		"RitisMainMenu1",
+		"TimLoadingMenu1",
+		"TimLoadingMenu2",
+		"DetteLoadingMenu1"
 
 	],
 	"AllBackgrounds": 73,
