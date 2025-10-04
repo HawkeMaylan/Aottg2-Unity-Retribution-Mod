@@ -2053,17 +2053,7 @@
 			{ "Name": "Utgard2" }
 		]
 	},
-	"HawkStuff": {
-		"Info": {
-			"Type": "HawkStuff",
-			"AssetPrefix": "HawkStuff/",
-			"AssetSameAsName": true
-		},
-		"Prefabs": [
-			{ "Name": "CharacterEditorRoom" },
-			
-		]
-	},
+
 	"Nature": {
 		"Info": {
 			"Type": "Scene",
