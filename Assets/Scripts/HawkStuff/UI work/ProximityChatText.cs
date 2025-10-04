@@ -51,7 +51,8 @@ public class ProximityChatText : MonoBehaviourPun
     {
         if (textMesh == null || string.IsNullOrEmpty(newMessage)) return;
 
-        Debug.Log($"Setting proximity chat message: {newMessage}");
+        Debug.Log($"Setting proximity chat message: '{newMessage}' (Length: {newMessage.Length})");
+        Debug.Log($"Current settings - AutoScaling: {enableAutoScaling}, MaxLines: {maxLines}, MaxCharsPerLine: {maxCharactersPerLine}");
 
         // Format the message with line wrapping
         string formattedMessage = FormatMessage(newMessage);
@@ -88,11 +89,37 @@ public class ProximityChatText : MonoBehaviourPun
             return FormatMessageWithFixedLimits(message);
         }
     }
+
     private string FormatMessageWithFixedLimits(string message)
     {
-        // Original logic for fixed limits
+        // Handle pre-formatted multi-line text
+        if (message.Contains("\n"))
+        {
+            string[] lines = message.Split('\n');
+            if (lines.Length > maxLines)
+            {
+                // Truncate to maxLines
+                StringBuilder truncatedResult = new StringBuilder(); // Renamed to avoid conflict
+                for (int i = 0; i < maxLines; i++)
+                {
+                    if (i > 0) truncatedResult.AppendLine();
+                    truncatedResult.Append(lines[i]);
+                }
+                truncatedResult.Append("...");
+                AdjustTextSize(1f);
+                return truncatedResult.ToString();
+            }
+            else
+            {
+                AdjustTextSize(1f);
+                return message; // Return original with preserved line breaks
+            }
+        }
+
+        // Original logic for single-line text that needs wrapping
         if (message.Length <= maxCharactersPerLine)
         {
+            AdjustTextSize(1f);
             return message;
         }
 
@@ -131,7 +158,13 @@ public class ProximityChatText : MonoBehaviourPun
 
     private string FormatMessageWithAutoScaling(string message)
     {
-        // Start with base limits
+        // If the message already has line breaks, we need to handle them differently
+        if (message.Contains("\n"))
+        {
+            return FormatPreFormattedMessageWithAutoScaling(message);
+        }
+
+        // Start with base limits for regular text
         int currentMaxLines = maxLines;
         int currentMaxCharsPerLine = maxCharactersPerLine;
         float scaleFactor = 1f;
@@ -172,11 +205,39 @@ public class ProximityChatText : MonoBehaviourPun
         return finalMessage;
     }
 
+    private string FormatPreFormattedMessageWithAutoScaling(string message)
+    {
+        // Split the pre-formatted message into lines
+        string[] originalLines = message.Split('\n');
+        int totalLines = originalLines.Length; // Use Length instead of Count()
+
+        Debug.Log($"Processing pre-formatted message with {totalLines} lines");
+
+        // If the message fits within maxLines at normal size, no scaling needed
+        if (totalLines <= maxLines)
+        {
+            AdjustTextSize(1f);
+            return message; // Return original with preserved line breaks
+        }
+
+        // Calculate required scale factor based on line count
+        float scaleFactor = Mathf.Clamp((float)maxLines / totalLines, minCharacterSize / originalCharacterSize, 1f);
+
+        // Apply scaling
+        AdjustTextSize(scaleFactor);
+
+        Debug.Log($"Pre-formatted scaling: {totalLines} lines -> scale={scaleFactor}");
+
+        // Return original message with preserved formatting
+        return message;
+    }
+
     private string WrapText(string message, int charsPerLine, int maxLines, out int lineCount, out bool wasTruncated)
     {
         wasTruncated = false;
         lineCount = 1;
 
+        // If message is short enough, return as is
         if (message.Length <= charsPerLine)
         {
             return message;
@@ -188,6 +249,7 @@ public class ProximityChatText : MonoBehaviourPun
 
         foreach (string word in words)
         {
+            // Check if adding this word would exceed line length
             if (currentLine.Length + word.Length + 1 > charsPerLine)
             {
                 if (lineCount >= maxLines)
@@ -213,7 +275,6 @@ public class ProximityChatText : MonoBehaviourPun
 
         return result.ToString();
     }
-
 
     private void AdjustTextSize(float scaleFactor)
     {
