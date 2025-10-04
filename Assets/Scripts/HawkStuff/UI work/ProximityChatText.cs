@@ -1,6 +1,7 @@
 using UnityEngine;
 using Photon.Pun;
 using System.Collections;
+using System.Text;
 
 [RequireComponent(typeof(PhotonView))]
 public class ProximityChatText : MonoBehaviourPun
@@ -9,12 +10,20 @@ public class ProximityChatText : MonoBehaviourPun
     public float messageDuration = 3f;
     public float fadeTime = 1f;
 
+    [Header("Text Formatting")]
+    public int maxCharactersPerLine = 20;
+    public int maxLines = 3;
+    public bool enableAutoScaling = true;
+    public float minCharacterSize = 0.1f;
+    public float maxCharacterSize = 0.2f;
+
     [Header("Billboard Settings")]
     public Camera referenceCamera;
 
     private TextMesh textMesh;
     private float fadeTimer = -1f;
     private Color baseColor;
+    private float originalCharacterSize;
 
     private void Awake()
     {
@@ -30,6 +39,7 @@ public class ProximityChatText : MonoBehaviourPun
         // Initialize with empty text
         textMesh.text = "";
         baseColor = textMesh.color;
+        originalCharacterSize = textMesh.characterSize;
 
         // Get camera reference
         if (referenceCamera == null)
@@ -43,8 +53,11 @@ public class ProximityChatText : MonoBehaviourPun
 
         Debug.Log($"Setting proximity chat message: {newMessage}");
 
+        // Format the message with line wrapping
+        string formattedMessage = FormatMessage(newMessage);
+
         // Update locally
-        ShowMessage(newMessage);
+        ShowMessage(formattedMessage);
 
         // Sync with other players
         if (photonView.IsMine)
@@ -57,7 +70,162 @@ public class ProximityChatText : MonoBehaviourPun
     private void RPC_ShowMessage(string message)
     {
         Debug.Log($"RPC received for proximity chat: {message}");
-        ShowMessage(message);
+        string formattedMessage = FormatMessage(message);
+        ShowMessage(formattedMessage);
+    }
+
+    private string FormatMessage(string message)
+    {
+        if (string.IsNullOrEmpty(message)) return "";
+
+        // If auto-scaling is enabled, we'll use dynamic limits based on scale
+        if (enableAutoScaling)
+        {
+            return FormatMessageWithAutoScaling(message);
+        }
+        else
+        {
+            return FormatMessageWithFixedLimits(message);
+        }
+    }
+    private string FormatMessageWithFixedLimits(string message)
+    {
+        // Original logic for fixed limits
+        if (message.Length <= maxCharactersPerLine)
+        {
+            return message;
+        }
+
+        string[] words = message.Split(' ');
+        StringBuilder result = new StringBuilder();
+        StringBuilder currentLine = new StringBuilder();
+        int lineCount = 1;
+
+        foreach (string word in words)
+        {
+            if (currentLine.Length + word.Length + 1 > maxCharactersPerLine)
+            {
+                if (lineCount >= maxLines)
+                {
+                    result.Append(currentLine.ToString().Trim());
+                    result.Append("...");
+                    break;
+                }
+
+                result.AppendLine(currentLine.ToString().Trim());
+                currentLine.Clear();
+                lineCount++;
+            }
+
+            currentLine.Append(word + " ");
+        }
+
+        if (lineCount <= maxLines && currentLine.Length > 0)
+        {
+            result.Append(currentLine.ToString().Trim());
+        }
+
+        AdjustTextSize(1f); // Fixed size
+        return result.ToString();
+    }
+
+    private string FormatMessageWithAutoScaling(string message)
+    {
+        // Start with base limits
+        int currentMaxLines = maxLines;
+        int currentMaxCharsPerLine = maxCharactersPerLine;
+        float scaleFactor = 1f;
+
+        // Keep scaling down until the text fits or we hit minimum size
+        for (int i = 0; i < 10; i++) // Safety limit to prevent infinite loops
+        {
+            // Try to fit the message with current limits
+            string formattedMessage = WrapText(message, currentMaxCharsPerLine, currentMaxLines, out int actualLineCount, out bool wasTruncated);
+
+            // If text fits without truncation, we're done
+            if (!wasTruncated)
+            {
+                AdjustTextSize(scaleFactor);
+                return formattedMessage;
+            }
+
+            // Calculate new scale factor (reduce size)
+            scaleFactor *= 0.8f; // Reduce by 20% each iteration
+            scaleFactor = Mathf.Max(scaleFactor, minCharacterSize / originalCharacterSize);
+
+            // Increase limits based on inverse scale
+            currentMaxLines = Mathf.CeilToInt(maxLines / scaleFactor);
+            currentMaxCharsPerLine = Mathf.CeilToInt(maxCharactersPerLine / scaleFactor);
+
+            Debug.Log($"Auto-scaling iteration {i + 1}: scale={scaleFactor}, maxLines={currentMaxLines}, maxChars={currentMaxCharsPerLine}");
+        }
+
+        // If we get here, use the smallest possible size with maximum limits
+        scaleFactor = minCharacterSize / originalCharacterSize;
+        currentMaxLines = Mathf.CeilToInt(maxLines / scaleFactor);
+        currentMaxCharsPerLine = Mathf.CeilToInt(maxCharactersPerLine / scaleFactor);
+
+        string finalMessage = WrapText(message, currentMaxCharsPerLine, currentMaxLines, out int finalLineCount, out bool finalTruncated);
+        AdjustTextSize(scaleFactor);
+
+        Debug.Log($"Final auto-scaling: scale={scaleFactor}, lines={finalLineCount}, truncated={finalTruncated}");
+        return finalMessage;
+    }
+
+    private string WrapText(string message, int charsPerLine, int maxLines, out int lineCount, out bool wasTruncated)
+    {
+        wasTruncated = false;
+        lineCount = 1;
+
+        if (message.Length <= charsPerLine)
+        {
+            return message;
+        }
+
+        string[] words = message.Split(' ');
+        StringBuilder result = new StringBuilder();
+        StringBuilder currentLine = new StringBuilder();
+
+        foreach (string word in words)
+        {
+            if (currentLine.Length + word.Length + 1 > charsPerLine)
+            {
+                if (lineCount >= maxLines)
+                {
+                    result.Append(currentLine.ToString().Trim());
+                    result.Append("...");
+                    wasTruncated = true;
+                    break;
+                }
+
+                result.AppendLine(currentLine.ToString().Trim());
+                currentLine.Clear();
+                lineCount++;
+            }
+
+            currentLine.Append(word + " ");
+        }
+
+        if (!wasTruncated && currentLine.Length > 0)
+        {
+            result.Append(currentLine.ToString().Trim());
+        }
+
+        return result.ToString();
+    }
+
+
+    private void AdjustTextSize(float scaleFactor)
+    {
+        if (enableAutoScaling)
+        {
+            float newSize = originalCharacterSize * scaleFactor;
+            textMesh.characterSize = Mathf.Clamp(newSize, minCharacterSize, maxCharacterSize);
+        }
+        else
+        {
+            textMesh.characterSize = originalCharacterSize;
+        }
     }
 
     private void ShowMessage(string message)
@@ -81,9 +249,6 @@ public class ProximityChatText : MonoBehaviourPun
         {
             // Make the text face the camera while maintaining up direction
             transform.rotation = Quaternion.LookRotation(transform.position - referenceCamera.transform.position);
-
-            // Alternative method if you want to maintain world up:
-            // transform.LookAt(2 * transform.position - referenceCamera.transform.position);
         }
 
         // Handle fade out
@@ -100,6 +265,8 @@ public class ProximityChatText : MonoBehaviourPun
             if (fadeTimer <= 0f)
             {
                 textMesh.text = "";
+                // Reset character size when clearing text
+                textMesh.characterSize = originalCharacterSize;
             }
         }
     }

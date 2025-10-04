@@ -16975,9 +16975,11 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8101322667644146443}
-  m_Text: 'Hello Worldaf
+  m_Text: 'HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 
-'
+    HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+
+    HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH'
   m_OffsetZ: 0
   m_CharacterSize: 0.05
   m_LineSpacing: 1
@@ -17027,6 +17029,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   messageDuration: 20
   fadeTime: 20
+  maxCharactersPerLine: 60
+  maxLines: 3
+  enableAutoScaling: 1
+  minCharacterSize: 0.0005
+  maxCharacterSize: 0.9
   referenceCamera: {fileID: 0}
 --- !u!1 &8618271432415042918
 GameObject:
