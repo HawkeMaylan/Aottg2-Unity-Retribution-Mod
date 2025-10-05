@@ -2005,6 +2005,10 @@
 			{ "Name": "Arena3" },
 			{ "Name": "Arena4" },
 			{ "Name": "Arena5" },
+			{ "Name": "TrostToShig1" },
+			{ "Name": "TrostToShig2" },
+			{ "Name": "TrostToShig3" },
+			{ "Name": "TrostToShig4" },
 			{ "Name": "CaveMap1" },
 			{ "Name": "HQ1" },
 			{
@@ -2282,6 +2286,11 @@
 			{ "Name": "Arena4" },
 			{ "Name": "Arena5" },
 			{ "Name": "CaveMap1" },
+			{ "Name": "TrostToShig1" },
+			{ "Name": "TrostToShig2" },
+			{ "Name": "TrostToShig3" },
+			{ "Name": "TrostToShig4" },
+
 			{ "Name": "HQ1" },
 			{
 				"Name": "HQ1b",
