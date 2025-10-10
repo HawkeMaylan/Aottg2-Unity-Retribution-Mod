@@ -33,14 +33,6 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     private int currentBuildableIndex = 0;
     private HumanInventory _playerInventory;
     private bool _inventorySearchPerformed = false;
-    private Dictionary<string, int> _pendingRefunds = new Dictionary<string, int>();
-    private bool IsLocalPlayer => PhotonNetwork.LocalPlayer != null &&
-                             _playerInventory != null &&
-                             _playerInventory.photonView != null &&
-                             _playerInventory.photonView.IsMine;
-
-    private float _lastInventoryCheckTime = 0f;
-    private float _inventoryCheckCooldown = 2f;
 
     // Cached references for performance
     private BuildableObjectHelper _currentHelper;
@@ -50,22 +42,17 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     // Rotation state
     private Quaternion surfaceAlignmentRotation = Quaternion.identity;
 
-    private enum RotationAxis { X, Y, Z }
+    // Cache for performance (non-allocating)
+    private Collider[] _colliderCache = new Collider[32];
+    private List<Renderer> _rendererCache = new List<Renderer>(16);
 
     private IEnumerator Start()
     {
-        yield return new WaitUntil(() => FindLocalPlayerInventory() || _inventorySearchPerformed);
-
-        if (_playerInventory == null)
-        {
-            Debug.LogError("BuildSystem: Failed to find player inventory after waiting");
-            yield break;
-        }
-
+        // Just load prefabs and initialize UI, don't search for inventory yet
         LoadBuildablePrefabs();
         InitializeRadialMenu();
-
-        Debug.Log("BuildSystem: Initialized with inventory");
+        Debug.Log("BuildSystem: Initialized - waiting for build attempt to find inventory");
+        yield break;
     }
 
     private bool FindLocalPlayerInventory()
@@ -114,40 +101,12 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             }
         }
 
+        Debug.LogWarning("BuildSystem: Could not find local player inventory");
         return false;
     }
 
     void Update()
     {
-        // Periodically check for inventory with cooldown
-        if (_playerInventory == null)
-        {
-            if (Time.time - _lastInventoryCheckTime >= _inventoryCheckCooldown)
-            {
-                _lastInventoryCheckTime = Time.time;
-                if (!FindLocalPlayerInventory())
-                {
-                    Debug.LogWarning("BuildSystem: Waiting for player inventory...");
-                    // Disable building until we have a valid inventory
-                    if (isBuilding)
-                    {
-                        isBuilding = false;
-                        CleanupPreview();
-                    }
-                    return;
-                }
-                else
-                {
-                    Debug.Log("BuildSystem: Successfully reconnected to player inventory");
-                }
-            }
-            else
-            {
-                // Still waiting for cooldown, skip update
-                return;
-            }
-        }
-
         HandleSystemToggle();
         if (!scriptActive) return;
 
@@ -211,6 +170,16 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     {
         if (Input.GetKeyDown(buildKey) && !InGameMenu.InMenu() && !ChatManager.IsChatActive())
         {
+            // Only search for inventory when they first try to build
+            if (_playerInventory == null && !_inventorySearchPerformed)
+            {
+                if (!FindLocalPlayerInventory())
+                {
+                    Debug.LogError("BuildSystem: Cannot start building - no player inventory found");
+                    return;
+                }
+            }
+
             isBuilding = !isBuilding;
 
             if (!isBuilding)
@@ -311,7 +280,12 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     {
         // Only check position validity for preview, not costs
         bool isValid = IsPreviewValid();
-        foreach (Renderer renderer in currentPreview.GetComponentsInChildren<Renderer>())
+
+        // Use the cached list to avoid GC allocations
+        _rendererCache.Clear();
+        currentPreview.GetComponentsInChildren<Renderer>(true, _rendererCache);
+
+        foreach (Renderer renderer in _rendererCache)
         {
             renderer.material = isValid ? buildableMaterial : notBuildableMaterial;
         }
@@ -323,15 +297,22 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         if (_currentHelper == null || _currentHelper.collisionCheckObject == null) return false;
 
         Vector3 checkPos = currentPreview.transform.position + _currentHelper.collisionCheckObject.transform.localPosition;
-        Collider[] colliders = Physics.OverlapBox(
+
+        // Use non-allocating version if possible, fallback to regular version
+        Collider checkCollider = _currentHelper.collisionCheckObject.GetComponent<Collider>();
+        if (checkCollider == null) return false;
+
+        int numColliders = Physics.OverlapBoxNonAlloc(
             checkPos,
-            _currentHelper.collisionCheckObject.GetComponent<Collider>().bounds.extents,
+            checkCollider.bounds.extents,
+            _colliderCache,
             currentPreview.transform.rotation,
             buildLayer | (1 << LayerMask.NameToLayer("Player"))
         );
 
-        foreach (Collider col in colliders)
+        for (int i = 0; i < numColliders; i++)
         {
+            Collider col = _colliderCache[i];
             if (col != null && col.gameObject != currentPreview)
             {
                 return false;
@@ -416,14 +397,24 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         // 1. Validate build position
         if (currentPreview == null || !IsPreviewValid()) return;
 
-        // 2. Only allow the LOCAL player to build
+        // 2. Search for inventory if we don't have it yet
+        if (_playerInventory == null && !_inventorySearchPerformed)
+        {
+            if (!FindLocalPlayerInventory())
+            {
+                Debug.LogError("BuildSystem: Cannot build - no player inventory found");
+                return;
+            }
+        }
+
+        // 3. Only allow the LOCAL player to build
         if (!IsLocalPlayer)
         {
             Debug.Log("Not local player - skipping build logic");
             return;
         }
 
-        // 3. Check & deduct resources (local only)
+        // 4. Check & deduct resources (local only)
         if (_currentHelper == null) return;
 
         foreach (InventoryCost cost in _currentHelper.buildCosts)
@@ -436,20 +427,25 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             _playerInventory.SetItemCount(cost.itemName, _playerInventory.GetItemCount(cost.itemName) - cost.amount);
         }
 
-        // 4. Spawn object for ALL players (but only local player pays)
+        // 5. Spawn object for ALL players (but only local player pays)
         PhotonNetwork.Instantiate(
             "Buildables/" + buildablePrefabs[currentBuildableIndex].name,
             currentPos,
             currentPreview.transform.rotation
         );
 
-        // 5. Local effects
+        // 6. Local effects
         if (_currentHelper.buildParticleEffectPrefab != null)
             SpawnBuildParticles(_currentHelper);
 
         CleanupPreview();
         CreatePreview();
     }
+
+    private bool IsLocalPlayer => PhotonNetwork.LocalPlayer != null &&
+                             _playerInventory != null &&
+                             _playerInventory.photonView != null &&
+                             _playerInventory.photonView.IsMine;
 
     private void SpawnBuildParticles(BuildableObjectHelper helper)
     {
@@ -490,13 +486,15 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         yield return null;
 
         // Check if objects are still valid
-        if (this == null || particles == null) yield break;
+        if (this == null || particles == null || !gameObject.activeInHierarchy)
+            yield break;
 
         // Find the nearest building object at our build position
-        Collider[] colliders = Physics.OverlapSphere(buildPosition, 0.5f);
-        foreach (Collider col in colliders)
+        int numColliders = Physics.OverlapSphereNonAlloc(buildPosition, 0.5f, _colliderCache);
+        for (int i = 0; i < numColliders; i++)
         {
-            if (col.gameObject != currentPreview && col.CompareTag("Buildable"))
+            Collider col = _colliderCache[i];
+            if (col != null && col.gameObject != currentPreview && col.CompareTag("Buildable"))
             {
                 particles.transform.SetParent(col.transform);
                 break;
@@ -504,21 +502,6 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         }
 
         _parentParticlesCoroutine = null;
-    }
-
-    bool CanAffordBuild()
-    {
-        if (_playerInventory == null) return false;
-        if (_currentHelper == null) return false;
-
-        foreach (InventoryCost cost in _currentHelper.buildCosts)
-        {
-            if (_playerInventory.GetItemCount(cost.itemName) < cost.amount)
-            {
-                return false;
-            }
-        }
-        return true;
     }
 
     public void HandleBuildableSelection(GameObject prefab)
@@ -593,7 +576,6 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         // Additional cleanup
         CleanupPreview();
         buildablePrefabs.Clear();
-        _pendingRefunds.Clear();
 
         // Ensure all coroutines are stopped
         if (_parentParticlesCoroutine != null)
@@ -601,5 +583,8 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             StopCoroutine(_parentParticlesCoroutine);
             _parentParticlesCoroutine = null;
         }
+
+        // Unregister from Photon callbacks
+        PhotonNetwork.RemoveCallbackTarget(this);
     }
 }

@@ -35,7 +35,7 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     private float originalMass;
     private bool originalUseGravity;
 
-    private static string currentPrompt = "";
+    private string currentPrompt = ""; // REMOVED STATIC
     private float unmountPromptTimer = 0f;
     private Vector3 lastMountedWorldPos = Vector3.zero;
     private bool isCurrentlyRunning = false;
@@ -48,17 +48,33 @@ public class DirectMountBundled : MonoBehaviourPunCallbacks
     private const float MaxDistanceBuffer = 40.5f;
 
     [Header("Trigger Validation")]
-public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trigger stay
-
+    public float maxTriggerDistance = 40.5f;
 
     private int isOccupied = 0;
 
+    // FIX: Cached GUI elements to prevent memory leaks
+    private GUIStyle _cachedPromptStyle;
+    private bool _isStyleInitialized = false;
 
     private void Start()
     {
         _triggerCollider = GetComponent<Collider>();
         UpdatePromptTexts();
         ClearPrompt();
+        InitializeGUIStyle(); // Initialize style once
+    }
+
+    // FIX: Initialize GUI style once to prevent memory leaks
+    private void InitializeGUIStyle()
+    {
+        if (!_isStyleInitialized)
+        {
+            _cachedPromptStyle = new GUIStyle(GUI.skin.label);
+            _cachedPromptStyle.fontSize = 24;
+            _cachedPromptStyle.alignment = TextAnchor.UpperCenter;
+            _cachedPromptStyle.normal.textColor = Color.white;
+            _isStyleInitialized = true;
+        }
     }
 
     private void UpdatePromptTexts()
@@ -70,7 +86,7 @@ public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trig
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isOccupied == 1) return; // Don't proceed if already occupied
+        if (isOccupied == 1) return;
 
         Human human = other.GetComponentInParent<Human>();
         if (human != null && human.IsMine())
@@ -201,7 +217,7 @@ public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trig
         if (humanInTrigger == null || mountPoint == null)
             return;
 
-        isOccupied = 1; // Set to occupied
+        isOccupied = 1;
 
         humanInTrigger.MountedTransform = mountPoint;
         humanInTrigger.MountedMapObject = null;
@@ -234,7 +250,7 @@ public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trig
         if (humanInTrigger == null)
             return;
 
-        isOccupied = 0; // Set to available
+        isOccupied = 0;
 
         humanInTrigger.Unmount(true);
 
@@ -261,16 +277,13 @@ public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trig
         return useHorseIdle ? HumanAnimations.HorseIdle : HumanAnimations.IdleM;
     }
 
+    // FIX: Using cached GUIStyle to prevent memory leaks
     private void OnGUI()
     {
         if (!string.IsNullOrEmpty(currentPrompt))
         {
-            GUIStyle style = new GUIStyle(GUI.skin.label);
-            style.fontSize = 24;
-            style.alignment = TextAnchor.UpperCenter;
-            style.normal.textColor = Color.white;
-
-            GUI.Label(new Rect(Screen.width / 2 - 200, 10, 400, 50), currentPrompt, style);
+            // Use the pre-initialized style instead of creating new one each frame
+            GUI.Label(new Rect(Screen.width / 2 - 200, 10, 400, 50), currentPrompt, _cachedPromptStyle);
         }
     }
 
@@ -283,5 +296,23 @@ public float maxTriggerDistance = 40.5f; // Adjustable distance to validate trig
     private void ClearPrompt()
     {
         currentPrompt = "";
+    }
+
+    // FIX: Clean up when object is destroyed
+    private void OnDestroy()
+    {
+        // Clear references to help garbage collection
+        humanInTrigger = null;
+        humanRigidbody = null;
+        currentPrompt = "";
+
+        // If style was created, we let it be garbage collected naturally
+        // since GUIStyle doesn't implement IDisposable
+    }
+
+    // FIX: Additional cleanup when disabled
+    private void OnDisable()
+    {
+        ClearPrompt();
     }
 }
