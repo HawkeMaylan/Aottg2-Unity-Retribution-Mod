@@ -16414,8 +16414,6 @@ GameObject:
   - component: {fileID: 2099644246177627274}
   - component: {fileID: 4723133760165692264}
   - component: {fileID: 2091740737953389303}
-  - component: {fileID: -5803597552919391511}
-  - component: {fileID: -5965969077283035797}
   m_Layer: 0
   m_Name: HumanPlayer
   m_TagString: Player
@@ -16793,37 +16791,6 @@ MonoBehaviour:
   - Resources
   - Airburst Compressor Lvl 1
   - Supply Station
---- !u!114 &-5803597552919391511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 101914}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47c1a9cb40ced004d9bcdbb2c5d2cc33, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetRigidbody: {fileID: 5414280}
-  checkInterval: 4
-  expectedMass: 0.75
-  expectedUseGravity: 1
-  expectedDrag: 0
-  expectedAngularDrag: 0.05
-  isMounted: 0
---- !u!114 &-5965969077283035797
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 101914}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f1bdcf9e2b328048bb78e39e6b16ce1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &4310715724008364727
 GameObject:
   m_ObjectHideFlags: 0

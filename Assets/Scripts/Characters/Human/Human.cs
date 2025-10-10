@@ -330,40 +330,44 @@ namespace Characters
         public bool CanJump()
         {
             return (Grounded && CarryState != HumanCarryState.Carry && (State == HumanState.Idle || State == HumanState.Slide) &&
-                !Animation.IsPlaying(HumanAnimations.Jump) && !Animation.IsPlaying(HumanAnimations.HorseMount));
+                !Animation.IsPlaying(HumanAnimations.Jump) && !Animation.IsPlaying(HumanAnimations.HorseMount) && CurrentStamina >= 5f);
         }
 
         public void Jump()
         {
-            Idle();
-            CrossFade(HumanAnimations.Jump, 0.1f);
-            PlaySound(HumanSounds.Jump);
-            ToggleSparks(false);
-            CurrentStamina -= 5f;// Stamina loss
-            _canRegenStamina = false; /// Force Cooldown
-            _timeSinceLastStaminaUse = 0f; /// Force Cooldown
+            if (CurrentStamina >= 5f);
+            {
+                Idle();
+                CrossFade(HumanAnimations.Jump, 0.1f);
+                PlaySound(HumanSounds.Jump);
+                ToggleSparks(false);
+                CurrentStamina -= 5f;// Stamina loss
+                _canRegenStamina = false; /// Force Cooldown
+                _timeSinceLastStaminaUse = 0f; /// Force Cooldown
+
+            }
         }
 
-        public void Mount(Transform transform, Vector3 positionOffset, Vector3 rotationOffset)
-        {
-            Transform parent = transform;
-            MapObject mapObject = null;
-            string transformName = "";
-            while (parent != null)
-            {
-                if (MapLoader.GoToMapObject.ContainsKey(parent.gameObject))
+                public void Mount(Transform transform, Vector3 positionOffset, Vector3 rotationOffset)
                 {
-                    mapObject = MapLoader.GoToMapObject[parent.gameObject];
-                    break;
+                    Transform parent = transform;
+                    MapObject mapObject = null;
+                    string transformName = "";
+                    while (parent != null)
+                    {
+                        if (MapLoader.GoToMapObject.ContainsKey(parent.gameObject))
+                        {
+                            mapObject = MapLoader.GoToMapObject[parent.gameObject];
+                            break;
+                        }
+                        if (transformName == "")
+                            transformName = parent.name;
+                        else
+                            transformName = parent.name + "/" + transformName;
+                        parent = parent.parent;
+                    }
+                    Mount(mapObject, transformName, positionOffset, rotationOffset);
                 }
-                if (transformName == "")
-                    transformName = parent.name;
-                else
-                    transformName = parent.name + "/" + transformName;
-                parent = parent.parent;
-            }
-            Mount(mapObject, transformName, positionOffset, rotationOffset);
-        }
 
         public void Mount(MapObject mapObject, Vector3 positionOffset, Vector3 rotationOffset)
         {
@@ -1834,7 +1838,7 @@ namespace Characters
                     force.x = Mathf.Clamp(force.x, -MaxVelocityChange, MaxVelocityChange);
                     force.z = Mathf.Clamp(force.z, -MaxVelocityChange, MaxVelocityChange);
                     force.y = 0f;
-                    if (Animation.IsPlaying(HumanAnimations.Jump) && Animation.GetNormalizedTime(HumanAnimations.Jump) > 0.18f)
+                    if (Animation.IsPlaying(HumanAnimations.Jump)  && Animation.GetNormalizedTime(HumanAnimations.Jump) > 0.18f)
                     {
                         // float jumpSpeed = ((0.5f * (float)Stats.Speed) - 20f);
                         float jumpSpeed = 20f;
