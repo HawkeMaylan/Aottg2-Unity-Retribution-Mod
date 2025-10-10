@@ -42,6 +42,10 @@ public class RadialMenuController : MonoBehaviour
     private float _postSelectionTimer = 0f;
     private bool _inPostSelectionState = false;
 
+    // Memory leak protection
+    private Dictionary<string, GameObject> prefabLookup = new Dictionary<string, GameObject>();
+    private List<GameObject> _createdUIElements = new List<GameObject>();
+    private bool _isInitialized = false;
 
     void Start()
     {
@@ -62,14 +66,24 @@ public class RadialMenuController : MonoBehaviour
 
     void OnDestroy()
     {
-        if (menuActive && _inGameMenu != null)
+        Cleanup();
+    }
+
+    void OnDisable()
+    {
+        // Clean up when object is disabled
+        if (menuActive)
         {
-            _inGameMenu.SetRadialMenuActive(false);
+            ForceCloseMenu();
         }
     }
 
     void Update()
     {
+        // Early exit if critical components are missing
+        if (radialMenuBase == null || selectionIndicator == null ||
+            selectionNameText == null || pageNameText == null || pageNumberText == null)
+            return;
 
         // Handle post-selection timer
         if (_inPostSelectionState)
@@ -113,7 +127,7 @@ public class RadialMenuController : MonoBehaviour
         else
         {
             // Original toggle behavior
-            if (SettingsManager.InputSettings.General.BuildMenuRadial.GetKeyDown()) 
+            if (SettingsManager.InputSettings.General.BuildMenuRadial.GetKeyDown())
             {
                 if (menuActive)
                 {
@@ -127,10 +141,10 @@ public class RadialMenuController : MonoBehaviour
         }
     }
 
-    private Dictionary<string, GameObject> prefabLookup = new Dictionary<string, GameObject>();
-
     public void InitializeWithBuildables(List<GameObject> buildablePrefabs)
     {
+        // Clear previous data first
+        CleanupEvents();
         prefabLookup.Clear();
         pages.Clear();
 
@@ -174,7 +188,12 @@ public class RadialMenuController : MonoBehaviour
         // Set default page if none selected
         if (currentPage >= pages.Count) currentPage = 0;
 
-        UpdateMenuDisplay();
+        _isInitialized = true;
+
+        if (menuActive)
+        {
+            UpdateMenuDisplay();
+        }
     }
 
     private void OnBuildableSelected(string optionName)
@@ -191,6 +210,8 @@ public class RadialMenuController : MonoBehaviour
 
     void OpenMenu()
     {
+        if (!_isInitialized) return;
+
         menuActive = true;
         radialMenuBase.SetActive(true);
         _isHolding = true;
@@ -210,11 +231,32 @@ public class RadialMenuController : MonoBehaviour
         _isHolding = false;
         radialMenuBase.SetActive(false);
 
+        // Clean up UI elements immediately
+        CleanupUIElements();
+
         // Start post-selection delay
         _postSelectionTimer = postSelectionMenuTime;
         _inPostSelectionState = true;
 
-        ((InGameMenu)UIManager.CurrentMenu).SkipAHSSInput = true;
+        if (UIManager.CurrentMenu is InGameMenu inGameMenu)
+        {
+            inGameMenu.SkipAHSSInput = true;
+        }
+    }
+
+    void ForceCloseMenu()
+    {
+        menuActive = false;
+        _isHolding = false;
+        if (radialMenuBase != null)
+            radialMenuBase.SetActive(false);
+
+        CleanupUIElements();
+
+        if (_inGameMenu != null)
+        {
+            _inGameMenu.SetRadialMenuActive(false);
+        }
     }
 
     void ExecuteSelection(int selectionIndex)
@@ -222,7 +264,10 @@ public class RadialMenuController : MonoBehaviour
         if (currentPage < pages.Count && selectionIndex < pages[currentPage].options.Count)
         {
             pages[currentPage].options[selectionIndex].onSelect.Invoke();
-            ((InGameMenu)UIManager.CurrentMenu).SkipAHSSInput = true;
+            if (UIManager.CurrentMenu is InGameMenu inGameMenu)
+            {
+                inGameMenu.SkipAHSSInput = true;
+            }
         }
     }
 
@@ -245,6 +290,8 @@ public class RadialMenuController : MonoBehaviour
 
     void UpdateSelection()
     {
+        if (currentPage >= pages.Count) return;
+
         int optionsOnPage = Mathf.Min(pages[currentPage].options.Count, segmentsPerPage);
 
         if (inputDirection.magnitude < deadZone)
@@ -278,6 +325,8 @@ public class RadialMenuController : MonoBehaviour
 
     void UpdateSelectionVisual()
     {
+        if (currentPage >= pages.Count) return;
+
         int optionsOnPage = Mathf.Min(pages[currentPage].options.Count, segmentsPerPage);
 
         if (currentSelection < 0 || currentSelection >= optionsOnPage) return;
@@ -296,7 +345,11 @@ public class RadialMenuController : MonoBehaviour
 
     void HandleSelectionInput()
     {
-        ((InGameMenu)UIManager.CurrentMenu).SkipAHSSInput = true;
+        if (UIManager.CurrentMenu is InGameMenu inGameMenu)
+        {
+            inGameMenu.SkipAHSSInput = true;
+        }
+
         if (currentSelection == -1) return;
 
         if (!holdToSelectMode)
@@ -346,21 +399,13 @@ public class RadialMenuController : MonoBehaviour
 
     void UpdateMenuDisplay()
     {
-        foreach (Transform child in radialMenuBase.transform)
-        {
-            if (child != selectionIndicator &&
-                child.gameObject != selectionNameText.gameObject &&
-                child.gameObject != pageNameText.gameObject &&
-                child.gameObject != pageNumberText.gameObject)
-            {
-                Destroy(child.gameObject);
-            }
-        }
+        // Clean up previous UI first
+        CleanupUIElements();
+
+        if (currentPage >= pages.Count) return;
 
         pageNameText.text = pages[currentPage].pageName;
         pageNumberText.text = $"Page {currentPage + 1} of {pages.Count}";
-
-        if (currentPage >= pages.Count) return;
 
         int optionsOnPage = Mathf.Min(pages[currentPage].options.Count, segmentsPerPage);
         float segmentAngle = 360f / optionsOnPage;
@@ -390,7 +435,81 @@ public class RadialMenuController : MonoBehaviour
             labelText.alignment = TextAnchor.UpperCenter;
             labelText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             labelText.fontSize = 14;
+
+            // Track for cleanup
+            _createdUIElements.Add(icon);
+            _createdUIElements.Add(label);
         }
+    }
+
+    // Memory leak protection methods
+    private void CleanupUIElements()
+    {
+        foreach (GameObject uiElement in _createdUIElements)
+        {
+            if (uiElement != null)
+            {
+                if (Application.isPlaying)
+                    Destroy(uiElement);
+                else
+                    DestroyImmediate(uiElement);
+            }
+        }
+        _createdUIElements.Clear();
+
+        // Additional safety cleanup of any remaining children
+        if (radialMenuBase != null)
+        {
+            foreach (Transform child in radialMenuBase.transform)
+            {
+                if (child != selectionIndicator &&
+                    child.gameObject != selectionNameText.gameObject &&
+                    child.gameObject != pageNameText.gameObject &&
+                    child.gameObject != pageNumberText.gameObject)
+                {
+                    if (Application.isPlaying)
+                        Destroy(child.gameObject);
+                    else
+                        DestroyImmediate(child.gameObject);
+                }
+            }
+        }
+    }
+
+    private void CleanupEvents()
+    {
+        foreach (var page in pages)
+        {
+            foreach (var option in page.options)
+            {
+                if (option.onSelect != null)
+                {
+                    option.onSelect.RemoveAllListeners();
+                }
+            }
+        }
+    }
+
+    private void Cleanup()
+    {
+        // Comprehensive cleanup
+        if (menuActive && _inGameMenu != null)
+        {
+            _inGameMenu.SetRadialMenuActive(false);
+        }
+
+        CleanupEvents();
+        CleanupUIElements();
+        prefabLookup.Clear();
+
+        menuActive = false;
+        _isHolding = false;
+    }
+
+    // Public method for external cleanup if needed
+    public void ForceCleanup()
+    {
+        Cleanup();
     }
 }
 
