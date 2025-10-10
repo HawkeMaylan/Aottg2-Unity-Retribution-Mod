@@ -2889,11 +2889,12 @@ namespace Characters
                 SetupItems();
 
                 InitializeSpecials(
+                    SettingsManager.InGameCharacterSettings.Special.Value,
+                    SettingsManager.InGameCharacterSettings.Special2.Value,
+                    SettingsManager.InGameCharacterSettings.Special3.Value);
 
-            SettingsManager.InGameCharacterSettings.Special.Value,
-            SettingsManager.InGameCharacterSettings.Special2.Value,
-            SettingsManager.InGameCharacterSettings.Special3.Value);
-
+                // ADD THIS SECTION - Feed inventory to BuildSystem
+                FeedInventoryToBuildSystem();
             }
             FinishSetup = true;
             // ignore if name contains char_eyes, char_face, char_glasses
@@ -2905,6 +2906,29 @@ namespace Characters
             StartCoroutine(WaitAndNotifyReloaded());
         }
 
+        // 
+        private void FeedInventoryToBuildSystem()
+        {
+            // Get the HumanInventory component from this human
+            HumanInventory inventory = GetComponent<HumanInventory>();
+            if (inventory == null)
+            {
+                Debug.LogError("Human: Could not find HumanInventory component on this human");
+                return;
+            }
+
+            // Find the BuildSystem in the scene
+            BuildSystem buildSystem = FindObjectOfType<BuildSystem>();
+            if (buildSystem != null)
+            {
+                buildSystem.SetPlayerInventory(inventory);
+                Debug.Log($"Human: Successfully fed inventory to BuildSystem for player {gameObject.name}");
+            }
+            else
+            {
+                Debug.LogWarning("Human: BuildSystem not found in scene - building may not work until it's available");
+            }
+        }
         protected void SetupWeapon(int humanWeapon)
         {
             if (humanWeapon == (int)HumanWeapon.Blade)

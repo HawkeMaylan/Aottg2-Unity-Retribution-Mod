@@ -544,7 +544,13 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             SetLayerRecursively(child.gameObject, layer);
         }
     }
-
+    
+    public void SetPlayerInventory(HumanInventory inventory)
+    {
+        _playerInventory = inventory;
+        _inventorySearchPerformed = true; // Mark as found
+        Debug.Log($"BuildSystem: Player inventory set externally to {inventory?.gameObject?.name}");
+    }
     private void CleanupPreview()
     {
         if (currentPreview != null)
