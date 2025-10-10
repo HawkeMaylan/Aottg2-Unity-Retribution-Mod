@@ -66,6 +66,10 @@ namespace UI
         {
             yield return new WaitForSeconds(totalDuration - fadeDuration);
 
+            // Check if popup still exists
+            if (popup == null)
+                yield break;
+
             CanvasGroup cg = popup.GetComponent<CanvasGroup>();
             if (cg == null)
                 cg = popup.AddComponent<CanvasGroup>();
@@ -73,36 +77,73 @@ namespace UI
             float elapsed = 0f;
             while (elapsed < fadeDuration)
             {
+                // Check if popup was destroyed during fade
+                if (popup == null)
+                    yield break;
+
                 elapsed += Time.deltaTime;
                 cg.alpha = 1f - (elapsed / fadeDuration);
                 yield return null;
             }
 
-            cg.alpha = 0f;
-
-            if (_popupQueue.Contains(popup))
+            if (popup != null)
             {
-                _popupQueue.Dequeue();
-                Destroy(popup);
-                UpdatePopupPositions();
+                cg.alpha = 0f;
+
+                // Remove from queue and destroy
+                if (_popupQueue.Contains(popup))
+                {
+                    // Create a new queue without the destroyed popup
+                    var newQueue = new Queue<GameObject>();
+                    foreach (var item in _popupQueue)
+                    {
+                        if (item != popup && item != null)
+                            newQueue.Enqueue(item);
+                    }
+                    _popupQueue.Clear();
+                    foreach (var item in newQueue)
+                        _popupQueue.Enqueue(item);
+
+                    Destroy(popup);
+                    UpdatePopupPositions();
+                }
             }
         }
 
         private void UpdatePopupPositions()
         {
             int index = 0;
+
+            // First clean up any null references in the queue
+            var validPopups = new List<GameObject>();
             foreach (GameObject popup in _popupQueue)
             {
-                RectTransform rt = popup.GetComponent<RectTransform>();
-                if (rt != null)
-                    rt.anchoredPosition = new Vector2(0f, index * Spacing);
+                if (popup != null)
+                    validPopups.Add(popup);
+            }
+
+            _popupQueue.Clear();
+            foreach (var popup in validPopups)
+                _popupQueue.Enqueue(popup);
+
+            // Update positions
+            foreach (GameObject popup in _popupQueue)
+            {
+                if (popup != null)
+                {
+                    RectTransform rt = popup.GetComponent<RectTransform>();
+                    if (rt != null)
+                        rt.anchoredPosition = new Vector2(0f, index * Spacing);
+                }
                 index++;
             }
 
+            // Remove oldest popups if exceeding max count
             while (_popupQueue.Count > MaxPopups)
             {
                 GameObject oldest = _popupQueue.Dequeue();
-                Destroy(oldest);
+                if (oldest != null)
+                    Destroy(oldest);
             }
         }
     }
