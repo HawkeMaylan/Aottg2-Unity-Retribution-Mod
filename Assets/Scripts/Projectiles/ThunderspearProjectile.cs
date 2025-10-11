@@ -1,4 +1,4 @@
-﻿using Settings;
+using Settings;
 using UnityEngine;
 using Photon;
 using Characters;
@@ -76,6 +76,17 @@ namespace Projectiles
         {
             if (photonView.IsMine && !Disabled)
             {
+                // Check if we're in ThunderspearPVP mode and BombCollision (bouncy) is enabled
+                if (SettingsManager.InGameCurrent.Misc.ThunderspearPVP.Value && SettingsManager.AbilitySettings.BombCollision.Value)
+                {
+                    // Bouncing behavior - reflect velocity off the collision surface
+                    Vector3 reflectedVelocity = Vector3.Reflect(_rigidbody.velocity, collision.contacts[0].normal);
+                    _rigidbody.velocity = reflectedVelocity * 0.8f; // Apply some energy loss on bounce
+                    _velocity = _rigidbody.velocity;
+                    return; // Don't proceed with normal collision logic
+                }
+                
+                // Original collision logic for all other cases
                 _wasImpact = true;
                 _rigidbody.velocity = Vector3.zero;
                 foreach (Collider c in _colliders)
@@ -258,7 +269,7 @@ namespace Projectiles
                         human.GetHit("", 400, "Thunderspear", "");
                     else
                     {
-                        var damage = CalculateDamage();
+                        var damage = CalculateDamage(true);
                         human.GetHit(_owner, damage, "Thunderspear", "");
                         ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
                         ((InGameCamera)SceneLoader.CurrentCamera).TakeSnapshot(human.Cache.Transform.position, damage);
@@ -282,7 +293,7 @@ namespace Projectiles
             return soundPriority;
         }
 
-        int CalculateDamage()
+        int CalculateDamage(bool dmgOverride=false)
         {
             float multiplier = CharacterData.HumanWeaponInfo["Thunderspear"]["DamageMultiplier"].AsFloat;
             if (SettingsManager.InGameCurrent.Misc.ThunderspearPVP.Value)

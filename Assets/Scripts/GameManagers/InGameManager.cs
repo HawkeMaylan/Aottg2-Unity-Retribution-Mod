@@ -218,6 +218,7 @@ namespace GameManagers
 
         public static void LeaveRoom()
         {
+            ChatManager.ResetAllPMState();
             ResetPersistentPlayerProperties();
             if (PhotonNetwork.IsMasterClient)
                 PhotonNetwork.DestroyAll();
@@ -234,6 +235,11 @@ namespace GameManagers
         {
             if (PhotonNetwork.IsConnected)
             {
+                var chatPanel = UIManager.CurrentMenu?.GetComponent<InGameMenu>()?.ChatPanel;
+                if (chatPanel != null)
+                {
+                    chatPanel.ResetPMState();
+                }
                 LeaveRoom();
                 MainMenuGameManager.JustLeftRoom = true;
             }
@@ -245,6 +251,10 @@ namespace GameManagers
             ResetPlayerInfo();
             ResetPersistentPlayerProperties();
             _needSendPlayerInfo = true;
+            
+            // Add this line to sync PM state
+            ChatManager.SyncPMPartnersOnJoin();
+            
             if (PhotonNetwork.OfflineMode)
                 ChatManager.AddLine("Welcome to single player. \nType /help for a list of commands.", ChatTextColor.System);
             else
@@ -336,6 +346,8 @@ namespace GameManagers
                 if (GlobalPause)
                     RPCManager.PhotonView.RPC("PauseGameRPC", player, new object[0]);
             }
+            if (ChatManager.HasActivePlayerSuggestions())
+                ChatManager.RefreshPlayerSuggestions();
         }
 
         public void OnNotifyPlayerJoined(Player player)
@@ -346,10 +358,23 @@ namespace GameManagers
                 string line = player.GetCustomProperty(PlayerProperty.Name) + ChatManager.GetColorString(" has joined the room.", ChatTextColor.System);
                 ChatManager.AddLine(line);
             }
+            if (ChatManager.HasActivePlayerSuggestions())
+                ChatManager.RefreshPlayerSuggestions();
         }
 
         public override void OnPlayerLeftRoom(Player player)
         {
+            base.OnPlayerLeftRoom(player);
+            var chatPanel = UIManager.CurrentMenu?.GetComponent<InGameMenu>()?.ChatPanel;
+            if (chatPanel != null)
+            {
+                chatPanel.RemovePMPartner(player);
+                chatPanel.Sync();
+            }
+            if (AllPlayerInfo.ContainsKey(player.ActorNumber))
+            {
+                AllPlayerInfo.Remove(player.ActorNumber);
+            }
             if (SettingsManager.UISettings.JoinNotifications.Value)
             {
                 string line = player.GetCustomProperty(PlayerProperty.Name) + ChatManager.GetColorString(" has left the room.", ChatTextColor.System);
@@ -357,8 +382,6 @@ namespace GameManagers
             }
             if (CustomLogicManager.Evaluator != null)
                 CustomLogicManager.Evaluator.OnPlayerLeave(player);
-
-            // Clear the mute lists for the player that left (only if they are in the lists)
             if (MuteEmote.Contains(player.ActorNumber))
                 MuteEmote.Remove(player.ActorNumber);
             if (MuteText.Contains(player.ActorNumber))
@@ -369,6 +392,8 @@ namespace GameManagers
                 VoiceChatVolumeMultiplier.Remove(player.ActorNumber);
 
             AnticheatManager.ResetVoteKicks(player);
+            if (ChatManager.HasActivePlayerSuggestions())
+                ChatManager.RefreshPlayerSuggestions();
         }
 
         public override void OnMasterClientSwitched(Player newMasterClient)
@@ -387,8 +412,6 @@ namespace GameManagers
             if (data.Length > 1000)
                 return;
             AllPlayerInfo[info.Sender.ActorNumber].DeserializeFromJsonString(StringCompression.Decompress(data));
-            if (AnticheatManager.BanList.Contains(AllPlayerInfo[info.Sender.ActorNumber].Profile.ID.Value))
-                AnticheatManager.KickPlayer(info.Sender, false);
         }
 
         public static void OnGameSettingsRPC(byte[] data, PhotonMessageInfo info)
@@ -822,6 +845,8 @@ namespace GameManagers
                 prefab = CharacterPrefabs.ArmoredShifter;
             else if (type == "Eren")
                 prefab = CharacterPrefabs.ErenShifter;
+            else if (type == "WallColossal")
+                prefab = CharacterPrefabs.WallColossal;
             if (prefab == "")
                 return null;
             var shifter = (BaseShifter)CharacterSpawner.Spawn(prefab, position, rotation);

@@ -1,4 +1,4 @@
-﻿using ApplicationManagers;
+using ApplicationManagers;
 using Cameras;
 using Controllers;
 using CustomLogic;
@@ -65,12 +65,19 @@ namespace Characters
         public Transform MountedTransform;
         public Vector3 MountedPositionOffset;
         public Vector3 MountedRotationOffset;
+        public Vector3 _lastMountedPosition;
+        public Vector3 _mountedVelocity;
         public bool CancelHookLeftKey;
         public bool CancelHookRightKey;
         public bool CancelHookBothKey;
         public bool CanDodge = true;
         public bool IsInvincible = true;
         public float InvincibleTimeLeft;
+
+        public bool CanMountedAttack = false;
+        public bool InMountedCombat = false;
+        public bool IsAttackableState;
+        public bool IsRefillable;
         private object[] _lastMountMessage = null;
         private int _lastCarryRPCSender = -1;
         private float _grabIFrames = 0f;
@@ -137,6 +144,7 @@ namespace Characters
         private float _hookHumanConstantTimeLeft;
         private bool _isReelingOut;
         private Dictionary<BaseTitan, float> _lastNapeHitTimes = new Dictionary<BaseTitan, float>();
+        private Material _originalSmokeMaterial;
 
         ///Stamina Addons
         public float SprintSpeedMultiplier = 1.3f;
@@ -369,12 +377,12 @@ namespace Characters
                     Mount(mapObject, transformName, positionOffset, rotationOffset);
                 }
 
-        public void Mount(MapObject mapObject, Vector3 positionOffset, Vector3 rotationOffset)
+        public void Mount(MapObject mapObject, Vector3 positionOffset, Vector3 rotationOffset, bool canMountedAttack = false)
         {
-            Mount(mapObject, "", positionOffset, rotationOffset);
+            Mount(mapObject, "", positionOffset, rotationOffset, canMountedAttack);
         }
 
-        public void Mount(MapObject mapObject, string transformName, Vector3 positionOffset, Vector3 rotationOffset)
+        public void Mount(MapObject mapObject, string transformName, Vector3 positionOffset, Vector3 rotationOffset, bool canMountedAttack = false)
         {
             if (MountedTransform != transform)
             {
@@ -385,15 +393,16 @@ namespace Characters
             int scriptId = -100;
             if (mapObject != null)
                 scriptId = mapObject.ScriptObject.Id;
-            _lastMountMessage = new object[] { scriptId, transformName, positionOffset, rotationOffset };
+            _lastMountMessage = new object[] { scriptId, transformName, positionOffset, rotationOffset, canMountedAttack };
             Cache.PhotonView.RPC("MountRPC", RpcTarget.All, _lastMountMessage);
         }
 
         [PunRPC]
-        public void MountRPC(int mapObjectID, string transformName, Vector3 positionOffset, Vector3 rotationOffset, PhotonMessageInfo info)
+        public void MountRPC(int mapObjectID, string transformName, Vector3 positionOffset, Vector3 rotationOffset, bool canMountedAttack, PhotonMessageInfo info)
         {
             if (info.Sender != Cache.PhotonView.Owner)
                 return;
+            CanMountedAttack = canMountedAttack;
             MountState = HumanMountState.MapObject;
             MountedMapObject = null;
             MountedTransform = null;
@@ -429,6 +438,7 @@ namespace Characters
                     MountedTransform = transform;
                     MountedPositionOffset = positionOffset;
                     MountedRotationOffset = rotationOffset;
+                    _lastMountedPosition = MountedTransform.TransformPoint(MountedPositionOffset);
                 }
             }
         }
@@ -436,18 +446,18 @@ namespace Characters
         public void Unmount(bool immediate)
         {
             SetInterpolation(true);
-            if (MountState == HumanMountState.Horse && !immediate)
+            if (MountState != HumanMountState.None && !immediate)
             {
                 PlayAnimation(HumanAnimations.HorseDismount);
-                Cache.Rigidbody.AddForce((((Vector3.up * 10f) - (Cache.Transform.forward * 2f)) - (Cache.Transform.right * 1f)), ForceMode.VelocityChange);
-                MountState = HumanMountState.None;
+                Cache.Rigidbody.AddForce((Vector3.up * 10f) - (Cache.Transform.forward * 2f) - (Cache.Transform.right * 1f), ForceMode.VelocityChange);
             }
             else
             {
-                MountState = HumanMountState.None;
                 Idle();
-                SetTriggerCollider(false);
             }
+            if (MountState == HumanMountState.MapObject)
+                SetTriggerCollider(false);
+            MountState = HumanMountState.None;
             _lastMountMessage = null;
             Cache.PhotonView.RPC("UnmountRPC", RpcTarget.All, new object[0]);
         }
@@ -458,6 +468,7 @@ namespace Characters
             if (info.Sender != Cache.PhotonView.Owner)
                 return;
             MountState = HumanMountState.None;
+            CanMountedAttack = false;
             MountedTransform = null;
             MountedMapObject = null;
         }
@@ -510,7 +521,7 @@ namespace Characters
                 {
                     //The line below was causing problems when dashing away from walls at certain angles.
                     //Removing it fixed that but I'm unsure if it's needed for another situation (didn't notice a difference without it), do uncomment if the case
-                    //Cache.Rigidbody.rotation = _targetRotation;
+                    Cache.Rigidbody.rotation = _targetRotation;
                     CrossFade(HumanAnimations.Dash, 0.1f, 0.1f);
                 }
 
@@ -1029,7 +1040,7 @@ namespace Characters
 
         public bool Refill()
         {
-            if (!Grounded || State != HumanState.Idle)
+            if (!IsRefillable)
                 return false;
             State = HumanState.Refill;
             if (Special is SupplySpecial)
@@ -1044,7 +1055,7 @@ namespace Characters
         }
         public bool SupplySpawnableRefill()
         {
-            if (!Grounded || State != HumanState.Idle)
+            if (!IsRefillable)
                 return false;
             State = HumanState.Refill;
             ToggleSparks(false);
@@ -1133,7 +1144,7 @@ namespace Characters
 
         public bool CanEmote()
         {
-            return !Dead && State != HumanState.Grab && CarryState != HumanCarryState.Carry && State != HumanState.AirDodge && State != HumanState.EmoteAction && State != HumanState.SpecialAttack && MountState == HumanMountState.None
+            return !Dead && State != HumanState.Grab && CarryState != HumanCarryState.Carry && State != HumanState.AirDodge && State != HumanState.EmoteAction && State != HumanState.SpecialAttack && IsAttackableState
                 && State != HumanState.Stun;
         }
 
@@ -1174,6 +1185,20 @@ namespace Characters
         {
             FinishSetup = false;
             Setup.Copy(settings);
+            Setup.Load(Setup.CustomSet, Setup.Weapon, false);
+            Transform smokeTransform = transform.Find("3dmg_smoke");
+            if (smokeTransform != null)
+            {
+                ParticleSystem smokeParticleSystem = smokeTransform.GetComponent<ParticleSystem>();
+                if (smokeParticleSystem != null)
+                {
+                    Renderer smokeRenderer = smokeParticleSystem.GetComponent<Renderer>();
+                    if (smokeRenderer != null && _originalSmokeMaterial != null)
+                    {
+                        smokeRenderer.material = _originalSmokeMaterial;
+                    }
+                }
+            }
             if (IsMine())
             {
                 Cache.PhotonView.RPC("SetupRPC", RpcTarget.All, Setup.CustomSet.SerializeToJsonString(), (int)Setup.Weapon);
@@ -1224,6 +1249,19 @@ namespace Characters
             _inGameManager.RegisterCharacter(this);
             base.Start();
             SetInterpolation(true);
+            Transform smokeTransform = transform.Find("3dmg_smoke");
+            if (smokeTransform != null)
+            {
+                ParticleSystem smokeParticleSystem = smokeTransform.GetComponent<ParticleSystem>();
+                if (smokeParticleSystem != null)
+                {
+                    Renderer smokeRenderer = smokeParticleSystem.GetComponent<Renderer>();
+                    if (smokeRenderer != null && smokeRenderer.sharedMaterial != null)
+                    {
+                        _originalSmokeMaterial = smokeRenderer.sharedMaterial;
+                    }
+                }
+            }
             if (IsMine())
             {
                 InvincibleTimeLeft = SettingsManager.InGameCurrent.Misc.InvincibilityTime.Value;
@@ -1388,7 +1426,9 @@ namespace Characters
         {
             if (IsMine() && !Dead)
             {
-                
+                InMountedCombat = MountState != HumanMountState.None && CanMountedAttack;
+                IsAttackableState = MountState == HumanMountState.None || InMountedCombat;
+                IsRefillable = State == HumanState.Idle && (Grounded || InMountedCombat);
                 _stateTimeLeft -= Time.deltaTime;
                 _dashCooldownLeft -= Time.deltaTime;
                 _reloadCooldownLeft -= Time.deltaTime;
@@ -1424,7 +1464,10 @@ namespace Characters
                     else
                     {
                         Cache.Transform.position = MountedTransform.TransformPoint(MountedPositionOffset);
-                        Cache.Transform.rotation = Quaternion.Euler(MountedTransform.rotation.eulerAngles + MountedRotationOffset);
+                        if (!IsAttackableState || (_state != HumanState.Attack && _state != HumanState.SpecialAttack && _state != HumanState.SpecialAction))
+                        {
+                            Cache.Transform.rotation = Quaternion.Euler(MountedTransform.rotation.eulerAngles + MountedRotationOffset);
+                        }
                     }
                 }
                 else if (MountState == HumanMountState.Horse)
@@ -1434,14 +1477,36 @@ namespace Characters
                     else
                     {
                         Cache.Transform.position = Horse.Cache.Transform.position + Vector3.up * 1.95f;
-                        Cache.Transform.rotation = Horse.Cache.Transform.rotation;
+                        if (!IsAttackableState || (_state != HumanState.Attack && _state != HumanState.SpecialAttack && _state != HumanState.SpecialAction))
+                        {
+                            Cache.Transform.rotation = Horse.Cache.Transform.rotation;
+                        }
                     }
                 }
-                else if (State == HumanState.Attack)
+
+                if (State == HumanState.Attack)
                 {
                     if (Setup.Weapon == HumanWeapon.Blade)
                     {
                         var bladeWeapon = (BladeWeapon)Weapon;
+                        if (MountState != HumanMountState.None && IsAttackableState)
+                        {
+                            // This allows bladers to attack enemies on a different plane
+                            var target = GetAimPoint();
+                            var start = Cache.Transform.position + Cache.Transform.up * 0.8f;
+                            var direction = (target - start).normalized;
+                            var forward = MountedTransform.forward;
+                            float maxAngle = 70f;
+                            float angle = Vector3.Angle(forward, direction);
+
+                            if (angle > maxAngle)
+                            {
+                                // Rotate the direction vector to the legal range
+                                Quaternion rotation = Quaternion.AngleAxis(maxAngle * Mathf.Sign(Vector3.SignedAngle(forward, direction, Vector3.up)), Vector3.up);
+                                direction = rotation * forward;
+                            }
+                            Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 10.0f);
+                        }
                         if (!bladeWeapon.IsActive)
                             _attackButtonRelease = true;
                         if (!_attackRelease)
@@ -1696,6 +1761,8 @@ namespace Characters
 
         protected override void FixedUpdate()
         {
+            HookLeft.FixedUpdateMock();
+            HookRight.FixedUpdateMock();
             base.FixedUpdate();
             if (IsMine())
             {
@@ -1721,15 +1788,27 @@ namespace Characters
                 if (MountState == HumanMountState.Horse)
                 {
                     Cache.Rigidbody.velocity = Horse.Cache.Rigidbody.velocity;
-                    return;
+                    if (!IsAttackableState)
+                    {
+                        return;
+                    }
                 }
                 if (MountState == HumanMountState.MapObject)
                 {
-                    Cache.Rigidbody.velocity = Vector3.zero;
-                    ToggleSparks(false);
-                    if (State != HumanState.Idle)
-                        Idle();
-                    return;
+                    if (!IsAttackableState)
+                    {
+                        Cache.Rigidbody.velocity = Vector3.zero;
+                        ToggleSparks(false);
+                        if (State != HumanState.Idle)
+                            Idle();
+                        return;
+                    }
+                    else
+                    {
+                        var currentMountedPosition = MountedTransform.TransformPoint(MountedPositionOffset);
+                        Cache.Rigidbody.velocity = (currentMountedPosition - _lastMountedPosition) / Time.deltaTime;
+                        _lastMountedPosition = currentMountedPosition;
+                    }
                 }
                 if (_hookHuman != null && !_hookHuman.Dead)
                 {
@@ -1754,7 +1833,10 @@ namespace Characters
                 {
                     rotationSpeed = 10f;
                 }
-                Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, _targetRotation, Time.deltaTime * rotationSpeed);
+                if (MountState == HumanMountState.None)
+                {
+                    Cache.Transform.rotation = Quaternion.Lerp(Cache.Transform.rotation, _targetRotation, Time.deltaTime * rotationSpeed);
+                }
                 bool pivotLeft = FixedUpdateLaunch(true);
                 bool pivotRight = FixedUpdateLaunch(false);
                 bool pivot = pivotLeft || pivotRight;
@@ -1868,6 +1950,8 @@ namespace Characters
                         Cache.Transform.position = Horse.Cache.Transform.position + Vector3.up * 1.95f;
                         Cache.Transform.rotation = Horse.Cache.Transform.rotation;
                         MountState = HumanMountState.Horse;
+                        MountedTransform = Horse.Cache.Transform;
+                        CanMountedAttack = SettingsManager.InGameCurrent.Misc.HorsebackCombat.Value;
                         SetInterpolation(false);
                         if (!Animation.IsPlaying(HumanAnimations.HorseIdle))
                             CrossFade(HumanAnimations.HorseIdle, 0.1f);
@@ -2108,6 +2192,19 @@ namespace Characters
                     windEmission.enabled = false;
                 FixedUpdateSetHookedDirection();
                 FixedUpdateBodyLean();
+
+                if (SettingsManager.InGameCurrent.Misc.RealismMode.Value)
+                {
+                    float currentSpeed = Cache.Rigidbody.velocity.magnitude;
+                    float maxSpeed = SettingsManager.InGameCurrent.Misc.RealismMaxSpeed.Value;
+                    float dampingStrength = 0.9f;
+                    if (currentSpeed > maxSpeed)
+                    {
+                        Vector3 dampingForce = -(Cache.Rigidbody.velocity.normalized * (currentSpeed - maxSpeed)) * dampingStrength;
+                        Cache.Rigidbody.AddForce(dampingForce, ForceMode.Acceleration);
+                    }
+                }
+
                 if (_useFixedUpdateClipping)
                 {
                     FixedUpdateClippingCheck();
@@ -2267,8 +2364,11 @@ namespace Characters
                 if (MountState == HumanMountState.None)
                 {
                     LateUpdateTilt();
-                    LateUpdateGun();
                     LateUpdateReelOut();
+                }
+                if (IsAttackableState)
+                {
+                    LateUpdateGun();
                 }
                 bool validState = State == HumanState.Idle || State == HumanState.Run || State == HumanState.Slide;
                 if (Grounded && validState && !_cameraFPS)
@@ -2334,34 +2434,88 @@ namespace Characters
                 if (((SwitchbackSpecial)Special).RegisterCollision(this, collision, _lastVelocity.magnitude * 0.7f))
                     return;
             }
+            bool hitTitan = collision.transform.root.gameObject.layer == PhysicsLayer.TitanMovebox;
             if (_lastVelocity.magnitude > 0f)
             {
-                float angle = Mathf.Abs(Vector3.Angle(velocity, _lastVelocity));
-                float speedMultiplier = Mathf.Max(1f - (angle * 1.5f * 0.01f), 0f);
-                float speed = _lastVelocity.magnitude * speedMultiplier;
-                Cache.Rigidbody.velocity = velocity.normalized * speed;
+                // Get the contact point normal
+                ContactPoint theContact = collision.contacts[0];
+                Vector3 collisionNormal = theContact.normal;
+
+                // Calculate the angle between the velocity and the collision normal
+                float hitAngle = Vector3.Angle(_lastVelocity, -collisionNormal);
+                float angleThreshold = 45;
+                float frictionThreshold = 25;
+
+                if (hitTitan)
+                {
+                    float maxAngle = 0;
+                    float minAngle = 0;
+                    float newAngle = 0;
+                    foreach (ContactPoint contact in collision.contacts)
+                    {
+                        newAngle = Vector3.Angle(_lastVelocity, -contact.normal);
+                        newAngle = Mathf.Abs(newAngle - 90f);
+
+                        maxAngle = Mathf.Max(maxAngle, newAngle);
+                        minAngle = Mathf.Min(minAngle, newAngle);
+                        if (newAngle < angleThreshold)
+                        {
+                            // Project velocity along the surface to preserve momentum
+                            Vector3 projected = Vector3.ProjectOnPlane(_lastVelocity, contact.normal);
+                            Cache.Rigidbody.velocity = Vector3.Lerp(_lastVelocity, projected, 0.5f);
+                        }
+                    }
+
+                    // Map velocity on a scale from 0-500 into 0-1
+                    if (minAngle > frictionThreshold)
+                    {
+                        // Testing optional friction under 1k it should apply the max friction possible and reduce it to nothing towards the upper limit.
+                        float speedFactor = Util.ClampedLinearMap(Cache.Rigidbody.velocity.magnitude, 0, 250, 0, 1);
+                        float speedMultiplier = Mathf.Max(1f - (minAngle * 0.005f), 0f);    // Friction value 1-0.5
+                        float appliedMultiplier = Mathf.Lerp(speedMultiplier, 1f, speedFactor);
+                        float speed = _lastVelocity.magnitude * appliedMultiplier;
+                        Cache.Rigidbody.velocity = velocity.normalized * speed;
+                    }
+                }
+                else
+                {
+                    float angle = Mathf.Abs(Vector3.Angle(velocity, _lastVelocity));
+                    float speedMultiplier = Mathf.Max(1f - (angle * 1.5f * 0.01f), 0f);
+                    float speed = _lastVelocity.magnitude * speedMultiplier;
+                    Cache.Rigidbody.velocity = velocity.normalized * speed;
+                }
+
                 float speedDiff = _lastVelocity.magnitude - Cache.Rigidbody.velocity.magnitude;
-                if (SettingsManager.InGameCurrent.Misc.RealismMode.Value && speedDiff > RealismDeathVelocity)
+                if (SettingsManager.InGameCurrent.Misc.RealismMode.Value && speedDiff > SettingsManager.InGameCurrent.Misc.RealismImpactThreshold.Value)
                     GetHit("Impact", (int)speedDiff, "Impact", "");
             }
-            var titan = collision.transform.root.GetComponent<BaseTitan>();
-            if (titan != null && !titan.AI)
+            if (hitTitan)
             {
-                var normal = collision.contacts[0].normal;
-                var titanVel = titan.GetVelocity();
-                if (titanVel.magnitude > 0f && Vector3.Angle(titanVel, normal) < 70f)
+                var titan = collision.transform.root.GetComponent<BaseTitan>();
+                if (titan != null && !titan.AI)
                 {
-                    Cache.Rigidbody.velocity += titanVel;
+                    var normal = collision.contacts[0].normal;
+                    var titanVel = titan.GetVelocity();
+                    if (titanVel.magnitude > 0f && Vector3.Angle(titanVel, normal) < 70f)
+                    {
+                        Cache.Rigidbody.velocity += titanVel;
+                    }
                 }
             }
         }
 
         protected void OnCollisionStay(Collision collision)
         {
-            if (!Grounded && Cache.Rigidbody.velocity.magnitude >= 15f && !Animation.IsPlaying(HumanAnimations.WallRun) && collision.gameObject.layer != PhysicsLayer.MapObjectTitans)
+            bool hitTitan = collision.transform.root.gameObject.layer == PhysicsLayer.TitanMovebox;
+            if (!Grounded && Cache.Rigidbody.velocity.magnitude >= 15f && !Animation.IsPlaying(HumanAnimations.WallRun) && !hitTitan)
             {
-                _wallSlide = true;
-                _wallSlideGround = collision.GetContact(0).normal.normalized;
+                if (SettingsManager.InputSettings.Human.WallSlideAttach.Value == (int)WallSlideAttachMethod.Auto ||
+                    (SettingsManager.InputSettings.Human.WallSlideAttach.Value == (int)WallSlideAttachMethod.Strafe
+                    && IsPressDirectionRelativeToWall(-collision.GetContact(0).normal.normalized, 0.5f)))
+                {
+                    _wallSlide = true;
+                    _wallSlideGround = collision.GetContact(0).normal.normalized;
+                }
             }
             if (Special != null && Special is SwitchbackSpecial)
             {
@@ -2491,7 +2645,7 @@ namespace Characters
             float reelAxis = GetReelAxis();
             if (reelAxis > 0f)
             {
-                if (SettingsManager.InGameCurrent.Misc.RealismMode.Value && Vector3.Distance(Cache.Transform.position, position) > RealismMaxReel)
+                if (SettingsManager.InGameCurrent.Misc.RealismMode.Value && Vector3.Distance(Cache.Transform.position, position) > SettingsManager.InGameCurrent.Misc.RealismMaxReel.Value)
                     reelAxis = 0f;
             }
             float reel = Mathf.Clamp(reelAxis, -0.8f, 0.8f) + 1f;
@@ -2509,6 +2663,7 @@ namespace Characters
             }
             _currentVelocity = v * newSpeed;
             Cache.Rigidbody.velocity = _currentVelocity;
+            //  Cache.Rigidbody.AddForce(-Cache.Rigidbody.GetAccumulatedForce()); - potential change for tg1 parity.
         }
 
         private bool IsStock(bool pivot)
@@ -2962,20 +3117,17 @@ namespace Characters
                 var tsInfo = CharacterData.HumanWeaponInfo["Thunderspear"];
                 if (SettingsManager.InGameCurrent.Misc.ThunderspearPVP.Value)
                 {
+
+
                     int radiusStat = SettingsManager.AbilitySettings.BombRadius.Value;
                     int cdStat = SettingsManager.AbilitySettings.BombCooldown.Value;
                     int speedStat = SettingsManager.AbilitySettings.BombSpeed.Value;
                     int rangeStat = SettingsManager.AbilitySettings.BombRange.Value;
-                    if (radiusStat + cdStat + speedStat + rangeStat > 16)
-                    {
-                        radiusStat = speedStat = 6;
-                        rangeStat = 3;
-                        cdStat = 1;
-                    }
-                    float travelTime = ((rangeStat * 60f) + 200f) / ((speedStat * 60f) + 200f);
-                    float radius = (radiusStat * 4f) + 20f;
-                    float cd = ((cdStat + 4) * -0.4f) + 5f;
-                    float speed = (speedStat * 60f) + 200f;
+                    float range = BombUtil.GetBombRange(rangeStat, 0f, 4f, 7f);
+                    float speed = BombUtil.GetBombSpeed(speedStat, 3f, 10.5f, 10.5f);
+                    float travelTime = range / speed;
+                    float radius = BombUtil.GetBombRadius(radiusStat, 5.40f, 7.4f, 7f);
+                    float cd = BombUtil.GetBombCooldown(cdStat, 4f, 7f, 7f);
                     Weapon = new ThunderspearWeapon(this, -1, -1, cd, radius, speed, travelTime, 0f, tsInfo);
                     if (CustomLogicManager.Evaluator.CurrentTime > 10f)
                         Weapon.SetCooldownLeft(5f);
@@ -3271,20 +3423,128 @@ namespace Characters
             {
                 if (SettingsManager.CustomSkinSettings.Human.SkinsEnabled.Value)
                 {
-                    HumanCustomSkinSet set = (HumanCustomSkinSet)SettingsManager.CustomSkinSettings.Human.GetSelectedSet();
-                    string url = string.Join(",", new string[] { set.Horse.Value, set.Hair.Value, set.Eye.Value, set.Glass.Value, set.Face.Value,
+                    try
+                    {
+                        bool useGlobalOverrides = SettingsManager.CustomSkinSettings.Human.GlobalSkinOverridesEnabled.Value;
+                        bool usePresetSkins = SettingsManager.CustomSkinSettings.Human.SetSpecificSkinsEnabled.Value;
+                        HumanCustomSet presetSet = null;
+                        if (Setup?.CustomSet != null)
+                        {
+                            presetSet = Setup.CustomSet;
+                        }
+                        HumanCustomSkinSet globalSet = null;
+                        if (useGlobalOverrides)
+                        {
+                            int globalPresetIndex = SettingsManager.CustomSkinSettings.Human.LastGlobalPresetIndex.Value;
+                            var allSets = SettingsManager.CustomSkinSettings.Human.GetSets().GetItems();
+                            if (globalPresetIndex >= 0 && globalPresetIndex < allSets.Count)
+                            {
+                                globalSet = (HumanCustomSkinSet)allSets[globalPresetIndex];
+                            }
+                        }
+                        string GetSkinValue(string globalValue, string presetValue)
+                        {
+                            if (usePresetSkins && presetSet != null)
+                            {
+                                if (useGlobalOverrides && globalSet != null && !string.IsNullOrEmpty(globalValue))
+                                {
+                                    return globalValue;
+                                }
+                                if (!string.IsNullOrEmpty(presetValue))
+                                {
+                                    return presetValue;
+                                }
+                            }
+                            else if (useGlobalOverrides && globalSet != null)
+                            {
+                                if (!string.IsNullOrEmpty(globalValue))
+                                {
+                                    return globalValue;
+                                }
+                            }
+                            else if (usePresetSkins && presetSet != null && !string.IsNullOrEmpty(presetValue))
+                            {
+                                return presetValue;
+                            }
+                            return string.Empty;
+                        }
+                        float GetFloatValue(float globalValue, float presetValue)
+                        {
+                            if (usePresetSkins && presetSet != null)
+                            {
+                                if (useGlobalOverrides && globalSet != null)
+                                {
+                                    return globalValue;
+                                }
+                                return presetValue;
+                            }
+                            else if (useGlobalOverrides && globalSet != null)
+                            {
+                                if (presetSet != null && Math.Abs(globalValue - presetValue) < 0.001f)
+                                {
+                                    return 1f;
+                                }
+                                return globalValue;
+                            }
+                            else if (usePresetSkins && presetSet != null)
+                            {
+                                return presetValue;
+                            }
+                            return 1f;
+                        }
+                        string[] skinUrls = new string[] {
+                            GetSkinValue(globalSet?.Horse.Value, presetSet?.SkinHorse.Value),
+                            GetSkinValue(globalSet?.Hair.Value, presetSet?.SkinHair.Value),
+                            GetSkinValue(globalSet?.Eye.Value, presetSet?.SkinEye.Value),
+                            GetSkinValue(globalSet?.Glass.Value, presetSet?.SkinGlass.Value),
+                            GetSkinValue(globalSet?.Face.Value, presetSet?.SkinFace.Value),
+                            GetSkinValue(globalSet?.Skin.Value, presetSet?.SkinSkin.Value),
+                            GetSkinValue(globalSet?.Costume.Value, presetSet?.SkinCostume.Value),
+                            GetSkinValue(globalSet?.Logo.Value, presetSet?.SkinLogo.Value),
+                            GetSkinValue(globalSet?.GearL.Value, presetSet?.SkinGearL.Value),
+                            GetSkinValue(globalSet?.GearR.Value, presetSet?.SkinGearR.Value),
+                            GetSkinValue(globalSet?.Gas.Value, presetSet?.SkinGas.Value),
+                            GetSkinValue(globalSet?.Hoodie.Value, presetSet?.SkinHoodie.Value),
+                            GetSkinValue(globalSet?.WeaponTrail.Value, presetSet?.SkinWeaponTrail.Value),
+                            GetSkinValue(globalSet?.ThunderspearL.Value, presetSet?.SkinThunderspearL.Value),
+                            GetSkinValue(globalSet?.ThunderspearR.Value, presetSet?.SkinThunderspearR.Value),
+                            GetFloatValue(globalSet?.HookLTiling.Value ?? 1f, presetSet?.SkinHookLTiling.Value ?? 1f).ToString(),
+                            GetSkinValue(globalSet?.HookL.Value, presetSet?.SkinHookL.Value),
+                            GetFloatValue(globalSet?.HookRTiling.Value ?? 1f, presetSet?.SkinHookRTiling.Value ?? 1f).ToString(),
+                            GetSkinValue(globalSet?.HookR.Value, presetSet?.SkinHookR.Value),
+                            GetSkinValue(globalSet?.Hat.Value, presetSet?.SkinHat.Value),
+                            GetSkinValue(globalSet?.Head.Value, presetSet?.SkinHead.Value),
+                            GetSkinValue(globalSet?.Back.Value, presetSet?.SkinBack.Value)
+                        };
+                        string url = string.Join(",", skinUrls);
+                        int viewID = -1;
+                        if (Horse != null)
+                        {
+                            viewID = Horse.gameObject.GetPhotonView().ViewID;
+                        }
+                        if (player == null)
+                            Cache.PhotonView.RPC("LoadSkinRPC", RpcTarget.All, new object[] { viewID, url });
+                        else
+                            Cache.PhotonView.RPC("LoadSkinRPC", player, new object[] { viewID, url });
+                    }
+                    catch (System.Exception ex)
+                    {
+                        UnityEngine.Debug.LogError("Failed to load skin: " + ex.Message);
+                        HumanCustomSkinSet set = (HumanCustomSkinSet)SettingsManager.CustomSkinSettings.Human.GetSelectedSet();
+                        string url = string.Join(",", new string[] { set.Horse.Value, set.Hair.Value, set.Eye.Value, set.Glass.Value, set.Face.Value,
                 set.Skin.Value, set.Costume.Value, set.Logo.Value, set.GearL.Value, set.GearR.Value, set.Gas.Value, set.Hoodie.Value,
                     set.WeaponTrail.Value, set.ThunderspearL.Value, set.ThunderspearR.Value, set.HookLTiling.Value.ToString(), set.HookL.Value,
                     set.HookRTiling.Value.ToString(), set.HookR.Value, set.Hat.Value, set.Head.Value, set.Back.Value });
-                    int viewID = -1;
-                    if (Horse != null)
-                    {
-                        viewID = Horse.gameObject.GetPhotonView().ViewID;
+                        int viewID = -1;
+                        if (Horse != null)
+                        {
+                            viewID = Horse.gameObject.GetPhotonView().ViewID;
+                        }
+                        if (player == null)
+                            Cache.PhotonView.RPC("LoadSkinRPC", RpcTarget.All, new object[] { viewID, url });
+                        else
+                            Cache.PhotonView.RPC("LoadSkinRPC", player, new object[] { viewID, url });
                     }
-                    if (player == null)
-                        Cache.PhotonView.RPC("LoadSkinRPC", RpcTarget.All, new object[] { viewID, url });
-                    else
-                        Cache.PhotonView.RPC("LoadSkinRPC", player, new object[] { viewID, url });
                 }
                 else
                     _customSkinLoader.Finished = true;
@@ -3398,10 +3658,10 @@ namespace Characters
                 _launchRight = true;
                 _launchRightTime = 0f;
             }
-            if (State == HumanState.Grab || State == HumanState.Reload || MountState == HumanMountState.MapObject
-                || State == HumanState.Stun)
+            // There is no need to judge the mountState of human, whether hookable is desiced by controller
+            if (State == HumanState.Grab || State == HumanState.Reload || State == HumanState.Stun)
                 return;
-            if (MountState == HumanMountState.Horse)
+            if (MountState != HumanMountState.None)
                 Unmount(true);
             if (CarryState == HumanCarryState.Carry)
                 Cache.PhotonView.RPC("UncarryRPC", RpcTarget.All, new object[0]);
@@ -3615,7 +3875,7 @@ namespace Characters
 
         public void StartBladeSwing()
         {
-            if (!Grounded && (HookLeft.IsHooked() || HookRight.IsHooked()))
+            if (!Grounded && (HookLeft.IsHooked() || HookRight.IsHooked() || MountState != HumanMountState.None))
             {
                 if (SettingsManager.InputSettings.General.Left.GetKey())
                     AttackAnimation = (UnityEngine.Random.Range(0, 100) >= 50) ? HumanAnimations.Attack1HookL1 : HumanAnimations.Attack1HookL2;
@@ -3720,12 +3980,16 @@ namespace Characters
             return nearestHuman;
         }
 
-        private void FalseAttack()
+        public void FalseAttack()
         {
             if (Setup.Weapon == HumanWeapon.AHSS || Setup.Weapon == HumanWeapon.Thunderspear || Setup.Weapon == HumanWeapon.APG)
             {
                 if (!_attackRelease)
                     _attackRelease = true;
+                if (Special is StockSpecial)
+                {
+                    ContinueAnimation();
+                }
             }
             else
             {

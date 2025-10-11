@@ -80,8 +80,7 @@ namespace Characters
         {
             if (!Disabled && !_photonView.IsMine)
             {
-                // Check if mounted by ViewID
-                if (_mountedParentViewID.HasValue)
+                if (_human.MountState == HumanMountState.MapObject && !_human.CanMountedAttack && _human.MountedTransform != null)
                 {
                     PhotonView mountedPV = PhotonView.Find(_mountedParentViewID.Value);
                     if (mountedPV != null)
@@ -110,8 +109,15 @@ namespace Characters
 
                 if (_timeSinceLastMessage < MaxPredictionTime)
                 {
-                    _correctPosition += _correctVelocity * Time.deltaTime;
-                    _timeSinceLastMessage += Time.deltaTime;
+                    _transform.position = Vector3.Lerp(_transform.position, _correctPosition, Time.deltaTime * SmoothingDelay);
+                    _transform.rotation = Quaternion.Lerp(_transform.rotation, _correctRotation, Time.deltaTime * SmoothingDelay);
+                    if (_human.BackHuman != null)
+                        _human.CarryVelocity = _correctVelocity;
+                    if (_timeSinceLastMessage < MaxPredictionTime)
+                    {
+                        _correctPosition += _correctVelocity * Time.deltaTime;
+                        _timeSinceLastMessage += Time.deltaTime;
+                    }
                 }
             }
         }
