@@ -5,6 +5,9 @@ using Characters;
 using System.Collections;
 using GameManagers;
 using UI;
+using Photon.Realtime;
+using System.IO;
+using System.Linq;
 
 public class BuildSystem : MonoBehaviourPunCallbacks
 {
@@ -46,13 +49,67 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     private Collider[] _colliderCache = new Collider[32];
     private List<Renderer> _rendererCache = new List<Renderer>(16);
 
+    // Build tracking system
+    [System.Serializable]
+    public class BuildableObjectData
+    {
+        public string prefabName;
+        public Vector3 position;
+        public Quaternion rotation;
+        public int viewId;
+        public string ownerId;
+        public double timestamp;
+    }
+
+    [System.Serializable]
+    public class BuildableObjectsCollection
+    {
+        public List<BuildableObjectData> objects = new List<BuildableObjectData>();
+    }
+
+    private static List<BuildableObjectData> _buildableObjects = new List<BuildableObjectData>();
+    private static Dictionary<int, BuildableObjectData> _buildableObjectsByViewId = new Dictionary<int, BuildableObjectData>();
+
     private IEnumerator Start()
     {
         // Just load prefabs and initialize UI, don't search for inventory yet
         LoadBuildablePrefabs();
         InitializeRadialMenu();
+
+        // Register for master client changes
+        PhotonNetwork.AddCallbackTarget(this);
+
         Debug.Log("BuildSystem: Initialized - waiting for build attempt to find inventory");
         yield break;
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        Debug.Log($"Master client switched to: {newMasterClient.ActorNumber}");
+
+        // If we become the new master client, we need to restore all buildables
+        if (PhotonNetwork.IsMasterClient)
+        {
+            StartCoroutine(RestoreBuildablesForNewMaster());
+        }
+    }
+
+    private IEnumerator RestoreBuildablesForNewMaster()
+    {
+        yield return new WaitForSeconds(1f); // Wait for scene to stabilize
+
+        Debug.Log("New master client restoring buildables...");
+
+        // Clear existing buildables (in case any were orphaned)
+        ClearAllBuildables();
+
+        // Restore from our saved data
+        foreach (var buildData in _buildableObjects)
+        {
+            yield return StartCoroutine(InstantiateBuildableForAll(buildData));
+        }
+
+        Debug.Log($"Restored {_buildableObjects.Count} buildables as new master");
     }
 
     private bool FindLocalPlayerInventory()
@@ -427,19 +484,244 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             _playerInventory.SetItemCount(cost.itemName, _playerInventory.GetItemCount(cost.itemName) - cost.amount);
         }
 
-        // 5. Spawn object for ALL players (but only local player pays)
-        PhotonNetwork.Instantiate(
-            "Buildables/" + buildablePrefabs[currentBuildableIndex].name,
-            currentPos,
-            currentPreview.transform.rotation
-        );
+        // 5. Create build data
+        BuildableObjectData buildData = new BuildableObjectData
+        {
+            prefabName = buildablePrefabs[currentBuildableIndex].name,
+            position = currentPos,
+            rotation = currentPreview.transform.rotation,
+            ownerId = PhotonNetwork.LocalPlayer.UserId,
+            timestamp = PhotonNetwork.Time
+        };
 
-        // 6. Local effects
+        // 6. Request master client to spawn the object
+        if (PhotonNetwork.IsMasterClient)
+        {
+            // We are master client, spawn directly
+            StartCoroutine(InstantiateBuildableForAll(buildData));
+        }
+        else
+        {
+            // Request master client to spawn
+            photonView.RPC("RequestBuildObject", RpcTarget.MasterClient, buildData);
+        }
+
+        // 7. Local effects
         if (_currentHelper.buildParticleEffectPrefab != null)
             SpawnBuildParticles(_currentHelper);
 
         CleanupPreview();
         CreatePreview();
+    }
+
+    [PunRPC]
+    private void RequestBuildObject(BuildableObjectData buildData, PhotonMessageInfo info)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        // Verify the request came from a valid player
+        if (info.Sender == null) return;
+
+        Debug.Log($"Master client received build request from {info.Sender.ActorNumber}");
+        StartCoroutine(InstantiateBuildableForAll(buildData));
+    }
+
+    private IEnumerator InstantiateBuildableForAll(BuildableObjectData buildData)
+    {
+        string prefabPath = "Buildables/" + buildData.prefabName;
+
+        // Instantiate the object
+        GameObject builtObject = PhotonNetwork.InstantiateRoomObject(prefabPath, buildData.position, buildData.rotation);
+
+        if (builtObject != null)
+        {
+            PhotonView photonView = builtObject.GetComponent<PhotonView>();
+            if (photonView != null)
+            {
+                // Store the PhotonView ID for tracking
+                buildData.viewId = photonView.ViewID;
+
+                // Add to our tracking list if not already there
+                if (!_buildableObjects.Exists(b => b.viewId == buildData.viewId))
+                {
+                    _buildableObjects.Add(buildData);
+                    _buildableObjectsByViewId[buildData.viewId] = buildData;
+                    Debug.Log($"Added buildable to tracking: {buildData.prefabName} (ViewID: {buildData.viewId})");
+                }
+
+                // Add build tracking component
+                BuildableTracker tracker = builtObject.AddComponent<BuildableTracker>();
+                tracker.Initialize(buildData.prefabName, buildData.viewId);
+
+                // Sync the build data to all clients
+                photonView.RPC("SyncBuildableData", RpcTarget.OthersBuffered, buildData);
+            }
+        }
+
+        yield return null;
+    }
+
+    [PunRPC]
+    private void SyncBuildableData(BuildableObjectData buildData, PhotonMessageInfo info)
+    {
+        if (!info.Sender.IsMasterClient) return;
+
+        // Only process if this came from master client
+        if (!_buildableObjects.Exists(b => b.viewId == buildData.viewId))
+        {
+            _buildableObjects.Add(buildData);
+            _buildableObjectsByViewId[buildData.viewId] = buildData;
+            Debug.Log($"Received sync buildable: {buildData.prefabName} from master");
+        }
+    }
+
+    // JSON Saving/Loading Methods
+    public void SaveBuildablesToJson(string filePath = "buildables_save.json")
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            Debug.LogWarning("Only master client can save buildables");
+            return;
+        }
+
+        BuildableObjectsCollection collection = new BuildableObjectsCollection();
+        collection.objects = new List<BuildableObjectData>(_buildableObjects);
+
+        string json = JsonUtility.ToJson(collection, true);
+        string fullPath = Path.Combine(Application.persistentDataPath, filePath);
+        File.WriteAllText(fullPath, json);
+
+        Debug.Log($"Saved {_buildableObjects.Count} buildables to JSON at: {fullPath}");
+
+        // Show chat message using the static method that exists
+        AddChatMessage($"[System] Saved {_buildableObjects.Count} buildables to file");
+    }
+
+    public void LoadBuildablesFromJson(string filePath = "buildables_save.json")
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            Debug.LogWarning("Only master client can load buildables");
+            return;
+        }
+
+        string fullPath = Path.Combine(Application.persistentDataPath, filePath);
+        if (!File.Exists(fullPath))
+        {
+            Debug.LogWarning($"No save file found at {fullPath}");
+            AddChatMessage($"[System] No save file found at {filePath}");
+            return;
+        }
+
+        string json = File.ReadAllText(fullPath);
+        BuildableObjectsCollection collection = JsonUtility.FromJson<BuildableObjectsCollection>(json);
+
+        // Clear existing buildables
+        ClearAllBuildables();
+
+        // Load new ones
+        foreach (var buildData in collection.objects)
+        {
+            StartCoroutine(InstantiateBuildableForAll(buildData));
+        }
+
+        Debug.Log($"Loaded {collection.objects.Count} buildables from JSON");
+        AddChatMessage($"[System] Loaded {collection.objects.Count} buildables from file");
+    }
+
+    [PunRPC]
+    private void ClearAllBuildablesRPC(PhotonMessageInfo info)
+    {
+        if (!info.Sender.IsMasterClient) return;
+        ClearAllBuildables();
+    }
+
+    private void ClearAllBuildables()
+    {
+        // Find and destroy all buildable objects in scene
+        var buildables = FindObjectsOfType<BuildableTracker>();
+        foreach (var buildable in buildables)
+        {
+            if (buildable.photonView != null && buildable.photonView.IsMine)
+            {
+                PhotonNetwork.Destroy(buildable.gameObject);
+            }
+        }
+        _buildableObjects.Clear();
+        _buildableObjectsByViewId.Clear();
+
+        Debug.Log("Cleared all buildables");
+    }
+
+    public void ClearAllBuildablesMaster()
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        photonView.RPC("ClearAllBuildablesRPC", RpcTarget.AllBuffered);
+        AddChatMessage($"[System] Cleared all buildables");
+    }
+
+    // Safe method to add chat messages
+    private void AddChatMessage(string message)
+    {
+        // Try multiple ways to send chat messages
+        try
+        {
+            // Method 1: Use the static method that exists in your project
+            ChatManager.AddLine(message, ChatTextColor.System);
+            return;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"Failed to send chat message via ChatManager.AddLine: {e.Message}");
+        }
+
+        try
+        {
+            // Method 2: Find ChatManager in scene and use reflection
+            ChatManager chatManager = FindObjectOfType<ChatManager>();
+            if (chatManager != null)
+            {
+                var addLineMethod = chatManager.GetType().GetMethod("AddLine",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static);
+                if (addLineMethod != null)
+                {
+                    addLineMethod.Invoke(null, new object[] { message, ChatTextColor.System });
+                    return;
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"Failed to send chat message via reflection: {e.Message}");
+        }
+
+        // Method 3: Just use debug log as fallback
+        Debug.Log($"CHAT: {message}");
+    }
+
+    // Helper method to get current buildables count
+    public int GetBuildableCount()
+    {
+        return _buildableObjects.Count;
+    }
+
+    // Get all buildable objects data
+    public List<BuildableObjectData> GetAllBuildableData()
+    {
+        return new List<BuildableObjectData>(_buildableObjects);
+    }
+
+    // Remove a specific buildable by view ID
+    public void RemoveBuildable(int viewId)
+    {
+        BuildableObjectData data = _buildableObjects.Find(b => b.viewId == viewId);
+        if (data != null)
+        {
+            _buildableObjects.Remove(data);
+            _buildableObjectsByViewId.Remove(viewId);
+            Debug.Log($"Removed buildable from tracking: {data.prefabName} (ViewID: {viewId})");
+        }
     }
 
     private bool IsLocalPlayer => PhotonNetwork.LocalPlayer != null &&
@@ -544,13 +826,14 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             SetLayerRecursively(child.gameObject, layer);
         }
     }
-    
+
     public void SetPlayerInventory(HumanInventory inventory)
     {
         _playerInventory = inventory;
         _inventorySearchPerformed = true; // Mark as found
         Debug.Log($"BuildSystem: Player inventory set externally to {inventory?.gameObject?.name}");
     }
+
     private void CleanupPreview()
     {
         if (currentPreview != null)

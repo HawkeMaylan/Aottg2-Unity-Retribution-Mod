@@ -20,7 +20,6 @@ public class CustomAssetMenu : MonoBehaviourPun
     private List<GameObject> spawnedAssets = new List<GameObject>();
     private GameObject selectedObject = null;
     private string moveX = "0", moveY = "0", moveZ = "0";
-
     private string moveRotX = "0", moveRotY = "0", moveRotZ = "0";
 
     private List<string> buildablePrefabNames = new List<string>();
@@ -28,7 +27,15 @@ public class CustomAssetMenu : MonoBehaviourPun
     private Vector2 buildableScroll = Vector2.zero;
     private bool buildablesLoaded = false;
 
+    // Build system integration
+    private BuildSystem buildSystem;
+    private string saveFileName = "buildables_save.json";
+    private bool showBuildSystemPanel = true;
 
+    private void Start()
+    {
+        buildSystem = FindObjectOfType<BuildSystem>();
+    }
 
     private void Update()
     {
@@ -42,10 +49,12 @@ public class CustomAssetMenu : MonoBehaviourPun
 
     private void OnGUI()
     {
-        if (!menuOpen) return;
+        if (!menuOpen || !PhotonNetwork.IsMasterClient) return;
 
+        // Main menu area
         GUI.Box(new Rect(20, 20, 320, 340), "Custom Asset Spawner");
 
+        // Existing asset spawning UI...
         GUI.Label(new Rect(30, 50, 60, 20), "Bundle:");
         bundleName = GUI.TextField(new Rect(90, 50, 230, 20), bundleName);
 
@@ -65,7 +74,7 @@ public class CustomAssetMenu : MonoBehaviourPun
         GUI.Label(new Rect(30, 150, 60, 20), "Layer:");
         layer = GUI.TextField(new Rect(90, 150, 230, 20), layer);
 
-        if (GUI.Button(new Rect(90, 180, 140, 30), "Spawn"))
+        if (GUI.Button(new Rect(90, 180, 140, 30), "Spawn Asset"))
         {
             if (float.TryParse(posX, out float x) &&
                 float.TryParse(posY, out float y) &&
@@ -74,22 +83,102 @@ public class CustomAssetMenu : MonoBehaviourPun
                 float.TryParse(rotY, out float ry) &&
                 float.TryParse(rotZ, out float rz) &&
                 int.TryParse(layer, out int parsedLayer))
-
             {
                 StartCoroutine(SpawnAsset(bundleName, prefabName, new Vector3(x, y, z), new Vector3(rx, ry, rz), parsedLayer));
             }
         }
 
-        GUI.Box(new Rect(360, 20, 300, 300), "Spawned Assets");
+        // Build System Panel
+        GUI.Box(new Rect(360, 20, 300, 500), "Build System Manager");
+
+        if (buildSystem != null)
+        {
+            // Buildables count
+            GUI.Label(new Rect(370, 50, 200, 20), $"Tracked Buildables: {buildSystem.GetBuildableCount()}");
+
+            // Save/Load controls
+            GUI.Label(new Rect(370, 80, 60, 20), "Save File:");
+            saveFileName = GUI.TextField(new Rect(440, 80, 200, 20), saveFileName);
+
+            if (GUI.Button(new Rect(370, 110, 130, 30), "Save Buildables"))
+            {
+                buildSystem.SaveBuildablesToJson(saveFileName);
+            }
+
+            if (GUI.Button(new Rect(510, 110, 130, 30), "Load Buildables"))
+            {
+                buildSystem.LoadBuildablesFromJson(saveFileName);
+            }
+
+            if (GUI.Button(new Rect(370, 150, 270, 30), "Clear All Buildables"))
+            {
+                buildSystem.ClearAllBuildablesMaster();
+            }
+
+            // Buildable spawning section
+            if (!buildablesLoaded)
+                LoadBuildablePrefabs();
+
+            GUI.Label(new Rect(370, 200, 200, 20), "Spawn Buildable:");
+
+            buildableScroll = GUI.BeginScrollView(
+                new Rect(370, 225, 280, 160),
+                buildableScroll,
+                new Rect(0, 0, 260, buildablePrefabNames.Count * 25)
+            );
+
+            for (int i = 0; i < buildablePrefabNames.Count; i++)
+            {
+                if (GUI.Button(new Rect(0, i * 25, 260, 25), buildablePrefabNames[i]))
+                {
+                    selectedBuildableIndex = i;
+                }
+            }
+
+            GUI.EndScrollView();
+
+            GUI.Label(new Rect(370, 390, 200, 20), "Selected: " + buildablePrefabNames[selectedBuildableIndex]);
+
+            if (GUI.Button(new Rect(370, 420, 270, 30), "Spawn Buildable at Position"))
+            {
+                if (float.TryParse(posX, out float x) &&
+                    float.TryParse(posY, out float y) &&
+                    float.TryParse(posZ, out float z) &&
+                    float.TryParse(rotX, out float rx) &&
+                    float.TryParse(rotY, out float ry) &&
+                    float.TryParse(rotZ, out float rz) &&
+                    int.TryParse(layer, out int parsedLayer))
+                {
+                    string buildableName = buildablePrefabNames[selectedBuildableIndex];
+                    SpawnBuildable(buildableName, new Vector3(x, y, z), new Vector3(rx, ry, rz), parsedLayer);
+                }
+            }
+
+            // Quick spawn at camera position
+            if (GUI.Button(new Rect(370, 460, 270, 30), "Spawn Buildable at Camera"))
+            {
+                Transform cameraTransform = Camera.main.transform;
+                Vector3 spawnPos = cameraTransform.position + cameraTransform.forward * 3f;
+                string buildableName = buildablePrefabNames[selectedBuildableIndex];
+                SpawnBuildable(buildableName, spawnPos, Quaternion.identity.eulerAngles, int.Parse(layer));
+            }
+        }
+        else
+        {
+            GUI.Label(new Rect(370, 50, 280, 40), "BuildSystem not found in scene!");
+        }
+
+        // Existing spawned assets management UI...
+        GUI.Box(new Rect(680, 20, 300, 300), "Spawned Assets");
 
         for (int i = 0; i < spawnedAssets.Count; i++)
         {
             var obj = spawnedAssets[i];
             if (obj == null) continue;
 
-            GUI.Label(new Rect(370, 50 + 25 * i, 150, 20), obj.name);
+            GUI.Label(new Rect(690, 50 + 25 * i, 150, 20), obj.name);
 
-            if (GUI.Button(new Rect(520, 50 + 25 * i, 60, 20), "Move"))
+            if (GUI.Button(new Rect(840, 50 + 25 * i, 60, 20), "Move"))
             {
                 selectedObject = obj;
                 var pos = obj.transform.position;
@@ -100,15 +189,15 @@ public class CustomAssetMenu : MonoBehaviourPun
                 moveRotX = rot.x.ToString();
                 moveRotY = rot.y.ToString();
                 moveRotZ = rot.z.ToString();
-
             }
 
-            if (GUI.Button(new Rect(585, 50 + 25 * i, 60, 20), "Delete"))
+            if (GUI.Button(new Rect(905, 50 + 25 * i, 60, 20), "Delete"))
             {
                 obj.GetComponent<CustomAssetHelper>()?.Delete();
             }
         }
 
+        // Move asset panel (existing code)...
         if (selectedObject != null)
         {
             GUI.Box(new Rect(20, 380, 320, 130), "Move Asset");
@@ -126,15 +215,14 @@ public class CustomAssetMenu : MonoBehaviourPun
             GUI.Label(new Rect(230, 470, 30, 20), "Z:");
             moveRotZ = GUI.TextField(new Rect(260, 470, 60, 20), moveRotZ);
 
-
             if (GUI.Button(new Rect(60, 440, 100, 25), "Apply"))
             {
                 if (float.TryParse(moveX, out float mx) &&
-                float.TryParse(moveY, out float my) &&
-                float.TryParse(moveZ, out float mz) &&
-                float.TryParse(moveRotX, out float rx) &&
-                float.TryParse(moveRotY, out float ry) &&
-                float.TryParse(moveRotZ, out float rz))
+                    float.TryParse(moveY, out float my) &&
+                    float.TryParse(moveZ, out float mz) &&
+                    float.TryParse(moveRotX, out float rx) &&
+                    float.TryParse(moveRotY, out float ry) &&
+                    float.TryParse(moveRotZ, out float rz))
                 {
                     var helper = selectedObject.GetComponent<CustomAssetHelper>();
                     if (helper != null)
@@ -143,7 +231,6 @@ public class CustomAssetMenu : MonoBehaviourPun
                     }
                     selectedObject = null;
                 }
-
             }
 
             if (GUI.Button(new Rect(170, 440, 100, 25), "Cancel"))
@@ -151,48 +238,6 @@ public class CustomAssetMenu : MonoBehaviourPun
                 selectedObject = null;
             }
         }
-        if (!buildablesLoaded)
-            LoadBuildablePrefabs();
-
-        GUI.Box(new Rect(680, 20, 300, 300), "Resources/Buildables");
-
-        GUI.Label(new Rect(690, 50, 200, 20), "Select Buildable:");
-
-        buildableScroll = GUI.BeginScrollView(
-            new Rect(690, 75, 280, 160),
-            buildableScroll,
-            new Rect(0, 0, 260, buildablePrefabNames.Count * 25)
-        );
-
-        for (int i = 0; i < buildablePrefabNames.Count; i++)
-        {
-            if (GUI.Button(new Rect(0, i * 25, 260, 25), buildablePrefabNames[i]))
-            {
-                selectedBuildableIndex = i;
-            }
-        }
-
-        GUI.EndScrollView();
-
-        GUI.Label(new Rect(690, 240, 200, 20), "Selected: " + buildablePrefabNames[selectedBuildableIndex]);
-
-        if (GUI.Button(new Rect(690, 270, 140, 30), "Spawn Buildable"))
-        {
-            if (float.TryParse(posX, out float x) &&
-                float.TryParse(posY, out float y) &&
-                float.TryParse(posZ, out float z) &&
-                float.TryParse(rotX, out float rx) &&
-                float.TryParse(rotY, out float ry) &&
-                float.TryParse(rotZ, out float rz) &&
-                int.TryParse(layer, out int parsedLayer))
-            {
-                string buildableName = buildablePrefabNames[selectedBuildableIndex];
-                SpawnBuildable(buildableName, new Vector3(x, y, z), new Vector3(rx, ry, rz), parsedLayer);
-            }
-        }
-
-
-
     }
 
     private void LoadBuildablePrefabs()
@@ -201,7 +246,6 @@ public class CustomAssetMenu : MonoBehaviourPun
         GameObject[] allPrefabs = Resources.LoadAll<GameObject>("Buildables");
         foreach (GameObject prefab in allPrefabs)
         {
-            // Filter out subfoldered prefabs
             string fullPath = "Buildables/" + prefab.name;
             GameObject check = Resources.Load<GameObject>(fullPath);
             if (check != null)
@@ -209,14 +253,8 @@ public class CustomAssetMenu : MonoBehaviourPun
                 buildablePrefabNames.Add(prefab.name);
             }
         }
-
         buildablesLoaded = true;
     }
-
-
-
-
-
 
     private IEnumerator SpawnAsset(string bundle, string prefab, Vector3 position, Vector3 rotation, int layer)
     {
@@ -232,12 +270,11 @@ public class CustomAssetMenu : MonoBehaviourPun
 
         GameObject go = Instantiate(prefabObj, position, Quaternion.Euler(rotation));
         PhotonView view = go.AddComponent<PhotonView>();
-
         view.ViewID = PhotonNetwork.AllocateViewID(true);
         SetLayerRecursively(go, layer);
         go.AddComponent<CustomAssetHelper>();
-
         spawnedAssets.Add(go);
+
         PhotonView rpcView = RPCManager.PhotonView;
         rpcView.RPC("RPC_SpawnRemote", RpcTarget.Others, bundle, prefab, position, rotation, layer, view.ViewID);
     }
@@ -265,15 +302,13 @@ public class CustomAssetMenu : MonoBehaviourPun
 
     private void SpawnBuildable(string prefabName, Vector3 position, Vector3 rotation, int layer)
     {
-        GameObject go = PhotonNetwork.Instantiate("Buildables/" + prefabName, position, Quaternion.Euler(rotation), 0);
+        GameObject go = PhotonNetwork.InstantiateRoomObject("Buildables/" + prefabName, position, Quaternion.Euler(rotation));
         SetLayerRecursively(go, layer);
         go.AddComponent<CustomAssetHelper>();
         spawnedAssets.Add(go);
+
+        ChatManager.AddLine($"[MC] Spawned buildable: {prefabName}", ChatTextColor.System);
     }
-
-
-
-
 
     private void SetLayerRecursively(GameObject obj, int layer)
     {
