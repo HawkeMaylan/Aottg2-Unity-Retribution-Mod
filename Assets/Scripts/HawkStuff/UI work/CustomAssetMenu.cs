@@ -6,6 +6,8 @@ using ApplicationManagers;
 using UI;
 using GameManagers;
 using Settings;
+using System.IO;
+using System.Linq;
 
 public class CustomAssetMenu : MonoBehaviourPun
 {
@@ -32,6 +34,12 @@ public class CustomAssetMenu : MonoBehaviourPun
     private string saveFileName = "buildables_save.json";
     private bool showBuildSystemPanel = true;
 
+    // JSON file browser
+    private List<string> savedJsonFiles = new List<string>();
+    private int selectedJsonIndex = -1;
+    private Vector2 jsonFileScroll = Vector2.zero;
+    private bool jsonFilesLoaded = false;
+
     private void Start()
     {
         buildSystem = FindObjectOfType<BuildSystem>();
@@ -44,6 +52,12 @@ public class CustomAssetMenu : MonoBehaviourPun
             menuOpen = !menuOpen;
             Cursor.visible = menuOpen;
             Cursor.lockState = menuOpen ? CursorLockMode.None : CursorLockMode.Locked;
+
+            // Refresh JSON file list when opening menu
+            if (menuOpen)
+            {
+                RefreshJsonFileList();
+            }
         }
     }
 
@@ -103,6 +117,7 @@ public class CustomAssetMenu : MonoBehaviourPun
             if (GUI.Button(new Rect(370, 110, 130, 30), "Save Buildables"))
             {
                 buildSystem.SaveBuildablesToJson(saveFileName);
+                RefreshJsonFileList(); // Refresh list after saving
             }
 
             if (GUI.Button(new Rect(510, 110, 130, 30), "Load Buildables"))
@@ -115,14 +130,65 @@ public class CustomAssetMenu : MonoBehaviourPun
                 buildSystem.ClearAllBuildablesMaster();
             }
 
+            // JSON File Browser
+            GUI.Label(new Rect(370, 190, 200, 20), "Saved Buildable Files:");
+
+            // Refresh button for JSON files
+            if (GUI.Button(new Rect(570, 190, 80, 20), "Refresh"))
+            {
+                RefreshJsonFileList();
+            }
+
+            // JSON file list
+            jsonFileScroll = GUI.BeginScrollView(
+                new Rect(370, 215, 280, 120),
+                jsonFileScroll,
+                new Rect(0, 0, 260, savedJsonFiles.Count * 25)
+            );
+
+            for (int i = 0; i < savedJsonFiles.Count; i++)
+            {
+                bool isSelected = i == selectedJsonIndex;
+                string displayName = Path.GetFileName(savedJsonFiles[i]);
+
+                // Highlight selected file
+                if (isSelected)
+                {
+                    GUI.backgroundColor = Color.blue;
+                }
+
+                if (GUI.Button(new Rect(0, i * 25, 260, 25), displayName))
+                {
+                    selectedJsonIndex = i;
+                    saveFileName = Path.GetFileName(savedJsonFiles[i]);
+                }
+
+                if (isSelected)
+                {
+                    GUI.backgroundColor = Color.white;
+                }
+            }
+
+            GUI.EndScrollView();
+
+            // Load selected file button
+            if (selectedJsonIndex >= 0 && selectedJsonIndex < savedJsonFiles.Count)
+            {
+                if (GUI.Button(new Rect(370, 345, 280, 25), "Load Selected File"))
+                {
+                    string selectedFile = Path.GetFileName(savedJsonFiles[selectedJsonIndex]);
+                    buildSystem.LoadBuildablesFromJson(selectedFile);
+                }
+            }
+
             // Buildable spawning section
             if (!buildablesLoaded)
                 LoadBuildablePrefabs();
 
-            GUI.Label(new Rect(370, 200, 200, 20), "Spawn Buildable:");
+            GUI.Label(new Rect(370, 380, 200, 20), "Spawn Buildable:");
 
             buildableScroll = GUI.BeginScrollView(
-                new Rect(370, 225, 280, 160),
+                new Rect(370, 405, 280, 120),
                 buildableScroll,
                 new Rect(0, 0, 260, buildablePrefabNames.Count * 25)
             );
@@ -137,9 +203,9 @@ public class CustomAssetMenu : MonoBehaviourPun
 
             GUI.EndScrollView();
 
-            GUI.Label(new Rect(370, 390, 200, 20), "Selected: " + buildablePrefabNames[selectedBuildableIndex]);
+            GUI.Label(new Rect(370, 530, 200, 20), "Selected: " + buildablePrefabNames[selectedBuildableIndex]);
 
-            if (GUI.Button(new Rect(370, 420, 270, 30), "Spawn Buildable at Position"))
+            if (GUI.Button(new Rect(370, 555, 270, 30), "Spawn Buildable at Position"))
             {
                 if (float.TryParse(posX, out float x) &&
                     float.TryParse(posY, out float y) &&
@@ -155,7 +221,7 @@ public class CustomAssetMenu : MonoBehaviourPun
             }
 
             // Quick spawn at camera position
-            if (GUI.Button(new Rect(370, 460, 270, 30), "Spawn Buildable at Camera"))
+            if (GUI.Button(new Rect(370, 590, 270, 30), "Spawn Buildable at Camera"))
             {
                 Transform cameraTransform = Camera.main.transform;
                 Vector3 spawnPos = cameraTransform.position + cameraTransform.forward * 3f;
@@ -168,17 +234,89 @@ public class CustomAssetMenu : MonoBehaviourPun
             GUI.Label(new Rect(370, 50, 280, 40), "BuildSystem not found in scene!");
         }
 
+        // JSON Files Panel
+        GUI.Box(new Rect(680, 20, 300, 400), "Saved Buildable Files");
+
+        if (savedJsonFiles.Count == 0)
+        {
+            GUI.Label(new Rect(690, 50, 280, 30), "No saved buildable files found.");
+            if (GUI.Button(new Rect(690, 80, 280, 25), "Refresh Files"))
+            {
+                RefreshJsonFileList();
+            }
+        }
+        else
+        {
+            // File list with more details
+            Vector2 detailedScroll = GUI.BeginScrollView(
+                new Rect(690, 50, 280, 300),
+                Vector2.zero,
+                new Rect(0, 0, 260, savedJsonFiles.Count * 60)
+            );
+
+            for (int i = 0; i < savedJsonFiles.Count; i++)
+            {
+                string filePath = savedJsonFiles[i];
+                string fileName = Path.GetFileName(filePath);
+                FileInfo fileInfo = new FileInfo(filePath);
+                string fileSize = FormatFileSize(fileInfo.Length);
+                string modified = fileInfo.LastWriteTime.ToString("MM/dd/yy HH:mm");
+
+                // File entry background
+                GUI.Box(new Rect(0, i * 60, 260, 58), "");
+
+                // File name (clickable)
+                if (GUI.Button(new Rect(5, i * 60 + 5, 250, 20), fileName))
+                {
+                    selectedJsonIndex = i;
+                    saveFileName = fileName;
+                }
+
+                // File details
+                GUI.Label(new Rect(5, i * 60 + 28, 250, 15), $"Size: {fileSize} | Modified: {modified}");
+
+                // Quick load button
+                if (GUI.Button(new Rect(5, i * 60 + 45, 120, 12), "Quick Load"))
+                {
+                    buildSystem.LoadBuildablesFromJson(fileName);
+                }
+
+                // Delete button
+                if (GUI.Button(new Rect(130, i * 60 + 45, 120, 12), "Delete File"))
+                {
+                    DeleteJsonFile(fileName);
+                }
+            }
+
+            GUI.EndScrollView();
+
+            // Selected file info
+            if (selectedJsonIndex >= 0 && selectedJsonIndex < savedJsonFiles.Count)
+            {
+                string selectedFilePath = savedJsonFiles[selectedJsonIndex];
+                FileInfo selectedFileInfo = new FileInfo(selectedFilePath);
+
+                GUI.Label(new Rect(690, 360, 280, 20), $"Selected: {Path.GetFileName(selectedFilePath)}");
+                GUI.Label(new Rect(690, 380, 280, 20), $"Size: {FormatFileSize(selectedFileInfo.Length)}");
+
+                if (GUI.Button(new Rect(690, 405, 280, 25), "Load Selected Buildables"))
+                {
+                    buildSystem.LoadBuildablesFromJson(Path.GetFileName(selectedFilePath));
+                }
+            }
+        }
+
         // Existing spawned assets management UI...
-        GUI.Box(new Rect(680, 20, 300, 300), "Spawned Assets");
+        GUI.Box(new Rect(680, 430, 300, 200), "Spawned Assets");
 
         for (int i = 0; i < spawnedAssets.Count; i++)
         {
             var obj = spawnedAssets[i];
             if (obj == null) continue;
 
-            GUI.Label(new Rect(690, 50 + 25 * i, 150, 20), obj.name);
+            GUI.Label(new Rect(690, 460 + 25 * i, 150, 20), obj.name);
 
-            if (GUI.Button(new Rect(840, 50 + 25 * i, 60, 20), "Move"))
+            if (GUI.Button(new Rect(840, 460 + 25 * i, 60, 20), "Move"))
             {
                 selectedObject = obj;
                 var pos = obj.transform.position;
@@ -191,7 +329,7 @@ public class CustomAssetMenu : MonoBehaviourPun
                 moveRotZ = rot.z.ToString();
             }
 
-            if (GUI.Button(new Rect(905, 50 + 25 * i, 60, 20), "Delete"))
+            if (GUI.Button(new Rect(905, 460 + 25 * i, 60, 20), "Delete"))
             {
                 obj.GetComponent<CustomAssetHelper>()?.Delete();
             }
@@ -240,6 +378,89 @@ public class CustomAssetMenu : MonoBehaviourPun
         }
     }
 
+    private void RefreshJsonFileList()
+    {
+        savedJsonFiles.Clear();
+        string persistentDataPath = Application.persistentDataPath;
+
+        try
+        {
+            // Get all JSON files in persistent data path
+            string[] allJsonFiles = Directory.GetFiles(persistentDataPath, "*.json");
+
+            foreach (string filePath in allJsonFiles)
+            {
+                // Optional: Filter only buildable files if they have a specific pattern
+                // For now, include all JSON files
+                savedJsonFiles.Add(filePath);
+            }
+
+            // Sort by modification date (newest first)
+            savedJsonFiles = savedJsonFiles
+                .OrderByDescending(f => new FileInfo(f).LastWriteTime)
+                .ToList();
+
+            jsonFilesLoaded = true;
+
+            // Auto-select the first file if none selected
+            if (savedJsonFiles.Count > 0 && selectedJsonIndex == -1)
+            {
+                selectedJsonIndex = 0;
+                saveFileName = Path.GetFileName(savedJsonFiles[0]);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error refreshing JSON file list: {e.Message}");
+        }
+    }
+
+    private void DeleteJsonFile(string fileName)
+    {
+        try
+        {
+            string filePath = Path.Combine(Application.persistentDataPath, fileName);
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+                RefreshJsonFileList(); // Refresh the list
+
+                // Add chat message
+                AddChatMessage($"[System] Deleted buildable file: {fileName}");
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error deleting JSON file: {e.Message}");
+            AddChatMessage($"[System] Error deleting file: {fileName}");
+        }
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        int order = 0;
+        double len = bytes;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+
+    private void AddChatMessage(string message)
+    {
+        try
+        {
+            ChatManager.AddLine(message, ChatTextColor.System);
+        }
+        catch
+        {
+            Debug.Log($"CHAT: {message}");
+        }
+    }
+
     private void LoadBuildablePrefabs()
     {
         buildablePrefabNames.Clear();
@@ -264,7 +485,7 @@ public class CustomAssetMenu : MonoBehaviourPun
         GameObject prefabObj = AssetBundleManager.LoadAsset(bundle, prefab) as GameObject;
         if (prefabObj == null)
         {
-            ChatManager.AddLine($"[MC] Prefab not found: {prefab}", ChatTextColor.System);
+            AddChatMessage($"[MC] Prefab not found: {prefab}");
             yield break;
         }
 
@@ -307,7 +528,7 @@ public class CustomAssetMenu : MonoBehaviourPun
         go.AddComponent<CustomAssetHelper>();
         spawnedAssets.Add(go);
 
-        ChatManager.AddLine($"[MC] Spawned buildable: {prefabName}", ChatTextColor.System);
+        AddChatMessage($"[MC] Spawned buildable: {prefabName}");
     }
 
     private void SetLayerRecursively(GameObject obj, int layer)
