@@ -72,15 +72,78 @@ public class BuildSystem : MonoBehaviourPunCallbacks
 
     private IEnumerator Start()
     {
-        // Just load prefabs and initialize UI, don't search for inventory yet
         LoadBuildablePrefabs();
         InitializeRadialMenu();
-
-        // Register for master client changes
         PhotonNetwork.AddCallbackTarget(this);
 
-        Debug.Log("BuildSystem: Initialized - waiting for build attempt to find inventory");
+        // Master Client scans for all existing buildables on start
+        if (PhotonNetwork.IsMasterClient)
+        {
+            yield return new WaitForSeconds(2f);
+            ScanAndTrackAllBuildables();
+
+            // Set up periodic scanning to catch any missed objects
+            StartCoroutine(PeriodicBuildableScan());
+        }
+
+        Debug.Log("BuildSystem: Initialized");
         yield break;
+    }
+
+    private IEnumerator PeriodicBuildableScan()
+    {
+        while (PhotonNetwork.IsMasterClient)
+        {
+            yield return new WaitForSeconds(5f); // Scan every 5 seconds
+            ScanAndTrackAllBuildables();
+        }
+    }
+
+    private void ScanAndTrackAllBuildables()
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        BuildableTracker[] allTrackers = FindObjectsOfType<BuildableTracker>();
+        Debug.Log($"SCAN: Found {allTrackers.Length} buildables in scene");
+
+        _buildableObjects.Clear();
+
+        foreach (BuildableTracker tracker in allTrackers)
+        {
+            if (tracker != null && tracker.gameObject != null)
+            {
+                // GET PREFAB NAME FROM GAME OBJECT NAME AS FALLBACK
+                string prefabName = tracker.GetPrefabName();
+
+                // If prefabName is empty, use the game object name
+                if (string.IsNullOrEmpty(prefabName))
+                {
+                    prefabName = tracker.gameObject.name.Replace("(Clone)", "").Trim();
+                    Debug.Log($"Using fallback name: {prefabName} for object {tracker.gameObject.name}");
+                }
+
+                // Get view ID from PhotonView
+                int viewId = 0;
+                PhotonView pv = tracker.GetComponent<PhotonView>();
+                if (pv != null)
+                {
+                    viewId = pv.ViewID;
+                }
+
+                BuildableObjectData buildData = new BuildableObjectData
+                {
+                    prefabName = prefabName, // THIS WAS EMPTY BEFORE
+                    position = tracker.transform.position,
+                    rotation = tracker.transform.rotation,
+                    viewId = viewId,
+                    ownerId = "MC",
+                    timestamp = PhotonNetwork.Time
+                };
+
+                _buildableObjects.Add(buildData);
+                Debug.Log($"Tracked: {prefabName} at {tracker.transform.position}");
+            }
+        }
     }
 
     public override void OnMasterClientSwitched(Player newMasterClient)
@@ -116,16 +179,16 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     {
         _playerInventory = null;
 
-        // Method 1: Find by PhotonView ownership (most reliable)
+        // Method 1: Find by PhotonView ownership (removed IsMine check)
         var humans = FindObjectsOfType<Human>();
         foreach (var human in humans)
         {
-            if (human != null && human.photonView != null && human.photonView.IsMine)
+            if (human != null && human.photonView != null)
             {
                 _playerInventory = human.GetComponent<HumanInventory>();
                 if (_playerInventory != null)
                 {
-                    Debug.Log("BuildSystem: Found local player inventory via PhotonView ownership");
+                    Debug.Log("BuildSystem: Found player inventory via PhotonView");
                     _inventorySearchPerformed = true;
                     return true;
                 }
@@ -145,11 +208,11 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             }
         }
 
-        // Method 3: Final fallback
+        // Method 3: Final fallback (removed IsMine check)
         HumanInventory[] allInventories = FindObjectsOfType<HumanInventory>();
         foreach (HumanInventory inventory in allInventories)
         {
-            if (inventory != null && inventory.photonView != null && inventory.photonView.IsMine)
+            if (inventory != null && inventory.photonView != null)
             {
                 _playerInventory = inventory;
                 Debug.Log("BuildSystem: Found player inventory via scene search");
@@ -158,7 +221,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             }
         }
 
-        Debug.LogWarning("BuildSystem: Could not find local player inventory");
+        Debug.LogWarning("BuildSystem: Could not find player inventory");
         return false;
     }
 
@@ -464,14 +527,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             }
         }
 
-        // 3. Only allow the LOCAL player to build
-        if (!IsLocalPlayer)
-        {
-            Debug.Log("Not local player - skipping build logic");
-            return;
-        }
-
-        // 4. Check & deduct resources (local only)
+        // 3. Check & deduct resources from current player
         if (_currentHelper == null) return;
 
         foreach (InventoryCost cost in _currentHelper.buildCosts)
@@ -484,7 +540,7 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             _playerInventory.SetItemCount(cost.itemName, _playerInventory.GetItemCount(cost.itemName) - cost.amount);
         }
 
-        // 5. Create build data
+        // 4. Create build data
         BuildableObjectData buildData = new BuildableObjectData
         {
             prefabName = buildablePrefabs[currentBuildableIndex].name,
@@ -494,19 +550,10 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             timestamp = PhotonNetwork.Time
         };
 
-        // 6. Request master client to spawn the object
-        if (PhotonNetwork.IsMasterClient)
-        {
-            // We are master client, spawn directly
-            StartCoroutine(InstantiateBuildableForAll(buildData));
-        }
-        else
-        {
-            // Request master client to spawn
-            photonView.RPC("RequestBuildObject", RpcTarget.MasterClient, buildData);
-        }
+        // 5. Spawn the object for all players
+        StartCoroutine(InstantiateBuildableForAll(buildData));
 
-        // 7. Local effects
+        // 6. Local effects
         if (_currentHelper.buildParticleEffectPrefab != null)
             SpawnBuildParticles(_currentHelper);
 
@@ -529,51 +576,118 @@ public class BuildSystem : MonoBehaviourPunCallbacks
     private IEnumerator InstantiateBuildableForAll(BuildableObjectData buildData)
     {
         string prefabPath = "Buildables/" + buildData.prefabName;
-
-        // Instantiate the object
-        GameObject builtObject = PhotonNetwork.InstantiateRoomObject(prefabPath, buildData.position, buildData.rotation);
+        GameObject builtObject = PhotonNetwork.Instantiate(prefabPath, buildData.position, buildData.rotation);
 
         if (builtObject != null)
         {
             PhotonView photonView = builtObject.GetComponent<PhotonView>();
             if (photonView != null)
             {
-                // Store the PhotonView ID for tracking
                 buildData.viewId = photonView.ViewID;
 
-                // Add to our tracking list if not already there
+                // Add tracker component - THIS IS THE KEY
+                BuildableTracker tracker = builtObject.GetComponent<BuildableTracker>();
+                if (tracker == null)
+                {
+                    tracker = builtObject.AddComponent<BuildableTracker>();
+                }
+                tracker.Initialize(buildData.prefabName, buildData.viewId);
+
+                // Add to local tracking
                 if (!_buildableObjects.Exists(b => b.viewId == buildData.viewId))
                 {
                     _buildableObjects.Add(buildData);
                     _buildableObjectsByViewId[buildData.viewId] = buildData;
-                    Debug.Log($"Added buildable to tracking: {buildData.prefabName} (ViewID: {buildData.viewId})");
                 }
 
-                // Add build tracking component
-                BuildableTracker tracker = builtObject.AddComponent<BuildableTracker>();
-                tracker.Initialize(buildData.prefabName, buildData.viewId);
-
-                // Sync the build data to all clients
+                // Optional: Still sync for other players
                 photonView.RPC("SyncBuildableData", RpcTarget.OthersBuffered, buildData);
             }
         }
 
         yield return null;
     }
+    public void ForceRefreshBuildableTracking()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            ScanAndTrackAllBuildables();
+            Debug.Log($"MC Force Refresh: Now tracking {_buildableObjects.Count} buildables");
+
+            // Show in chat
+            AddChatMessage($"[System] Refreshed buildable tracking: {_buildableObjects.Count} objects");
+        }
+    }
+
 
     [PunRPC]
     private void SyncBuildableData(BuildableObjectData buildData, PhotonMessageInfo info)
     {
-        if (!info.Sender.IsMasterClient) return;
-
-        // Only process if this came from master client
+        // Just add to local tracking - MC will pick it up via scanning anyway
         if (!_buildableObjects.Exists(b => b.viewId == buildData.viewId))
         {
             _buildableObjects.Add(buildData);
             _buildableObjectsByViewId[buildData.viewId] = buildData;
-            Debug.Log($"Received sync buildable: {buildData.prefabName} from master");
         }
     }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            Debug.Log($"New player joined, syncing {_buildableObjects.Count} buildables");
+
+            // Sync all existing buildables to the new player
+            foreach (var buildData in _buildableObjects)
+            {
+                // Find the existing object in scene and sync its data
+                PhotonView existingView = PhotonView.Find(buildData.viewId);
+                if (existingView != null)
+                {
+                    existingView.RPC("SyncBuildableData", newPlayer, buildData);
+                }
+            }
+        }
+    }
+
+
+    private void FindAndTrackExistingBuildables()
+    {
+        // Find all buildable trackers in scene
+        BuildableTracker[] allBuildables = FindObjectsOfType<BuildableTracker>();
+        Debug.Log($"MC found {allBuildables.Length} buildables in scene to track");
+
+        foreach (BuildableTracker tracker in allBuildables)
+        {
+            if (tracker.photonView != null)
+            {
+                int viewId = tracker.photonView.ViewID;
+
+                // Check if we're already tracking this
+                if (!_buildableObjects.Exists(b => b.viewId == viewId))
+                {
+                    // Use game object name as fallback for prefab name
+                    string prefabName = tracker.gameObject.name.Replace("(Clone)", "").Trim();
+
+                    // Create new build data for this existing object
+                    BuildableObjectData buildData = new BuildableObjectData
+                    {
+                        prefabName = prefabName,
+                        position = tracker.transform.position,
+                        rotation = tracker.transform.rotation,
+                        viewId = viewId,
+                        ownerId = "Unknown", // We don't know the original owner
+                        timestamp = PhotonNetwork.Time
+                    };
+
+                    _buildableObjects.Add(buildData);
+                    _buildableObjectsByViewId[viewId] = buildData;
+                    Debug.Log($"MC added existing buildable to tracking: {prefabName} (ViewID: {viewId})");
+                }
+            }
+        }
+    }
+
 
     // JSON Saving/Loading Methods
     public void SaveBuildablesToJson(string filePath = "buildables_save.json")
@@ -584,6 +698,9 @@ public class BuildSystem : MonoBehaviourPunCallbacks
             return;
         }
 
+        // Force scan to get ALL objects
+        ScanAndTrackAllBuildables();
+
         BuildableObjectsCollection collection = new BuildableObjectsCollection();
         collection.objects = new List<BuildableObjectData>(_buildableObjects);
 
@@ -591,10 +708,15 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         string fullPath = Path.Combine(Application.persistentDataPath, filePath);
         File.WriteAllText(fullPath, json);
 
-        Debug.Log($"Saved {_buildableObjects.Count} buildables to JSON at: {fullPath}");
+        Debug.Log($"SAVED: {_buildableObjects.Count} objects to {fullPath}");
 
-        // Show chat message using the static method that exists
-        AddChatMessage($"[System] Saved {_buildableObjects.Count} buildables to file");
+        // Debug what we saved
+        foreach (var buildData in _buildableObjects)
+        {
+            Debug.Log($"- {buildData.prefabName} at {buildData.position}");
+        }
+
+        AddChatMessage($"[System] Saved {_buildableObjects.Count} buildables");
     }
 
     public void LoadBuildablesFromJson(string filePath = "buildables_save.json")
@@ -616,49 +738,161 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         string json = File.ReadAllText(fullPath);
         BuildableObjectsCollection collection = JsonUtility.FromJson<BuildableObjectsCollection>(json);
 
-        // Clear existing buildables
-        ClearAllBuildables();
+        Debug.Log($"LOADING: Found {collection.objects.Count} buildables in save file");
 
-        // Load new ones
+        // JUST SPAWN THE DAMN OBJECTS
         foreach (var buildData in collection.objects)
         {
-            StartCoroutine(InstantiateBuildableForAll(buildData));
+            Debug.Log($"Spawning: {buildData.prefabName} at {buildData.position} with rot {buildData.rotation}");
+            SpawnBuildableSimple(buildData);
         }
 
-        Debug.Log($"Loaded {collection.objects.Count} buildables from JSON");
-        AddChatMessage($"[System] Loaded {collection.objects.Count} buildables from file");
+        AddChatMessage($"[System] Loaded {collection.objects.Count} buildables");
+    }
+
+    private void SpawnBuildableSimple(BuildableObjectData buildData)
+    {
+        string prefabPath = "Buildables/" + buildData.prefabName;
+
+        // JUST INSTANTIATE THE PREFAB AT POSITION WITH ROTATION
+        GameObject builtObject = PhotonNetwork.Instantiate(prefabPath, buildData.position, buildData.rotation);
+
+        if (builtObject != null)
+        {
+            Debug.Log($"SUCCESS: Spawned {buildData.prefabName}");
+            // Optionally add tracker if needed
+            BuildableTracker tracker = builtObject.GetComponent<BuildableTracker>();
+            if (tracker == null)
+                tracker = builtObject.AddComponent<BuildableTracker>();
+            tracker.Initialize(buildData.prefabName, builtObject.GetComponent<PhotonView>().ViewID);
+        }
+        else
+        {
+            Debug.LogError($"FAILED to spawn: {buildData.prefabName}");
+        }
+    }
+    private IEnumerator SpawnBuildableForAllPlayers(BuildableObjectData buildData)
+    {
+        if (!PhotonNetwork.IsMasterClient) yield break;
+
+        string prefabPath = "Buildables/" + buildData.prefabName;
+
+        // MASTER CLIENT spawns the object using PhotonNetwork.Instantiate
+        GameObject builtObject = PhotonNetwork.Instantiate(prefabPath, buildData.position, buildData.rotation);
+
+        if (builtObject != null)
+        {
+            PhotonView photonView = builtObject.GetComponent<PhotonView>();
+            if (photonView != null)
+            {
+                // Update the view ID in build data
+                buildData.viewId = photonView.ViewID;
+
+                // Add tracker component
+                BuildableTracker tracker = builtObject.GetComponent<BuildableTracker>();
+                if (tracker == null)
+                {
+                    tracker = builtObject.AddComponent<BuildableTracker>();
+                }
+                tracker.Initialize(buildData.prefabName, buildData.viewId);
+
+                // Add to tracking
+                if (!_buildableObjects.Exists(b => b.viewId == buildData.viewId))
+                {
+                    _buildableObjects.Add(buildData);
+                    _buildableObjectsByViewId[buildData.viewId] = buildData;
+                }
+
+                Debug.Log($"MC spawned buildable: {buildData.prefabName} at {buildData.position}");
+            }
+        }
+
+        // Small delay to prevent overwhelming the network
+        yield return new WaitForSeconds(0.1f);
     }
 
     [PunRPC]
     private void ClearAllBuildablesRPC(PhotonMessageInfo info)
     {
-        if (!info.Sender.IsMasterClient) return;
-        ClearAllBuildables();
-    }
-
-    private void ClearAllBuildables()
-    {
-        // Find and destroy all buildable objects in scene
-        var buildables = FindObjectsOfType<BuildableTracker>();
-        foreach (var buildable in buildables)
+        if (info.Sender != null && !info.Sender.IsMasterClient)
         {
-            if (buildable.photonView != null && buildable.photonView.IsMine)
-            {
-                PhotonNetwork.Destroy(buildable.gameObject);
-            }
+            Debug.LogWarning("ClearAllBuildablesRPC called by non-master client");
+            return;
         }
-        _buildableObjects.Clear();
-        _buildableObjectsByViewId.Clear();
 
-        Debug.Log("Cleared all buildables");
+        ClearAllBuildables();
     }
 
     public void ClearAllBuildablesMaster()
     {
-        if (!PhotonNetwork.IsMasterClient) return;
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            Debug.LogWarning("Only master client can clear buildables");
+            return;
+        }
 
-        photonView.RPC("ClearAllBuildablesRPC", RpcTarget.AllBuffered);
-        AddChatMessage($"[System] Cleared all buildables");
+        if (photonView == null)
+        {
+            Debug.LogError("BuildSystem: PhotonView is null, cannot send RPC");
+            // Fallback: clear locally
+            ClearAllBuildables();
+            AddChatMessage($"[System] Cleared all buildables (local fallback)");
+            return;
+        }
+
+        try
+        {
+            photonView.RPC("ClearAllBuildablesRPC", RpcTarget.AllBuffered);
+            AddChatMessage($"[System] Cleared all buildables");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"BuildSystem: Error clearing buildables: {e.Message}");
+            // Fallback to local clearing
+            ClearAllBuildables();
+            AddChatMessage($"[System] Cleared all buildables (fallback)");
+        }
+    }
+
+    private void ClearAllBuildables()
+    {
+        try
+        {
+            // Find and destroy all buildable objects in scene
+            var buildables = FindObjectsOfType<BuildableTracker>();
+            Debug.Log($"Clearing {buildables.Length} buildable objects");
+
+            foreach (var buildable in buildables)
+            {
+                if (buildable != null && buildable.gameObject != null)
+                {
+                    if (buildable.photonView != null && buildable.photonView.IsMine)
+                    {
+                        PhotonNetwork.Destroy(buildable.gameObject);
+                    }
+                    else if (!PhotonNetwork.IsConnected)
+                    {
+                        Destroy(buildable.gameObject);
+                    }
+                }
+            }
+
+            // Also clear any spawned assets from CustomAssetMenu
+            var customAssetMenu = FindObjectOfType<CustomAssetMenu>();
+            if (customAssetMenu != null)
+            {
+                // Use reflection to clear spawnedAssets if needed, or add a public method
+            }
+
+            _buildableObjects.Clear();
+            _buildableObjectsByViewId.Clear();
+
+            Debug.Log("Cleared all buildables successfully");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error during buildable clearing: {e.Message}");
+        }
     }
 
     // Safe method to add chat messages
@@ -724,10 +958,8 @@ public class BuildSystem : MonoBehaviourPunCallbacks
         }
     }
 
-    private bool IsLocalPlayer => PhotonNetwork.LocalPlayer != null &&
-                             _playerInventory != null &&
-                             _playerInventory.photonView != null &&
-                             _playerInventory.photonView.IsMine;
+    // Modified to always allow building for any player
+    private bool IsLocalPlayer => true;
 
     private void SpawnBuildParticles(BuildableObjectHelper helper)
     {

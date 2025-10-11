@@ -186,6 +186,9 @@ MonoBehaviour:
   - RPC_DetachHuman
   - RPC_ShowMessage
   - RequestBuildFromMaster
+  - ClearAllBuildablesRPC
+  - RequestBuildObject
+  - SyncBuildableData
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

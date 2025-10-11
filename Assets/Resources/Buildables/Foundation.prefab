@@ -119,6 +119,7 @@ GameObject:
   - component: {fileID: 5839652533482026660}
   - component: {fileID: 3744331647855283518}
   - component: {fileID: 1895436054991038007}
+  - component: {fileID: -7994513020166261528}
   m_Layer: 23
   m_Name: Foundation
   m_TagString: Untagged
@@ -267,3 +268,15 @@ MonoBehaviour:
   buildCosts:
   - itemName: Resources
     amount: 4
+--- !u!114 &-7994513020166261528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5870241039757901027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15b057ff2804ee4438eb3120113a3d55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

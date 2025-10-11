@@ -119,6 +119,7 @@ GameObject:
   - component: {fileID: 5518128420203072097}
   - component: {fileID: 6375567141409933643}
   - component: {fileID: 6897917882706372688}
+  - component: {fileID: 4879939323804419576}
   m_Layer: 23
   m_Name: Sphere
   m_TagString: Untagged
@@ -267,3 +268,15 @@ MonoBehaviour:
   buildCosts:
   - itemName: Resources
     amount: 1
+--- !u!114 &4879939323804419576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3303310570190839526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15b057ff2804ee4438eb3120113a3d55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

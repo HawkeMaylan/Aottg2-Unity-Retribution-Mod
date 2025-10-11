@@ -9,6 +9,8 @@ using Settings;
 using System.IO;
 using System.Linq;
 
+
+
 public class CustomAssetMenu : MonoBehaviourPun
 {
     private bool menuOpen = false;
@@ -40,9 +42,33 @@ public class CustomAssetMenu : MonoBehaviourPun
     private Vector2 jsonFileScroll = Vector2.zero;
     private bool jsonFilesLoaded = false;
 
+    // Day Night Cycle Control
+    private GameObject dayNightManager;
+    private object dayNightCycle; 
+    private string timeOfDayInput = "0.5";
+
     private void Start()
     {
         buildSystem = FindObjectOfType<BuildSystem>();
+        FindDayNightManager();
+    }
+
+    private void FindDayNightManager()
+    {
+        dayNightManager = GameObject.Find("HawkDayNightManager(Clone)");
+        if (dayNightManager != null)
+        {
+            // Get all components and find the one with the right name
+            Component[] components = dayNightManager.GetComponents<Component>();
+            foreach (Component comp in components)
+            {
+                if (comp.GetType().Name == "SimpleDayNightCycle")
+                {
+                    dayNightCycle = comp;
+                    break;
+                }
+            }
+        }
     }
 
     private void Update()
@@ -57,6 +83,20 @@ public class CustomAssetMenu : MonoBehaviourPun
             if (menuOpen)
             {
                 RefreshJsonFileList();
+                // Refresh day night cycle reference
+                if (dayNightManager == null)
+                    FindDayNightManager();
+                else if (dayNightCycle != null)
+                {
+                    // Use reflection to get the timeOfDay value
+                    System.Type type = dayNightCycle.GetType();
+                    System.Reflection.PropertyInfo timeProp = type.GetProperty("timeOfDay");
+                    if (timeProp != null)
+                    {
+                        float currentTime = (float)timeProp.GetValue(dayNightCycle);
+                        timeOfDayInput = currentTime.ToString("F3");
+                    }
+                }
             }
         }
     }
@@ -99,6 +139,55 @@ public class CustomAssetMenu : MonoBehaviourPun
                 int.TryParse(layer, out int parsedLayer))
             {
                 StartCoroutine(SpawnAsset(bundleName, prefabName, new Vector3(x, y, z), new Vector3(rx, ry, rz), parsedLayer));
+            }
+        }
+
+        // Day Night Cycle Panel
+        GUI.Box(new Rect(20, 520, 320, 80), "Day Night Cycle Control"); // Increased height
+
+        if (dayNightCycle != null)
+        {
+            GUI.Label(new Rect(30, 550, 80, 20), "Time (0-1):");
+            timeOfDayInput = GUI.TextField(new Rect(110, 550, 80, 20), timeOfDayInput);
+
+            if (GUI.Button(new Rect(200, 550, 120, 20), "Set Time"))
+            {
+                if (float.TryParse(timeOfDayInput, out float time))
+                {
+                    time = Mathf.Clamp01(time);
+                    // Use reflection to call SetTimeOfDay method with 2 parameters
+                    System.Type type = dayNightCycle.GetType();
+                    System.Reflection.MethodInfo method = type.GetMethod("SetTimeOfDay");
+                    if (method != null)
+                    {
+                        // Pass both parameters: time and sync (true)
+                        method.Invoke(dayNightCycle, new object[] { time, true });
+                        AddChatMessage($"[MC] Set time to: {time:F3}");
+                    }
+                    else
+                    {
+                        Debug.LogError("SetTimeOfDay method not found!");
+                    }
+                }
+            }
+
+            // Refresh button
+            if (GUI.Button(new Rect(30, 580, 120, 20), "Refresh"))
+            {
+                FindDayNightManager();
+                AddChatMessage("[MC] Refreshed DayNightManager reference");
+            }
+        }
+        else
+        {
+            GUI.Label(new Rect(30, 550, 200, 20), "HawkDayNightManager not found!");
+            if (GUI.Button(new Rect(30, 580, 120, 20), "Find Manager"))
+            {
+                FindDayNightManager();
+                if (dayNightCycle != null)
+                    AddChatMessage("[MC] Found DayNightManager!");
+                else
+                    AddChatMessage("[MC] DayNightManager still not found");
             }
         }
 

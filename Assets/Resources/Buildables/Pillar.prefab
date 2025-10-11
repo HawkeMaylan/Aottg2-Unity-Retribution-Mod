@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8043064848591919334}
   - component: {fileID: 2518779631329418026}
   - component: {fileID: 5963723269669770145}
+  - component: {fileID: -2508007384065021167}
   m_Layer: 23
   m_Name: Pillar
   m_TagString: Untagged
@@ -162,6 +163,18 @@ MonoBehaviour:
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &-2508007384065021167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3759115724369024139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15b057ff2804ee4438eb3120113a3d55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8435941559868461540
 GameObject:
   m_ObjectHideFlags: 0
