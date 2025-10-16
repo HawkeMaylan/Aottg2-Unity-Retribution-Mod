@@ -507,6 +507,7 @@ Transform:
   m_Children:
   - {fileID: 461814}
   - {fileID: 494868}
+  - {fileID: 1413925727251613402}
   m_Father: {fileID: 461832}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &161728
@@ -1979,6 +1980,7 @@ Transform:
   m_Children:
   - {fileID: 461898}
   - {fileID: 494870}
+  - {fileID: 120390980460473603}
   m_Father: {fileID: 461744}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &161808
@@ -4406,3 +4408,151 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1001 &441651315353619176
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 461806}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 27.941124
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 27.941162
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 27.941183
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.025
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.021
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.046
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.018129624
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.03153255
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.31037143
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.94991934
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -216.052
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -185.05
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 356.169
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_Name
+      value: Human Foot in Blender_1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+--- !u!4 &120390980460473603 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+  m_PrefabInstance: {fileID: 441651315353619176}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1447340517810708785
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 461726}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 34.412888
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 34.412918
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 34.412945
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.036
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.023
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.046
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.033337597
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.06610241
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.28646395
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.9552265
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -212.879
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 170.031
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -6.945984
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+      propertyPath: m_Name
+      value: Human Foot in Blender
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+--- !u!4 &1413925727251613402 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: eb39aaa97f3277d49ae8c45132a479fd, type: 3}
+  m_PrefabInstance: {fileID: 1447340517810708785}
+  m_PrefabAsset: {fileID: 0}
