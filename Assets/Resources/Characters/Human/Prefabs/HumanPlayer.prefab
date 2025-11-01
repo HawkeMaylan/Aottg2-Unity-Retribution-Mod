@@ -16793,6 +16793,8 @@ MonoBehaviour:
   - Resources
   - Airburst Compressor Lvl 1
   - Supply Station
+  - Corpse
+  - Hell Token
 --- !u!1 &4310715724008364727
 GameObject:
   m_ObjectHideFlags: 0
