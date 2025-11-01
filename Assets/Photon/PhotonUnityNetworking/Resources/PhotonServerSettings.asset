@@ -197,6 +197,8 @@ MonoBehaviour:
   - RPC_EndProcessing
   - RPC_SpawnHellToken
   - RPC_StartProcessing
+  - ManualSpawn
+  - SetVelocity
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
