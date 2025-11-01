@@ -24,7 +24,6 @@ namespace GameManagers
         public DummyCharacter Character;
         private static string PreviewFolderPath = FolderPaths.Documents + "/CharacterPreviews";
         private GameObject platform;
-        private GameObject place;
 
         protected override void Awake()
         {
@@ -36,7 +35,6 @@ namespace GameManagers
             platform.GetComponent<Renderer>().material.color = new Color(1f, 1f, 1f, 0.2f);
             SettingsManager.HumanCustomSettings.CustomSets.SelectedSetIndex.Value = 0;
             SettingsManager.TitanCustomSettings.TitanCustomSets.SelectedSetIndex.Value = 0;
-            place = ResourceManager.InstantiateAsset<GameObject>(ResourcePaths.Map, "Hawkstuff/CharacterEditorRoom");
             ReinstantiateCharacter();
         }
 

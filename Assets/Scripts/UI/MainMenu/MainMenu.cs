@@ -143,7 +143,7 @@ namespace UI
                 {
                     colorMultiplier = 1f,
                     fadeDuration = 0.1f,
-                    normalColor = new Color(0.1f, 0.1f, 0.1f),
+                    normalColor = new Color(0.9f, 0.9f, 0.9f),
                     highlightedColor = new Color(0.75f, 0.75f, 0.75f),
                     pressedColor = new Color(0.5f, 0.5f, 0.5f),
                     disabledColor = new Color(0.5f, 0.5f, 0.5f)
@@ -163,7 +163,7 @@ namespace UI
             if (ApplicationConfig.DevelopmentMode)
                 versionText.text = "AOTTG2 DEVELOPMENT VERSION";
             else
-                versionText.text = "AOTTG2 Retribution Version " + ApplicationConfig.GameVersion + ".";
+                versionText.text = "AOTTG2 Version " + ApplicationConfig.GameVersion + ".";
             versionText.text = "";
         }
 
@@ -213,7 +213,8 @@ namespace UI
                 }
                 _multiplayerStatusLabel.text = label;
             }
-            
+            if (SettingsManager.UISettings.FadeMainMenu.Value)
+            {
                 if (HoverIntroPanel())
                 {
                     float alpha = _introPanelBackground.color.a;
@@ -226,7 +227,9 @@ namespace UI
                     if (alpha > 0f)
                         _introPanelBackground.color = new Color(1f, 1f, 1f, Mathf.Max(0f, alpha - Time.deltaTime * 1f));
                 }
-            
+            }
+            else
+                _introPanelBackground.color = Color.white;
             if (!ShowedOutdated)
             {
                 if (PastebinLoader.Status == PastebinStatus.Loaded)

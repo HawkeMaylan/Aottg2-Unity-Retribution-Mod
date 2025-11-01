@@ -40,8 +40,6 @@ namespace UI
             if (lastCharSettings.CharacterType.Value == PlayerCharacter.Human)
             {
                 charSettings.Special.Value = lastCharSettings.Special.Value;
-                charSettings.Special2.Value = lastCharSettings.Special2.Value;  // Load Special2
-                charSettings.Special3.Value = lastCharSettings.Special3.Value;  // Load Special3
                 charSettings.Costume.Value = lastCharSettings.Costume.Value;
                 charSettings.CustomSet.Value = lastCharSettings.CustomSet.Value;
                 charSettings.Loadout.Value = lastCharSettings.Loadout.Value;
@@ -51,10 +49,6 @@ namespace UI
             var specials = HumanSpecials.GetSpecialNames(charSettings.Loadout.Value, miscSettings.AllowShifterSpecials.Value);
             if (!specials.Contains(charSettings.Special.Value))
                 charSettings.Special.Value = HumanSpecials.DefaultSpecial;
-            if (!specials.Contains(charSettings.Special2.Value))  // Validate Special2
-                charSettings.Special2.Value = HumanSpecials.DefaultSpecial;
-            if (!specials.Contains(charSettings.Special3.Value))  // Validate Special3
-                charSettings.Special3.Value = HumanSpecials.DefaultSpecial;
             string[] options = GetCharOptions();
             if (charSettings.CustomSet.Value >= options.Length)
             {
@@ -68,15 +62,8 @@ namespace UI
                 loadouts.ToArray(), elementWidth: 180f, optionsWidth: 180f, onDropdownOptionSelect: () => OnLoadoutClick());
             options = specials.ToArray();
             var maybeTooltip = UIManager.CurrentMenu is InGameMenu menu ? menu.SkillTooltipPopup : null;
-
             ElementFactory.CreateIconPickSetting(DoublePanelLeft, dropdownStyle, charSettings.Special, UIManager.GetLocale(LocaleCategory, sub, "Special"),
                 options, GetSpecialIcons(options), UIManager.CurrentMenu.IconPickPopup, tooltips: GetSpecialTooltips(options), elementWidth: 180f, elementHeight: 40f, tooltipPopup: maybeTooltip);
-
-            ElementFactory.CreateIconPickSetting(DoublePanelLeft, dropdownStyle, charSettings.Special2, UIManager.GetLocale(LocaleCategory, sub, "Special 2"),
-                options, GetSpecialIcons(options), UIManager.CurrentMenu.IconPickPopup, tooltips: GetSpecialTooltips(options), elementWidth: 180f, elementHeight: 40f, tooltipPopup: maybeTooltip, onSelect: () => SaveSpecials());
-
-            ElementFactory.CreateIconPickSetting(DoublePanelLeft, dropdownStyle, charSettings.Special3, UIManager.GetLocale(LocaleCategory, sub, "Special 3"),
-                options, GetSpecialIcons(options), UIManager.CurrentMenu.IconPickPopup, tooltips: GetSpecialTooltips(options), elementWidth: 180f, elementHeight: 40f, tooltipPopup: maybeTooltip, onSelect: () => SaveSpecials());
 
             if (miscSettings.PVP.Value == (int)PVPMode.Team)
             {
@@ -91,8 +78,6 @@ namespace UI
             InGameCharacterSettings charSettings = SettingsManager.InGameCharacterSettings;
             InGameCharacterSettings lastCharSettings = SettingsManager.InGameSettings.LastCharacter;
             lastCharSettings.Special.Value = charSettings.Special.Value;
-            lastCharSettings.Special2.Value = charSettings.Special2.Value;  // Save Special2
-            lastCharSettings.Special3.Value = charSettings.Special3.Value;  // Save Special3
             lastCharSettings.Costume.Value = charSettings.Costume.Value;
             lastCharSettings.CustomSet.Value = charSettings.CustomSet.Value;
             lastCharSettings.Loadout.Value = charSettings.Loadout.Value;
@@ -128,8 +113,6 @@ namespace UI
             CreateStatBar(UIManager.GetLocale(cat, sub, "Speed"), stats.Speed);
             CreateStatBar(UIManager.GetLocale(cat, sub, "Gas"), stats.Gas);
             CreateStatBar(UIManager.GetLocale(cat, sub, "Ammunition"), stats.Ammunition);
-            CreateStatBar(UIManager.GetLocale(cat, sub, "Expertise"), stats.Expertise);
-            
         }
 
         protected void CreateStatBar(string title, int value)
@@ -173,19 +156,6 @@ namespace UI
             foreach (string option in options)
                 icons.Add(ResourcePaths.UI + "/Icons/Specials/" + HumanSpecials.GetSpecialIcon(option));
             return icons.ToArray();
-        }
-
-        private void SaveSpecials()
-        {
-            InGameCharacterSettings charSettings = SettingsManager.InGameCharacterSettings;
-            InGameCharacterSettings lastCharSettings = SettingsManager.InGameSettings.LastCharacter;
-
-            lastCharSettings.Special.Value = charSettings.Special.Value;
-            lastCharSettings.Special2.Value = charSettings.Special2.Value;
-            lastCharSettings.Special3.Value = charSettings.Special3.Value;
-            lastCharSettings.Loadout.Value = charSettings.Loadout.Value;
-            lastCharSettings.Costume.Value = charSettings.Costume.Value;
-            lastCharSettings.CustomSet.Value = charSettings.CustomSet.Value;
         }
 
         protected string[] GetSpecialTooltips(string[] options) =>

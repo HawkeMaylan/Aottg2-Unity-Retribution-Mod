@@ -17,7 +17,7 @@ namespace UI
     {
         protected override string Title => UIManager.GetLocale("CharacterEditor", "Stats", "Title");
         protected override float Width => 330f;
-        protected override float Height => 400f;
+        protected override float Height => 360f;
         protected override float VerticalSpacing => 20f;
         protected override int HorizontalPadding => 25;
         protected override int VerticalPadding => 25;
@@ -35,8 +35,6 @@ namespace UI
             CreateStatBar(UIManager.GetLocale(cat, sub, "Speed"), stats.Speed);
             CreateStatBar(UIManager.GetLocale(cat, sub, "Gas"), stats.Gas);
             CreateStatBar(UIManager.GetLocale(cat, sub, "Ammunition"), stats.Ammunition);
-            CreateStatBar(UIManager.GetLocale(cat, sub, "Expert"), stats.Expertise);
-            
             ElementFactory.CreateTextButton(BottomBar, style, UIManager.GetLocale(cat, sub, "EditStats"), onClick: () => OnButtonClick("EditStats"));
             ElementFactory.CreateTextButton(BottomBar, style, UIManager.GetLocale(cat, sub, "EditPerks"), onClick: () => OnButtonClick("EditPerks"));
         }

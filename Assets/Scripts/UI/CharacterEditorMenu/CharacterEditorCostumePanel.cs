@@ -53,13 +53,7 @@ namespace UI
             CreateHorizontalDivider(SinglePanel);
             ElementFactory.CreateDropdownSetting(SinglePanel, style, set.Sex, UIManager.GetLocale(cat, sub, "Sex"), new string[] { "Male", "Female" }, 
                 elementWidth: dropdownWidth, onDropdownOptionSelect: () => OnSexChanged());
-
-            ElementFactory.CreateSliderInputSetting(SinglePanel, style, set.Height, "Height",
-                onValueChanged: () => _menu.ResetCharacter());
-
             string[] options = GetOptions("Eye", HumanSetup.EyeCount);
-           
-
             ElementFactory.CreateIconPickSetting(SinglePanel, style, set.Eye, UIManager.GetLocale(cat, sub, "Eye"), options, GetIcons(options), 
                 UIManager.CurrentMenu.IconPickPopup, elementWidth: dropdownWidth, elementHeight: 40f, onSelect: () => _menu.ResetCharacter());
             options = GetOptions("Face", HumanSetup.FaceCount, true);

@@ -10,11 +10,11 @@ namespace Characters
     {
         protected override float ActiveTime => 10f;
         protected override bool GroundedOnly => false;
-        protected float Range = 120f;
+        protected float Range = 250f;
 
         public ConfuseSpecial(BaseCharacter owner) : base(owner)
         {
-            Cooldown = 120f;
+            Cooldown = 30f;
         }
         protected override void Activate()
         {

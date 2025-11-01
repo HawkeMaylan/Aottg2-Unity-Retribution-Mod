@@ -21,8 +21,6 @@ namespace Controllers
         protected static LayerMask HookMask = PhysicsLayer.GetMask(PhysicsLayer.TitanMovebox, PhysicsLayer.TitanPushbox,
             PhysicsLayer.MapObjectEntities, PhysicsLayer.MapObjectProjectiles, PhysicsLayer.MapObjectAll);
 
-        public KeybindSetting CycleSpecial = new KeybindSetting(new string[] { "Keyboard/0" });
-
         protected override void Awake()
         {
             base.Awake();
@@ -265,13 +263,6 @@ namespace Controllers
             UpdateHookInput(inMenu);
             UpdateReelInput(inMenu);
             UpdateDashInput(inMenu);
-            UpdateDashup(inMenu);
-            UpdateDashDown(inMenu);
-            UpdateDashRight(inMenu);
-            UpdateDashLeft(inMenu);
-            UpdateCycleSpecial(inMenu);
-
-
             bool canWeapon = _human.MountState == HumanMountState.None && !_illegalWeaponStates.Contains(_human.State) && !inMenu && !_human.Dead;
             var attackInput = _humanInput.AttackDefault;
             var specialInput = _humanInput.AttackSpecial;
@@ -324,7 +315,7 @@ namespace Controllers
                     if (_human.Special is AHSSTwinShot)
                         _human.Special.SetInput(specialInput.GetKeyUp());
                     else
-                        _human.Special.ReadInput(specialInput);
+                    _human.Special.ReadInput(specialInput);
                 }
                 else
                     _human.Special.SetInput(false);
@@ -377,14 +368,8 @@ namespace Controllers
             }
         }
 
-        void UpdateCycleSpecial(bool inMenu)
-        {
-            if (Input.GetKeyDown(KeyCode.O)) 
-            {
-                _human.CycleSpecial();
 
-            }
-        }
+
         void UpdateReelInput(bool inMenu)
         {
             _reelOutScrollTimeLeft -= Time.deltaTime;
@@ -492,74 +477,6 @@ namespace Controllers
                     _human.Dash(GetDashAngle(currentDirection));
             }
         }
-
-        void UpdateDashup(bool inMenu)
-        {
-            if (!_human.Grounded && _human.State != HumanState.AirDodge && _human.MountState == HumanMountState.None &&
-                _human.State != HumanState.Grab && _human.CarryState != HumanCarryState.Carry &&
-                _human.State != HumanState.Stun && _human.State != HumanState.EmoteAction &&
-                _human.State != HumanState.SpecialAction && !inMenu && !_human.Dead)
-            {
-                if (_humanInput.DashUp.GetKeyDown())
-                {
-                    float angle = 90f; 
-                    Vector3 direction = Vector3.up;
-                    _human.DashUp(angle, direction); 
-                }
-            }
-        }
-
-        
-        void UpdateDashDown(bool inMenu)
-        {
-            if (!_human.Grounded && _human.State != HumanState.AirDodge && _human.MountState == HumanMountState.None &&
-                _human.State != HumanState.Grab && _human.CarryState != HumanCarryState.Carry &&
-                _human.State != HumanState.Stun && _human.State != HumanState.EmoteAction &&
-                _human.State != HumanState.SpecialAction && !inMenu && !_human.Dead)
-            {
-                if (_humanInput.DashDown.GetKeyDown())
-                {
-                    float angle = -90f;
-                    Vector3 direction = Vector3.down;
-                    _human.DashDown(angle, direction);
-                }
-            }
-        }
-        void UpdateDashLeft(bool inMenu)
-        {
-            if (!_human.Grounded && _human.State != HumanState.AirDodge && _human.MountState == HumanMountState.None &&
-                _human.State != HumanState.Grab && _human.CarryState != HumanCarryState.Carry &&
-                _human.State != HumanState.Stun && _human.State != HumanState.EmoteAction &&
-                _human.State != HumanState.SpecialAction && !inMenu && !_human.Dead)
-            {
-                if (_humanInput.DashLeft.GetKeyDown())
-                {
-                    float angle = 0f;
-                    Vector3 direction = Vector3.left;
-                    _human.DashLeft(angle, direction);
-                }
-            }
-        }
-
-        void UpdateDashRight(bool inMenu)
-        {
-            if (!_human.Grounded && _human.State != HumanState.AirDodge && _human.MountState == HumanMountState.None &&
-                _human.State != HumanState.Grab && _human.CarryState != HumanCarryState.Carry &&
-                _human.State != HumanState.Stun && _human.State != HumanState.EmoteAction &&
-                _human.State != HumanState.SpecialAction && !inMenu && !_human.Dead)
-            {
-                if (_humanInput.DashRight.GetKeyDown())
-                {
-                    float angle = 0f;
-                    Vector3 direction = Vector3.right;
-                    _human.DashRight(angle, direction);
-                }
-            }
-        }
-
-
-
-
 
         float GetDashAngle(HumanDashDirection direction)
         {

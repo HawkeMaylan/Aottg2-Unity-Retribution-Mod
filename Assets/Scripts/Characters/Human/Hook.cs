@@ -143,7 +143,7 @@ namespace Characters
             _nodes.Clear();
             _currentLiveTime = 0f;
             _nodes.Add(_hookPosition);
-            _renderer.startWidth = _renderer.endWidth = 0.05f;
+            _renderer.startWidth = _renderer.endWidth = 0.1f;
             if (SettingsManager.SoundSettings.OldHookEffect.Value)
                 _owner.PlaySoundRPC(HumanSounds.OldHookLaunch, Util.CreateLocalPhotonInfo());
             else
@@ -183,18 +183,18 @@ namespace Characters
                 _lastWorldHookPosition = position;
                 HookCharacter = transform.root.GetComponent<BaseCharacter>();
 
-                ///if (SettingsManager.InGameCurrent.Misc.RealismMode.Value)
-                ///{
-                ///    if (HookCharacter != null && HookCharacter is Human && !TeamInfo.SameTeam(HookCharacter, _owner) && _owner.IsMine())
-                ///    {
-                ///        var damage = Math.Max(10, (int)(_owner.CurrentSpeed * CharacterData.HumanWeaponInfo["Hook"]["DamageMultiplier"]));
-                ///        ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
-                ///        HookCharacter.GetHit(_owner, damage, "Hook", "");
-                ///    }
-                /// }
+                if (SettingsManager.InGameCurrent.Misc.RealismMode.Value)
+                {
+                    if (HookCharacter != null && HookCharacter is Human && !TeamInfo.SameTeam(HookCharacter, _owner) && _owner.IsMine())
+                    {
+                        var damage = Math.Max(10, (int)(_owner.CurrentSpeed * CharacterData.HumanWeaponInfo["Hook"]["DamageMultiplier"]));
+                        ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
+                        HookCharacter.GetHit(_owner, damage, "Hook", "");
+                    }
+                }
             }
             _currentLiveTime = 0f;
-            _renderer.startWidth = _renderer.endWidth = 0.05f;
+            _renderer.startWidth = _renderer.endWidth = 0.1f;
             if (SettingsManager.SoundSettings.HookImpactEffect.Value)
             {
                 if (HookCharacter != null && HookCharacter is Human)
@@ -363,8 +363,7 @@ namespace Characters
                                     if (HasOffset)
                                         SetHooked(finalHit.point + new Vector3(0f, 0.1f, 0f));  // Try and only add the offset if directly on a flat plane.
                                     else
-                                        SetHooked(finalHit.point, obj.transform.root);
-
+                                        SetHooked(finalHit.point);
                                 }
                                 else if (mapObject.RuntimeCreated)
                                     SetHooked(finalHit.point, obj.transform);
@@ -372,19 +371,7 @@ namespace Characters
                                     SetHooked(finalHit.point, obj.transform, -1, mapObject.ScriptObject.Id);
                             }
                             else
-                            {
-                                // Only follow if the object has a specific tag
-                                if (obj.CompareTag("HookFollow"))
-                                {
-                                    SetHooked(finalHit.point, obj.transform.root); // Will follow movement
-                                }
-                                else
-                                {
-                                    SetHooked(finalHit.point); // Static hook point
-                                }
-                            }
-
-
+                                SetHooked(finalHit.point);
                             return;
                         }
                     }

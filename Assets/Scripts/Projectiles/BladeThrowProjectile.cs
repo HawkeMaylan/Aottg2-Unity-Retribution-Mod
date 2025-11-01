@@ -80,7 +80,7 @@ namespace Projectiles
 
         void CheckHurtboxes(Collider firstCollider)
         {
-            var radius = GetComponent<SphereCollider>().radius * transform.lossyScale.x * 1.1f;
+            var radius = GetComponent<SphereCollider>().radius * transform.lossyScale.x * 1.3f;
             var overlap = Physics.OverlapSphere(transform.position, radius, PhysicsLayer.GetMask(PhysicsLayer.Hurtbox, PhysicsLayer.Human));
             List<Collider> colliders = new List<Collider>(overlap);
             if (!colliders.Contains(firstCollider))
@@ -142,8 +142,8 @@ namespace Projectiles
 
         int CalculateDamage()
         {
-            int damage = Mathf.Max((int)(this.InitialPlayerVelocity.magnitude * 3f *
-                CharacterData.HumanWeaponInfo["Blade"]["DamageMultiplier"].AsFloat), 3);
+            int damage = Mathf.Max((int)(this.InitialPlayerVelocity.magnitude * 10f *
+                CharacterData.HumanWeaponInfo["Blade"]["DamageMultiplier"].AsFloat), 10);
             if (_owner != null && _owner is Human)
             {
                 var human = (Human)_owner;
@@ -158,7 +158,7 @@ namespace Projectiles
             base.Update();
             if (!Disabled)
             {
-                float speed = Mathf.Max(GetComponent<Rigidbody>().velocity.magnitude, 20f);
+                float speed = Mathf.Max(GetComponent<Rigidbody>().velocity.magnitude, 80f);
                 float rotateSpeed = 1600f * speed;
                 _blade.RotateAround(_blade.position, _blade.right, Time.deltaTime * rotateSpeed);
             }

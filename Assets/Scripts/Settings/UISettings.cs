@@ -9,7 +9,7 @@ namespace Settings
     {
         protected override string FileName { get { return "UI.json"; } }
         public StringSetting UITheme = new StringSetting("Dark");
-        private BoolSetting GameFeed = new BoolSetting(false);
+        public BoolSetting GameFeed = new BoolSetting(false);
         public BoolSetting FeedConsole = new BoolSetting(false);
         public BoolSetting ShowStylebar = new BoolSetting(true);
         public FloatSetting UIMasterScale = new FloatSetting(1f, minValue: 0.75f, maxValue: 1.5f);
@@ -27,7 +27,6 @@ namespace Settings
         public BoolSetting ShowInterpolation = new BoolSetting(false);
         public BoolSetting ShowCrosshairArrows = new BoolSetting(false);
         public IntSetting KDR = new IntSetting((int)KDRMode.Off);
-
         public BoolSetting ShowPing = new BoolSetting(false);
         public BoolSetting ShowEmotes = new BoolSetting(true);
         public BoolSetting ShowKeybindTip = new BoolSetting(true);
@@ -41,7 +40,7 @@ namespace Settings
         public ColorSetting ForceBackgroundColor = new ColorSetting(new Utility.Color255(0, 0, 0, 100));
         public IntSetting MinNameLength = new IntSetting(0, minValue: 0, maxValue: 100);
         public IntSetting MaxNameLength = new IntSetting(20, minValue: 0, maxValue: 100);
-        ///public BoolSetting FadeMainMenu = new BoolSetting(true);
+        public BoolSetting FadeMainMenu = new BoolSetting(false);
         public BoolSetting FadeLoadscreen = new BoolSetting(true);
         public IntSetting ChatWidth = new IntSetting(320, minValue: 0, maxValue: 1000);
         public IntSetting ChatHeight = new IntSetting(295, minValue: 0, maxValue: 500);
@@ -61,9 +60,8 @@ namespace Settings
                 {
                     InGameMenu igm = (InGameMenu)UIManager.CurrentMenu;
                     igm.ApplyUISettings();
-                    // Force KDR mode to Off
-                    KDR.Value = (int)KDRMode.Off;
                 }
+
             }
         }
     }
@@ -91,7 +89,9 @@ namespace Settings
 
     public enum KDRMode
     {
-        Off
+        Off,
+        Mine,
+        All
     }
 
     public enum CoordinateMode

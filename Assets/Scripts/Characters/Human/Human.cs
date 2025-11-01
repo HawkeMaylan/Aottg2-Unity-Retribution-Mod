@@ -18,8 +18,6 @@ using UI;
 using UnityEngine;
 using Utility;
 using Weather;
-using UnityEngine.UI;
-using Entities;
 
 namespace Characters
 {
@@ -27,7 +25,7 @@ namespace Characters
     {
         // setup
         public HumanComponentCache HumanCache;
-
+        public BaseUseable Special;
         public BaseUseable Weapon;
         public HookUseable HookLeft;
         public HookUseable HookRight;
@@ -44,17 +42,10 @@ namespace Characters
         public static LayerMask ClipMask = PhysicsLayer.GetMask(PhysicsLayer.MapObjectAll, PhysicsLayer.MapObjectCharacters,
             PhysicsLayer.MapObjectEntities);
         private Dictionary<Renderer, Material> FPSMaterials = new Dictionary<Renderer, Material>();
-        public Dictionary<string, List<SimpleUseable>> ItemLists = new Dictionary<string, List<SimpleUseable>>();
-        public Dictionary<string, string> ItemListDisplayNames = new Dictionary<string, string>();
-
-
-        public Dictionary<string, Sprite> ItemSpriteMap = new();
-
-
 
         // state
         private HumanState _state = HumanState.Idle;
-  
+        public string CurrentSpecial;
         public BaseTitan Grabber;
         public Transform GrabHand;
         public Human Carrier;
@@ -83,8 +74,8 @@ namespace Characters
         public float ReelOutScrollTimeLeft = 0f;
         public float TargetMagnitude = 0f;
         public bool IsWalk;
-        public const float RealismMaxReel = 170f;
-        public const float RealismDeathVelocity = 200f;
+        public const float RealismMaxReel = 120f;
+        public const float RealismDeathVelocity = 100f;
         private const float MaxVelocityChange = 10f;
         private float _originalDashSpeed;
         public Quaternion _targetRotation;
@@ -137,87 +128,6 @@ namespace Characters
         private float _hookHumanConstantTimeLeft;
         private bool _isReelingOut;
         private Dictionary<BaseTitan, float> _lastNapeHitTimes = new Dictionary<BaseTitan, float>();
-
-        ///Stamina Addons
-        public float SprintSpeedMultiplier = 1.3f;
-        public float StaminaDrainRate = 20f;
-        public float StaminaRegenRate = 10f;
-        public float MaxStamina = 100f;
-        public float CurrentStamina = 100f;
-        public bool IsSprinting = false;
-        private GameObject _staminaBar;
-        private UnityEngine.UI.Image _staminaBarFill;
-        private float _staminaRegenDelay = 1.5f; // Time before regen starts after using stamina
-        private float _timeSinceLastStaminaUse;
-        private bool _canRegenStamina = true;
-
-
-        //Specials Addon
-
-        public BaseUseable Special;
-        public BaseUseable Special2;
-        public BaseUseable Special3;
-        public string CurrentSpecial;
-        public float SkillCycleNum;
-        public BaseUseable[] SpecialsArray = new BaseUseable[3];
-        public string[] CurrentSpecials = new string[3];
-        public int CurrentSpecialIndex = 0;
-
-
-
-        private void CreateStaminaBar()
-        {
-
-
-            var menu = GameObject.Find("DefaultMenu(Clone)");
-
-
-            // Create stamina bar parent object
-            _staminaBar = new GameObject("StaminaBar");
-            _staminaBar.transform.SetParent(menu.transform);
-
-            // Set up the background (same as horse)
-            var bg = _staminaBar.AddComponent<UnityEngine.UI.Image>();
-            bg.color = new Color(0.2f, 0.2f, 0.2f); // Dark gray background (no transparency)
-            bg.type = UnityEngine.UI.Image.Type.Sliced;
-
-            // Create fill object (same as horse)
-            var fillObject = new GameObject("Fill");
-            fillObject.transform.SetParent(_staminaBar.transform);
-            _staminaBarFill = fillObject.AddComponent<UnityEngine.UI.Image>();
-            _staminaBarFill.color = Color.white; // Same white color as horse
-            _staminaBarFill.type = UnityEngine.UI.Image.Type.Filled;
-            _staminaBarFill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
-            _staminaBarFill.fillOrigin = (int)UnityEngine.UI.Image.OriginHorizontal.Right;
-
-            // Set fill rectangle to stretch (same as horse)
-            var fillRect = _staminaBarFill.GetComponent<RectTransform>();
-            fillRect.anchorMin = Vector2.zero;
-            fillRect.anchorMax = Vector2.one;
-            fillRect.sizeDelta = Vector2.zero;
-
-
-
-            _staminaBar.SetActive(false);
-        }
-
-        private void UpdateStaminaBar()
-        {
-            if (_staminaBarFill != null)
-            {
-                _staminaBarFill.fillAmount = CurrentStamina / MaxStamina;
-                _staminaBar.SetActive(IsSprinting || CurrentStamina < MaxStamina);
-                // Positioning (same as horse)
-                var rect = _staminaBar.GetComponent<RectTransform>();
-                rect.anchorMin = new Vector2(0.5f, 0);
-                rect.anchorMax = new Vector2(0.5f, 0);
-                rect.pivot = new Vector2(0.5f, 0);
-                rect.anchoredPosition = new Vector2(0, 150);
-                rect.sizeDelta = new Vector2(2 * CurrentStamina, 10);
-            }
-        }
-
-
 
         protected override void CreateDetection()
         {
@@ -330,44 +240,37 @@ namespace Characters
         public bool CanJump()
         {
             return (Grounded && CarryState != HumanCarryState.Carry && (State == HumanState.Idle || State == HumanState.Slide) &&
-                !Animation.IsPlaying(HumanAnimations.Jump) && !Animation.IsPlaying(HumanAnimations.HorseMount) && CurrentStamina >= 5f);
+                !Animation.IsPlaying(HumanAnimations.Jump) && !Animation.IsPlaying(HumanAnimations.HorseMount));
         }
 
         public void Jump()
         {
-            if (CurrentStamina >= 5f);
-            {
-                Idle();
-                CrossFade(HumanAnimations.Jump, 0.1f);
-                PlaySound(HumanSounds.Jump);
-                ToggleSparks(false);
-                CurrentStamina -= 5f;// Stamina loss
-                _canRegenStamina = false; /// Force Cooldown
-                _timeSinceLastStaminaUse = 0f; /// Force Cooldown
-
-            }
+            Idle();
+            CrossFade(HumanAnimations.Jump, 0.1f);
+            PlaySound(HumanSounds.Jump);
+            ToggleSparks(false);
         }
 
-                public void Mount(Transform transform, Vector3 positionOffset, Vector3 rotationOffset)
+        public void Mount(Transform transform, Vector3 positionOffset, Vector3 rotationOffset)
+        {
+            Transform parent = transform;
+            MapObject mapObject = null;
+            string transformName = "";
+            while (parent != null)
+            {
+                if (MapLoader.GoToMapObject.ContainsKey(parent.gameObject))
                 {
-                    Transform parent = transform;
-                    MapObject mapObject = null;
-                    string transformName = "";
-                    while (parent != null)
-                    {
-                        if (MapLoader.GoToMapObject.ContainsKey(parent.gameObject))
-                        {
-                            mapObject = MapLoader.GoToMapObject[parent.gameObject];
-                            break;
-                        }
-                        if (transformName == "")
-                            transformName = parent.name;
-                        else
-                            transformName = parent.name + "/" + transformName;
-                        parent = parent.parent;
-                    }
-                    Mount(mapObject, transformName, positionOffset, rotationOffset);
+                    mapObject = MapLoader.GoToMapObject[parent.gameObject];
+                    break;
                 }
+                if (transformName == "")
+                    transformName = parent.name;
+                else
+                    transformName = parent.name + "/" + transformName;
+                parent = parent.parent;
+            }
+            Mount(mapObject, transformName, positionOffset, rotationOffset);
+        }
 
         public void Mount(MapObject mapObject, Vector3 positionOffset, Vector3 rotationOffset)
         {
@@ -474,16 +377,13 @@ namespace Characters
 
         public void Dodge(float targetAngle)
         {
-            if (CanDodge && CurrentStamina >= 15f)
+            if (CanDodge)
             {
                 State = HumanState.GroundDodge;
                 TargetAngle = targetAngle;
                 _targetRotation = GetTargetRotation();
                 CrossFade(HumanAnimations.Dodge, 0.1f);
                 PlaySound(HumanSounds.Dodge);
-                CurrentStamina -= 10f;// Stamina loss
-                _canRegenStamina = false; /// Force Cooldown
-                _timeSinceLastStaminaUse = 0f; /// Force Cooldown
                 ToggleSparks(false);
             }
         }
@@ -549,103 +449,6 @@ namespace Characters
                 ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.ShakeGas();
             }
         }
-
-        public void DashUp(float targetAngle, Vector3 direction)
-        {
-            if (_dashTimeLeft <= 0f && Stats.CurrentGas > 0 && MountState == HumanMountState.None &&
-                State != HumanState.Grab && CarryState != HumanCarryState.Carry && _dashCooldownLeft <= 0f)
-            {
-                Stats.UseDashGas();
-                TargetAngle = targetAngle;
-                _originalDashSpeed = Cache.Rigidbody.velocity.magnitude;
-                _targetRotation = Quaternion.LookRotation(direction);
-                Cache.Rigidbody.rotation = _targetRotation;
-                EffectSpawner.Spawn(EffectPrefabs.GasBurst, Cache.Transform.position, Cache.Transform.rotation);
-                PlaySound(HumanSounds.GasBurst);
-                _dashTimeLeft = 0.5f;
-                CrossFade(HumanAnimations.Dash, 0.1f, 0.1f);
-                State = HumanState.AirDodge;
-                FalseAttack();
-                Cache.Rigidbody.AddForce(Vector3.up * 40f, ForceMode.VelocityChange);
-                _dashCooldownLeft = 0.2f;
-                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.ShakeGas();
-            }
-        }
-
-        public void DashDown(float targetAngle, Vector3 direction)
-        {
-            if (_dashTimeLeft <= 0f && Stats.CurrentGas > 0 && MountState == HumanMountState.None &&
-                State != HumanState.Grab && CarryState != HumanCarryState.Carry && _dashCooldownLeft <= 0f)
-            {
-                Stats.UseDashGas();
-                TargetAngle = targetAngle;
-                _originalDashSpeed = Cache.Rigidbody.velocity.magnitude;
-                _targetRotation = Quaternion.LookRotation(direction);
-                Cache.Rigidbody.rotation = _targetRotation;
-                EffectSpawner.Spawn(EffectPrefabs.GasBurst, Cache.Transform.position, Cache.Transform.rotation);
-                PlaySound(HumanSounds.GasBurst);
-                _dashTimeLeft = 0.5f;
-                CrossFade(HumanAnimations.Dash, 0.1f, 0.1f);
-                State = HumanState.AirDodge;
-                FalseAttack();
-                Cache.Rigidbody.AddForce(Vector3.down * 40f, ForceMode.VelocityChange);
-                _dashCooldownLeft = 0.2f;
-                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.ShakeGas();
-            }
-        }
-
-        public void DashRight(float targetAngle, Vector3 direction)
-        {
-            if (_dashTimeLeft <= 0f && Stats.CurrentGas > 0 && MountState == HumanMountState.None &&
-                State != HumanState.Grab && CarryState != HumanCarryState.Carry && _dashCooldownLeft <= 0f)
-            {
-                Stats.UseDashGas();
-                TargetAngle = targetAngle;
-                _originalDashSpeed = Cache.Rigidbody.velocity.magnitude;
-                _targetRotation = Quaternion.LookRotation(direction);
-                Cache.Rigidbody.rotation = _targetRotation;
-                EffectSpawner.Spawn(EffectPrefabs.GasBurst, Cache.Transform.position, Cache.Transform.rotation);
-                PlaySound(HumanSounds.GasBurst);
-                _dashTimeLeft = 0.5f;
-                CrossFade(HumanAnimations.Dash, 0.1f, 0.1f);
-                State = HumanState.AirDodge;
-                FalseAttack();
-
-
-                Cache.Rigidbody.AddForce(-Cache.Transform.right * 45f, ForceMode.VelocityChange);
-
-                _dashCooldownLeft = 0.2f;
-                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.ShakeGas();
-            }
-        }
-
-        public void DashLeft(float targetAngle, Vector3 direction)
-        {
-            if (_dashTimeLeft <= 0f && Stats.CurrentGas > 0 && MountState == HumanMountState.None &&
-                State != HumanState.Grab && CarryState != HumanCarryState.Carry && _dashCooldownLeft <= 0f)
-            {
-                Stats.UseDashGas();
-                TargetAngle = targetAngle;
-                _originalDashSpeed = Cache.Rigidbody.velocity.magnitude;
-                _targetRotation = Quaternion.LookRotation(direction);
-                Cache.Rigidbody.rotation = _targetRotation;
-                EffectSpawner.Spawn(EffectPrefabs.GasBurst, Cache.Transform.position, Cache.Transform.rotation);
-                PlaySound(HumanSounds.GasBurst);
-                _dashTimeLeft = 0.5f;
-                CrossFade(HumanAnimations.Dash, 0.1f, 0.1f);
-                State = HumanState.AirDodge;
-                FalseAttack();
-
-
-                Cache.Rigidbody.AddForce(Cache.Transform.right * 45f, ForceMode.VelocityChange);
-
-                _dashCooldownLeft = 0.2f;
-                ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.ShakeGas();
-            }
-        }
-
-
-
 
         public void Idle()
         {
@@ -1186,13 +989,6 @@ namespace Characters
 
         protected override void Awake()
         {
-
-            CreateStaminaBar();
-
-            ItemSpriteMap["Cannon"] = Resources.Load<Sprite>("Sprites/Items/Cannon");
-            ItemSpriteMap["WallCannon"] = Resources.Load<Sprite>("Sprites/Items/WallCannon");
-            //Add more to list
-
             if (SceneLoader.SceneName == SceneName.CharacterEditor)
             {
                 this.enabled = false;
@@ -1201,7 +997,7 @@ namespace Characters
             base.Awake();
             HumanCache = (HumanComponentCache)Cache;
             Cache.Rigidbody.freezeRotation = true;
-            Cache.Rigidbody.useGravity = true;
+            Cache.Rigidbody.useGravity = false;
             if (gameObject.GetComponent<HumanSetup>() == null)
                 Setup = gameObject.AddComponent<HumanSetup>();
             Setup = gameObject.GetComponent<HumanSetup>();
@@ -1215,9 +1011,6 @@ namespace Characters
                 Cache.AudioSources[HumanSounds.GasEnd].spatialBlend = 0;
             }
         }
-
-
-
 
         protected override void Start()
         {
@@ -1261,7 +1054,7 @@ namespace Characters
                 return;
             if (type == "TitanEat")
             {
-                base.GetHitRPC(viewId, "Grabbed And Eaten", damage, type, collider);
+                base.GetHitRPC(viewId, name, damage, type, collider);
                 if (!Dead)
                     Ungrab(false, true);
             }
@@ -1291,21 +1084,33 @@ namespace Characters
                 {
                     type = "AHSS";
                     if (((CapsuleCollider)HumanCache.AHSSHit._collider).radius == CharacterData.HumanWeaponInfo["AHSS"]["Radius"].AsFloat * 2f)
+                    {
                         type = "AHSSDouble";
+                    }
                 }
+
                 else if (hitbox == HumanCache.APGHit)
                     type = "APG";
             }
-
             int damage = (CarryState == HumanCarryState.Carry && Carrier != null)
                 ? Mathf.Max((int)(Carrier.CarryVelocity.magnitude * 10f), 10)
                 : Mathf.Max((int)(Cache.Rigidbody.velocity.magnitude * 10f), 10);
-
             if (type == "Blade")
             {
-                PlaySound(SettingsManager.SoundSettings.OldBladeEffect.Value ? HumanSounds.OldBladeHit : HumanSounds.BladeHit);
+                if (!(victim is CustomLogicCollisionHandler))
+                    EffectSpawner.Spawn(EffectPrefabs.Blood1, hitbox.transform.position, Quaternion.Euler(270f, 0f, 0f));
+                if (SettingsManager.SoundSettings.OldBladeEffect.Value)
+                    PlaySound(HumanSounds.OldBladeHit);
+                else
+                    PlaySound(HumanSounds.BladeHit);
                 var weapon = (BladeWeapon)Weapon;
-                weapon.UseDurability(Stats.Perks["AdvancedAlloy"].CurrPoints == 1 && damage < 500 ? weapon.CurrentDurability : 2f);
+                if (Stats.Perks["AdvancedAlloy"].CurrPoints == 1)
+                {
+                    if (damage < 500)
+                        weapon.UseDurability(weapon.CurrentDurability);
+                }
+                else
+                    weapon.UseDurability(2f);
                 if (weapon.CurrentDurability == 0f)
                 {
                     ToggleBlades(false);
@@ -1313,55 +1118,90 @@ namespace Characters
                 }
                 damage = (int)(damage * CharacterData.HumanWeaponInfo["Blade"]["DamageMultiplier"].AsFloat);
             }
-            else if (type == "AHSS" || type == "AHSSDouble")
+            else if (type == "AHSS")
             {
                 damage = (int)(damage * CharacterData.HumanWeaponInfo["AHSS"]["DamageMultiplier"].AsFloat);
             }
+            else if (type == "AHSSDouble")
+                type = "AHSS";
             else if (type == "APG")
-            {
                 damage = (int)(damage * CharacterData.HumanWeaponInfo["APG"]["DamageMultiplier"].AsFloat);
-            }
-
             damage = Mathf.Max(damage, 10);
             if (CustomDamageEnabled)
                 damage = CustomDamage;
-
-            Vector3 hitPos = hitbox != null ? hitbox.transform.position : Cache.Transform.position;
-
-            // Support for DamageableEntity
-            var entity = (victim as Component)?.GetComponentInParent<Entities.DamageableEntity>();
-            bool hasDamageable = entity != null;
-
-            // Spawn blood only if there's no DamageableEntity on the victim
-            if (!hasDamageable && type == "Blade")
+            if (victim is CustomLogicCollisionHandler)
             {
-                EffectSpawner.Spawn(EffectPrefabs.Blood1, hitPos, Quaternion.Euler(270f, 0f, 0f));
-            }
-
-            if (hasDamageable)
-            {
-                entity.GetHit(Name, damage, type, collider.name);
+                Vector3 position = Vector3.zero;
+                if (hitbox != null)
+                    position = hitbox.transform.position;
+                (victim as CustomLogicCollisionHandler).GetHit(this, Name, damage, type, position);
                 return;
             }
-
-
-
-            // Regular BaseCharacter victim
-            var victimChar = victim as BaseCharacter;
-            if (victimChar != null && !victimChar.Dead)
+            var victimChar = (BaseCharacter)victim;
+            if (!victimChar.Dead)
             {
-                if (victimChar is BaseTitan titan)
+                if (victimChar is BaseTitan)
                 {
+                    var titan = (BaseTitan)victimChar;
                     if (titan.BaseTitanCache.NapeHurtbox == collider)
                     {
-                        float angle = type == "Blade" ? CharacterData.HumanWeaponInfo["Blade"]["RestrictAngle"].AsFloat : 180f;
-                        if (!titan.CheckNapeAngle(hitbox.transform.position, angle))
+                        if (type == "Blade" && !titan.CheckNapeAngle(hitbox.transform.position, CharacterData.HumanWeaponInfo["Blade"]["RestrictAngle"].AsFloat))
                             return;
-                    }
+                        if (type == "AHSS" && !titan.CheckNapeAngle(hitbox.transform.position, CharacterData.HumanWeaponInfo["AHSS"]["RestrictAngle"].AsFloat))
+                            return;
+                        if (type == "APG" && !titan.CheckNapeAngle(hitbox.transform.position, CharacterData.HumanWeaponInfo["APG"]["RestrictAngle"].AsFloat))
+                            return;
+                        if (type != "APG" && _lastNapeHitTimes.ContainsKey(titan) && (_lastNapeHitTimes[titan] + 0.2f) > Time.time)
+                            return;
+                        ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
+                        ((InGameCamera)SceneLoader.CurrentCamera).TakeSnapshot(titan.BaseTitanCache.Neck.position, damage);
+                        if (type == "Blade" && SettingsManager.GraphicsSettings.BloodSplatterEnabled.Value)
+                            ((InGameMenu)UIManager.CurrentMenu).ShowBlood();
+                        if (type == "Blade" || type == "AHSS" || type == "APG")
+                        {
+                            if (SettingsManager.SoundSettings.OldNapeEffect.Value)
+                                PlaySound(HumanSounds.OldNapeHit);
+                            else
+                            {
+                                if (type == "APG")
+                                    PlaySound(HumanSounds.NapeHit);
+                                if (type == "Blade")
+                                {
+                                    if (damage < 500)
+                                        PlaySound(HumanSounds.NapeHit);
+                                    if (damage < 1000)
+                                        PlaySound(HumanSounds.GetRandomBladeNapeVar1());
+                                    else if (damage < 2000)
+                                        PlaySound(HumanSounds.GetRandomBladeNapeVar2());
+                                    else if (damage < 3000)
+                                        PlaySound(HumanSounds.GetRandomBladeNapeVar3());
+                                    else
+                                        PlaySound(HumanSounds.GetRandomBladeNapeVar4());
+                                }
+                                else if (type == "AHSS")
+                                {
+                                    if (damage < 1000)
+                                    {
+                                        PlaySound(HumanSounds.NapeHit);
+                                    }
+                                    else if (damage < 2000)
+                                    {
+                                        PlaySound(HumanSounds.GetRandomAHSSNapeHitVar1());
+                                    }
+                                    else
+                                    {
+                                        PlaySound(HumanSounds.GetRandomAHSSNapeHitVar2());
+                                    }
+                                }
 
+                            }
+
+                        }
+                        _lastNapeHitTimes[titan] = Time.time;
+                    }
                     if (titan.BaseTitanCache.Hurtboxes.Contains(collider))
                     {
-                        EffectSpawner.Spawn(EffectPrefabs.CriticalHit, hitPos, Quaternion.Euler(270f, 0f, 0f));
+                        EffectSpawner.Spawn(EffectPrefabs.CriticalHit, hitbox.transform.position, Quaternion.Euler(270f, 0f, 0f));
                         victimChar.GetHit(this, damage, type, collider.name);
                         if (titan.BaseTitanCache.NapeHurtbox != collider)
                             PlaySound(HumanSounds.LimbHit);
@@ -1369,7 +1209,6 @@ namespace Characters
                 }
                 else
                 {
-                    EffectSpawner.Spawn(EffectPrefabs.CriticalHit, hitPos, Quaternion.Euler(270f, 0f, 0f));
                     ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
                     ((InGameCamera)SceneLoader.CurrentCamera).TakeSnapshot(victimChar.Cache.Transform.position, damage);
                     victimChar.GetHit(this, damage, type, collider.name);
@@ -1377,25 +1216,15 @@ namespace Characters
             }
         }
 
-        
-
-
-
-
-
-
         protected void Update()
         {
             if (IsMine() && !Dead)
             {
-                
                 _stateTimeLeft -= Time.deltaTime;
                 _dashCooldownLeft -= Time.deltaTime;
                 _reloadCooldownLeft -= Time.deltaTime;
                 UpdateIFrames();
                 UpdateBladeFire();
-
-               
                 if (_needFinishReload)
                 {
                     _reloadTimeLeft -= Time.deltaTime;
@@ -1582,116 +1411,6 @@ namespace Characters
                 Cache.Transform.position = GrabHand.transform.position;
                 Cache.Transform.rotation = GrabHand.transform.rotation;
             }
-
-            UpdateStamina(); ///
-            CheckSprintInput(); ///
-            if (IsMine() && SettingsManager.InputSettings.Human.CycleSpecials.GetKeyDown() && State != HumanState.SpecialAction && State != HumanState.SpecialAttack)
-            {
-                CycleSpecial();
-            }
-            if (IsMine() && SettingsManager.InputSettings.Human.CycleSpecialsBackwards.GetKeyDown() && State != HumanState.SpecialAction && State != HumanState.SpecialAttack)
-            {
-                CycleSpecialBackwards();
-            }
-
-        }
-
-        private void UpdateStamina()
-        {
-            if (!IsMine()) return;
-
-            // Handle stamina regeneration delay
-            if (!_canRegenStamina)
-            {
-                _timeSinceLastStaminaUse += Time.deltaTime;
-                if (_timeSinceLastStaminaUse >= _staminaRegenDelay)
-                {
-                    _canRegenStamina = true;
-                }
-            }
-
-            if (CurrentStamina <= 0)
-            {
-                _staminaRegenDelay = 5f;
-            }
-            else
-            {
-                _staminaRegenDelay = 2f;
-            }
-            if (IsSprinting)
-            {
-                // Prevent sprinting if stamina is depleted
-                if (CurrentStamina <= 0)
-                {
-                    ToggleSprint(false);
-                    return;
-                }
-
-                CurrentStamina -= StaminaDrainRate * Time.deltaTime;
-                _canRegenStamina = false;
-                _timeSinceLastStaminaUse = 0f;
-
-                if (CurrentStamina <= 0)
-                {
-                    CurrentStamina = 0;
-                    ToggleSprint(false);
-                }
-            }
-            else if (CurrentStamina < MaxStamina && _canRegenStamina)
-            {
-                // Faster regen when standing still
-                float regenMultiplier = (State == HumanState.Idle && !HasDirection) ? 1.5f : 1f;
-                CurrentStamina += StaminaRegenRate * regenMultiplier * Time.deltaTime;
-                CurrentStamina = Mathf.Min(CurrentStamina, MaxStamina);
-            }
-
-            UpdateStaminaBar();
-        }
-
-        public void ToggleSprint(bool sprint)
-        {
-            if (!IsMine()) return;
-
-            // Only allow sprinting when grounded, moving, and has sufficient stamina
-            bool canSprint = Grounded && HasDirection && CurrentStamina > 0;
-
-            if (!canSprint)
-                sprint = false;
-
-            // Only change state if different
-            if (IsSprinting != sprint)
-            {
-                IsSprinting = sprint;
-                // Update animation speeds for all relevant animations
-                if (Animation.IsPlaying(HumanAnimations.Run))
-                    Animation.SetSpeed(HumanAnimations.Run, IsSprinting ? SprintSpeedMultiplier : 1f);
-                if (Animation.IsPlaying(HumanAnimations.RunTS))
-                    Animation.SetSpeed(HumanAnimations.RunTS, IsSprinting ? SprintSpeedMultiplier : 1f);
-                if (Animation.IsPlaying(HumanAnimations.RunBuffed))
-                    Animation.SetSpeed(HumanAnimations.RunBuffed, IsSprinting ? SprintSpeedMultiplier : 1f);
-            }
-        }
-
-        private void CheckSprintInput()
-        {
-            if (!IsMine() || Dead || MountState != HumanMountState.None)
-                return;
-
-
-            // Sprint when Shift is held while moving on ground
-            bool wantToSprint = (SettingsManager.InputSettings.Human.HumanSprint.GetKey());
-
-
-            // Additional check for stamina here to prevent toggling sprint when empty
-            if (wantToSprint && Grounded && HasDirection && CurrentStamina > 0)
-            {
-                if (!IsSprinting)
-                    ToggleSprint(true);
-            }
-            else if (IsSprinting)
-            {
-                ToggleSprint(false);
-            }
         }
 
         protected override void FixedUpdate()
@@ -1734,7 +1453,7 @@ namespace Characters
                 if (_hookHuman != null && !_hookHuman.Dead)
                 {
                     Vector3 vector2 = _hookHuman.Cache.Transform.position - Cache.Transform.position;
-                    float magnitude = vector2.magnitude + 30;
+                    float magnitude = vector2.magnitude;
                     // Temporarily remove until a rework is done as this completely breaks hook physics
                     /*if (magnitude > 2f)
                         Cache.Rigidbody.AddForce((vector2.normalized * Mathf.Pow(magnitude, 0.15f) * 30f) - (Cache.Rigidbody.velocity * 0.95f), ForceMode.VelocityChange);*/
@@ -1791,20 +1510,17 @@ namespace Characters
                     }
                     if (State == HumanState.GroundDodge)
                     {
-
                         if (Animation.GetNormalizedTime(HumanAnimations.Dodge) >= 0.2f && Animation.GetNormalizedTime(HumanAnimations.Dodge) < 0.8f)
                             newVelocity = -Cache.Transform.forward * 2.4f * Stats.RunSpeed;
                         else if (Animation.GetNormalizedTime(HumanAnimations.Dodge) > 0.8f)
                             newVelocity = Cache.Rigidbody.velocity * 0.9f;
-
                     }
                     else if (State == HumanState.Idle)
                     {
                         newVelocity = Vector3.zero;
                         if (HasDirection)
                         {
-                            float speed = Stats.RunSpeed * (IsSprinting ? SprintSpeedMultiplier : 1f);
-                            newVelocity = GetTargetDirection() * TargetMagnitude * speed;///
+                            newVelocity = GetTargetDirection() * TargetMagnitude * Stats.RunSpeed;
                             if (!Animation.IsPlaying(HumanAnimations.Run) && !Animation.IsPlaying(HumanAnimations.Jump) &&
                                 !Animation.IsPlaying(HumanAnimations.RunBuffed) && (!Animation.IsPlaying(HumanAnimations.HorseMount) ||
                                 Animation.GetNormalizedTime(HumanAnimations.HorseMount) >= 0.5f))
@@ -1815,7 +1531,6 @@ namespace Characters
                             if (!Animation.IsPlaying(HumanAnimations.WallRun))
                                 _targetRotation = GetTargetRotation();
                         }
-
                         else if (!(Animation.IsPlaying(StandAnimation) || State == HumanState.Land || Animation.IsPlaying(HumanAnimations.Jump) || Animation.IsPlaying(HumanAnimations.HorseMount) || Animation.IsPlaying(HumanAnimations.Grabbed)))
                         {
                             CrossFade(StandAnimation, 0.1f);
@@ -1838,7 +1553,7 @@ namespace Characters
                     force.x = Mathf.Clamp(force.x, -MaxVelocityChange, MaxVelocityChange);
                     force.z = Mathf.Clamp(force.z, -MaxVelocityChange, MaxVelocityChange);
                     force.y = 0f;
-                    if (Animation.IsPlaying(HumanAnimations.Jump)  && Animation.GetNormalizedTime(HumanAnimations.Jump) > 0.18f)
+                    if (Animation.IsPlaying(HumanAnimations.Jump) && Animation.GetNormalizedTime(HumanAnimations.Jump) > 0.18f)
                     {
                         // float jumpSpeed = ((0.5f * (float)Stats.Speed) - 20f);
                         float jumpSpeed = 20f;
@@ -2004,7 +1719,6 @@ namespace Characters
                         {
                             if (State == HumanState.Attack)
                                 targetDirection = Vector3.zero;
-
                         }
                         else
                             _targetRotation = GetTargetRotation();
@@ -2487,7 +2201,7 @@ namespace Characters
                     v = position - (Cache.Rigidbody.position - new Vector3(0, 0.020f, 0)); // 0.020F gives the player the original aottg1 clipping required for bounce.
                 }
             }
-
+           
             float reelAxis = GetReelAxis();
             if (reelAxis > 0f)
             {
@@ -2495,7 +2209,7 @@ namespace Characters
                     reelAxis = 0f;
             }
             float reel = Mathf.Clamp(reelAxis, -0.8f, 0.8f) + 1f;
-            v = Vector3.RotateTowards(v, _currentVelocity, 1.33938f * reel, 1.33938f * reel).normalized;
+            v = Vector3.RotateTowards(v, _currentVelocity, 1.53938f * reel, 1.53938f * reel).normalized;
             if (reelAxis > 0f)
                 _isReelingOut = true;
             else if (reelAxis < 0f && !_reelInWaitForRelease)
@@ -2859,7 +2573,6 @@ namespace Characters
                 Stats.Speed = 75;
                 Stats.Gas = 75;
                 Stats.Ammunition = 70;
-                Stats.Expertise = 80;
                 Stats.ResetGas();
                 Stats.UpdateStats();
             }
@@ -2887,14 +2600,7 @@ namespace Characters
             {
                 SetupWeapon(humanWeapon);
                 SetupItems();
-
-                InitializeSpecials(
-                    SettingsManager.InGameCharacterSettings.Special.Value,
-                    SettingsManager.InGameCharacterSettings.Special2.Value,
-                    SettingsManager.InGameCharacterSettings.Special3.Value);
-
-                // ADD THIS SECTION - Feed inventory to BuildSystem
-                FeedInventoryToBuildSystem();
+                SetSpecial(SettingsManager.InGameCharacterSettings.Special.Value);
             }
             FinishSetup = true;
             // ignore if name contains char_eyes, char_face, char_glasses
@@ -2906,29 +2612,6 @@ namespace Characters
             StartCoroutine(WaitAndNotifyReloaded());
         }
 
-        // 
-        private void FeedInventoryToBuildSystem()
-        {
-            // Get the HumanInventory component from this human
-            HumanInventory inventory = GetComponent<HumanInventory>();
-            if (inventory == null)
-            {
-                Debug.LogError("Human: Could not find HumanInventory component on this human");
-                return;
-            }
-
-            // Find the BuildSystem in the scene
-            BuildSystem buildSystem = FindObjectOfType<BuildSystem>();
-            if (buildSystem != null)
-            {
-                buildSystem.SetPlayerInventory(inventory);
-                Debug.Log($"Human: Successfully fed inventory to BuildSystem for player {gameObject.name}");
-            }
-            else
-            {
-                Debug.LogWarning("Human: BuildSystem not found in scene - building may not work until it's available");
-            }
-        }
         protected void SetupWeapon(int humanWeapon)
         {
             if (humanWeapon == (int)HumanWeapon.Blade)
@@ -2985,284 +2668,33 @@ namespace Characters
                 else
                 {
                     float travelTime = tsInfo["Range"].AsFloat / tsInfo["Speed"].AsFloat;
-                    Weapon = new ThunderspearWeapon(this, Mathf.Clamp(Mathf.FloorToInt(Stats.Ammunition * 0.1111111f) - 2, 1, 11), tsInfo["AmmoRound"].AsInt, tsInfo["CD"].AsFloat, tsInfo["Radius"].AsFloat,
+                    Weapon = new ThunderspearWeapon(this, Mathf.Clamp(Mathf.FloorToInt(Stats.Ammunition * 0.5f) - 20, 4, 30), tsInfo["AmmoRound"].AsInt, tsInfo["CD"].AsFloat, tsInfo["Radius"].AsFloat,
                         tsInfo["Speed"].AsFloat, travelTime, tsInfo["Delay"].AsFloat, tsInfo);
                 }
             }
         }
 
-        public List<SimpleUseable> Flares = new List<SimpleUseable>();
-        public List<SimpleUseable> itemList1 = new List<SimpleUseable>();
-        public List<SimpleUseable> itemList2 = new List<SimpleUseable>();
-        public List<SimpleUseable> itemList3 = new List<SimpleUseable>();
-        public List<SimpleUseable> itemList4 = new List<SimpleUseable>();
-
-        public void SetupItems()
+        protected void SetupItems()
         {
-
-
-            itemList1.Add(new FlareItem(this, "Green", new Color(0f, 1f, 0f, 0.7f), 300f));
-            itemList1.Add(new FlareItem(this, "Red", new Color(1f, 0f, 0f, 0.7f), 300f));
-            itemList1.Add(new FlareItem(this, "Black", new Color(0f, 0f, 0f, 0.7f), 300f));
-            itemList1.Add(new FlareItem(this, "Purple", new Color(153f / 255, 0f, 204f / 255, 0.7f), 300f));
-            itemList1.Add(new FlareItem(this, "Blue", new Color(0f, 102f / 255, 204f / 255, 0.7f), 300f));
-            itemList1.Add(new FlareItem(this, "Yellow", new Color(1f, 1f, 0f, 0.7f), 300f));
-            ///itemList1.Add(new FlareItem(this, "Cyan", new Color(0f, 255f / 252, 255f / 255, 0.8f), 300f));
-            ///itemList1.Add(new FlareItem(this, "Indigo", Color.blue, 300f));
-            itemList2.Add(new FlareItem1(this, "Flash Flare", Color.white, 220f));
-            ///itemList2.Add(new FlareItem3(this, "Acoustic Flare", Color.grey, 300f));
-            itemList2.Add(new HorseWhistleItem(this, "Whistle", 20f));
-            itemList2.Add(new Airburst1Spawn(this, "Airburst Compressor", 1f));
-
-            itemList2.Add(new SupplyStationSpawn(this, "Resupply", 1f));
-
-
-
-
-
-            var inventory = GetComponent<HumanInventory>();
-            if (inventory != null)
-            {
-                inventory.SetItemCount("Molotov", inventory.GetItemCount("Molotov")); // ensure key exists
-
-                if (inventory.GetItemCount("Molotov") > 0)
-                    itemList2.Add(new MolotovSpawn(this, "Molotov", 1f)); // 'this' is the owner
-
-                inventory.SetItemCount("Gas Bomb", inventory.GetItemCount("Gas Bomb")); // ensure key exists
-
-                if (inventory.GetItemCount("Gas Bomb") > 0)
-                    itemList2.Add(new GasBombSpawn(this, "Gas Bomb", 1f)); // 'this' is the owner
-
-
-            }
-
-
-
-
-
-            itemList3.Add(new Lanterntoggle(this, "Lantern On/Off", 1f));
-            itemList3.Add(new CloakToggle(this, "Cape On/Off", 1f));
-            itemList3.Add(new Cloak1Toggle(this, "Hood On/Off", 1f));
-            itemList3.Add(new Wagon1Spawn(this, "Support Wagon", 5f));
-            itemList3.Add(new LargeWagonSpawn(this, "Resupply Wagon", 5f));
-            itemList3.Add(new CannonTestSpawn(this, "Cannon", 5f));
-            itemList3.Add(new WallCannonSpawn(this, "Wall Cannon", 5f));
-            itemList3.Add(new CannonGroundSpawn(this, "Ground Cannon", 5f));
-
-            if (PhotonNetwork.IsMasterClient)
-            {
-                itemList4.Add(new Daycycle(this, "DayCycle", 5f));
-                itemList4.Add(new DaycycleDelete(this, "DeleteDayCycle", 15f));
-
-                ///itemList4.Add(new ShigGateSpawn(this, "ShigGateSpawn", 1f));
-                ///itemList4.Add(new PickupGroundCannon(this, "Field Cannon Item", 1f));
-                itemList4.Add(new Stable2Spawn(this, "Stables", 1f));
-                itemList4.Add(new PastVarreosaSpawn(this, "Shiganshina", 1f));
-                itemList4.Add(new Act0MissionSpawn(this, "Act3MissionSpawn", 1f));
-                itemList4.Add(new Act2MissionDespawn(this, "Act3MissionDespawn", 1f));
-                ///itemList4.Add(new WorkerLogSpawn(this, "WorkerLogSpawn", 1f));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            }
-
-
-
-
-
-            ItemListDisplayNames["itemList1"] = "Flares";
-            ItemListDisplayNames["itemList2"] = "Support";
-            ItemListDisplayNames["itemList3"] = "Equipment";
-            ItemListDisplayNames["itemList4"] = "Master Client Control";
-
-            RegisterItemSprites();
-
+            float cooldown = 140f;
+            Items.Clear();
+            Items.Add(new FlareItem(this, "Green", new Color(0f, 1f, 0f, 0.7f), cooldown));
+            Items.Add(new FlareItem(this, "Red", new Color(1f, 0f, 0f, 0.7f), cooldown));
+            Items.Add(new FlareItem(this, "Black", new Color(0f, 0f, 0f, 0.7f), cooldown));
+            Items.Add(new FlareItem(this, "Purple", new Color(153f / 255, 0f, 204f / 255, 0.7f), cooldown));
+            Items.Add(new FlareItem(this, "Blue", new Color(0f, 102f / 255, 204f / 255, 0.7f), cooldown));
+            Items.Add(new FlareItem(this, "Yellow", new Color(1f, 1f, 0f, 0.7f), cooldown));
+            Items.Add(new FlareItem(this, "Cyan", new Color(0f, 255f / 252, 255f / 255, 0.8f), cooldown));
+            Items.Add(new FlareItem1(this, "Light", new Color(1f, 1f, 1f, 1f), cooldown));
 
 
         }
 
-        public void RefreshItemBasedOnInventory(string itemName)
-        {
-            var inventory = GetComponent<HumanInventory>();
-            if (inventory == null) return;
-
-            // Clean out any existing instance of that item
-            itemList2.RemoveAll(i => i.Name == itemName);
-
-            // Only re-add if count > 0
-            if (inventory.GetItemCount(itemName) > 0)
-            {
-                switch (itemName)
-                {
-                    case "Molotov":
-                        itemList2.Add(new MolotovSpawn(this, itemName, 1f));
-                        break;
-
-                    case "Gas Bomb":
-                        itemList2.Add(new GasBombSpawn(this, itemName, 1f));
-                        break;
-
-                        // ADD MORE IF NEEDING TO BE REFRESHED HERE 
-                }
-            }
-        }
-
-
-
-        private void RegisterItemSprites()
-        {
-            RegisterSprite("Green", "Sprites/Items/Green");
-            RegisterSprite("Red", "Sprites/Items/Red");
-            RegisterSprite("Black", "Sprites/Items/Black");
-            RegisterSprite("Purple", "Sprites/Items/Purple");
-            RegisterSprite("Blue", "Sprites/Items/Blue");
-            RegisterSprite("Yellow", "Sprites/Items/Yellow");
-            RegisterSprite("Cyan", "Sprites/Items/Cyan");
-            RegisterSprite("Indigo", "Sprites/Items/Indigo");
-
-            RegisterSprite("Flash Flare", "Sprites/Items/FlashFlare");
-            RegisterSprite("Acoustic Flare", "Sprites/Items/AcousticFlare");
-            RegisterSprite("Whistle", "Sprites/Items/Whistle");
-
-            RegisterSprite("Lantern On/Off", "Sprites/Items/Lantern");
-            RegisterSprite("Cape On/Off", "Sprites/Items/Cape");
-            RegisterSprite("Hood On/Off", "Sprites/Items/Hood");
-
-            RegisterSprite("Support Wagon", "Sprites/Items/Wagon1");
-            RegisterSprite("Resupply Wagon", "Sprites/Items/Wagon2");
-            RegisterSprite("Cannon", "Sprites/Items/Cannon");
-            RegisterSprite("Wall Cannon", "Sprites/Items/WallCannon");
-            RegisterSprite("Ground Cannon", "Sprites/Items/GroundCannon");
-
-            RegisterSprite("DayCycle", "Sprites/Items/DayCycle");
-            RegisterSprite("DeleteDayCycle", "Sprites/Items/DeleteDayCycle");
-
-            RegisterSprite("ShigGateSpawn", "Sprites/Items/ShigGate");
-            RegisterSprite("Field Cannon Item", "Sprites/Items/FieldCannon");
-
-            RegisterSprite("Resupply", "Sprites/Items/SupplyStationicon");
-            RegisterSprite("Airburst Compressor", "Sprites/Items/AirburstCompressorLvl1");
-            RegisterSprite("Gas Bomb", "Sprites/Items/GasBombSprite");
-            RegisterSprite("Molotov", "Sprites/Items/MolotovSprite");
-
-
-        }
-
-
-
-
-        public void InitializeSpecials(string special1, string special2, string special3)
-        {
-            CurrentSpecials[0] = special1;
-            CurrentSpecials[1] = special2;
-            CurrentSpecials[2] = special3;
-
-            SpecialsArray[0] = HumanSpecials.GetSpecialUseable(this, special1);
-            SpecialsArray[1] = !string.IsNullOrEmpty(special2) ? HumanSpecials.GetSpecialUseable(this, special2) : null;
-            SpecialsArray[2] = !string.IsNullOrEmpty(special3) ? HumanSpecials.GetSpecialUseable(this, special3) : null;
-
-            // Automatically set first special as active
-            SetCurrentSpecial(0);
-        }
-
-        public void SetCurrentSpecial(int index)
-        {
-            // Check if the index is valid and the special exists
-            if (index < 0 || index >= 3 || SpecialsArray[index] == null)
-                return;
-
-            // Check expertise requirements based on the special index
-            switch (index)
-            {
-                case 0: // First special requires 80+ expertise
-                    if (Stats.Expertise < 80)
-                        return;
-                    break;
-                case 1: // Second special requires 100+ expertise
-                    if (Stats.Expertise < 100)
-                        return;
-                    break;
-                case 2: // Third special requires 120+ expertise
-                    if (Stats.Expertise < 120)
-                        return;
-                    break;
-            }
-
-            CurrentSpecialIndex = index;
-            CurrentSpecial = CurrentSpecials[index];
-            Special = SpecialsArray[index];
-
-            // Update UI
-            ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(HumanSpecials.GetSpecialIcon(CurrentSpecial));
-
-            // Reset animation if needed
-            if (State != HumanState.Die && State != HumanState.Grab &&
-                State != HumanState.MountingHorse && State != HumanState.Stun &&
-                State != HumanState.GroundDodge)
-            {
-                State = HumanState.Idle;
-            }
-        }
         public void SetSpecial(string special)
-
         {
             CurrentSpecial = special;
             Special = HumanSpecials.GetSpecialUseable(this, special);
             ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.SetSpecialIcon(HumanSpecials.GetSpecialIcon(special));
-            SkillCycleNum = 1;
-        }
-        public void CycleSpecial()
-        {
-            if (State == HumanState.SpecialAction || State == HumanState.SpecialAttack)
-            {
-                return;
-            }
-            int nextIndex = (CurrentSpecialIndex + 1) % 3;
-
-            // Find next available special (skip empty slots)
-            while (nextIndex != CurrentSpecialIndex &&
-                  (SpecialsArray[nextIndex] == null || string.IsNullOrEmpty(CurrentSpecials[nextIndex])))
-            {
-                nextIndex = (nextIndex + 1) % 3;
-            }
-
-            if (nextIndex != CurrentSpecialIndex)
-            {
-                SetCurrentSpecial(nextIndex);
-            }
-        }
-
-        public void CycleSpecialBackwards()
-        {
-            if (State == HumanState.SpecialAction)
-            {
-                return;
-            }
-            // Calculate previous index with wrap-around
-            int nextIndex = (CurrentSpecialIndex - 1 + 3) % 3;
-
-            // Find previous available special (skip empty slots)
-            while (nextIndex != CurrentSpecialIndex &&
-                  (SpecialsArray[nextIndex] == null || string.IsNullOrEmpty(CurrentSpecials[nextIndex])))
-            {
-                nextIndex = (nextIndex - 1 + 3) % 3;
-            }
-
-            if (nextIndex != CurrentSpecialIndex)
-            {
-                SetCurrentSpecial(nextIndex);
-            }
         }
 
         protected void LoadSkin(Player player = null)
@@ -4101,50 +3533,6 @@ namespace Characters
             }
             return renderers;
         }
-
-        [PunRPC]
-        public void RPC_Teleport(Vector3 newPosition)
-        {
-            StartCoroutine(ForceTeleportPosition(newPosition));
-        }
-
-        private IEnumerator ForceTeleportPosition(Vector3 targetPosition)
-        {
-            float timer = 1f; // Force for 1 second
-            while (timer > 0f)
-            {
-                Cache.Transform.position = targetPosition;
-                timer -= Time.deltaTime;
-                yield return null; // wait one frame
-            }
-        }
-
-        [PunRPC]
-        public void RPC_SetStats(int speed, int gas, int ammo, int acceleration, float horseSpeed)
-        {
-            Stats.Speed = speed;
-            Stats.Gas = gas;
-            Stats.Ammunition = ammo;
-            Stats.Acceleration = acceleration;
-
-            Stats.HorseSpeed = horseSpeed;
-
-            Stats.ResetGas();
-            Stats.UpdateStats();
-        }
-
-
-        private void RegisterSprite(string itemName, string resourcePath)
-        {
-            Sprite sprite = Resources.Load<Sprite>(resourcePath);
-            if (sprite != null)
-                ItemSpriteMap[itemName] = sprite;
-            else
-                Debug.LogWarning($"Missing sprite for '{itemName}' at {resourcePath}");
-        }
-
-
-
 
         public HumanState State
         {

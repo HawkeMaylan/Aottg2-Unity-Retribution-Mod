@@ -9,8 +9,6 @@
         public FloatSetting TitanSpawnCrawler = new FloatSetting(15f, minValue: 0f, maxValue: 100f);
         public FloatSetting TitanSpawnThrower = new FloatSetting(15f, minValue: 0f, maxValue: 100f);
         public FloatSetting TitanSpawnPunk = new FloatSetting(15f, minValue: 0f, maxValue: 100f);
-        public FloatSetting TitanSpawnAberrant = new FloatSetting(0, minValue: 0f, maxValue: 100f);
-        public FloatSetting TitanSpawnStrider = new FloatSetting(0, minValue: 0f, maxValue: 100f);
         public BoolSetting TitanSizeEnabled = new BoolSetting(false);
         public FloatSetting TitanSizeMin = new FloatSetting(1f, minValue: 0.1f, maxValue: 100f);
         public FloatSetting TitanSizeMax = new FloatSetting(3f, minValue: 0.1f, maxValue: 100f);

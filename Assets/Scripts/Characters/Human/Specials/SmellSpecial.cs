@@ -9,13 +9,13 @@ namespace Characters
     class SmellSpecial : BaseEmoteSpecial
     {
         protected override float ActiveTime => 30f;
-        protected float Range = 1000f;
+        protected float Range = 600f;
         protected override bool GroundedOnly => false;
         protected float Delay = 1f;
 
         public SmellSpecial(BaseCharacter owner): base(owner)
         {
-            Cooldown = 300f;
+            Cooldown = 60f;
         }
 
         protected override void Activate()

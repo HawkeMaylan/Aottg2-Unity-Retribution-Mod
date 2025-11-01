@@ -12,7 +12,7 @@ namespace Characters
 
         public SmokeBombSpecial(BaseCharacter owner): base(owner)
         {
-            Cooldown = 120f;
+            Cooldown = 15f;
         }
 
         protected override void Activate()

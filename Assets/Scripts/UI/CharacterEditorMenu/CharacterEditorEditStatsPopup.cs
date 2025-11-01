@@ -21,12 +21,10 @@ namespace UI
         protected override float VerticalSpacing => 20f;
         protected override int HorizontalPadding => 25;
         protected override int VerticalPadding => 25;
-        protected IntSetting Speed = new IntSetting(80, 50, 110);
-        protected IntSetting Acceleration = new IntSetting(80, 50, 110);
-        protected IntSetting Ammunition = new IntSetting(80, 50, 110);
-        protected IntSetting Gas = new IntSetting(80, 50, 110);
-        protected IntSetting Expertise = new IntSetting(80, 60, 120);
-        
+        protected IntSetting Speed = new IntSetting(80, 50, 100);
+        protected IntSetting Acceleration = new IntSetting(80, 50, 100);
+        protected IntSetting Ammunition = new IntSetting(80, 50, 100);
+        protected IntSetting Gas = new IntSetting(80, 50, 100);
 
         private Text _pointsLeftLabel;
 
@@ -46,7 +44,6 @@ namespace UI
             Acceleration.Value = stats.Acceleration;
             Gas.Value = stats.Gas;
             Ammunition.Value = stats.Ammunition;
-            Expertise.Value = stats.Expertise;
             ElementFactory.CreateIncrementSetting(SinglePanel, style, Acceleration, UIManager.GetLocale(cat, sub, "Acceleration"),
                onValueChanged: () => OnStatChanged(Acceleration));
             ElementFactory.CreateIncrementSetting(SinglePanel, style, Speed, UIManager.GetLocale(cat, sub, "Speed"), 
@@ -55,11 +52,6 @@ namespace UI
                 onValueChanged: () => OnStatChanged(Gas));
             ElementFactory.CreateIncrementSetting(SinglePanel, style, Ammunition, UIManager.GetLocale(cat, sub, "Ammunition"),
                onValueChanged: () => OnStatChanged(Ammunition));
-            ElementFactory.CreateIncrementSetting(SinglePanel, style, Expertise, UIManager.GetLocale(cat, sub, "Expertise", "Controls amounts of skills     0 < 80    1 at 80    2 at 100    3 at 120"),
-               onValueChanged: () => OnStatChanged(Expertise));
-            
-
-
             OnStatChanged(Speed);
         }
 
@@ -76,7 +68,6 @@ namespace UI
                 stats.Acceleration = Acceleration.Value;
                 stats.Gas = Gas.Value;
                 stats.Ammunition = Ammunition.Value;
-                stats.Expertise = Expertise.Value;
                 set.Stats.Value = stats.Serialize();
                 SettingsManager.HumanCustomSettings.Save();
                 ((CharacterEditorMenu)UIManager.CurrentMenu).RebuildPanels(false);
@@ -85,8 +76,8 @@ namespace UI
 
         protected void OnStatChanged(IntSetting setting)
         {
-            int maxPoints = 400;
-            int currentTotal = Speed.Value + Gas.Value + Ammunition.Value + Acceleration.Value + Expertise.Value;
+            int maxPoints = 320;
+            int currentTotal = Speed.Value + Gas.Value + Ammunition.Value + Acceleration.Value;
             if (currentTotal > maxPoints)
             {
                 int diff = currentTotal - maxPoints;
@@ -97,11 +88,10 @@ namespace UI
                     Gas.SetDefault();
                     Ammunition.SetDefault();
                     Acceleration.SetDefault();
-                    Expertise.SetDefault();
                 }
                 SyncSettingElements();
             }
-            currentTotal = Speed.Value + Gas.Value + Ammunition.Value + Acceleration.Value + Expertise.Value;
+            currentTotal = Speed.Value + Gas.Value + Ammunition.Value + Acceleration.Value;
             _pointsLeftLabel.text = "Points left: " + Math.Max(0, maxPoints - currentTotal).ToString();
         }
     }

@@ -132,83 +132,20 @@ namespace Controllers
 
         public virtual void Init(JSONNode data)
         {
-            // DetectRange
-            if (data.HasKey("DetectRangeMin") && data.HasKey("DetectRangeMax"))
-                DetectRange = UnityEngine.Random.Range(data["DetectRangeMin"].AsFloat, data["DetectRangeMax"].AsFloat);
-            else if (data.HasKey("DetectRange"))
-                DetectRange = data["DetectRange"].AsFloat;
-
-            // CloseAttackRange
-            if (data.HasKey("CloseAttackRangeMin") && data.HasKey("CloseAttackRangeMax"))
-                CloseAttackRange = UnityEngine.Random.Range(data["CloseAttackRangeMin"].AsFloat, data["CloseAttackRangeMax"].AsFloat);
-            else if (data.HasKey("CloseAttackRange"))
-                CloseAttackRange = data["CloseAttackRange"].AsFloat;
-
-            // FarAttackMinRange
-            if (data.HasKey("FarAttackMinRangeMin") && data.HasKey("FarAttackMinRangeMax"))
-                FarAttackMinRange = UnityEngine.Random.Range(data["FarAttackMinRangeMin"].AsFloat, data["FarAttackMinRangeMax"].AsFloat);
-            else if (data.HasKey("FarAttackMinRange"))
-                FarAttackMinRange = data["FarAttackMinRange"].AsFloat;
-
-            // FarAttackMaxRange
-            if (data.HasKey("FarAttackMaxRangeMin") && data.HasKey("FarAttackMaxRangeMax"))
-                FarAttackMaxRange = UnityEngine.Random.Range(data["FarAttackMaxRangeMin"].AsFloat, data["FarAttackMaxRangeMax"].AsFloat);
-            else if (data.HasKey("FarAttackMaxRange"))
-                FarAttackMaxRange = data["FarAttackMaxRange"].AsFloat;
-
-            // FarAttackCooldown
-            if (data.HasKey("FarAttackCooldownMin") && data.HasKey("FarAttackCooldownMax"))
-                FarAttackCooldown = UnityEngine.Random.Range(data["FarAttackCooldownMin"].AsFloat, data["FarAttackCooldownMax"].AsFloat);
-            else if (data.HasKey("FarAttackCooldown"))
-                FarAttackCooldown = data["FarAttackCooldown"].AsFloat;
-
-            // FocusRange
-            if (data.HasKey("FocusRangeMin") && data.HasKey("FocusRangeMax"))
-                FocusRange = UnityEngine.Random.Range(data["FocusRangeMin"].AsFloat, data["FocusRangeMax"].AsFloat);
-            else if (data.HasKey("FocusRange"))
-                FocusRange = data["FocusRange"].AsFloat;
-
-            // FocusTime
-            if (data.HasKey("FocusTimeMin") && data.HasKey("FocusTimeMax"))
-                FocusTime = UnityEngine.Random.Range(data["FocusTimeMin"].AsFloat, data["FocusTimeMax"].AsFloat);
-            else if (data.HasKey("FocusTime"))
-                FocusTime = data["FocusTime"].AsFloat;
-
-            // AttackWait
-            if (data.HasKey("AttackWaitMin") && data.HasKey("AttackWaitMax"))
-                AttackWait = UnityEngine.Random.Range(data["AttackWaitMin"].AsFloat, data["AttackWaitMax"].AsFloat);
-            else if (data.HasKey("AttackWait"))
-                AttackWait = data["AttackWait"].AsFloat;
-
-            // ChaseAngleTimeMin
-            if (data.HasKey("ChaseAngleTimeMinMin") && data.HasKey("ChaseAngleTimeMinMax"))
-                ChaseAngleTimeMin = UnityEngine.Random.Range(data["ChaseAngleTimeMinMin"].AsFloat, data["ChaseAngleTimeMinMax"].AsFloat);
-            else if (data.HasKey("ChaseAngleTimeMin"))
-                ChaseAngleTimeMin = data["ChaseAngleTimeMin"].AsFloat;
-
-            // ChaseAngleTimeMax
-            if (data.HasKey("ChaseAngleTimeMaxMin") && data.HasKey("ChaseAngleTimeMaxMax"))
-                ChaseAngleTimeMax = UnityEngine.Random.Range(data["ChaseAngleTimeMaxMin"].AsFloat, data["ChaseAngleTimeMaxMax"].AsFloat);
-            else if (data.HasKey("ChaseAngleTimeMax"))
-                ChaseAngleTimeMax = data["ChaseAngleTimeMax"].AsFloat;
-
-            // ChaseAngleMinRange
-            if (data.HasKey("ChaseAngleMinRangeMin") && data.HasKey("ChaseAngleMinRangeMax"))
-                ChaseAngleMinRange = UnityEngine.Random.Range(data["ChaseAngleMinRangeMin"].AsFloat, data["ChaseAngleMinRangeMax"].AsFloat);
-            else if (data.HasKey("ChaseAngleMinRange"))
-                ChaseAngleMinRange = data["ChaseAngleMinRange"].AsFloat;
-
-            // IsRun and IsTurn
+            DetectRange = data["DetectRange"].AsFloat;
+            CloseAttackRange = data["CloseAttackRange"].AsFloat;
+            FarAttackMinRange = data["FarAttackMinRange"].AsFloat;
+            FarAttackMaxRange = data["FarAttackMaxRange"].AsFloat;
+            FarAttackCooldown = data["FarAttackCooldown"].AsFloat;
+            FocusRange = data["FocusRange"].AsFloat;
+            FocusTime = data["FocusTime"].AsFloat;
+            AttackWait = data["AttackWait"].AsFloat;
+            ChaseAngleTimeMin = data["ChaseAngleTimeMin"].AsFloat;
+            ChaseAngleTimeMax = data["ChaseAngleTimeMax"].AsFloat;
+            ChaseAngleMinRange = data["ChaseAngleMinRange"].AsFloat;
             IsRun = data["IsRun"].AsBool;
             IsTurn = data["IsTurn"].AsBool;
-
-            // TurnAngle
-            if (data.HasKey("TurnAngleMin") && data.HasKey("TurnAngleMax"))
-                TurnAngle = UnityEngine.Random.Range(data["TurnAngleMin"].AsFloat, data["TurnAngleMax"].AsFloat);
-            else if (data.HasKey("TurnAngle"))
-                TurnAngle = data["TurnAngle"].AsFloat;
-
-            // Load Attack Infos
+            TurnAngle = data["TurnAngle"].AsFloat;
             AttackInfos = CharacterData.TitanAttackInfos[data["Type"].Value];
             foreach (string attack in data["Attacks"].Keys)
             {
@@ -228,10 +165,8 @@ namespace Controllers
                 else
                     AttackChances.Add(attack, chance);
             }
-
             _waitAttackTimeLeft = AttackWait;
         }
-
 
         public void SetDetectRange(float range)
         {
@@ -558,25 +493,25 @@ namespace Controllers
 
         protected bool HasClearLineOfSight(Vector3 target)
         {
-            //if (_usePathfinding == false)
+            if (_usePathfinding == false)
                 return true;
-            //float colliderRadius = _mainCollider.radius * _titan.Cache.Transform.localScale.x * 0.5f;
+            float colliderRadius = _mainCollider.radius * _titan.Cache.Transform.localScale.x * 0.5f;
             // var start = _titan.Cache.Transform.TransformPoint(_mainCollider.center) + _titan.Cache.Transform.forward * -1 * colliderRadius;
-            //var left = _titan.Cache.Transform.TransformPoint(_mainCollider.center) + _titan.Cache.Transform.forward * -1 * colliderRadius + _titan.Cache.Transform.right * -1.1f * colliderRadius;
-            //var right = _titan.Cache.Transform.TransformPoint(_mainCollider.center) + _titan.Cache.Transform.forward * -1 * colliderRadius + _titan.Cache.Transform.right * 1.1f * colliderRadius;
-            //return HasLineOfSight(left, target) && HasLineOfSight(right, target);
+            var left = _titan.Cache.Transform.TransformPoint(_mainCollider.center) + _titan.Cache.Transform.forward * -1 * colliderRadius + _titan.Cache.Transform.right * -1.1f * colliderRadius;
+            var right = _titan.Cache.Transform.TransformPoint(_mainCollider.center) + _titan.Cache.Transform.forward * -1 * colliderRadius + _titan.Cache.Transform.right * 1.1f * colliderRadius;
+            return HasLineOfSight(left, target) && HasLineOfSight(right, target);
         }
 
         protected bool HasLineOfSight(Vector3 start, Vector3 target)
         {
-            //RaycastHit hit;
-            //var direction = target - start;
-            //var distance = direction.magnitude - 0.2f;
-            //if (distance > 1000)
-            //    return false;
-            //direction = direction.normalized;
-            //if (Physics.Raycast(start, direction, out hit, distance, _losLayer.value))
-            //   return false;
+            RaycastHit hit;
+            var direction = target - start;
+            var distance = direction.magnitude - 0.2f;
+            if (distance > 1000)
+                return false;
+            direction = direction.normalized;
+            if (Physics.Raycast(start, direction, out hit, distance, _losLayer.value))
+                return false;
             return true;
         }
 

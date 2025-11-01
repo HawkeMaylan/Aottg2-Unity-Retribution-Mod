@@ -332,7 +332,7 @@ namespace Cameras
             var cameraDistance = GetCameraDistance();
             float offset = cameraDistance * (200f - Camera.fieldOfView) / 150f;
             if (cameraDistance == 0f)
-                offset = 0.0f;
+                offset = 0.1f;
             Cache.Transform.position = _follow.GetCameraAnchor().position;
             Cache.Transform.position += Vector3.up * GetHeightDistance() * SettingsManager.GeneralSettings.CameraHeight.Value;
             float height = cameraDistance == 0f ? 0.6f : cameraDistance;
@@ -479,11 +479,9 @@ namespace Cameras
                 }
                 Vector3 direction = Vector3.zero;
 
-                float speed = 10;
+                float speed = 200f;
                 if (_input.Modifier.GetKey())
-                    speed = 35;
-                if (Input.GetKey(KeyCode.Comma))
-                    speed = 1;
+                    speed *= 2f;
 
                 if (_input.Forward.GetKey())
                     direction += Cache.Transform.forward;

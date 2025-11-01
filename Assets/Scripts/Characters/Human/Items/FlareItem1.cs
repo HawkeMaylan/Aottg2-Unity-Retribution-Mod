@@ -21,7 +21,7 @@ namespace Characters
         {
             var human = (Human)_owner;
             Vector3 target = human.GetAimPoint();
-            Vector3 start = human.Cache.Transform.position + human.Cache.Transform.up * 5f;
+            Vector3 start = human.Cache.Transform.position + human.Cache.Transform.up * 2f;
             Vector3 direction = (target - start).normalized;
             ProjectileSpawner.Spawn(ProjectilePrefabs.FlareLight, start, Quaternion.identity, direction * Speed, Gravity, 6.5f, _owner.Cache.PhotonView.ViewID,
                 "", new object[] { _color });
