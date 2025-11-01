@@ -8,12 +8,12 @@ namespace Characters
     class DanceSpecial : BaseEmoteSpecial
     {
         protected override float ActiveTime => 2f;
-        protected float Range = 200f;
+        protected float Range = 100f;
         protected override bool GroundedOnly => false;
 
         public DanceSpecial(BaseCharacter owner): base(owner)
         {
-            Cooldown = 5f;
+            Cooldown = 180f;
         }
 
         protected override void Activate()

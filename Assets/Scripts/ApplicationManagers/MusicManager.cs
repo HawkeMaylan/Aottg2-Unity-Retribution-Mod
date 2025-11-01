@@ -396,11 +396,11 @@ namespace ApplicationManagers
                                 if (distance < BattleTitanActiveDistance && ((BasicTitan)character).TargetViewId > 0)
                                     return true;
                             }
-                            else
-                            {
-                                if (distance < BattleOtherAnyDistance)
-                                    return true;
-                            }
+                           /// else
+                            ///{
+                           ///     if (distance < BattleOtherAnyDistance)
+                           ///         return true;
+                           /// }
                         }
                     }
                 }

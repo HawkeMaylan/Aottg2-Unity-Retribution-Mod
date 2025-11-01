@@ -8,18 +8,18 @@ namespace Characters
     class SwitchbackSpecial : ExtendedUseable
     {
         private const float GrabIFrameDuration = 0.5f;
-        protected override float ActiveTime => 0.3f;
+        protected override float ActiveTime => 0.8f;
 
         public SwitchbackSpecial(BaseCharacter owner): base(owner)
         {
-            Cooldown = 2f;
+            Cooldown = 7f;
         }
 
         public bool RegisterCollision(Human human, Collision collision, float speed)
         {
             if (IsActive)
             {
-                human.Cache.Rigidbody.velocity = collision.contacts[0].normal.normalized * Mathf.Max(speed, 20f);
+                human.Cache.Rigidbody.velocity = collision.contacts[0].normal.normalized * Mathf.Max((speed * 0.4f), 20f);
                 _activeTimeLeft = 0f;
                 IsActive = false;
                 human.PlaySound(HumanSounds.Switchback);
@@ -29,11 +29,11 @@ namespace Characters
             return false;
         }
 
-        protected override void Activate()
-        {
-            ((Human)_owner).StartGrabImmunity(GrabIFrameDuration);
-            base.Activate();
-        }
+        ///protected override void Activate()
+        ///{
+        ///    ((Human)_owner).StartGrabImmunity(GrabIFrameDuration);
+        ///    base.Activate();
+        ///}
 
         protected override void Deactivate()
         {

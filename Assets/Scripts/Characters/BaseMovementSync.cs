@@ -98,6 +98,7 @@ namespace Characters
             {
                 _transform.position = Vector3.Lerp(_transform.position, _correctPosition, Time.deltaTime * SmoothingDelay);
                 _transform.rotation = Quaternion.Lerp(_transform.rotation, _correctRotation, Time.deltaTime * SmoothingDelay);
+
                 if (_syncVelocity && _timeSinceLastMessage < MaxPredictionTime)
                 {
                     _correctPosition += _correctVelocity * Time.deltaTime;
@@ -105,6 +106,8 @@ namespace Characters
                 }
             }
         }
+
+
 
         void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
         {

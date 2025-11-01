@@ -27,7 +27,13 @@ namespace UI
             ElementFactory.CreateDropdownSetting(DoublePanelLeft, style, settings.ScreenResolution, UIManager.GetLocale(cat, sub, "Resolution"),
                 FullscreenHandler.GetResolutionOptions(), elementWidth: 200f);
             ElementFactory.CreateInputSetting(DoublePanelLeft, style, settings.RenderDistance, UIManager.GetLocale(cat, sub, "RenderDistance"), elementWidth: 100f, tooltip: UIManager.GetLocale(cat, sub, "RenderDistanceTooltip"));
+
+            ElementFactory.CreateInputSetting(DoublePanelRight, style, settings.MemoryCapMB, UIManager.GetLocale(cat, sub, "MemoryCap"), elementWidth: 100f, tooltip: UIManager.GetLocale(cat, sub, "Attempts to Cap Reserved Ram to This"));
+
             ElementFactory.CreateInputSetting(DoublePanelLeft, style, settings.FPSCap, UIManager.GetLocale(cat, sub, "FPSCap"), elementWidth: 100f);
+
+            ElementFactory.CreateInputSetting(DoublePanelLeft, style, settings.FPSCap, UIManager.GetLocale(cat, sub, "FPSCap"), elementWidth: 100f);
+
             ElementFactory.CreateInputSetting(DoublePanelLeft, style, settings.MenuFPSCap, UIManager.GetLocale(cat, sub, "MenuFPSCap"), elementWidth: 100f);
             ElementFactory.CreateToggleSetting(DoublePanelLeft, style, settings.VSync, UIManager.GetLocale(cat, sub, "VSync"));
             ElementFactory.CreateToggleSetting(DoublePanelLeft, style, settings.InterpolationEnabled, UIManager.GetLocale(cat, sub, "InterpolationEnabled"), tooltip: UIManager.GetLocale(cat, sub, "InterpolationEnabledTooltip"));

@@ -78,6 +78,8 @@ namespace UI
         private Dictionary<string, BasePopup> _customPopups = new Dictionary<string, BasePopup>();
         private string[] trackedProperties = new string[] { "Kills", "Deaths", "HighestDamage", "TotalDamage" };
 
+        private bool _radialMenuActive = false;
+
         public override void Setup()
         {
             base.Setup();
@@ -97,6 +99,17 @@ namespace UI
             SetupSnapshot();
             HideAllMenus();
         }
+        public void SetRadialMenuActive(bool active)
+        {
+            _radialMenuActive = active;
+            if (active)
+            {
+                // Optional: Hide other UI elements when radial menu is open
+                HideAllMenus();
+            }
+        }
+
+        
 
         public void ApplyUISettings()
         {
@@ -166,11 +179,11 @@ namespace UI
 
         private void SetupChat()
         {
-            if (SettingsManager.UISettings.FeedConsole.Value && SettingsManager.UISettings.GameFeed.Value)
-            {
-                FeedPanel = ElementFactory.InstantiateAndSetupPanel<FeedPanel>(_bottomRightLabel.transform, "Prefabs/InGame/FeedPanel", true).GetComponent<FeedPanel>();
-                ElementFactory.SetAnchor(FeedPanel.gameObject, TextAnchor.UpperRight, TextAnchor.UpperRight, new Vector2(0f, -50f));
-            }
+           // if (SettingsManager.UISettings.FeedConsole.Value && SettingsManager.UISettings.GameFeed.Value)
+            //{
+            //    FeedPanel = ElementFactory.InstantiateAndSetupPanel<FeedPanel>(_bottomRightLabel.transform, "Prefabs/InGame/FeedPanel", true).GetComponent<FeedPanel>();
+            //    ElementFactory.SetAnchor(FeedPanel.gameObject, TextAnchor.UpperRight, TextAnchor.UpperRight, new Vector2(0f, -50f));
+            //}
             if (SettingsManager.SoundSettings.VoiceChatInput.Value != (int)VoiceChatInputMode.Off)
             {
                 VoiceChatPanel = ElementFactory.InstantiateAndSetupPanel<VoiceChatPanel>(transform, "Prefabs/InGame/VoiceChatPanel", true).GetComponent<VoiceChatPanel>();
@@ -244,7 +257,12 @@ namespace UI
 
         public bool AllowMap()
         {
-            return (!SettingsManager.InGameCurrent.Misc.GlobalMinimapDisable.Value && !SettingsManager.InGameCurrent.Misc.RealismMode.Value);
+            bool minimapDisabled = SettingsManager.InGameCurrent.Misc.GlobalMinimapDisable.Value;
+            bool realismEnabled = SettingsManager.InGameCurrent.Misc.RealismMode.Value;
+
+            // Allow the map if it's not disabled and realism is off,
+            // or if realism is on but this player is the Master Client
+            return !minimapDisabled && (!realismEnabled || Photon.Pun.PhotonNetwork.IsMasterClient);
         }
 
         public static bool InMenu()
@@ -255,7 +273,7 @@ namespace UI
                 if (popup.IsActive)
                     return true;
             }
-            return menu.EmoteHandler.IsActive || menu.ItemHandler.IsActive;
+            return menu.EmoteHandler.IsActive || menu.ItemHandler.IsActive || menu._radialMenuActive;
         }
 
         public void SetPauseMenu(bool enabled)
@@ -281,6 +299,12 @@ namespace UI
 
         public void SetScoreboardMenu(bool enabled, bool fromClick)
         {
+            bool realismEnabled = SettingsManager.InGameCurrent.Misc.RealismMode.Value;
+
+            // Only allow scoreboard if realism is off or player is MasterClient
+            if (realismEnabled && !PhotonNetwork.IsMasterClient)
+                return;
+
             if (enabled && !InMenu())
             {
                 HideAllMenus();
@@ -293,6 +317,7 @@ namespace UI
                     SkipAHSSInput = true;
             }
         }
+
 
         public void ToggleMapMenu()
         {
@@ -384,16 +409,23 @@ namespace UI
 
         public void ShowKillFeed(string killer, string victim, int score, string weapon)
         {
+            bool realismEnabled = SettingsManager.InGameCurrent.Misc.RealismMode.Value;
+
+            // Only allow showing kill feed if realism is off or player is MasterClient
+            if (realismEnabled && !PhotonNetwork.IsMasterClient)
+                return;
+
             int feedCount = SettingsManager.UISettings.KillFeedCount.Value;
             if (feedCount <= 0)
                 return;
             if (_killFeedBigPopup.TimeLeft > 0f)
             {
-                ShowKillFeedPushSmall(_killFeedBigPopup.Killer, _killFeedBigPopup.Victim, _killFeedBigPopup.Score, 
+                ShowKillFeedPushSmall(_killFeedBigPopup.Killer, _killFeedBigPopup.Victim, _killFeedBigPopup.Score,
                     _killFeedBigPopup.Weapon, _killFeedBigPopup.TimeLeft, 0);
             }
             _killFeedBigPopup.Show(killer, victim, score, weapon);
         }
+
 
         private void ShowKillFeedPushSmall(string killer, string victim, int score, string weapon, float timeLeft, int index)
         {
@@ -465,6 +497,21 @@ namespace UI
         {
             if (_gameManager == null)
                 return;
+
+            if (TopLeftHud != null)
+            {
+                bool realismEnabled = SettingsManager.InGameCurrent.Misc.RealismMode.Value;
+                if (realismEnabled && !PhotonNetwork.IsMasterClient)
+                {
+                    if (TopLeftHud.activeSelf)
+                        TopLeftHud.SetActive(false);
+                }
+                else
+                {
+                    if (!TopLeftHud.activeSelf)
+                        TopLeftHud.SetActive(true);
+                }
+            }
             if (_gameManager.GlobalPause)
             {
                 _globalPauseGamePopup.Show();
@@ -572,11 +619,11 @@ namespace UI
             if (SettingsManager.UISettings.ShowKeybindTip.Value)
             {
                 var settings = SettingsManager.InputSettings;
-                if (str != "")
-                    str += ", ";
-                str += "Pause: " + ChatManager.GetColorString(settings.General.Pause.ToString(), ChatTextColor.System);
-                str += ", " + "Scoreboard: " + ChatManager.GetColorString(settings.General.ToggleScoreboard.ToString(), ChatTextColor.System);
-                str += ", " + "Change Char: " + ChatManager.GetColorString(settings.General.ChangeCharacter.ToString(), ChatTextColor.System);
+                ///if (str != "")
+                ///    str += ", ";
+                ///str += "Pause: " + ChatManager.GetColorString(settings.General.Pause.ToString(), ChatTextColor.System);
+                ///str += ", " + "Scoreboard: " + ChatManager.GetColorString(settings.General.ToggleScoreboard.ToString(), ChatTextColor.System);
+                ///str += ", " + "Change Char: " + ChatManager.GetColorString(settings.General.ChangeCharacter.ToString(), ChatTextColor.System);
             }
             if (SettingsManager.UISettings.Coordinates.Value == (int)CoordinateMode.BottomRight)
             {

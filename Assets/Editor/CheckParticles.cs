@@ -17,9 +17,7 @@ public class CheckParticles
                 if (particle.renderMode == ParticleSystemRenderMode.Mesh)
                 {
                     if (particle.sharedMaterial.shader.name.Contains("Standard"))
-                        Debug.Log("Mesh particle using standard material: " + prefab);
-                    if (!particle.enableGPUInstancing)
-                        Debug.Log("Mesh particle not using gpu instancing: " + prefab);
+                        Debug.Log(prefab);
                 }
             }
         }

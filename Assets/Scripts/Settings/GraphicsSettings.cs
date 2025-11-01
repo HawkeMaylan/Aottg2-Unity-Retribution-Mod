@@ -36,6 +36,8 @@ namespace Settings
         public BoolSetting NapeBloodEnabled = new BoolSetting(true);
         public BoolSetting MipmapEnabled = new BoolSetting(true);
 
+        public IntSetting MemoryCapMB = new IntSetting(4096, minValue: 512, maxValue: 16384);
+
         // Post Processing
         public IntSetting AmbientOcclusion = new IntSetting((int)AmbientOcclusionLevel.Off, minValue: 0, maxValue: (int)Util.EnumMaxValue<AmbientOcclusionLevel>());
         public IntSetting Bloom = new IntSetting((int)BloomLevel.Low, minValue: 0, maxValue: (int)Util.EnumMaxValue<BloomLevel>());

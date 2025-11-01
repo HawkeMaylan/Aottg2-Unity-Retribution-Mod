@@ -38,8 +38,8 @@ namespace Anticheat
             var filters = _IdToEventFilters[sender.ActorNumber];
             if (!filters.ContainsKey(eventType))
             {
-                if (eventType == PhotonEventType.Instantiate)
-                    filters.Add(eventType, new InstantiateEventFilter(sender, eventType));
+                if (eventType == PhotonEventType.Instantiate);
+                    ///filters.Add(eventType, new InstantiateEventFilter(sender, eventType));
             }
             return filters[eventType].CheckEvent(data);
         }

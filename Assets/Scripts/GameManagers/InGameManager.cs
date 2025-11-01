@@ -501,6 +501,10 @@ namespace GameManagers
             var specials = HumanSpecials.GetSpecialNames(settings.Loadout.Value, miscSettings.AllowShifterSpecials.Value);
             if (!specials.Contains(settings.Special.Value))
                 settings.Special.Value = HumanSpecials.DefaultSpecial;
+            if (!specials.Contains(settings.Special2.Value))
+                settings.Special.Value = HumanSpecials.DefaultSpecial;
+            if (!specials.Contains(settings.Special3.Value))
+                settings.Special.Value = HumanSpecials.DefaultSpecial;
 
             return SettingsManager.InGameCharacterSettings;
         }
@@ -553,6 +557,10 @@ namespace GameManagers
                     settings.Loadout.Value = CustomLogicManager.Evaluator.ForcedLoadout;
                 var specials = HumanSpecials.GetSpecialNames(settings.Loadout.Value, miscSettings.AllowShifterSpecials.Value);
                 if (!specials.Contains(settings.Special.Value))
+                    settings.Special.Value = HumanSpecials.DefaultSpecial;
+                if (!specials.Contains(settings.Special2.Value))
+                    settings.Special.Value = HumanSpecials.DefaultSpecial;
+                if (!specials.Contains(settings.Special3.Value))
                     settings.Special.Value = HumanSpecials.DefaultSpecial;
                 var human = (Human)CharacterSpawner.Spawn(CharacterPrefabs.Human, position, rotation);
                 human.Init(false, GetPlayerTeam(false), SettingsManager.InGameCharacterSettings);
@@ -716,6 +724,8 @@ namespace GameManagers
                     float crawler = jumper + settings.TitanSpawnCrawler.Value / 100f;
                     float thrower = crawler + settings.TitanSpawnThrower.Value / 100f;
                     float punk = thrower + settings.TitanSpawnPunk.Value / 100f;
+                    float aberrant = punk + settings.TitanSpawnAberrant.Value / 100f;
+                    float Strider = aberrant + settings.TitanSpawnStrider.Value / 100f;
                     if (roll < normal)
                         type = "Normal";
                     else if (roll < abnormal)
@@ -728,11 +738,15 @@ namespace GameManagers
                         type = "Thrower";
                     else if (roll < punk)
                         type = "Punk";
+                    else if (roll < aberrant)
+                        type = "Aberrant";
+                    else if (roll < Strider)
+                        type = "Strider";
                 }
             }
             else if (type == "Random")
             {
-                string[] types = new string[]{ "Normal", "Abnormal", "Jumper", "Crawler", "Thrower" };
+                string[] types = new string[]{ "Normal", "Abnormal", "Jumper", "Crawler", "Thrower", "Aberrant", "Strider" };
                 type = types[UnityEngine.Random.Range(0, types.Length)];
             }
             var data = CharacterData.GetTitanAI((GameDifficulty)SettingsManager.InGameCurrent.General.Difficulty.Value, type);
@@ -839,12 +853,12 @@ namespace GameManagers
                 EndTimeLeft = time;
                 if (PhotonNetwork.IsMasterClient)
                     StartCoroutine(WaitAndEndGame(time));
-                if (SettingsManager.UISettings.GameFeed.Value)
-                {
-                    float timestamp = CustomLogicManager.Evaluator.CurrentTime;
-                    string feed = ChatManager.GetColorString("(" + Util.FormatFloat(timestamp, 2) + ")", ChatTextColor.System) + " Round ended.";
-                    ChatManager.AddFeed(feed);
-                }
+                ///if (SettingsManager.UISettings.GameFeed.Value)
+                ///{
+                 ///   float timestamp = CustomLogicManager.Evaluator.CurrentTime;
+                 //   string feed = ChatManager.GetColorString("(" + Util.FormatFloat(timestamp, 2) + ")", ChatTextColor.System) + " Round ended.";
+                 //   ChatManager.AddFeed(feed);
+                ///}
             }
         }
 
@@ -1046,12 +1060,12 @@ namespace GameManagers
                 _needSendPlayerInfo = false;
             }
             SpawnPlayer(false);
-            if (SettingsManager.UISettings.GameFeed.Value)
-            {
-                float time = CustomLogicManager.Evaluator.CurrentTime;
-                string feed = ChatManager.GetColorString("(" + Util.FormatFloat(time, 2) + ")", ChatTextColor.System) + " Round started.";
-                ChatManager.AddFeed(feed);
-            }
+            //if (SettingsManager.UISettings.GameFeed.Value)
+            //{
+             //   float time = CustomLogicManager.Evaluator.CurrentTime;
+             //   string feed = ChatManager.GetColorString("(" + Util.FormatFloat(time, 2) + ")", ChatTextColor.System) + " Round started.";
+             //   ChatManager.AddFeed(feed);
+            //}
         }
 
         private void UpdateInput()

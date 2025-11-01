@@ -12,6 +12,11 @@ using CustomLogic;
 using Photon.Pun;
 using Projectiles;
 using Spawnables;
+using Entities;
+using System.Linq;
+using Photon.Pun;
+using GameManagers;
+
 
 namespace Characters
 {
@@ -29,7 +34,7 @@ namespace Characters
         public float BellyFlopTime = 5.5f;
         protected float _leftArmDisabledTimeLeft;
         protected float _rightArmDisabledTimeLeft;
-        protected float ArmDisableTime = 12f;
+        protected float ArmDisableTime = 18f;
         public float RockThrow1Speed = 140f;
         protected Vector3 _rockThrowTarget;
         protected float _originalCapsuleValue;
@@ -972,6 +977,7 @@ namespace Characters
                     var tempHoldHuman = HoldHuman;
                     Ungrab();
                     tempHoldHuman.GetHit(this, damage, "TitanEat", "");
+                    PhotonNetwork.LocalPlayer.SetCustomProperty(PlayerProperty.Deaths, PhotonNetwork.LocalPlayer.GetIntProperty(PlayerProperty.Deaths) + 1); ///crona Addition
                 }
             }
             if (!AI && HoldHuman && !HoldHuman.Dead && !HoldHumanLeft && (Input.anyKeyDown || State == TitanState.HumanThrow))
@@ -1046,25 +1052,53 @@ namespace Characters
             else
             {
                 bool isBellyFlop = _currentStateAnimation == BasicAnimations.AttackBellyFlop || _currentStateAnimation == BasicAnimations.AttackBellyFlopGetup;
-                if (!isBellyFlop)
+
                     base.Cripple(time);
             }
         }
 
+
         public override void OnHit(BaseHitbox hitbox, object victim, Collider collider, string type, bool firstHit)
         {
-            int damage = 100;
-            if (CustomDamageEnabled)
-                damage = CustomDamage;
-            if (victim is CustomLogicCollisionHandler)
+            // Handle DamageableEntity first
+            var damageable = (victim as Component)?.GetComponentInParent<DamageableEntity>();
+            if (damageable != null)
             {
-                ((CustomLogicCollisionHandler)victim).GetHit(this, Name, damage, type, hitbox.transform.position);
+                int titanDamage = CustomDamageEnabled ? CustomDamage : damageable.npcBaseDamage;
+                titanDamage = Mathf.RoundToInt(titanDamage * damageable.titanDamageMultiplier);
+
+                // Apply damage type multipliers if exists
+                if (System.Enum.TryParse("Titan", out DamageType damageType))
+                {
+                    // Add using System.Linq at top of file if missing
+                    var multiplier = damageable.damageMultipliers.FirstOrDefault(x => x.type == damageType);
+                    if (multiplier != null)
+                        titanDamage = Mathf.RoundToInt(titanDamage * multiplier.multiplier);
+                }
+
+                damageable.photonView.RPC("RequestHitRPC", RpcTarget.MasterClient,
+                    Name,
+                    titanDamage,
+                    "Titan",
+                    collider.name,
+                    damageable.photonView.ViewID);
                 return;
             }
-            var victimChar = (BaseCharacter)victim;
-            if (State == TitanState.Attack && IsGrabAttack() && victim is Human)
+
+            // Original titan damage handling below
+            int characterDamage = 100;
+            if (CustomDamageEnabled)
+                characterDamage = CustomDamage;
+
+            if (victim is CustomLogicCollisionHandler customHandler)
             {
-                var human = (Human)victim;
+                customHandler.GetHit(this, Name, characterDamage, type, hitbox.transform.position);
+                return;
+            }
+
+            var victimChar = (BaseCharacter)victim;
+            if (State == TitanState.Attack && IsGrabAttack() && victim is Human human)
+            {
                 if (HoldHuman == null && firstHit && !human.Dead)
                 {
                     HoldHumanLeft = hitbox == BasicCache.HandLHitbox;
@@ -1083,19 +1117,31 @@ namespace Characters
                     if (!victimChar.Dead)
                     {
                         if (IsMainCharacter())
-                            ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
-                        victimChar.GetHit(this, damage, "TitanStun", collider.name);
+                            ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(characterDamage);
+                        victimChar.GetHit(this, characterDamage, "TitanStun", collider.name);
                     }
                 }
             }
-            else
+            else if (firstHit && !victimChar.Dead)
             {
-                if (firstHit && !victimChar.Dead)
-                {
-                    if (IsMainCharacter())
-                        ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(damage);
-                    victimChar.GetHit(this, damage, "Titan", collider.name);
-                }
+                if (IsMainCharacter())
+                    ((InGameMenu)UIManager.CurrentMenu).ShowKillScore(characterDamage);
+                victimChar.GetHit(this, characterDamage, "Titan", collider.name);
+            }
+        }
+
+        protected virtual void HandleDamageableEntity(Collider collider, string type)
+        {
+            var entity = collider.GetComponentInParent<DamageableEntity>();
+            if (entity != null)
+            {
+                int damage = CustomDamageEnabled ? CustomDamage : 100;
+                entity.photonView.RPC("RequestHitRPC", RpcTarget.MasterClient,
+                    Name,
+                    damage,
+                    type,
+                    collider.name,
+                    entity.photonView.ViewID);
             }
         }
 

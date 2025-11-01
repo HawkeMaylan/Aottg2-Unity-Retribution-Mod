@@ -316,6 +316,48 @@ namespace GameManagers
             }
         }
 
+        [CommandAttribute("o", "/o [message]: Set proximity chat message")]
+        private static void SetProximityChat(string[] args)
+        {
+            if (args.Length > 1)
+            {
+                string message = string.Join(' ', args, 1, args.Length - 1);
+
+                // Get the local player's ProximityChatText component
+                ProximityChatText proximityChat = GetLocalPlayerProximityChat();
+                if (proximityChat != null)
+                {
+                    proximityChat.SetMessage(message);
+                    AddLine("Proximity chat set: " + message);
+                }
+                else
+                {
+                    AddLine("Error: Proximity chat not found on player");
+                }
+            }
+            else
+            {
+                AddLine("Usage: /o [message] - Set your proximity chat text");
+            }
+        }
+
+        private static ProximityChatText GetLocalPlayerProximityChat()
+        {
+            // Find all ProximityChatText components in the scene
+            ProximityChatText[] allProximityChats = GameObject.FindObjectsOfType<ProximityChatText>();
+
+            foreach (ProximityChatText proxChat in allProximityChats)
+            {
+                // Check if this component belongs to the local player
+                if (proxChat.photonView != null && proxChat.photonView.IsMine)
+                {
+                    return proxChat;
+                }
+            }
+
+            return null;
+        }
+
         private IEnumerator WaitAndLeave()
         {
             yield return new WaitForSeconds(2f);

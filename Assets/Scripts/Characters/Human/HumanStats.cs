@@ -15,6 +15,7 @@ namespace Characters
         public int Gas = 80;
         public int Ammunition = 80;
         public int Acceleration = 80;
+        public int Expertise = 80;
         public Dictionary<string, BasePerk> Perks = new Dictionary<string, BasePerk>();
         public static int MaxPerkPoints = 3;
 
@@ -22,7 +23,7 @@ namespace Characters
         public float CurrentGas = -1f;
         public float MaxGas = -1f;
         public float GasUsage = 0.2f;
-        public float HorseSpeed = 50f;
+        public float HorseSpeed = 35f;
         public float RunSpeed;
         protected Human _human;
 
@@ -105,6 +106,8 @@ namespace Characters
                     stats.Gas = json["Gas"].AsInt;
                     stats.Ammunition = json["Ammunition"].AsInt;
                     stats.Acceleration = json["Acceleration"].AsInt;
+                    stats.Expertise = json["Expertise"].AsInt;
+                    
                     foreach (string key in json["Perks"].Keys)
                     {
                         if (stats.Perks.ContainsKey(key))
@@ -133,6 +136,7 @@ namespace Characters
                 Gas = 80;
                 Ammunition = 80;
                 Acceleration = 80;
+                Expertise = 80;
                 Perks.Clear();
             }
             var json = new JSONObject();
@@ -140,6 +144,8 @@ namespace Characters
             json["Gas"] = Gas.ToString();
             json["Ammunition"] = Ammunition.ToString();
             json["Acceleration"] = Acceleration.ToString();
+            json["Expertise"] = Expertise.ToString();
+            
             var perks = new JSONObject();
             foreach (string key in Perks.Keys)
             {
@@ -152,11 +158,12 @@ namespace Characters
 
         public bool Validate()
         {
-            if (Speed + Gas + Ammunition + Acceleration > 320) return false;
-            if (Speed < 50 || Speed > 100) return false;
-            if (Gas < 50 || Gas > 100) return false;
-            if (Ammunition < 50 || Ammunition > 100) return false;
-            if (Acceleration < 50 || Acceleration > 100) return false;
+            if (Speed + Gas + Ammunition + Acceleration + Expertise > 400) return false;
+            if (Speed < 40 || Speed > 110) return false;
+            if (Gas < 40 || Gas > 110) return false;
+            if (Ammunition < 40 || Ammunition > 110) return false;
+            if (Acceleration < 40 || Acceleration > 110) return false;
+            if (Expertise <40 || Expertise > 120) return false;
             foreach (var perk in Perks.Values)
             {
                 if (!perk.Validate(Perks))

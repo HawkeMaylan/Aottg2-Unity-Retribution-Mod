@@ -2,6 +2,7 @@
 using UnityEngine;
 using Utility;
 using System.Collections.Generic;
+using Settings;
 
 namespace Characters
 {
@@ -17,7 +18,7 @@ namespace Characters
         public HookUseable(BaseCharacter owner, bool left, bool gun) : base(owner)
         {
             _left = left;
-            _hookSpeed = 3f;
+            _hookSpeed = 3.5f;
             float maxLiveTime = 2.4f / _hookSpeed;
             for (int i = 0; i < 3; i++)
                 Hooks.Add(Hook.CreateHook((Human)owner, left, i, maxLiveTime, gun));
@@ -118,11 +119,14 @@ namespace Characters
                 Vector3 target = ((Human)_owner).GetAimPoint();
                 if (HookBoth)
                 {
-                    float distance = Vector3.Distance(SceneLoader.CurrentCamera.Cache.Transform.position, target);
-                    float offset = distance <= 50f ? distance * 0.05f : distance * 0.3f;
-                    if (_left)
-                        offset *= -1f;
-                    target += offset * _owner.Cache.Transform.right;
+                    if (SettingsManager.InputSettings.Human.DoubleHookPan.Value == false)
+                    {
+                        float distance = Vector3.Distance(SceneLoader.CurrentCamera.Cache.Transform.position, target);
+                        float offset = distance <= 50f ? distance * 0.05f : distance * 0.3f;
+                        if (_left)
+                            offset *= -1f;
+                        target += offset * _owner.Cache.Transform.right;
+                    }
                 }
                 Vector3 baseVel = (target - _activeHook.Anchor.position).normalized * _hookSpeed;
                 Vector3 playerVel = _owner.Cache.Rigidbody.velocity;
