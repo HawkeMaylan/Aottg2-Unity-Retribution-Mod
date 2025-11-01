@@ -193,6 +193,10 @@ MonoBehaviour:
   - RPC_SetWindActive
   - RPC_RequestDisable
   - RPC_SetColliderState
+  - RPC_AttemptInteraction
+  - RPC_EndProcessing
+  - RPC_SpawnHellToken
+  - RPC_StartProcessing
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
