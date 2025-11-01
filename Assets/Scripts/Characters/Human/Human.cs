@@ -1158,6 +1158,8 @@ namespace Characters
                 MusicManager.PlayDeathSong();
             }
             EffectSpawner.Spawn(EffectPrefabs.Blood2, Cache.Transform.position, Cache.Transform.rotation);
+            PhotonNetwork.Instantiate("Buildables/Corpse", Cache.Transform.position, Cache.Transform.rotation);
+
             yield return new WaitForSeconds(2f);
             PhotonNetwork.Destroy(gameObject);
         }
