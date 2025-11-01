@@ -189,6 +189,8 @@ MonoBehaviour:
   - ClearAllBuildablesRPC
   - RequestBuildObject
   - SyncBuildableData
+  - RPC_ChangeWindDirection
+  - RPC_SetWindActive
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
