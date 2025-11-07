@@ -1195,10 +1195,15 @@ namespace Characters
                 }
             }
 
-            // Disable animations
+            // Disable BOTH animation components
             Animator animator = GetComponent<Animator>();
             if (animator != null)
                 animator.enabled = false;
+
+            // Disable legacy Animation component
+            Animation legacyAnimation = GetComponent<Animation>();
+            if (legacyAnimation != null)
+                legacyAnimation.enabled = false;
 
             // Disable all scripts except PhotonView (including Human script)
             MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
