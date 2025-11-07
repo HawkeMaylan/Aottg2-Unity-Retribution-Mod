@@ -1158,7 +1158,64 @@ namespace Characters
                 MusicManager.PlayDeathSong();
             }
             EffectSpawner.Spawn(EffectPrefabs.Blood2, Cache.Transform.position, Cache.Transform.rotation);
-            yield return new WaitForSeconds(2f);
+
+            // Add the requested changes here
+            gameObject.layer = 23;
+
+            // Configure Rigidbody to include everything
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+                rb.constraints = RigidbodyConstraints.None;
+                rb.detectCollisions = true;
+                // Set collision matrix to include everything
+                rb.includeLayers = ~0; // All layers (bitmask of all 1s)
+            }
+
+            // Keep capsule colliders active and set to include everything
+            CapsuleCollider[] capsuleColliders = GetComponents<CapsuleCollider>();
+            foreach (CapsuleCollider collider in capsuleColliders)
+            {
+                collider.enabled = true;
+                collider.includeLayers = ~0; // All layers (bitmask of all 1s)
+                collider.excludeLayers = 0; // No excluded layers
+            }
+
+            // Also configure any other colliders to include everything
+            Collider[] allColliders = GetComponents<Collider>();
+            foreach (Collider collider in allColliders)
+            {
+                collider.enabled = true;
+                if (collider is CapsuleCollider)
+                {
+                    // Already handled above, but ensure consistency
+                    collider.includeLayers = ~0;
+                    collider.excludeLayers = 0;
+                }
+            }
+
+            // Disable animations
+            Animator animator = GetComponent<Animator>();
+            if (animator != null)
+                animator.enabled = false;
+
+            // Disable all scripts except PhotonView (including Human script)
+            MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
+            foreach (MonoBehaviour script in scripts)
+            {
+                if (script != this && !(script is PhotonView))
+                {
+                    script.enabled = false;
+                }
+            }
+
+            // Specifically disable the Human script if it exists
+            Human humanScript = GetComponent<Human>();
+            if (humanScript != null)
+                humanScript.enabled = false;
+
+            yield return new WaitForSeconds(3600f);
             PhotonNetwork.Destroy(gameObject);
         }
 
