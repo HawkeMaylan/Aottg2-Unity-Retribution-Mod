@@ -1171,7 +1171,7 @@ namespace Characters
                 rb.detectCollisions = true;
                 rb.includeLayers = ~0;
                 rb.mass = 5f;
-                rb.drag = 1f;
+                rb.drag = 0.5f;
                 rb.angularDrag = 1f;
                 rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
             }
@@ -1233,6 +1233,11 @@ namespace Characters
             Human humanScript = GetComponent<Human>();
             if (humanScript != null) humanScript.enabled = false;
 
+
+            gameObject.name = "DeadBody";
+            gameObject.tag = "Untagged";
+
+            Destroy(GetComponent<Human>());
             yield return new WaitForSeconds(3600f);
             PhotonNetwork.Destroy(gameObject);
         }
@@ -1285,7 +1290,7 @@ namespace Characters
                 foreach (Collider collider in subColliders)
                 {
                     //  collider.enabled = true;
-                    // collider.isTrigger = false; // CRITICAL: Ensure no colliders are triggers
+                    // collider.isTrigger = false; 
                     // collider.includeLayers = ~0;
                     // collider.excludeLayers = 0;
                 }
