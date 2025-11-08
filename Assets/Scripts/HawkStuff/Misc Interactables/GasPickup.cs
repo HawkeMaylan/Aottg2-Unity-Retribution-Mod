@@ -40,11 +40,13 @@ public class GasPickup : MonoBehaviourPunCallbacks, IPunObservable
         {
             stream.SendNext(grantsUsed);
             stream.SendNext(lastGrantTime);
+            stream.SendNext(isShrinking);
         }
         else
         {
             grantsUsed = (int)stream.ReceiveNext();
             lastGrantTime = (float)stream.ReceiveNext();
+            isShrinking = (bool)stream.ReceiveNext();
         }
     }
 
@@ -100,63 +102,62 @@ public class GasPickup : MonoBehaviourPunCallbacks, IPunObservable
 
                     if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
                     {
-                        photonView.RPC("RPC_TryGrant", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber);
+                        TryGrantGas();
                     }
                 }
             }
         }
     }
 
-    [PunRPC]
-    private void RPC_TryGrant(int actorId, PhotonMessageInfo info)
+    private void TryGrantGas()
     {
-        if (!PhotonNetwork.IsMasterClient || isShrinking) return;
+        if (isShrinking) return;
 
+        // Check local conditions first
         if (grantsUsed >= maxGrants || (Time.time - lastGrantTime) < cooldownDuration)
             return;
 
-        // Find the target human and check if they need gas
-        Human targetHuman = null;
-        foreach (var human in FindObjectsOfType<Human>())
-        {
-            if (human.photonView != null && human.photonView.OwnerActorNr == actorId)
-            {
-                targetHuman = human;
-                break;
-            }
-        }
-
-        if (targetHuman == null || targetHuman.Stats == null)
+        if (localHuman == null || localHuman.Stats == null)
             return;
 
         // Check if player already has max gas
-        if (targetHuman.Stats.CurrentGas >= targetHuman.Stats.MaxGas)
+        if (localHuman.Stats.CurrentGas >= localHuman.Stats.MaxGas)
             return;
 
-        grantsUsed++;
-        lastGrantTime = Time.time;
+        // Update the shared state via RPC
+        photonView.RPC("RPC_UpdateGrants", RpcTarget.All, grantsUsed + 1, Time.time);
 
-        photonView.RPC("RPC_SyncGrant", RpcTarget.All, grantsUsed, lastGrantTime);
-
-        // Add gas to the player's stats, but don't exceed MaxGas
+        // Apply gas locally to the interacting player
         float gasToAdd = gasPickup;
-        float newGas = targetHuman.Stats.CurrentGas + gasToAdd;
-        if (newGas > targetHuman.Stats.MaxGas)
+        float newGas = localHuman.Stats.CurrentGas + gasToAdd;
+        if (newGas > localHuman.Stats.MaxGas)
         {
-            gasToAdd = targetHuman.Stats.MaxGas - targetHuman.Stats.CurrentGas;
+            gasToAdd = localHuman.Stats.MaxGas - localHuman.Stats.CurrentGas;
         }
+        localHuman.Stats.CurrentGas += gasToAdd;
 
-        targetHuman.Stats.CurrentGas += gasToAdd;
-
-        if (grantsUsed >= maxGrants && destroyWhenEmpty)
-            StartCoroutine(ShrinkAndDestroy());
+        // Handle destruction if empty
+        if ((grantsUsed + 1) >= maxGrants && destroyWhenEmpty)
+        {
+            if (photonView.IsMine) // Only the owner handles destruction
+            {
+                photonView.RPC("RPC_StartShrinkAndDestroy", RpcTarget.All);
+            }
+        }
     }
 
     [PunRPC]
-    private void RPC_SyncGrant(int used, float lastTime)
+    private void RPC_UpdateGrants(int newGrantsUsed, float newLastGrantTime)
     {
-        grantsUsed = used;
-        lastGrantTime = lastTime;
+        grantsUsed = newGrantsUsed;
+        lastGrantTime = newLastGrantTime;
+    }
+
+    [PunRPC]
+    private void RPC_StartShrinkAndDestroy()
+    {
+        if (!isShrinking)
+            StartCoroutine(ShrinkAndDestroy());
     }
 
     private IEnumerator ShrinkAndDestroy()

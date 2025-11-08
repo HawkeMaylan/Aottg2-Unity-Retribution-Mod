@@ -194,6 +194,8 @@ MonoBehaviour:
   - RPC_DisableComponents
   - RPC_FinalizeDeath
   - RPC_ProcessAllSubObjects
+  - RPC_StartShrinkAndDestroy
+  - RPC_UpdateGrants
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

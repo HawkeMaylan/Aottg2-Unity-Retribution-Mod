@@ -36,11 +36,13 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
         {
             stream.SendNext(grantsUsed);
             stream.SendNext(lastGrantTime);
+            stream.SendNext(isShrinking);
         }
         else
         {
             grantsUsed = (int)stream.ReceiveNext();
             lastGrantTime = (float)stream.ReceiveNext();
+            isShrinking = (bool)stream.ReceiveNext();
         }
     }
 
@@ -98,10 +100,68 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
 
                 if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
                 {
-                    photonView.RPC("RPC_TryGrant", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber);
+                    TryGrantBlades();
                 }
             }
         }
+    }
+
+    private void TryGrantBlades()
+    {
+        if (isShrinking) return;
+
+        // Check local conditions first
+        if (grantsUsed >= maxGrants || (Time.time - lastGrantTime) < cooldownDuration)
+            return;
+
+        if (localHuman == null)
+            return;
+
+        int bladesNeeded = GetBladesNeeded(localHuman);
+        if (bladesNeeded <= 0)
+        {
+            Debug.Log("Player already at maximum blade capacity");
+            return;
+        }
+
+        int actualPickup = Mathf.Min(bladePickup, bladesNeeded);
+
+        // Apply blades locally to the interacting player
+        AddBladesToHuman(localHuman, actualPickup);
+
+        // Only consume a grant if we gave the full bladePickup amount
+        if (actualPickup == bladePickup)
+        {
+            // Update the shared state via RPC
+            photonView.RPC("RPC_UpdateGrants", RpcTarget.All, grantsUsed + 1, Time.time);
+
+            // Handle destruction if empty
+            if ((grantsUsed + 1) >= maxGrants && destroyWhenEmpty)
+            {
+                if (photonView.IsMine) // Only the owner handles destruction
+                {
+                    photonView.RPC("RPC_StartShrinkAndDestroy", RpcTarget.All);
+                }
+            }
+        }
+        else
+        {
+            Debug.Log($"Partial pickup: {actualPickup}/{bladePickup} blades given (no grant consumed)");
+        }
+    }
+
+    [PunRPC]
+    private void RPC_UpdateGrants(int newGrantsUsed, float newLastGrantTime)
+    {
+        grantsUsed = newGrantsUsed;
+        lastGrantTime = newLastGrantTime;
+    }
+
+    [PunRPC]
+    private void RPC_StartShrinkAndDestroy()
+    {
+        if (!isShrinking)
+            StartCoroutine(ShrinkAndDestroy());
     }
 
     private int GetBladesNeeded(Human human)
@@ -137,48 +197,6 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
             }
         }
         return bladePickup;
-    }
-
-    [PunRPC]
-    private void RPC_TryGrant(int actorId, PhotonMessageInfo info)
-    {
-        if (!PhotonNetwork.IsMasterClient || isShrinking) return;
-
-        if (grantsUsed >= maxGrants || (Time.time - lastGrantTime) < cooldownDuration)
-            return;
-
-        foreach (var human in FindObjectsOfType<Human>())
-        {
-            if (human.photonView != null && human.photonView.OwnerActorNr == actorId)
-            {
-                int bladesNeeded = GetBladesNeeded(human);
-                if (bladesNeeded <= 0)
-                {
-                    Debug.Log("Player already at maximum blade capacity");
-                    return;
-                }
-
-                int actualPickup = Mathf.Min(bladePickup, bladesNeeded);
-                AddBladesToHuman(human, actualPickup);
-
-                // Only consume a grant if we gave the full bladePickup amount
-                if (actualPickup == bladePickup)
-                {
-                    grantsUsed++;
-                    lastGrantTime = Time.time;
-                    photonView.RPC("RPC_SyncGrant", RpcTarget.All, grantsUsed, lastGrantTime);
-
-                    if (grantsUsed >= maxGrants && destroyWhenEmpty)
-                        StartCoroutine(ShrinkAndDestroy());
-                }
-                else
-                {
-                    Debug.Log($"Partial pickup: {actualPickup}/{bladePickup} blades given (no grant consumed)");
-                }
-
-                break;
-            }
-        }
     }
 
     private void AddBladesToHuman(Human human, int amount)
@@ -237,13 +255,6 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
         }
 
         Debug.LogWarning($"Could not add blades to weapon of type: {weaponType}");
-    }
-
-    [PunRPC]
-    private void RPC_SyncGrant(int used, float lastTime)
-    {
-        grantsUsed = used;
-        lastGrantTime = lastTime;
     }
 
     private IEnumerator ShrinkAndDestroy()

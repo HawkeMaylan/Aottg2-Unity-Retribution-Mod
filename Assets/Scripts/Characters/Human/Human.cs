@@ -1174,7 +1174,7 @@ namespace Characters
         [PunRPC]
         private void RPC_ConfigureMainPhysics()
         {
-            gameObject.layer = 23;
+            gameObject.layer = 20;
 
             Rigidbody rb = GetComponent<Rigidbody>();
             if (rb != null)
@@ -1189,13 +1189,13 @@ namespace Characters
                 rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
 
                 // ADD THIS: Photon Rigidbody View for synchronization
-                PhotonRigidbodyView photonRbView = GetComponent<PhotonRigidbodyView>();
-                if (photonRbView == null)
-                {
-                    photonRbView = gameObject.AddComponent<PhotonRigidbodyView>();
-                }
-                photonRbView.m_SynchronizeVelocity = true;
-                photonRbView.m_SynchronizeAngularVelocity = true;
+                //PhotonRigidbodyView photonRbView = GetComponent<PhotonRigidbodyView>();
+                //if (photonRbView == null)
+                //{
+                //    photonRbView = gameObject.AddComponent<PhotonRigidbodyView>();
+                //}
+                //photonRbView.m_SynchronizeVelocity = true;
+                //photonRbView.m_SynchronizeAngularVelocity = true;
             }
         }
 
@@ -1281,11 +1281,27 @@ namespace Characters
             ParticleSystem bloodParticleSystem = bloodParticleTransform.GetComponent<ParticleSystem>();
             bloodParticleSystem.Play();
 
+            // Get the current velocity from this object's rigidbody
+            Vector3 currentVelocity = Vector3.zero;
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                currentVelocity = rb.velocity;
+            }
+
             // Photon instantiate the gas pickup at this body's position
             if (PhotonNetwork.IsMasterClient)
             {
                 // Gas pickup
                 GameObject gasPickupObj = PhotonNetwork.Instantiate("Buildables/bodyGasPickup", transform.position, transform.rotation);
+
+                // Apply velocity to gas pickup
+                Rigidbody gasRb = gasPickupObj.GetComponent<Rigidbody>();
+                if (gasRb != null)
+                {
+                    gasRb.velocity = currentVelocity;
+                }
+
                 GasPickup gasPickupScript = gasPickupObj.GetComponent<GasPickup>();
                 if (gasPickupScript != null)
                 {
@@ -1307,9 +1323,20 @@ namespace Characters
                             {
                                 // Add some position variation so they don't all spawn in the exact same spot
                                 Vector3 spawnPosition = transform.position + UnityEngine.Random.insideUnitSphere * 0.5f;
-                                spawnPosition.y = transform.position.y +1f; // Keep same Y position
+                                spawnPosition.y = transform.position.y + 1f; // Keep same Y position
 
-                                PhotonNetwork.Instantiate("Buildables/bodyBladePickup", spawnPosition, transform.rotation);
+                                GameObject bladePickupObj = PhotonNetwork.Instantiate("Buildables/bodyBladePickup", spawnPosition, transform.rotation);
+
+                                // Apply velocity to blade pickup with slight random variation
+                                Rigidbody bladeRb = bladePickupObj.GetComponent<Rigidbody>();
+                                if (bladeRb != null)
+                                {
+                                    Vector3 randomVariation = UnityEngine.Random.insideUnitSphere * 2f;
+                                    bladeRb.velocity = currentVelocity + randomVariation;
+
+                                    // Add a small upward force for more natural scattering
+                                    bladeRb.velocity += Vector3.up * 3f;
+                                }
                             }
                         }
                     }
@@ -1413,13 +1440,7 @@ namespace Characters
                 case "head":
                     torqueMultiplier = 0.3f; // Even less for head
                     break;
-                case "hand":
-                case "foot":
-                    torqueMultiplier = 2f; // More rotation for extremities
-                    break;
-                default:
-                    torqueMultiplier = 1f; // Default for limbs
-                    break;
+                
             }
 
             Vector3 randomTorque = new Vector3(
@@ -3162,7 +3183,7 @@ namespace Characters
                     SettingsManager.InGameCharacterSettings.Special2.Value,
                     SettingsManager.InGameCharacterSettings.Special3.Value);
 
-                // ADD THIS SECTION - Feed inventory to BuildSystem
+                //Feed inventory to BuildSystem
                 FeedInventoryToBuildSystem();
             }
             FinishSetup = true;
