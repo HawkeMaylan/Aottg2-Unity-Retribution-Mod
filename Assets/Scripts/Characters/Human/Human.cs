@@ -1164,12 +1164,40 @@ namespace Characters
             photonView.RPC("RPC_ConfigureMainPhysics", RpcTarget.All);
             photonView.RPC("RPC_ProcessAllSubObjects", RpcTarget.All);
             photonView.RPC("RPC_ConfigureAllColliders", RpcTarget.All);
+
+            // Add rigidbody timer BEFORE disabling components
+            photonView.RPC("RPC_AddRigidbodyTimer", RpcTarget.All);
             photonView.RPC("RPC_DisableComponents", RpcTarget.All);
             photonView.RPC("RPC_FinalizeDeath", RpcTarget.All);
 
             yield return new WaitForSeconds(3600f);
             PhotonNetwork.Destroy(gameObject);
         }
+
+
+
+
+
+        [PunRPC]
+        private void RPC_AddRigidbodyTimer()
+        {
+            Debug.Log("Adding RigidbodyTimer component");
+
+            // Create list of body parts to remove rigidbodies from
+            List<string> bodyPartsToRemove = new List<string>()
+    {
+        "hip", "chest", "spine", "shoulder_L", "shoulder_R",
+        "neck", "head", "forearm_L", "forearm_R", "hand_L", "hand_R"
+    };
+
+            // Add the timer script
+            RigidbodyTimer timerScript = gameObject.AddComponent<RigidbodyTimer>();
+            timerScript.Initialize(2f, bodyPartsToRemove);
+
+            Debug.Log($"RigidbodyTimer initialized to remove {bodyPartsToRemove.Count} body parts after 2 seconds");
+        }
+
+
 
         [PunRPC]
         private void RPC_ConfigureMainPhysics()
@@ -1270,7 +1298,8 @@ namespace Characters
                 if (script != this &&
                     !(script is PhotonView ||
                       script is PhotonTransformView ||
-                      script is PhotonRigidbodyView))
+                      script is PhotonRigidbodyView ||
+                      script is RigidbodyTimer))
                 {
                     script.enabled = false;
                 }
@@ -1359,6 +1388,7 @@ namespace Characters
 
             gameObject.name = "DeadBody";
             gameObject.tag = "Untagged";
+            
             Destroy(GetComponent<Human>());
         }
 
