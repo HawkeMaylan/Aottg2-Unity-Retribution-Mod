@@ -1181,6 +1181,7 @@ namespace Characters
             {
                 rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
                 rb.constraints = RigidbodyConstraints.None;
+                rb.isKinematic = false;
                 rb.detectCollisions = true;
                 rb.includeLayers = ~0;
                 rb.mass = 5f;
@@ -1188,14 +1189,24 @@ namespace Characters
                 rb.angularDrag = 1f;
                 rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
 
-                // ADD THIS: Photon Rigidbody View for synchronization
-                //PhotonRigidbodyView photonRbView = GetComponent<PhotonRigidbodyView>();
-                //if (photonRbView == null)
-                //{
-                //    photonRbView = gameObject.AddComponent<PhotonRigidbodyView>();
-                //}
-                //photonRbView.m_SynchronizeVelocity = true;
-                //photonRbView.m_SynchronizeAngularVelocity = true;
+                // Add PhotonTransformView for position/rotation sync
+                PhotonTransformView photonTransformView = GetComponent<PhotonTransformView>();
+                if (photonTransformView == null)
+                {
+                    photonTransformView = gameObject.AddComponent<PhotonTransformView>();
+                }
+                photonTransformView.m_SynchronizePosition = true;
+                photonTransformView.m_SynchronizeRotation = true;
+                photonTransformView.m_SynchronizeScale = false;
+
+                // Keep RigidbodyView for velocity sync
+                PhotonRigidbodyView photonRbView = GetComponent<PhotonRigidbodyView>();
+                if (photonRbView == null)
+                {
+                    photonRbView = gameObject.AddComponent<PhotonRigidbodyView>();
+                }
+                photonRbView.m_SynchronizeVelocity = true;
+                photonRbView.m_SynchronizeAngularVelocity = true;
             }
         }
 
@@ -1252,11 +1263,14 @@ namespace Characters
             Animation legacyAnimation = GetComponent<Animation>();
             if (legacyAnimation != null) legacyAnimation.enabled = false;
 
-            // Disable all scripts except PhotonView
+            // Disable all scripts except PhotonView and other Photon components
             MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
             foreach (MonoBehaviour script in scripts)
             {
-                if (script != this && !(script is PhotonView))
+                if (script != this &&
+                    !(script is PhotonView ||
+                      script is PhotonTransformView ||
+                      script is PhotonRigidbodyView))
                 {
                     script.enabled = false;
                 }
