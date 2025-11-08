@@ -1150,6 +1150,7 @@ namespace Characters
 
         protected override IEnumerator WaitAndDie()
         {
+            // Keep death effects local (not RPC)
             if (State == HumanState.Grab)
                 PlaySound(HumanSounds.Death5);
             else
@@ -1159,6 +1160,20 @@ namespace Characters
             }
             EffectSpawner.Spawn(EffectPrefabs.Blood2, Cache.Transform.position, Cache.Transform.rotation);
 
+            // Call RPCs for all other actions
+            photonView.RPC("RPC_ConfigureMainPhysics", RpcTarget.All);
+            photonView.RPC("RPC_ProcessAllSubObjects", RpcTarget.All);
+            photonView.RPC("RPC_ConfigureAllColliders", RpcTarget.All);
+            photonView.RPC("RPC_DisableComponents", RpcTarget.All);
+            photonView.RPC("RPC_FinalizeDeath", RpcTarget.All);
+
+            yield return new WaitForSeconds(3600f);
+            PhotonNetwork.Destroy(gameObject);
+        }
+
+        [PunRPC]
+        private void RPC_ConfigureMainPhysics()
+        {
             // Set main object layer to 23
             gameObject.layer = 23;
 
@@ -1175,22 +1190,28 @@ namespace Characters
                 rb.angularDrag = 1f;
                 rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
             }
+        }
 
+        [PunRPC]
+        private void RPC_ProcessAllSubObjects()
+        {
             // Process sub objects
             ProcessSubObjectRecursive("hip");
             ProcessSubObjectRecursive("chest");
             ProcessSubObjectRecursive("spine");
-
             ProcessSubObjectRecursive("shoulder_L");
             ProcessSubObjectRecursive("shoulder_R");
             ProcessSubObjectRecursive("neck");
             ProcessSubObjectRecursive("head");
             ProcessSubObjectRecursive("forearm_L");
             ProcessSubObjectRecursive("forearm_R");
-            ProcessSubObjectRecursive("spine");
             ProcessSubObjectRecursive("hand_L");
             ProcessSubObjectRecursive("hand_R");
+        }
 
+        [PunRPC]
+        private void RPC_ConfigureAllColliders()
+        {
             // Keep capsule colliders active and set to include everything
             CapsuleCollider[] capsuleColliders = GetComponents<CapsuleCollider>();
             foreach (CapsuleCollider collider in capsuleColliders)
@@ -1212,7 +1233,11 @@ namespace Characters
                 collider.includeLayers = ~0;
                 collider.excludeLayers = 0;
             }
+        }
 
+        [PunRPC]
+        private void RPC_DisableComponents()
+        {
             // Disable animation components
             Animator animator = GetComponent<Animator>();
             if (animator != null) animator.enabled = false;
@@ -1232,14 +1257,35 @@ namespace Characters
 
             Human humanScript = GetComponent<Human>();
             if (humanScript != null) humanScript.enabled = false;
+        }
 
+        [PunRPC]
+        private void RPC_FinalizeDeath()
+        {
+            // Destroy specific child objects
+            DestroyChildObject("HumanSounds(Clone)");
+            DestroyChildObject("proxText");
+            DestroyChildObject("speedFX");
+            DestroyChildObject("3dmg_smoke");
 
             gameObject.name = "DeadBody";
             gameObject.tag = "Untagged";
-
             Destroy(GetComponent<Human>());
-            yield return new WaitForSeconds(3600f);
-            PhotonNetwork.Destroy(gameObject);
+        }
+
+        // Helper method to find and destroy child objects by name
+        private void DestroyChildObject(string childName)
+        {
+            Transform childTransform = FindDeepChild(transform, childName);
+            if (childTransform != null)
+            {
+                Destroy(childTransform.gameObject);
+                Debug.Log($"Destroyed child object: {childName}");
+            }
+            else
+            {
+                Debug.LogWarning($"Child object '{childName}' not found to destroy");
+            }
         }
 
         // Helper method to process sub objects recursively
@@ -1248,24 +1294,8 @@ namespace Characters
             // Find the sub object by name recursively in all children
             Transform subObjectTransform = FindDeepChild(transform, objectName);
             if (subObjectTransform != null)
-
-                
             {
                 GameObject subObject = subObjectTransform.gameObject;
-                
-
-                // Set layer to 23
-                //subObject.layer = 23;
-
-                // Configure capsule colliders on the sub object
-                CapsuleCollider[] subCapsuleColliders = subObject.GetComponents<CapsuleCollider>();
-                foreach (CapsuleCollider collider in subCapsuleColliders)
-                {
-                    ///   collider.enabled = true;
-                    //  collider.isTrigger = false; // Ensure it's not a trigger
-                    // collider.includeLayers = ~0; // All layers
-                    // collider.excludeLayers = 0; // No excluded layers
-                }
 
                 // Add Rigidbody component if it doesn't exist
                 Rigidbody subRb = subObject.GetComponent<Rigidbody>();
@@ -1284,16 +1314,6 @@ namespace Characters
                 subRb.mass = 0f;
                 subRb.drag = 0f;
                 subRb.angularDrag = 1f;
-
-                // Configure ALL colliders on the sub object (not just capsule colliders)
-                Collider[] subColliders = subObject.GetComponents<Collider>();
-                foreach (Collider collider in subColliders)
-                {
-                    //  collider.enabled = true;
-                    // collider.isTrigger = false; 
-                    // collider.includeLayers = ~0;
-                    // collider.excludeLayers = 0;
-                }
 
                 ApplyRandomRotationForce(subRb, objectName);
                 Debug.Log($"Processed sub object: {subObject.name} at path: {GetGameObjectPath(subObjectTransform)}");

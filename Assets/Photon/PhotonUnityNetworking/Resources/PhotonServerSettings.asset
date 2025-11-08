@@ -189,6 +189,11 @@ MonoBehaviour:
   - ClearAllBuildablesRPC
   - RequestBuildObject
   - SyncBuildableData
+  - RPC_ConfigureAllColliders
+  - RPC_ConfigureMainPhysics
+  - RPC_DisableComponents
+  - RPC_FinalizeDeath
+  - RPC_ProcessAllSubObjects
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
