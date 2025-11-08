@@ -695,14 +695,14 @@ namespace Characters
                         StateAction(TitanState.SitDown, BaseTitanAnimations.SitDown);
                 }
                 else if (State == TitanState.SitDown)
-                    StateActionWithTime(TitanState.SitIdle, GetSitIdleAniamtion(), 0f, 0.1f);
+                    StateActionWithTime(TitanState.SitIdle, GetSitIdleAniamtion(), 0f, 0.1f );
                 else if (State == TitanState.SitIdle)
                 {
                     if (HasDirection || !IsSit)
                         StateAction(TitanState.SitUp, GetSitUpAnimation());
                 }
                 else if (State == TitanState.SitFall)
-                    StateActionWithTime(TitanState.SitCripple, GetSitIdleAniamtion(), _currentCrippleTime, 0.1f);
+                    StateActionWithTime(TitanState.SitCripple, GetSitIdleAniamtion(), _currentCrippleTime / AttackSpeedMultiplier, 0.1f );
                 else if (State == TitanState.SitCripple)
                     StateAction(TitanState.SitUp, GetSitUpAnimation());
                 else if (State == TitanState.Run)
@@ -764,7 +764,7 @@ namespace Characters
                 else if (State == TitanState.Blind || State == TitanState.SitUp || State == TitanState.Emote)
                     IdleWait(0.3f);
                 else if (State == TitanState.ArmHurt)
-                    IdleWait(0.2f);
+                    IdleWait(0.2f/ AttackSpeedMultiplier);
                 else if (State == TitanState.SitBlind)
                     StateActionWithTime(TitanState.SitIdle, BaseTitanAnimations.SitIdle, 0.3f, 0.3f);
                 else
