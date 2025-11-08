@@ -1159,7 +1159,7 @@ namespace Characters
             }
             EffectSpawner.Spawn(EffectPrefabs.Blood2, Cache.Transform.position, Cache.Transform.rotation);
 
-            // Add the requested changes here
+            // Set main object layer to 23
             gameObject.layer = 23;
 
             // Configure Rigidbody to include everything
@@ -1169,17 +1169,29 @@ namespace Characters
                 rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
                 rb.constraints = RigidbodyConstraints.None;
                 rb.detectCollisions = true;
-                // Set collision matrix to include everything
-                rb.includeLayers = ~0; // All layers (bitmask of all 1s)
+                rb.includeLayers = ~0;
+                rb.mass = 1f;
+                rb.drag = 0f;
+                rb.angularDrag = 1f;
             }
+
+            // Process sub objects
+            ProcessSubObjectRecursive("hip");
+            ProcessSubObjectRecursive("chest");
+            ProcessSubObjectRecursive("spine");
+
+            ProcessSubObjectRecursive("shoulder_L");
+            ProcessSubObjectRecursive("shoulder_R");
+            ProcessSubObjectRecursive("neck");
 
             // Keep capsule colliders active and set to include everything
             CapsuleCollider[] capsuleColliders = GetComponents<CapsuleCollider>();
             foreach (CapsuleCollider collider in capsuleColliders)
             {
                 collider.enabled = true;
-                collider.includeLayers = ~0; // All layers (bitmask of all 1s)
-                collider.excludeLayers = 0; // No excluded layers
+                collider.isTrigger = false;
+                collider.includeLayers = ~0;
+                collider.excludeLayers = 0;
             }
 
             // Also configure any other colliders to include everything
@@ -1187,25 +1199,19 @@ namespace Characters
             foreach (Collider collider in allColliders)
             {
                 collider.enabled = true;
-                if (collider is CapsuleCollider)
-                {
-                    // Already handled above, but ensure consistency
-                    collider.includeLayers = ~0;
-                    collider.excludeLayers = 0;
-                }
+                collider.isTrigger = false;
+                collider.includeLayers = ~0;
+                collider.excludeLayers = 0;
             }
 
-            // Disable BOTH animation components
+            // Disable animation components
             Animator animator = GetComponent<Animator>();
-            if (animator != null)
-                animator.enabled = false;
+            if (animator != null) animator.enabled = false;
 
-            // Disable legacy Animation component
             Animation legacyAnimation = GetComponent<Animation>();
-            if (legacyAnimation != null)
-                legacyAnimation.enabled = false;
+            if (legacyAnimation != null) legacyAnimation.enabled = false;
 
-            // Disable all scripts except PhotonView (including Human script)
+            // Disable all scripts except PhotonView
             MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
             foreach (MonoBehaviour script in scripts)
             {
@@ -1215,13 +1221,132 @@ namespace Characters
                 }
             }
 
-            // Specifically disable the Human script if it exists
             Human humanScript = GetComponent<Human>();
-            if (humanScript != null)
-                humanScript.enabled = false;
+            if (humanScript != null) humanScript.enabled = false;
 
             yield return new WaitForSeconds(3600f);
             PhotonNetwork.Destroy(gameObject);
+        }
+
+        // Helper method to process sub objects recursively
+        private void ProcessSubObjectRecursive(string objectName)
+        {
+            // Find the sub object by name recursively in all children
+            Transform subObjectTransform = FindDeepChild(transform, objectName);
+            if (subObjectTransform != null)
+
+                
+            {
+                GameObject subObject = subObjectTransform.gameObject;
+                
+
+                // Set layer to 23
+                //subObject.layer = 23;
+
+                // Configure capsule colliders on the sub object
+                CapsuleCollider[] subCapsuleColliders = subObject.GetComponents<CapsuleCollider>();
+                foreach (CapsuleCollider collider in subCapsuleColliders)
+                {
+                    ///   collider.enabled = true;
+                    //  collider.isTrigger = false; // Ensure it's not a trigger
+                    // collider.includeLayers = ~0; // All layers
+                    // collider.excludeLayers = 0; // No excluded layers
+                }
+
+                // Add Rigidbody component if it doesn't exist
+                Rigidbody subRb = subObject.GetComponent<Rigidbody>();
+                if (subRb == null)
+                {
+                    subRb = subObject.AddComponent<Rigidbody>();
+                }
+
+                // Configure the Rigidbody - FREE rotation but FROZEN position
+                subRb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+                subRb.constraints = RigidbodyConstraints.FreezePosition; // Freeze all position movement
+                subRb.detectCollisions = true;
+                subRb.includeLayers = ~0; // All layers
+
+                // Set mass, drag, and angular drag to 0
+                subRb.mass = 0f;
+                subRb.drag = 0f;
+                subRb.angularDrag = 1f;
+
+                // Configure ALL colliders on the sub object (not just capsule colliders)
+                Collider[] subColliders = subObject.GetComponents<Collider>();
+                foreach (Collider collider in subColliders)
+                {
+                    //  collider.enabled = true;
+                    // collider.isTrigger = false; // CRITICAL: Ensure no colliders are triggers
+                    // collider.includeLayers = ~0;
+                    // collider.excludeLayers = 0;
+                }
+
+                ApplyRandomRotationForce(subRb, objectName);
+                Debug.Log($"Processed sub object: {subObject.name} at path: {GetGameObjectPath(subObjectTransform)}");
+            }
+            else
+            {
+                Debug.LogWarning($"Sub object '{objectName}' not found in hierarchy");
+            }
+        }
+
+        // Recursive method to find deep child by name
+        private Transform FindDeepChild(Transform parent, string childName)
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name == childName)
+                    return child;
+
+                Transform result = FindDeepChild(child, childName);
+                if (result != null)
+                    return result;
+            }
+            return null;
+        }
+
+        // Helper method to get full path for debugging
+        private string GetGameObjectPath(Transform transform)
+        {
+            string path = transform.name;
+            while (transform.parent != null)
+            {
+                transform = transform.parent;
+                path = transform.name + "/" + path;
+            }
+            return path;
+        }
+
+        private void ApplyRandomRotationForce(Rigidbody rb, string bodyPartName)
+        {
+            float torqueMultiplier = 1f;
+
+            // Adjust torque based on body part size/type
+            switch (bodyPartName.ToLower())
+            {
+                case "hip":
+                case "chest":
+                    torqueMultiplier = 0.5f; // Less rotation for core parts
+                    break;
+                case "head":
+                    torqueMultiplier = 0.3f; // Even less for head
+                    break;
+                case "hand":
+                case "foot":
+                    torqueMultiplier = 2f; // More rotation for extremities
+                    break;
+                default:
+                    torqueMultiplier = 1f; // Default for limbs
+                    break;
+            }
+
+            Vector3 randomTorque = new Vector3(
+                UnityEngine.Random.Range(-100f, 100f) * torqueMultiplier,
+                UnityEngine.Random.Range(-100f, 100f) * torqueMultiplier,
+                UnityEngine.Random.Range(-100f, 100f) * torqueMultiplier
+            );
+
+            rb.AddTorque(randomTorque, ForceMode.Impulse);
         }
 
         public void Init(bool ai, string team, InGameCharacterSettings settings)
