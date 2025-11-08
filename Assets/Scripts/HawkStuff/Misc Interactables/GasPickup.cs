@@ -52,60 +52,82 @@ public class GasPickup : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Update()
     {
-        if (ChatManager.IsChatActive() || isShrinking) return;
+        if (ChatManager.IsChatActive() || isShrinking)
+            return;
 
-        if (!isInside)
-        {
-            Human checkHuman = FindLocalHumanInZone();
-            if (checkHuman != null)
-            {
-                localHuman = checkHuman;
-                isInside = true;
-            }
-        }
-        else if (localHuman == null || !IsStillInZone(localHuman))
+        // Only check if we lost track of the human
+        if (isInside && (localHuman == null || !IsHumanValid(localHuman)))
         {
             ClearPrompt();
             isInside = false;
             localHuman = null;
+            return;
         }
 
         if (isInside && localHuman != null)
         {
-            int remaining = maxGrants - grantsUsed;
+            UpdatePromptAndInput();
+        }
+    }
 
-            if (remaining <= 0)
+    private void UpdatePromptAndInput()
+    {
+        int remaining = maxGrants - grantsUsed;
+
+        if (remaining <= 0)
+        {
+            currentPrompt = "No Gas remaining";
+            extraPrompt = "";
+            return;
+        }
+
+        extraPrompt = $"Gas pickups left: {remaining}";
+
+        float timeSinceLast = Time.time - lastGrantTime;
+        if (timeSinceLast < cooldownDuration)
+        {
+            float timeLeft = Mathf.Ceil(cooldownDuration - timeSinceLast);
+            currentPrompt = $"Pickup on cooldown ({timeLeft}s)";
+        }
+        else
+        {
+            // Check if player is already at max gas
+            if (localHuman.Stats != null && localHuman.Stats.CurrentGas >= localHuman.Stats.MaxGas)
             {
-                currentPrompt = "No Gas remaining";
-                extraPrompt = "";
-                return;
-            }
-
-            extraPrompt = $"Gas pickups left: {remaining}";
-
-            float timeSinceLast = Time.time - lastGrantTime;
-            if (timeSinceLast < cooldownDuration)
-            {
-                float timeLeft = Mathf.Ceil(cooldownDuration - timeSinceLast);
-                currentPrompt = $"Pickup on cooldown ({timeLeft}s)";
+                currentPrompt = "Gas is already full!";
             }
             else
             {
-                // Check if player is already at max gas
-                if (localHuman.Stats != null && localHuman.Stats.CurrentGas >= localHuman.Stats.MaxGas)
-                {
-                    currentPrompt = "Gas is already full!";
-                }
-                else
-                {
-                    currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Collect Gas: +{gasPickup}";
+                currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Collect Gas: +{gasPickup}";
 
-                    if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
-                    {
-                        TryGrantGas();
-                    }
+                if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
+                {
+                    TryGrantGas();
                 }
             }
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (isShrinking) return;
+
+        Human human = other.GetComponentInParent<Human>();
+        if (human != null && human.photonView.IsMine)
+        {
+            localHuman = human;
+            isInside = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        Human human = other.GetComponentInParent<Human>();
+        if (human != null && human == localHuman)
+        {
+            ClearPrompt();
+            isInside = false;
+            localHuman = null;
         }
     }
 
@@ -190,24 +212,9 @@ public class GasPickup : MonoBehaviourPunCallbacks, IPunObservable
             Destroy(gameObject);
     }
 
-    private Human FindLocalHumanInZone()
+    private bool IsHumanValid(Human human)
     {
-        foreach (Human h in FindObjectsOfType<Human>())
-        {
-            if (h.photonView.IsMine)
-            {
-                Transform trigger = h.transform.Find("HumanTrigger");
-                if (trigger != null && triggerZone.bounds.Contains(trigger.position))
-                    return h;
-            }
-        }
-        return null;
-    }
-
-    private bool IsStillInZone(Human h)
-    {
-        Transform trigger = h.transform.Find("HumanTrigger");
-        return trigger != null && triggerZone.bounds.Contains(trigger.position);
+        return human != null && human.gameObject != null && human.photonView != null && human.Stats != null;
     }
 
     private void ClearPrompt()

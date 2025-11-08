@@ -48,61 +48,83 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Update()
     {
-        if (ChatManager.IsChatActive() || isShrinking) return;
+        if (ChatManager.IsChatActive() || isShrinking)
+            return;
 
-        if (!isInside)
-        {
-            Human checkHuman = FindLocalHumanInZone();
-            if (checkHuman != null)
-            {
-                localHuman = checkHuman;
-                isInside = true;
-            }
-        }
-        else if (localHuman == null || !IsStillInZone(localHuman))
+        // Only check if we lost track of the human
+        if (isInside && (localHuman == null || !IsHumanValid(localHuman)))
         {
             ClearPrompt();
             isInside = false;
             localHuman = null;
+            return;
         }
 
         if (isInside && localHuman != null)
         {
-            int remaining = maxGrants - grantsUsed;
+            UpdatePromptAndInput();
+        }
+    }
 
-            if (remaining <= 0)
+    private void UpdatePromptAndInput()
+    {
+        int remaining = maxGrants - grantsUsed;
+
+        if (remaining <= 0)
+        {
+            currentPrompt = "No Blades remaining";
+            extraPrompt = "";
+            return;
+        }
+
+        int bladesNeeded = GetBladesNeeded(localHuman);
+        if (bladesNeeded <= 0)
+        {
+            currentPrompt = "Blades at maximum capacity";
+            extraPrompt = "";
+            return;
+        }
+
+        int actualPickup = Mathf.Min(bladePickup, bladesNeeded);
+        extraPrompt = $"Blade pickups left: {remaining}";
+
+        float timeSinceLast = Time.time - lastGrantTime;
+        if (timeSinceLast < cooldownDuration)
+        {
+            float timeLeft = Mathf.Ceil(cooldownDuration - timeSinceLast);
+            currentPrompt = $"Pickup on cooldown ({timeLeft}s)";
+        }
+        else
+        {
+            currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Collect Blades: +{actualPickup}";
+
+            if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
             {
-                currentPrompt = "No Blades remaining";
-                extraPrompt = "";
-                return;
+                TryGrantBlades();
             }
+        }
+    }
 
-            int bladesNeeded = GetBladesNeeded(localHuman);
-            if (bladesNeeded <= 0)
-            {
-                currentPrompt = "Blades at maximum capacity";
-                extraPrompt = "";
-                return;
-            }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (isShrinking) return;
 
-            int actualPickup = Mathf.Min(bladePickup, bladesNeeded);
-            extraPrompt = $"Blade pickups left: {remaining}";
+        Human human = other.GetComponentInParent<Human>();
+        if (human != null && human.photonView.IsMine)
+        {
+            localHuman = human;
+            isInside = true;
+        }
+    }
 
-            float timeSinceLast = Time.time - lastGrantTime;
-            if (timeSinceLast < cooldownDuration)
-            {
-                float timeLeft = Mathf.Ceil(cooldownDuration - timeSinceLast);
-                currentPrompt = $"Pickup on cooldown ({timeLeft}s)";
-            }
-            else
-            {
-                currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Collect Blades: +{actualPickup}";
-
-                if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
-                {
-                    TryGrantBlades();
-                }
-            }
+    private void OnTriggerExit(Collider other)
+    {
+        Human human = other.GetComponentInParent<Human>();
+        if (human != null && human == localHuman)
+        {
+            ClearPrompt();
+            isInside = false;
+            localHuman = null;
         }
     }
 
@@ -174,6 +196,7 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
             return Mathf.Max(0, bladeWeapon.MaxBlades - bladeWeapon.BladesLeft);
         }
 
+        // Reflection fallback (cached for performance)
         var weaponType = human.Weapon.GetType();
         string[] bladeCountNames = { "BladesLeft", "bladesLeft", "BladeCount", "bladeCount" };
         string[] maxBladeNames = { "MaxBlades", "maxBlades", "MaxBladeCount", "maxBladeCount" };
@@ -283,24 +306,9 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
             PhotonNetwork.Destroy(gameObject);
     }
 
-    private Human FindLocalHumanInZone()
+    private bool IsHumanValid(Human human)
     {
-        foreach (Human h in FindObjectsOfType<Human>())
-        {
-            if (h.photonView.IsMine)
-            {
-                Transform trigger = h.transform.Find("HumanTrigger");
-                if (trigger != null && triggerZone.bounds.Contains(trigger.position))
-                    return h;
-            }
-        }
-        return null;
-    }
-
-    private bool IsStillInZone(Human h)
-    {
-        Transform trigger = h.transform.Find("HumanTrigger");
-        return trigger != null && triggerZone.bounds.Contains(trigger.position);
+        return human != null && human.gameObject != null && human.photonView != null;
     }
 
     private void ClearPrompt()
