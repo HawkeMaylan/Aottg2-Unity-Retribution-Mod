@@ -1170,9 +1170,10 @@ namespace Characters
                 rb.constraints = RigidbodyConstraints.None;
                 rb.detectCollisions = true;
                 rb.includeLayers = ~0;
-                rb.mass = 1f;
-                rb.drag = 0f;
+                rb.mass = 5f;
+                rb.drag = 1f;
                 rb.angularDrag = 1f;
+                rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
             }
 
             // Process sub objects
@@ -1183,6 +1184,12 @@ namespace Characters
             ProcessSubObjectRecursive("shoulder_L");
             ProcessSubObjectRecursive("shoulder_R");
             ProcessSubObjectRecursive("neck");
+            ProcessSubObjectRecursive("head");
+            ProcessSubObjectRecursive("forearm_L");
+            ProcessSubObjectRecursive("forearm_R");
+            ProcessSubObjectRecursive("spine");
+            ProcessSubObjectRecursive("hand_L");
+            ProcessSubObjectRecursive("hand_R");
 
             // Keep capsule colliders active and set to include everything
             CapsuleCollider[] capsuleColliders = GetComponents<CapsuleCollider>();
@@ -1192,6 +1199,8 @@ namespace Characters
                 collider.isTrigger = false;
                 collider.includeLayers = ~0;
                 collider.excludeLayers = 0;
+                collider.radius = 0.7f;
+                collider.height = 0.5f;
             }
 
             // Also configure any other colliders to include everything
