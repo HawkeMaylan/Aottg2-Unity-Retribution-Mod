@@ -1268,6 +1268,10 @@ namespace Characters
             DestroyChildObject("speedFX");
             DestroyChildObject("3dmg_smoke");
 
+            Transform bloodParticleTransform = transform.Find("HumanBloodParticleDrip");
+            ParticleSystem bloodParticleSystem = bloodParticleTransform.GetComponent<ParticleSystem>();
+            bloodParticleSystem.Play();
+
             // Photon instantiate the gas pickup at this body's position
             if (PhotonNetwork.IsMasterClient)
             {
