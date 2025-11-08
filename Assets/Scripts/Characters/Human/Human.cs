@@ -1174,10 +1174,8 @@ namespace Characters
         [PunRPC]
         private void RPC_ConfigureMainPhysics()
         {
-            // Set main object layer to 23
             gameObject.layer = 23;
 
-            // Configure Rigidbody to include everything
             Rigidbody rb = GetComponent<Rigidbody>();
             if (rb != null)
             {
@@ -1189,6 +1187,15 @@ namespace Characters
                 rb.drag = 0.5f;
                 rb.angularDrag = 1f;
                 rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
+
+                // ADD THIS: Photon Rigidbody View for synchronization
+                PhotonRigidbodyView photonRbView = GetComponent<PhotonRigidbodyView>();
+                if (photonRbView == null)
+                {
+                    photonRbView = gameObject.AddComponent<PhotonRigidbodyView>();
+                }
+                photonRbView.m_SynchronizeVelocity = true;
+                photonRbView.m_SynchronizeAngularVelocity = true;
             }
         }
 
@@ -1267,6 +1274,8 @@ namespace Characters
             DestroyChildObject("proxText");
             DestroyChildObject("speedFX");
             DestroyChildObject("3dmg_smoke");
+            DestroyChildObject("blade_L(Clone)");
+            DestroyChildObject("blade_R(Clone)");
 
             Transform bloodParticleTransform = transform.Find("HumanBloodParticleDrip");
             ParticleSystem bloodParticleSystem = bloodParticleTransform.GetComponent<ParticleSystem>();
@@ -1298,7 +1307,7 @@ namespace Characters
                             {
                                 // Add some position variation so they don't all spawn in the exact same spot
                                 Vector3 spawnPosition = transform.position + UnityEngine.Random.insideUnitSphere * 0.5f;
-                                spawnPosition.y = transform.position.y; // Keep same Y position
+                                spawnPosition.y = transform.position.y +1f; // Keep same Y position
 
                                 PhotonNetwork.Instantiate("Buildables/bodyBladePickup", spawnPosition, transform.rotation);
                             }
