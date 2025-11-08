@@ -89,11 +89,19 @@ public class GasPickup : MonoBehaviourPunCallbacks, IPunObservable
             }
             else
             {
-                currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Collect Gas: +{gasPickup}";
-
-                if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
+                // Check if player is already at max gas
+                if (localHuman.Stats != null && localHuman.Stats.CurrentGas >= localHuman.Stats.MaxGas)
                 {
-                    photonView.RPC("RPC_TryGrant", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber);
+                    currentPrompt = "Gas is already full!";
+                }
+                else
+                {
+                    currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Collect Gas: +{gasPickup}";
+
+                    if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
+                    {
+                        photonView.RPC("RPC_TryGrant", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.ActorNumber);
+                    }
                 }
             }
         }
@@ -107,23 +115,38 @@ public class GasPickup : MonoBehaviourPunCallbacks, IPunObservable
         if (grantsUsed >= maxGrants || (Time.time - lastGrantTime) < cooldownDuration)
             return;
 
+        // Find the target human and check if they need gas
+        Human targetHuman = null;
+        foreach (var human in FindObjectsOfType<Human>())
+        {
+            if (human.photonView != null && human.photonView.OwnerActorNr == actorId)
+            {
+                targetHuman = human;
+                break;
+            }
+        }
+
+        if (targetHuman == null || targetHuman.Stats == null)
+            return;
+
+        // Check if player already has max gas
+        if (targetHuman.Stats.CurrentGas >= targetHuman.Stats.MaxGas)
+            return;
+
         grantsUsed++;
         lastGrantTime = Time.time;
 
         photonView.RPC("RPC_SyncGrant", RpcTarget.All, grantsUsed, lastGrantTime);
 
-        foreach (var human in FindObjectsOfType<Human>())
+        // Add gas to the player's stats, but don't exceed MaxGas
+        float gasToAdd = gasPickup;
+        float newGas = targetHuman.Stats.CurrentGas + gasToAdd;
+        if (newGas > targetHuman.Stats.MaxGas)
         {
-            if (human.photonView != null && human.photonView.OwnerActorNr == actorId)
-            {
-                // Add gas to the player's stats
-                if (human.Stats != null)
-                {
-                    human.Stats.CurrentGas += gasPickup;
-                }
-                break;
-            }
+            gasToAdd = targetHuman.Stats.MaxGas - targetHuman.Stats.CurrentGas;
         }
+
+        targetHuman.Stats.CurrentGas += gasToAdd;
 
         if (grantsUsed >= maxGrants && destroyWhenEmpty)
             StartCoroutine(ShrinkAndDestroy());
@@ -139,7 +162,6 @@ public class GasPickup : MonoBehaviourPunCallbacks, IPunObservable
     private IEnumerator ShrinkAndDestroy()
     {
         isShrinking = true;
-
 
         if (localHuman != null && localHuman.photonView.IsMine)
         {
@@ -166,7 +188,6 @@ public class GasPickup : MonoBehaviourPunCallbacks, IPunObservable
         else
             Destroy(gameObject);
     }
-
 
     private Human FindLocalHumanInZone()
     {
@@ -208,7 +229,8 @@ public class GasPickup : MonoBehaviourPunCallbacks, IPunObservable
                 fontSize = 24,
                 alignment = TextAnchor.UpperCenter,
                 wordWrap = false,
-                normal = { textColor = currentPrompt.Contains("cooldown") ? Color.red : Color.white }
+                normal = { textColor = currentPrompt.Contains("cooldown") ? Color.red :
+                          currentPrompt.Contains("full") ? Color.yellow : Color.white }
             };
 
             float labelWidth = 600f;
