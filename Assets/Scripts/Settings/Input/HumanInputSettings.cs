@@ -19,6 +19,7 @@
         public KeybindSetting Jump = new KeybindSetting(new string[] { "LeftShift", "None" });
         public KeybindSetting HumanSprint = new KeybindSetting(new string[] { "Space", "None" });
         public KeybindSetting Reload = new KeybindSetting(new string[] { "R", "None" });
+        public KeybindSetting Sheath = new KeybindSetting(new string[] { "Y", "None" });
         public KeybindSetting HorseMount = new KeybindSetting(new string[] { "LeftControl", "None" });
         public KeybindSetting HorseWalk = new KeybindSetting(new string[] { "LeftShift", "None" });
         public KeybindSetting HorseJump = new KeybindSetting(new string[] { "Space", "None" });

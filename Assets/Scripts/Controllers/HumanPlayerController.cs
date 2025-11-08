@@ -353,6 +353,13 @@ namespace Controllers
                     if (_humanInput.Reload.GetKeyDown())
                         _human.Reload();
                 }
+
+                if (_human.State == HumanState.Idle)
+                {
+                    if (_humanInput.Sheath.GetKeyDown())
+                        _human.Sheath();
+                }
+
                 if (_human.CarryState == HumanCarryState.Carry)
                 {
                     if (_humanInput.HorseMount.GetKeyDown())

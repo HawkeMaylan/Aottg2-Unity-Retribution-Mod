@@ -164,6 +164,11 @@ namespace Characters
         public int CurrentSpecialIndex = 0;
 
 
+        //Sheath Addon
+
+        private bool BladeSheathed = false;
+
+
 
         private void CreateStaminaBar()
         {
@@ -495,6 +500,9 @@ namespace Characters
             PlayAnimation(HumanAnimations.Dodge, 0.2f);
             ToggleSparks(false);
         }
+
+
+
 
         public void Dash(float targetAngle)
         {
@@ -1013,6 +1021,122 @@ namespace Characters
             ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.Reload();
         }
 
+
+        public void Sheath()
+        {
+            if ((Setup.Weapon == HumanWeapon.AHSS || Setup.Weapon == HumanWeapon.APG) && !SettingsManager.InGameCurrent.Misc.GunsAirReload.Value && !Grounded)
+                return;
+            if (_needFinishReload || _reloadCooldownLeft > 0f)
+                return;
+            if (Weapon is AmmoWeapon)
+            {
+                if (((AmmoWeapon)Weapon).AmmoLeft <= 0)
+                    return;
+                if (Weapon is AHSSWeapon)
+                {
+                    ToggleBlades(false);
+                    CancelHookLeftKey = true;
+                    CancelHookRightKey = true;
+                    CancelHookBothKey = true;
+                }
+                else if (Weapon is ThunderspearWeapon)
+                {
+                    SetThunderspears(false, false);
+                    CancelHookLeftKey = true;
+                    CancelHookRightKey = true;
+                    CancelHookBothKey = true;
+                }
+                PlaySound(HumanSounds.GunReload);
+            }
+            else if (Weapon is BladeWeapon)
+            {
+                if (((BladeWeapon)Weapon).BladesLeft <= 0)
+                    return;
+                ToggleBlades(false);
+                if (Grounded)
+                    PlaySound(HumanSounds.BladeReloadGround);
+                else
+                    PlaySound(HumanSounds.BladeReloadAir);
+            }
+            if (Setup.Weapon == HumanWeapon.AHSS || Setup.Weapon == HumanWeapon.Thunderspear || Setup.Weapon == HumanWeapon.APG)
+            {
+                if (Grounded)
+                    _reloadAnimation = HumanAnimations.AHSSGunReloadBoth;
+                else
+                    _reloadAnimation = HumanAnimations.AHSSGunReloadBothAir;
+            }
+            else
+            {
+                if (Grounded)
+                    _reloadAnimation = HumanAnimations.ChangeBlade;
+                else
+                    _reloadAnimation = HumanAnimations.ChangeBladeAir;
+            }
+            CrossFade(_reloadAnimation, 1f, 0f);
+
+            // Toggle BladeSheathed state
+            BladeSheathed = !BladeSheathed;
+
+            // Find and toggle checkbox objects
+            ToggleCheckBoxObjects(BladeSheathed);
+
+            // Find and toggle blade objects
+            ToggleBladeObjects(BladeSheathed);
+        }
+
+        // Toggle checkbox objects based on sheathed state
+        private void ToggleCheckBoxObjects(bool sheathed)
+        {
+            // Find all checkbox objects - search for objects containing "checkBox" in name
+            List<Transform> checkboxes = FindAllDeepChildren(transform, "checkBox");
+
+            foreach (Transform checkbox in checkboxes)
+            {
+                checkbox.gameObject.SetActive(!sheathed); // Disable when sheathed, enable when unsheathed
+            }
+        }
+
+        // Toggle blade objects based on sheathed state
+        private void ToggleBladeObjects(bool sheathed)
+        {
+            // Find blade objects - search for objects containing "blade" in name
+            List<Transform> blades = FindAllDeepChildren(transform, "blade");
+
+            foreach (Transform blade in blades)
+            {
+                // Only toggle actual blade objects (not handles or other blade-related objects)
+                if (blade.name.Contains("blade_R") || blade.name.Contains("blade_L"))
+                {
+                    blade.gameObject.SetActive(!sheathed); // Disable when sheathed, enable when unsheathed
+                }
+            }
+        }
+
+        // Helper method to find all children with name containing search term
+        private List<Transform> FindAllDeepChildren(Transform parent, string nameContains)
+        {
+            List<Transform> results = new List<Transform>();
+            FindAllDeepChildrenRecursive(parent, nameContains, results);
+            return results;
+        }
+
+        private void FindAllDeepChildrenRecursive(Transform parent, string nameContains, List<Transform> results)
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name.ToLower().Contains(nameContains.ToLower()))
+                {
+                    results.Add(child);
+                }
+                FindAllDeepChildrenRecursive(child, nameContains, results);
+            }
+        }
+
+
+
+
+
+
         protected void FinishReload()
         {
             if (!_needFinishReload)
@@ -1192,7 +1316,7 @@ namespace Characters
 
             // Add the timer script
             RigidbodyTimer timerScript = gameObject.AddComponent<RigidbodyTimer>();
-            timerScript.Initialize(2f, bodyPartsToRemove);
+            timerScript.Initialize(6f, bodyPartsToRemove);
 
             Debug.Log($"RigidbodyTimer initialized to remove {bodyPartsToRemove.Count} body parts after 2 seconds");
         }
