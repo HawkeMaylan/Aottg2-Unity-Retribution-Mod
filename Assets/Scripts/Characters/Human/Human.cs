@@ -1267,7 +1267,18 @@ namespace Characters
             DestroyChildObject("proxText");
             DestroyChildObject("speedFX");
             DestroyChildObject("3dmg_smoke");
-
+            // Photon instantiate the gas pickup at this body's position
+            if (PhotonNetwork.IsMasterClient)
+            {
+                GameObject gasPickupObj = PhotonNetwork.Instantiate("Buildables/bodyGasPickup", transform.position, transform.rotation);
+                GasPickup gasPickupScript = gasPickupObj.GetComponent<GasPickup>();
+                if (gasPickupScript != null)
+                {
+                    // Set the gas amount based on the player's current gas
+                    // You can use the full amount, a percentage, or a fixed value
+                    gasPickupScript.gasPickup = Stats.CurrentGas * 0.5f; // Example: 50% of player's gas
+                }
+            }
             gameObject.name = "DeadBody";
             gameObject.tag = "Untagged";
             Destroy(GetComponent<Human>());
