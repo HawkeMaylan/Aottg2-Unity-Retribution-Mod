@@ -10,9 +10,9 @@ using System.Collections.Generic;
 
 public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
 {
-    [Header("Gas Settings")]
+    [Header("Blade Pickup Settings")]
     public Collider triggerZone;
-    public int bladePickup = 4; // Changed to int since we're adding blades
+    public int bladePickup = 4;
     public float cooldownDuration = 10f;
     public int maxGrants = 3;
 
@@ -20,11 +20,7 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
     public bool destroyWhenEmpty = false;
     public float shrinkAndDestroyTime = 1.5f;
 
-    [Header("UI Prompt")]
-    public float promptDuration = 3f;
-
     private Human localHuman;
-    private Coroutine promptCoroutine;
     private static string currentPrompt = "";
     private static string extraPrompt = "";
 
@@ -79,14 +75,15 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
                 return;
             }
 
-            // Check if player is already at max blades
-            if (IsAtMaxBlades(localHuman))
+            int bladesNeeded = GetBladesNeeded(localHuman);
+            if (bladesNeeded <= 0)
             {
                 currentPrompt = "Blades at maximum capacity";
                 extraPrompt = "";
                 return;
             }
 
+            int actualPickup = Mathf.Min(bladePickup, bladesNeeded);
             extraPrompt = $"Blade pickups left: {remaining}";
 
             float timeSinceLast = Time.time - lastGrantTime;
@@ -97,7 +94,7 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
             }
             else
             {
-                currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Collect Blades: +{bladePickup}";
+                currentPrompt = $"Press {SettingsManager.InputSettings.Interaction.Interact2} to Collect Blades: +{actualPickup}";
 
                 if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
                 {
@@ -107,66 +104,39 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
-    private bool IsAtMaxBlades(Human human)
+    private int GetBladesNeeded(Human human)
     {
         if (human.Weapon == null)
-            return false;
+            return bladePickup;
 
-        // Check if the weapon is a BladeWeapon specifically
         if (human.Weapon is BladeWeapon bladeWeapon)
         {
-            return bladeWeapon.BladesLeft >= bladeWeapon.MaxBlades;
+            return Mathf.Max(0, bladeWeapon.MaxBlades - bladeWeapon.BladesLeft);
         }
 
         var weaponType = human.Weapon.GetType();
+        string[] bladeCountNames = { "BladesLeft", "bladesLeft", "BladeCount", "bladeCount" };
+        string[] maxBladeNames = { "MaxBlades", "maxBlades", "MaxBladeCount", "maxBladeCount" };
 
-        // Try different possible field/property names for blade count
-        string[] possibleBladeCountNames = { "BladesLeft", "bladesLeft", "BladeCount", "bladeCount", "blades", "Blades", "currentBlades", "CurrentBlades" };
-        string[] possibleMaxBladeNames = { "MaxBlades", "maxBlades", "MaxBladeCount", "maxBladeCount", "TotalBlades", "totalBlades" };
-
-        foreach (var fieldName in possibleBladeCountNames)
+        foreach (var fieldName in bladeCountNames)
         {
             var field = weaponType.GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
             if (field != null && field.FieldType == typeof(int))
             {
                 int currentBlades = (int)field.GetValue(human.Weapon);
-
-                // Try to find max blades field
-                foreach (var maxFieldName in possibleMaxBladeNames)
+                foreach (var maxFieldName in maxBladeNames)
                 {
                     var maxField = weaponType.GetField(maxFieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
                     if (maxField != null && maxField.FieldType == typeof(int))
                     {
                         int maxBlades = (int)maxField.GetValue(human.Weapon);
-                        return currentBlades >= maxBlades;
+                        return Mathf.Max(0, maxBlades - currentBlades);
                     }
                 }
-                // If max not found, assume not at max
-                return false;
-            }
-
-            var property = weaponType.GetProperty(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            if (property != null && property.PropertyType == typeof(int) && property.CanRead)
-            {
-                int currentBlades = (int)property.GetValue(human.Weapon);
-
-                // Try to find max blades property
-                foreach (var maxPropName in possibleMaxBladeNames)
-                {
-                    var maxProperty = weaponType.GetProperty(maxPropName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-                    if (maxProperty != null && maxProperty.PropertyType == typeof(int) && maxProperty.CanRead)
-                    {
-                        int maxBlades = (int)maxProperty.GetValue(human.Weapon);
-                        return currentBlades >= maxBlades;
-                    }
-                }
-                // If max not found, assume not at max
-                return false;
+                return bladePickup;
             }
         }
-
-        // If we can't determine, assume not at max
-        return false;
+        return bladePickup;
     }
 
     [PunRPC]
@@ -177,40 +147,41 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
         if (grantsUsed >= maxGrants || (Time.time - lastGrantTime) < cooldownDuration)
             return;
 
-        // Check if the target player is already at max blades
         foreach (var human in FindObjectsOfType<Human>())
         {
             if (human.photonView != null && human.photonView.OwnerActorNr == actorId)
             {
-                if (IsAtMaxBlades(human))
+                int bladesNeeded = GetBladesNeeded(human);
+                if (bladesNeeded <= 0)
                 {
-                    Debug.Log("Player already at maximum blade capacity, skipping grant");
+                    Debug.Log("Player already at maximum blade capacity");
                     return;
                 }
+
+                int actualPickup = Mathf.Min(bladePickup, bladesNeeded);
+                AddBladesToHuman(human, actualPickup);
+
+                // Only consume a grant if we gave the full bladePickup amount
+                if (actualPickup == bladePickup)
+                {
+                    grantsUsed++;
+                    lastGrantTime = Time.time;
+                    photonView.RPC("RPC_SyncGrant", RpcTarget.All, grantsUsed, lastGrantTime);
+
+                    if (grantsUsed >= maxGrants && destroyWhenEmpty)
+                        StartCoroutine(ShrinkAndDestroy());
+                }
+                else
+                {
+                    Debug.Log($"Partial pickup: {actualPickup}/{bladePickup} blades given (no grant consumed)");
+                }
+
                 break;
             }
         }
-
-        grantsUsed++;
-        lastGrantTime = Time.time;
-
-        photonView.RPC("RPC_SyncGrant", RpcTarget.All, grantsUsed, lastGrantTime);
-
-        foreach (var human in FindObjectsOfType<Human>())
-        {
-            if (human.photonView != null && human.photonView.OwnerActorNr == actorId)
-            {
-                // Try multiple approaches to add blades
-                AddBladesToHuman(human);
-                break;
-            }
-        }
-
-        if (grantsUsed >= maxGrants && destroyWhenEmpty)
-            StartCoroutine(ShrinkAndDestroy());
     }
 
-    private void AddBladesToHuman(Human human)
+    private void AddBladesToHuman(Human human, int amount)
     {
         if (human.Weapon == null)
         {
@@ -218,67 +189,24 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
             return;
         }
 
-        // Check if the weapon is a BladeWeapon specifically
         if (human.Weapon is BladeWeapon bladeWeapon)
         {
-            // Calculate how many blades we can actually add without exceeding max
-            int bladesToAdd = Mathf.Min(bladePickup, bladeWeapon.MaxBlades - bladeWeapon.BladesLeft);
-
-            if (bladesToAdd > 0)
-            {
-                bladeWeapon.BladesLeft += bladesToAdd;
-                Debug.Log($"Added {bladesToAdd} blades. New total: {bladeWeapon.BladesLeft}/{bladeWeapon.MaxBlades}");
-            }
-            else
-            {
-                Debug.Log("Blades already at maximum capacity");
-            }
+            bladeWeapon.BladesLeft += amount;
+            Debug.Log($"Added {amount} blades. New total: {bladeWeapon.BladesLeft}/{bladeWeapon.MaxBlades}");
             return;
         }
 
         var weaponType = human.Weapon.GetType();
+        string[] bladeCountNames = { "BladesLeft", "bladesLeft", "BladeCount", "bladeCount" };
 
-        // Try different possible field/property names for blade count
-        string[] possibleBladeCountNames = { "BladesLeft", "bladesLeft", "BladeCount", "bladeCount", "blades", "Blades", "currentBlades", "CurrentBlades" };
-        string[] possibleMaxBladeNames = { "MaxBlades", "maxBlades", "MaxBladeCount", "maxBladeCount", "TotalBlades", "totalBlades" };
-
-        foreach (var fieldName in possibleBladeCountNames)
+        foreach (var fieldName in bladeCountNames)
         {
             var field = weaponType.GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
             if (field != null && field.FieldType == typeof(int))
             {
                 int currentBlades = (int)field.GetValue(human.Weapon);
-
-                // Try to find max blades field
-                int maxBlades = int.MaxValue; // Default to very high number if max not found
-                bool foundMax = false;
-
-                foreach (var maxFieldName in possibleMaxBladeNames)
-                {
-                    var maxField = weaponType.GetField(maxFieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-                    if (maxField != null && maxField.FieldType == typeof(int))
-                    {
-                        maxBlades = (int)maxField.GetValue(human.Weapon);
-                        foundMax = true;
-                        break;
-                    }
-                }
-
-                // Calculate how many blades we can actually add
-                int bladesToAdd = Mathf.Min(bladePickup, maxBlades - currentBlades);
-
-                if (bladesToAdd > 0)
-                {
-                    field.SetValue(human.Weapon, currentBlades + bladesToAdd);
-                    if (foundMax)
-                        Debug.Log($"Added {bladesToAdd} blades via field '{fieldName}'. New total: {currentBlades + bladesToAdd}/{maxBlades}");
-                    else
-                        Debug.Log($"Added {bladesToAdd} blades via field '{fieldName}'. New total: {currentBlades + bladesToAdd}");
-                }
-                else
-                {
-                    Debug.Log("Blades already at maximum capacity");
-                }
+                field.SetValue(human.Weapon, currentBlades + amount);
+                Debug.Log($"Added {amount} blades via field '{fieldName}'. New total: {currentBlades + amount}");
                 return;
             }
 
@@ -286,69 +214,29 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
             if (property != null && property.PropertyType == typeof(int) && property.CanWrite)
             {
                 int currentBlades = (int)property.GetValue(human.Weapon);
-
-                // Try to find max blades property
-                int maxBlades = int.MaxValue;
-                bool foundMax = false;
-
-                foreach (var maxPropName in possibleMaxBladeNames)
-                {
-                    var maxProperty = weaponType.GetProperty(maxPropName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-                    if (maxProperty != null && maxProperty.PropertyType == typeof(int) && maxProperty.CanRead)
-                    {
-                        maxBlades = (int)maxProperty.GetValue(human.Weapon);
-                        foundMax = true;
-                        break;
-                    }
-                }
-
-                // Calculate how many blades we can actually add
-                int bladesToAdd = Mathf.Min(bladePickup, maxBlades - currentBlades);
-
-                if (bladesToAdd > 0)
-                {
-                    property.SetValue(human.Weapon, currentBlades + bladesToAdd);
-                    if (foundMax)
-                        Debug.Log($"Added {bladesToAdd} blades via property '{fieldName}'. New total: {currentBlades + bladesToAdd}/{maxBlades}");
-                    else
-                        Debug.Log($"Added {bladesToAdd} blades via property '{fieldName}'. New total: {currentBlades + bladesToAdd}");
-                }
-                else
-                {
-                    Debug.Log("Blades already at maximum capacity");
-                }
+                property.SetValue(human.Weapon, currentBlades + amount);
+                Debug.Log($"Added {amount} blades via property '{fieldName}'. New total: {currentBlades + amount}");
                 return;
             }
         }
 
-        // If direct field/property access doesn't work, try calling a method
-        string[] possibleMethodNames = { "AddBlades", "AddAmmo", "Reload", "RefillBlades", "Reset" };
-        foreach (var methodName in possibleMethodNames)
+        string[] methodNames = { "AddBlades", "AddAmmo", "RefillBlades" };
+        foreach (var methodName in methodNames)
         {
             var method = weaponType.GetMethod(methodName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
             if (method != null)
             {
                 var parameters = method.GetParameters();
-                if (parameters.Length == 0)
+                if (parameters.Length == 1 && parameters[0].ParameterType == typeof(int))
                 {
-                    // Methods like Reset() that restore blades without parameters
-                    // These typically handle their own max limits internally
-                    method.Invoke(human.Weapon, null);
-                    Debug.Log($"Called method '{methodName}' to restore blades");
-                    return;
-                }
-                else if (parameters.Length == 1 && parameters[0].ParameterType == typeof(int))
-                {
-                    // Methods that take an int parameter for blade count
-                    // We'll let the method handle its own max limits
-                    method.Invoke(human.Weapon, new object[] { bladePickup });
-                    Debug.Log($"Called method '{methodName}' to add {bladePickup} blades");
+                    method.Invoke(human.Weapon, new object[] { amount });
+                    Debug.Log($"Called method '{methodName}' to add {amount} blades");
                     return;
                 }
             }
         }
 
-        Debug.LogWarning($"Could not find blade count field/property/method in weapon of type: {weaponType}");
+        Debug.LogWarning($"Could not add blades to weapon of type: {weaponType}");
     }
 
     [PunRPC]
@@ -380,12 +268,8 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
             yield return null;
         }
 
-        transform.localScale = Vector3.zero;
-
         if (photonView != null && photonView.IsMine)
             PhotonNetwork.Destroy(gameObject);
-        else
-            Destroy(gameObject);
     }
 
     private Human FindLocalHumanInZone()
@@ -412,11 +296,6 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
     {
         currentPrompt = "";
         extraPrompt = "";
-        if (promptCoroutine != null)
-        {
-            StopCoroutine(promptCoroutine);
-            promptCoroutine = null;
-        }
     }
 
     private void OnGUI()
