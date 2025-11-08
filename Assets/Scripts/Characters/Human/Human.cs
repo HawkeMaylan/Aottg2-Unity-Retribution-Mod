@@ -1267,18 +1267,42 @@ namespace Characters
             DestroyChildObject("proxText");
             DestroyChildObject("speedFX");
             DestroyChildObject("3dmg_smoke");
+
             // Photon instantiate the gas pickup at this body's position
             if (PhotonNetwork.IsMasterClient)
             {
+                // Gas pickup
                 GameObject gasPickupObj = PhotonNetwork.Instantiate("Buildables/bodyGasPickup", transform.position, transform.rotation);
                 GasPickup gasPickupScript = gasPickupObj.GetComponent<GasPickup>();
                 if (gasPickupScript != null)
                 {
-                    // Set the gas amount based on the player's current gas
-                    // You can use the full amount, a percentage, or a fixed value
-                    gasPickupScript.gasPickup = Stats.CurrentGas * 0.5f; // Example: 50% of player's gas
+                    gasPickupScript.gasPickup = Stats.CurrentGas * 0.5f;
+                }
+
+                // Blade pickups - get blade count from human's weapon
+                Human human = GetComponent<Human>();
+                if (human != null && human.Weapon != null)
+                {
+                    // Check if the human has a blade weapon using the same pattern as your example
+                    if (human.Setup.Weapon == (int)HumanWeapon.Blade)
+                    {
+                        // Direct cast to BladeWeapon now that we know it's a blade
+                        Characters.BladeWeapon bladeWeapon = human.Weapon as Characters.BladeWeapon;
+                        if (bladeWeapon != null && bladeWeapon.BladesLeft > 0)
+                        {
+                            for (int i = 0; i < bladeWeapon.BladesLeft; i++)
+                            {
+                                // Add some position variation so they don't all spawn in the exact same spot
+                                Vector3 spawnPosition = transform.position + UnityEngine.Random.insideUnitSphere * 0.5f;
+                                spawnPosition.y = transform.position.y; // Keep same Y position
+
+                                PhotonNetwork.Instantiate("Buildables/bodyBladePickup", spawnPosition, transform.rotation);
+                            }
+                        }
+                    }
                 }
             }
+
             gameObject.name = "DeadBody";
             gameObject.tag = "Untagged";
             Destroy(GetComponent<Human>());
