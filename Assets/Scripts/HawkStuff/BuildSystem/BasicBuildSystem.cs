@@ -8,6 +8,27 @@ using UI;
 using Photon.Realtime;
 using System.IO;
 using System.Linq;
+using ApplicationManagers;
+using Cameras;
+using Controllers;
+using CustomLogic;
+using CustomSkins;
+using Effects;
+using GameManagers;
+using GameProgress;
+using Map;
+using Photon.Pun;
+using Photon.Realtime;
+using Settings;
+using SimpleJSONFixed;
+using System;
+using System.Collections;
+
+using UnityEngine;
+using Utility;
+using Weather;
+using UnityEngine.UI;
+using Entities;
 
 public class BuildSystem : MonoBehaviourPunCallbacks
 {
