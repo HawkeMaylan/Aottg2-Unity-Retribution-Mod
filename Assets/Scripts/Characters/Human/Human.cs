@@ -968,6 +968,13 @@ namespace Characters
                 return;
             if (_needFinishReload || _reloadCooldownLeft > 0f)
                 return;
+
+            if (BladeSheathed == true)
+            {
+                Sheath();
+                return;
+            }
+
             if (Weapon is AmmoWeapon)
             {
                 if (((AmmoWeapon)Weapon).AmmoLeft <= 0)
@@ -1012,6 +1019,9 @@ namespace Characters
                 else
                     _reloadAnimation = HumanAnimations.ChangeBladeAir;
             }
+            
+
+
             CrossFade(_reloadAnimation, 0.1f, 0f);
             State = HumanState.Reload;
             _stateTimeLeft = Animation.GetTotalTime(_reloadAnimation);
@@ -1073,6 +1083,11 @@ namespace Characters
                     _reloadAnimation = HumanAnimations.ChangeBladeAir;
             }
             CrossFade(_reloadAnimation, 1f, 0f);
+            State = HumanState.Reload;
+            _stateTimeLeft = Animation.GetTotalTime(_reloadAnimation);
+
+            _reloadTimeLeft = _stateTimeLeft;
+            _reloadCooldownLeft = _reloadTimeLeft + 0.5f;
 
             // Toggle BladeSheathed state
             BladeSheathed = !BladeSheathed;
@@ -4638,6 +4653,7 @@ namespace Characters
         MountingHorse,
         Stun,
         WallSlide
+
     }
 
     public enum HumanMountState
