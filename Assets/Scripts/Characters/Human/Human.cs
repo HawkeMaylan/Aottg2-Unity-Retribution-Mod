@@ -1038,6 +1038,11 @@ namespace Characters
                 return;
             if (_needFinishReload || _reloadCooldownLeft > 0f)
                 return;
+
+            // Multiplayer authority check - only allow sheath if we own this object
+            if (PhotonNetwork.InRoom && !photonView.IsMine)
+                return;
+
             if (Weapon is AmmoWeapon)
             {
                 if (((AmmoWeapon)Weapon).AmmoLeft <= 0)
@@ -1092,11 +1097,54 @@ namespace Characters
             // Toggle BladeSheathed state
             BladeSheathed = !BladeSheathed;
 
+            // Sync over network
+            if (PhotonNetwork.InRoom)
+            {
+                // Update networked variable
+                photonView.RPC("SyncSheathState", RpcTarget.All, BladeSheathed);
+            }
+            else
+            {
+                // Single player fallback
+                ApplySheathVisuals(BladeSheathed);
+            }
+        }
+
+        [PunRPC]
+        private void SyncSheathState(bool sheathed)
+        {
+            BladeSheathed = sheathed;
+            ApplySheathVisuals(sheathed);
+
+            // Optional: Also sync the animation state if needed
+            if (photonView.IsMine) return; // Don't play animations for remote players twice
+
+            // Play appropriate animation for remote players
+            if (Setup.Weapon == HumanWeapon.AHSS || Setup.Weapon == HumanWeapon.Thunderspear || Setup.Weapon == HumanWeapon.APG)
+            {
+                if (Grounded)
+                    _reloadAnimation = HumanAnimations.AHSSGunReloadBoth;
+                else
+                    _reloadAnimation = HumanAnimations.AHSSGunReloadBothAir;
+            }
+            else
+            {
+                if (Grounded)
+                    _reloadAnimation = HumanAnimations.ChangeBlade;
+                else
+                    _reloadAnimation = HumanAnimations.ChangeBladeAir;
+            }
+            CrossFade(_reloadAnimation, 1f, 0f);
+            State = HumanState.Reload;
+        }
+
+        private void ApplySheathVisuals(bool sheathed)
+        {
             // Find and toggle checkbox objects
-            ToggleCheckBoxObjects(BladeSheathed);
+            ToggleCheckBoxObjects(sheathed);
 
             // Find and toggle blade objects
-            ToggleBladeObjects(BladeSheathed);
+            ToggleBladeObjects(sheathed);
         }
 
         // Toggle checkbox objects based on sheathed state
@@ -1126,6 +1174,7 @@ namespace Characters
                 }
             }
         }
+
 
         // Helper method to find all children with name containing search term
         private List<Transform> FindAllDeepChildren(Transform parent, string nameContains)

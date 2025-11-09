@@ -198,6 +198,7 @@ MonoBehaviour:
   - RPC_UpdateGrants
   - RPC_AddRigidbodyTimer
   - RPC_RemoveAllSubObjectRigidbodies
+  - SyncSheathState
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
