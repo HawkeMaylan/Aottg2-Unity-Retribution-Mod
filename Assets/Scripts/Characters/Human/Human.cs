@@ -1418,6 +1418,16 @@ namespace Characters
                         }
                     }
                 }
+
+                // Spawn Human Corpse Ragdoll with same function as gas pickup
+                GameObject corpseObj = PhotonNetwork.Instantiate("Buildables/HumanCorpseRagdoll", transform.position, transform.rotation);
+
+                // Apply velocity to corpse ragdoll (same as gas pickup)
+                Rigidbody corpseRb = corpseObj.GetComponent<Rigidbody>();
+                if (corpseRb != null)
+                {
+                    corpseRb.velocity = currentVelocity;
+                }
             }
 
             yield return new WaitForSeconds(0f);
