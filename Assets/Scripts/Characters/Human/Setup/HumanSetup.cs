@@ -209,9 +209,9 @@ namespace Characters
         {
             if (Deleted)
                 return;
-            //DeleteParts();
-            //foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
-            //    renderer.enabled = false;
+            DeleteParts();
+            foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
+                renderer.enabled = false;
             Deleted = true;
         }
 

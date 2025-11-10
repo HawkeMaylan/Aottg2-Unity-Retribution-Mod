@@ -1032,6 +1032,7 @@ namespace Characters
         }
 
 
+
         public void Sheath()
         {
             if ((Setup.Weapon == HumanWeapon.AHSS || Setup.Weapon == HumanWeapon.APG) && !SettingsManager.InGameCurrent.Misc.GunsAirReload.Value && !Grounded)
@@ -1199,8 +1200,6 @@ namespace Characters
 
 
 
-
-
         protected void FinishReload()
         {
             if (!_needFinishReload)
@@ -1349,16 +1348,79 @@ namespace Characters
             EffectSpawner.Spawn(EffectPrefabs.Blood2, Cache.Transform.position, Cache.Transform.rotation);
 
             // Call RPCs for all other actions
-            photonView.RPC("RPC_ConfigureMainPhysics", RpcTarget.All);
-            photonView.RPC("RPC_ProcessAllSubObjects", RpcTarget.All);
-            photonView.RPC("RPC_ConfigureAllColliders", RpcTarget.All);
+            //photonView.RPC("RPC_ConfigureMainPhysics", RpcTarget.All);
+            //photonView.RPC("RPC_ProcessAllSubObjects", RpcTarget.All);
+            //photonView.RPC("RPC_ConfigureAllColliders", RpcTarget.All);
 
             // Add rigidbody timer BEFORE disabling components
-            photonView.RPC("RPC_AddRigidbodyTimer", RpcTarget.All);
-            photonView.RPC("RPC_DisableComponents", RpcTarget.All);
-            photonView.RPC("RPC_FinalizeDeath", RpcTarget.All);
+            //photonView.RPC("RPC_AddRigidbodyTimer", RpcTarget.All);
+            //photonView.RPC("RPC_DisableComponents", RpcTarget.All);
+            //photonView.RPC("RPC_FinalizeDeath", RpcTarget.All);
 
-            yield return new WaitForSeconds(3600f);
+
+            // Get the current velocity from this object's rigidbody
+            Vector3 currentVelocity = Vector3.zero;
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                currentVelocity = rb.velocity;
+            }
+
+            // Photon instantiate the gas pickup at this body's position
+            if (PhotonNetwork.IsMasterClient)
+            {
+                // Gas pickup
+                GameObject gasPickupObj = PhotonNetwork.Instantiate("Buildables/bodyGasPickup", transform.position, transform.rotation);
+
+                // Apply velocity to gas pickup
+                Rigidbody gasRb = gasPickupObj.GetComponent<Rigidbody>();
+                if (gasRb != null)
+                {
+                    gasRb.velocity = currentVelocity;
+                }
+
+                GasPickup gasPickupScript = gasPickupObj.GetComponent<GasPickup>();
+                if (gasPickupScript != null)
+                {
+                    gasPickupScript.gasPickup = Stats.CurrentGas * 0.5f;
+                }
+
+                // Blade pickups - get blade count from human's weapon
+                Human human = GetComponent<Human>();
+                if (human != null && human.Weapon != null)
+                {
+                    // Check if the human has a blade weapon using the same pattern as your example
+                    if (human.Setup.Weapon == (int)HumanWeapon.Blade)
+                    {
+                        // Direct cast to BladeWeapon now that we know it's a blade
+                        Characters.BladeWeapon bladeWeapon = human.Weapon as Characters.BladeWeapon;
+                        if (bladeWeapon != null && bladeWeapon.BladesLeft > 0)
+                        {
+                            for (int i = 0; i < bladeWeapon.BladesLeft; i++)
+                            {
+                                // Add some position variation so they don't all spawn in the exact same spot
+                                Vector3 spawnPosition = transform.position + UnityEngine.Random.insideUnitSphere * 0.5f;
+                                spawnPosition.y = transform.position.y + 1f; // Keep same Y position
+
+                                GameObject bladePickupObj = PhotonNetwork.Instantiate("Buildables/bodyBladePickup", spawnPosition, transform.rotation);
+
+                                // Apply velocity to blade pickup with slight random variation
+                                Rigidbody bladeRb = bladePickupObj.GetComponent<Rigidbody>();
+                                if (bladeRb != null)
+                                {
+                                    Vector3 randomVariation = UnityEngine.Random.insideUnitSphere * 2f;
+                                    bladeRb.velocity = currentVelocity + randomVariation;
+
+                                    // Add a small upward force for more natural scattering
+                                    bladeRb.velocity += Vector3.up * 3f;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            yield return new WaitForSeconds(0f);
             PhotonNetwork.Destroy(gameObject);
         }
 
