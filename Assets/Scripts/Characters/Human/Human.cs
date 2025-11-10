@@ -1426,7 +1426,9 @@ namespace Characters
 
 
 
-
+        /// <summary>
+        /// ////////////////////////////////////////////////START OF DEFUNCT RAGDOLL CODE STORED FOR LATER
+        /// </summary>
 
         [PunRPC]
         private void RPC_AddRigidbodyTimer()
@@ -1745,6 +1747,24 @@ namespace Characters
 
             rb.AddTorque(randomTorque, ForceMode.Impulse);
         }
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// ////////////////////////////////////////////////END OF DEFUNCT RAGDOLL CODE STORED FOR LATER
+        /// </summary>
+
+
+
+
+
+
+
 
         public void Init(bool ai, string team, InGameCharacterSettings settings)
         {
