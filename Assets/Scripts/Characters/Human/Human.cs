@@ -1367,8 +1367,8 @@ namespace Characters
             }
 
             // Photon instantiate the gas pickup at this body's position
-            if (PhotonNetwork.IsMasterClient)
-            {
+            //if (PhotonNetwork.IsMasterClient)
+            //{
                 // Gas pickup
                 GameObject gasPickupObj = PhotonNetwork.Instantiate("Buildables/bodyGasPickup", transform.position, transform.rotation);
 
@@ -1428,7 +1428,7 @@ namespace Characters
                 {
                     corpseRb.velocity = currentVelocity;
                 }
-            }
+            //}
 
             yield return new WaitForSeconds(0f);
             PhotonNetwork.Destroy(gameObject);
