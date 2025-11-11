@@ -969,6 +969,31 @@ namespace Characters
             if (_needFinishReload || _reloadCooldownLeft > 0f)
                 return;
 
+            if (Weapon is BladeWeapon && ((BladeWeapon)Weapon).BladesLeft <= 0)
+            {
+
+                if (((BladeWeapon)Weapon).CurrentDurability == ((BladeWeapon)Weapon).MaxDurability)
+                {
+                    Vector3 spawnPosition = transform.position + UnityEngine.Random.insideUnitSphere * 0.5f;
+                    spawnPosition.y = transform.position.y + 1f; // Keep same Y position
+
+                    GameObject bladePickupObj = PhotonNetwork.Instantiate("Buildables/bodyBladePickup", spawnPosition, transform.rotation);
+                }
+                ((BladeWeapon)Weapon).UseDurability(20000);
+                BladeSheathed = true;
+                // Sync over network
+                
+                if (PhotonNetwork.InRoom)
+                {
+                    photonView.RPC("SyncSheathState", RpcTarget.All, BladeSheathed);
+                }
+                else
+                {
+                    ApplySheathVisuals(BladeSheathed);
+                }
+                return; 
+            }
+
             if (BladeSheathed == true && ((BladeWeapon)Weapon).CurrentDurability > 0)
             {
                 Sheath();
