@@ -1275,6 +1275,17 @@ namespace Characters
             CrossFade(HumanAnimations.Refill, 0.1f);
             PlaySound(HumanSounds.Refill);
             _stateTimeLeft = Animation.GetTotalTime(HumanAnimations.Refill);
+            BladeSheathed = false;
+            if (PhotonNetwork.InRoom)
+            {
+                // Update networked variable
+                photonView.RPC("SyncSheathState", RpcTarget.All, BladeSheathed);
+            }
+            else
+            {
+                // Single player fallback
+                ApplySheathVisuals(BladeSheathed);
+            }
             return true;
         }
         public bool NeedRefill(bool isGasTank)
