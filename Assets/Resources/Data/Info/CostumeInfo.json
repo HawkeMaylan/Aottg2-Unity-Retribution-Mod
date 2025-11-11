@@ -253,7 +253,12 @@
 			},
 			{
 				"Texture": "Hair_Ness"
+			},
+			
+			{
+				"Texture": "hair_floch"
 			}
+			
 		],
 		"Female": [
 			{

@@ -381,9 +381,9 @@ namespace Characters
 
                 AttachToMount(_part_hair, _part_head);
 
-                // Custom position handling for specific prefabs - inherit from prefab
+                // Custom position handling for specific prefabs      inherit from prefab
                 string prefabName = System.IO.Path.GetFileNameWithoutExtension(hairMesh);
-                if (prefabName == "Hair_Ness" || prefabName == "SpecialHairStyle2" || prefabName == "AnotherSpecialHair")
+                if (prefabName == "Hair_Ness" || prefabName == "hair_floch" || prefabName == "AnotherSpecialHair")
                 {
                     // Use the prefab's original local position and rotation
                     _part_hair.transform.localPosition = originalLocalPosition;
@@ -399,7 +399,7 @@ namespace Characters
                 }
             }
 
-            // Similar logic for hair cloth mesh if needed
+            
             string hairClothMesh = _meshes.GetHairClothMesh();
             if (hairClothMesh != string.Empty && !IsDeadBody)
             {
