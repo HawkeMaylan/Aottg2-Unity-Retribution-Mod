@@ -397,6 +397,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: hair_morgan
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f34f95cdb66778041ab7c1ab233643a5, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -593,6 +597,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: a44ce89bb2841764e934408a7fdd2d64, type: 3}
       propertyPath: m_Name
       value: hair_nanaba
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a44ce89bb2841764e934408a7fdd2d64, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -876,6 +884,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: hair_reiner
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: dc4516a339995814f947878da35ece95, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1145,6 +1157,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: hair_reinerS4
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 96bee747bdbfa2549894bddfbb7a3d4e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1341,6 +1357,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: e33709c64061e1047a6ab98332a11dce, type: 3}
       propertyPath: m_Name
       value: hair_oluo
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e33709c64061e1047a6ab98332a11dce, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2479,6 +2499,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: hair_ian
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 59353fd3b399d2c4d97a36005779c8aa, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2548,6 +2572,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: hair_hitch
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f84faef8d164e99409877886955a44ca, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2564,6 +2592,10 @@ PrefabInstance:
     - target: {fileID: 118902, guid: dfa08f8517dac504ca5c43a9aad82bef, type: 3}
       propertyPath: m_Name
       value: hair_boy2
+      objectReference: {fileID: 0}
+    - target: {fileID: 118902, guid: dfa08f8517dac504ca5c43a9aad82bef, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 418902, guid: dfa08f8517dac504ca5c43a9aad82bef, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2621,6 +2653,10 @@ PrefabInstance:
     - target: {fileID: 8564760753052017093, guid: 59a017353ee799b4ab73d6ff58eb3ea1, type: 3}
       propertyPath: m_Name
       value: hair_floch
+      objectReference: {fileID: 0}
+    - target: {fileID: 8564760753052017093, guid: 59a017353ee799b4ab73d6ff58eb3ea1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9049970438615022463, guid: 59a017353ee799b4ab73d6ff58eb3ea1, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2762,6 +2798,10 @@ PrefabInstance:
     - target: {fileID: 9068257308375271224, guid: 0ed8364d510b66647a35623174a920df, type: 3}
       propertyPath: m_Name
       value: Hair_Ness
+      objectReference: {fileID: 0}
+    - target: {fileID: 9068257308375271224, guid: 0ed8364d510b66647a35623174a920df, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
