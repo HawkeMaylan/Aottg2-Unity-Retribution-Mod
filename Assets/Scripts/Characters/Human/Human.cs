@@ -974,7 +974,21 @@ namespace Characters
                 Sheath();
                 return;
             }
-
+            if (BladeSheathed == true && ((BladeWeapon)Weapon).CurrentDurability == 0)
+            {
+                BladeSheathed = false;
+                // Sync over network
+                if (PhotonNetwork.InRoom)
+                {
+                    // Update networked variable
+                    photonView.RPC("SyncSheathState", RpcTarget.All, BladeSheathed);
+                }
+                else
+                {
+                    // Single player fallback
+                    ApplySheathVisuals(BladeSheathed);
+                }
+            }
 
             if (Weapon is AmmoWeapon)
             {
