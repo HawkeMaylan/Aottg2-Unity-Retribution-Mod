@@ -1066,7 +1066,8 @@ namespace Characters
             }
             else if (Weapon is BladeWeapon)
             {
-
+                if (((BladeWeapon)Weapon).BladesLeft <= 0)
+                    return;
                 ToggleBlades(false);
                 if (Grounded)
                     PlaySound(HumanSounds.BladeReloadGround);
