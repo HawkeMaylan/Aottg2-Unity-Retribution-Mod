@@ -997,7 +997,7 @@ namespace Characters
             }
             else if (Weapon is BladeWeapon)
             {
-                if (((BladeWeapon)Weapon).BladesLeft <= 0)
+                if (((BladeWeapon)Weapon).BladesLeft <= 0 && ((BladeWeapon)Weapon).CurrentDurability <= 0)
                     return;
                 ToggleBlades(false);
                 if (Grounded)
@@ -1029,6 +1029,9 @@ namespace Characters
             _reloadTimeLeft = _stateTimeLeft;
             _reloadCooldownLeft = _reloadTimeLeft + 0.5f;
             ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.Reload();
+            if (((BladeWeapon)Weapon).BladesLeft <= 0)
+                ((BladeWeapon)Weapon).CurrentDurability = 0;
+
         }
 
 
