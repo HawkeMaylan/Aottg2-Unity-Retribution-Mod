@@ -969,11 +969,12 @@ namespace Characters
             if (_needFinishReload || _reloadCooldownLeft > 0f)
                 return;
 
-            if (BladeSheathed == true)
+            if (BladeSheathed == true && ((BladeWeapon)Weapon).CurrentDurability > 0)
             {
                 Sheath();
                 return;
             }
+
 
             if (Weapon is AmmoWeapon)
             {
@@ -1000,6 +1001,14 @@ namespace Characters
                 if (((BladeWeapon)Weapon).BladesLeft <= 0 && ((BladeWeapon)Weapon).CurrentDurability <= 0)
                     return;
                 ToggleBlades(false);
+
+                if (((BladeWeapon)Weapon).CurrentDurability == ((BladeWeapon)Weapon).MaxDurability)
+                {
+                    Vector3 spawnPosition = transform.position + UnityEngine.Random.insideUnitSphere * 0.5f;
+                    spawnPosition.y = transform.position.y + 1f; // Keep same Y position
+
+                    GameObject bladePickupObj = PhotonNetwork.Instantiate("Buildables/bodyBladePickup", spawnPosition, transform.rotation);
+                }
                 if (Grounded)
                     PlaySound(HumanSounds.BladeReloadGround);
                 else
