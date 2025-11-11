@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4700879227131728423}
   - component: {fileID: 7410699067692672749}
   m_Layer: 0
-  m_Name: Hair_Ness
+  m_Name: hair_ness
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

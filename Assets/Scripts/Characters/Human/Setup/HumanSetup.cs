@@ -383,7 +383,7 @@ namespace Characters
 
                 // Custom position handling for specific prefabs      inherit from prefab
                 string prefabName = System.IO.Path.GetFileNameWithoutExtension(hairMesh);
-                if (prefabName == "Hair_Ness" || prefabName == "hair_floch" || prefabName == "AnotherSpecialHair")
+                if (prefabName == "hair_ness" || prefabName == "hair_floch" || prefabName == "AnotherSpecialHair")
                 {
                     // Use the prefab's original local position and rotation
                     _part_hair.transform.localPosition = originalLocalPosition;
