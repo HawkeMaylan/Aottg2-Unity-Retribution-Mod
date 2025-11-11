@@ -369,11 +369,28 @@ namespace Characters
             DestroyIfExists(_part_hair);
             if (!IsDeadBody)
                 ClothFactory.DisposeObject(_part_hair_1);
+
             string hairMesh = _meshes.GetHairMesh();
             if (hairMesh != string.Empty)
             {
                 _part_hair = ResourceManager.InstantiateAsset<GameObject>(ResourcePaths.Characters, hairMesh, cached: true);
+
+                // Store the prefab's original local position and rotation BEFORE attaching
+                Vector3 originalLocalPosition = _part_hair.transform.localPosition;
+                Quaternion originalLocalRotation = _part_hair.transform.localRotation;
+
                 AttachToMount(_part_hair, _part_head);
+
+                // Custom position handling for specific prefabs - inherit from prefab
+                string prefabName = System.IO.Path.GetFileNameWithoutExtension(hairMesh);
+                if (prefabName == "Hair_Ness" || prefabName == "SpecialHairStyle2" || prefabName == "AnotherSpecialHair")
+                {
+                    // Use the prefab's original local position and rotation
+                    _part_hair.transform.localPosition = originalLocalPosition;
+                    _part_hair.transform.localRotation = originalLocalRotation;
+                }
+                // Add more prefab names as needed
+
                 foreach (var renderer in _part_hair.GetComponentsInChildren<Renderer>())
                 {
                     renderer.material = HumanSetupMaterials.GetHairMaterial(_textures.GetHairTexture());
@@ -381,6 +398,8 @@ namespace Characters
                         renderer.material.color = CustomSet.HairColor.Value.ToColor();
                 }
             }
+
+            // Similar logic for hair cloth mesh if needed
             string hairClothMesh = _meshes.GetHairClothMesh();
             if (hairClothMesh != string.Empty && !IsDeadBody)
             {
