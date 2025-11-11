@@ -1023,16 +1023,28 @@ namespace Characters
 
 
             CrossFade(_reloadAnimation, 0.1f, 0f);
-            State = HumanState.Reload;
+            if (((BladeWeapon)Weapon).BladesLeft <= 0)
+            {
+
+                ((BladeWeapon)Weapon).UseDurability(20000);
+                BladeSheathed = true;
+                
+                return;
+            }
+
+
+                State = HumanState.Reload;
             _stateTimeLeft = Animation.GetTotalTime(_reloadAnimation);
             _needFinishReload = true;
             _reloadTimeLeft = _stateTimeLeft;
             _reloadCooldownLeft = _reloadTimeLeft + 0.5f;
             ((InGameMenu)UIManager.CurrentMenu).HUDBottomHandler.Reload();
-            if (((BladeWeapon)Weapon).BladesLeft <= 0)
-                ((BladeWeapon)Weapon).CurrentDurability = 0;
+            
+            
+                
 
         }
+    
 
 
 
