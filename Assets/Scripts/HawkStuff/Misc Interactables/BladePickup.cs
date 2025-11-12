@@ -164,6 +164,11 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
                 {
                     photonView.RPC("RPC_StartShrinkAndDestroy", RpcTarget.All);
                 }
+                else
+                {
+                    // Request master client to take over and destroy
+                    photonView.RPC("RPC_RequestTakeoverAndDestroy", RpcTarget.MasterClient);
+                }
             }
         }
         else
@@ -177,6 +182,27 @@ public class BladePickup : MonoBehaviourPunCallbacks, IPunObservable
     {
         grantsUsed = newGrantsUsed;
         lastGrantTime = newLastGrantTime;
+    }
+
+    [PunRPC]
+    private void RPC_RequestTakeoverAndDestroy()
+    {
+        // Master client takes ownership and starts destruction
+        if (!photonView.IsMine)
+            photonView.TransferOwnership(PhotonNetwork.LocalPlayer);
+
+        // Start destruction process
+        if (!isShrinking)
+            StartCoroutine(TakeoverAndDestroy());
+    }
+
+    private IEnumerator TakeoverAndDestroy()
+    {
+        // Wait a frame for ownership transfer to complete
+        yield return null;
+
+        // Now we should own the object, start the destruction process
+        photonView.RPC("RPC_StartShrinkAndDestroy", RpcTarget.All);
     }
 
     [PunRPC]
