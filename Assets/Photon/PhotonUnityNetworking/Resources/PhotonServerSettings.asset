@@ -200,6 +200,7 @@ MonoBehaviour:
   - RPC_RemoveAllSubObjectRigidbodies
   - SyncSheathState
   - RPC_RequestTakeoverAndDestroy
+  - RPC_SetText
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

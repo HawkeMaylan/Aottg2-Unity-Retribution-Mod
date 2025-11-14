@@ -21,6 +21,7 @@ using Weather;
 using UnityEngine.UI;
 using Entities;
 
+
 namespace Characters
 {
     class Human : BaseCharacter
@@ -1443,17 +1444,6 @@ namespace Characters
             }
             EffectSpawner.Spawn(EffectPrefabs.Blood2, Cache.Transform.position, Cache.Transform.rotation);
 
-            // Call RPCs for all other actions
-            //photonView.RPC("RPC_ConfigureMainPhysics", RpcTarget.All);
-            //photonView.RPC("RPC_ProcessAllSubObjects", RpcTarget.All);
-            //photonView.RPC("RPC_ConfigureAllColliders", RpcTarget.All);
-
-            // Add rigidbody timer BEFORE disabling components
-            //photonView.RPC("RPC_AddRigidbodyTimer", RpcTarget.All);
-            //photonView.RPC("RPC_DisableComponents", RpcTarget.All);
-            //photonView.RPC("RPC_FinalizeDeath", RpcTarget.All);
-
-
             // Get the current velocity from this object's rigidbody
             Vector3 currentVelocity = Vector3.zero;
             Rigidbody rb = GetComponent<Rigidbody>();
@@ -1463,74 +1453,116 @@ namespace Characters
             }
 
             // Photon instantiate the gas pickup at this body's position
-            //if (PhotonNetwork.IsMasterClient)
-            //{
-                // Gas pickup
-                GameObject gasPickupObj = PhotonNetwork.Instantiate("Buildables/bodyGasPickup", transform.position, transform.rotation);
+            GameObject gasPickupObj = PhotonNetwork.Instantiate("Buildables/bodyGasPickup", transform.position, transform.rotation);
 
-                // Apply velocity to gas pickup
-                Rigidbody gasRb = gasPickupObj.GetComponent<Rigidbody>();
-                if (gasRb != null)
-                {
-                    gasRb.velocity = currentVelocity;
-                }
+            // Apply velocity to gas pickup
+            Rigidbody gasRb = gasPickupObj.GetComponent<Rigidbody>();
+            if (gasRb != null)
+            {
+                gasRb.velocity = currentVelocity;
+            }
 
-                GasPickup gasPickupScript = gasPickupObj.GetComponent<GasPickup>();
-                if (gasPickupScript != null)
-                {
-                    gasPickupScript.gasPickup = Stats.CurrentGas * 0.5f;
-                }
+            GasPickup gasPickupScript = gasPickupObj.GetComponent<GasPickup>();
+            if (gasPickupScript != null)
+            {
+                gasPickupScript.gasPickup = Stats.CurrentGas * 0.5f;
+            }
 
-                // Blade pickups - get blade count from human's weapon
-                Human human = GetComponent<Human>();
-                if (human != null && human.Weapon != null)
+            // Blade pickups - get blade count from human's weapon
+            Human human = GetComponent<Human>();
+            if (human != null && human.Weapon != null)
+            {
+                // Check if the human has a blade weapon using the same pattern as your example
+                if (human.Setup.Weapon == (int)HumanWeapon.Blade)
                 {
-                    // Check if the human has a blade weapon using the same pattern as your example
-                    if (human.Setup.Weapon == (int)HumanWeapon.Blade)
+                    // Direct cast to BladeWeapon now that we know it's a blade
+                    Characters.BladeWeapon bladeWeapon = human.Weapon as Characters.BladeWeapon;
+                    if (bladeWeapon != null && bladeWeapon.BladesLeft > 0)
                     {
-                        // Direct cast to BladeWeapon now that we know it's a blade
-                        Characters.BladeWeapon bladeWeapon = human.Weapon as Characters.BladeWeapon;
-                        if (bladeWeapon != null && bladeWeapon.BladesLeft > 0)
+                        for (int i = 0; i < bladeWeapon.BladesLeft; i++)
                         {
-                            for (int i = 0; i < bladeWeapon.BladesLeft; i++)
+                            // Add some position variation so they don't all spawn in the exact same spot
+                            Vector3 spawnPosition = transform.position + UnityEngine.Random.insideUnitSphere * 0.5f;
+                            spawnPosition.y = transform.position.y + 1f; // Keep same Y position
+
+                            GameObject bladePickupObj = PhotonNetwork.Instantiate("Buildables/bodyBladePickup", spawnPosition, transform.rotation);
+
+                            // Apply velocity to blade pickup with slight random variation
+                            Rigidbody bladeRb = bladePickupObj.GetComponent<Rigidbody>();
+                            if (bladeRb != null)
                             {
-                                // Add some position variation so they don't all spawn in the exact same spot
-                                Vector3 spawnPosition = transform.position + UnityEngine.Random.insideUnitSphere * 0.5f;
-                                spawnPosition.y = transform.position.y + 1f; // Keep same Y position
+                                Vector3 randomVariation = UnityEngine.Random.insideUnitSphere * 2f;
+                                bladeRb.velocity = currentVelocity + randomVariation;
 
-                                GameObject bladePickupObj = PhotonNetwork.Instantiate("Buildables/bodyBladePickup", spawnPosition, transform.rotation);
-
-                                // Apply velocity to blade pickup with slight random variation
-                                Rigidbody bladeRb = bladePickupObj.GetComponent<Rigidbody>();
-                                if (bladeRb != null)
-                                {
-                                    Vector3 randomVariation = UnityEngine.Random.insideUnitSphere * 2f;
-                                    bladeRb.velocity = currentVelocity + randomVariation;
-
-                                    // Add a small upward force for more natural scattering
-                                    bladeRb.velocity += Vector3.up * 3f;
-                                }
+                                // Add a small upward force for more natural scattering
+                                bladeRb.velocity += Vector3.up * 3f;
                             }
                         }
                     }
                 }
+            }
 
-                // Spawn Human Corpse Ragdoll with same function as gas pickup
-                GameObject corpseObj = PhotonNetwork.Instantiate("Buildables/HumanCorpseRagdoll", transform.position, transform.rotation);
+            // Spawn Human Corpse Ragdoll with same function as gas pickup
+            GameObject corpseObj = PhotonNetwork.Instantiate("Buildables/HumanCorpseRagdoll", transform.position, transform.rotation);
 
-                // Apply velocity to corpse ragdoll (same as gas pickup)
-                Rigidbody corpseRb = corpseObj.GetComponent<Rigidbody>();
-                if (corpseRb != null)
+            // Apply velocity to corpse ragdoll (same as gas pickup)
+            Rigidbody corpseRb = corpseObj.GetComponent<Rigidbody>();
+            if (corpseRb != null)
+            {
+                corpseRb.velocity = currentVelocity;
+            }
+
+            // Set the visible name on the corpse's proxtext child
+            if (corpseObj != null)
+            {
+                // Get the BaseCharacter component to access VisibleName
+                BaseCharacter baseCharacter = GetComponent<BaseCharacter>();
+                if (baseCharacter != null)
                 {
-                    corpseRb.velocity = currentVelocity;
+                    string visibleName = baseCharacter.VisibleName;
+                    if (!string.IsNullOrEmpty(visibleName))
+                    {
+                        // Find the proxtext child in the corpse object
+                        Transform proxTextChild = corpseObj.transform.Find("proxText");
+                        if (proxTextChild == null)
+                        {
+                            // If direct find fails, try searching recursively
+                            proxTextChild = FindDeepChild(corpseObj.transform, "proxText");
+                        }
+
+                        if (proxTextChild != null)
+                        {
+                            TextDisplay textDisplay = proxTextChild.GetComponent<TextDisplay>();
+                            if (textDisplay != null)
+                            {
+                                // Set the visible name as the text
+                                textDisplay.SetText(visibleName);
+                                Debug.Log($"Set corpse text to: {visibleName}");
+                            }
+                            else
+                            {
+                                Debug.LogWarning("TextDisplay component not found on proxtext child");
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogWarning("proxtext child not found in corpse object");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("VisibleName is null or empty on BaseCharacter");
+                    }
                 }
-            //}
+                else
+                {
+                    Debug.LogWarning("BaseCharacter component not found on this object");
+                }
+            }
 
             yield return new WaitForSeconds(0f);
             PhotonNetwork.Destroy(gameObject);
         }
-
-
 
         /// <summary>
         /// ////////////////////////////////////////////////START OF DEFUNCT RAGDOLL CODE STORED FOR LATER
