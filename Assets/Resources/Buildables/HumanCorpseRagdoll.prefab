@@ -16402,11 +16402,12 @@ MonoBehaviour:
   - forearm_R
   - hand_L
   - hand_R
-  mass: 0
+  mass: 0.05
   drag: 0
   angularDrag: 1
-  baseTorqueForce: 100
-  capsuleRadius: 0.7
+  rigorDelay: 6
+  baseTorqueForce: 25
+  capsuleRadius: 0.6
   capsuleHeight: 0.5
   debugLogs: 1
 --- !u!1 &6264646279966748074

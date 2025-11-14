@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class HumanCorpseRagdoller : MonoBehaviour
 {
@@ -15,12 +16,13 @@ public class HumanCorpseRagdoller : MonoBehaviour
     [SerializeField] private float mass = 0f;
     [SerializeField] private float drag = 0f;
     [SerializeField] private float angularDrag = 1f;
+    [SerializeField] private float rigorDelay = 1f;
 
     [Header("Torque Settings")]
-    [SerializeField] private float baseTorqueForce = 100f;
+    [SerializeField] private float baseTorqueForce = 10f;
 
     [Header("Collider Settings")]
-    [SerializeField] private float capsuleRadius = 0.7f;
+    [SerializeField] private float capsuleRadius = 0.5f;
     [SerializeField] private float capsuleHeight = 0.5f;
 
     [Header("Debug")]
@@ -33,6 +35,8 @@ public class HumanCorpseRagdoller : MonoBehaviour
 
         // Equivalent to RPC_ConfigureAllColliders()
         ConfigureAllColliders();
+
+        StartCoroutine(RemoveRigidbodiesAfterDelay(rigorDelay));
 
         if (debugLogs)
         {
@@ -190,6 +194,38 @@ public class HumanCorpseRagdoller : MonoBehaviour
     {
         ConfigureAllColliders();
     }
+
+
+    private IEnumerator RemoveRigidbodiesAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        foreach (string bodyPartName in bodyPartsToProcess)
+        {
+            Transform bodyPart = FindDeepChild(transform, bodyPartName);
+            if (bodyPart != null)
+            {
+                Rigidbody rb = bodyPart.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    Destroy(rb);
+                }
+
+                // Also remove colliders if needed
+                Collider collider = bodyPart.GetComponent<Collider>();
+                if (collider != null)
+                {
+                    Destroy(collider);
+                }
+            }
+        }
+
+        if (debugLogs)
+        {
+            Debug.Log($"[HumanCorpseRagdoller] Removed Rigidbodies after {delay} seconds");
+        }
+    }
+
 
     // Editor helpers
 #if UNITY_EDITOR
