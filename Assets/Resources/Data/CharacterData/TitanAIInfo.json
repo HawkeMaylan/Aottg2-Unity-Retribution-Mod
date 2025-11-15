@@ -498,8 +498,8 @@
 			"DetectRangeMin": 30000,
 			"DetectRangeMax": 40200,
 
-			"FocusRangeMin": 15000,
-			"FocusRangeMax": 30200,
+			"FocusRangeMin": 1000,
+			"FocusRangeMax": 2020,
 
 			"FocusTimeMin": 5.0,
 			"FocusTimeMax": 60.0,
@@ -854,8 +854,8 @@
 			"DetectRangeMin": 30000,
 			"DetectRangeMax": 50200,
 
-			"FocusRangeMin": 15000,
-			"FocusRangeMax": 30200,
+			"FocusRangeMin": 1500,
+			"FocusRangeMax": 2020,
 
 			"FocusTimeMin": 1.0,
 			"FocusTimeMax": 1.3,
@@ -1068,8 +1068,8 @@
 			"DetectRangeMin": 80000,
 			"DetectRangeMax": 80200,
 
-			"FocusRangeMin": 45000,
-			"FocusRangeMax": 80200,
+			"FocusRangeMin": 50
+			"FocusRangeMax": 75
 
 			"FocusTimeMin": 1.0,
 			"FocusTimeMax": 3.0,
@@ -1187,7 +1187,7 @@
 			"DetectRangeMax": 80200,
 
 			"FocusRangeMin": 75000,
-			"FocusRangeMax": 80200,
+			"FocusRangeMax": 80000,
 
 			"FocusTimeMin": 1,
 			"FocusTimeMax": 2,
