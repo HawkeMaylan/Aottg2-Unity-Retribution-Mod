@@ -270,7 +270,7 @@ namespace Controllers
             UpdateDashRight(inMenu);
             UpdateDashLeft(inMenu);
             UpdateCycleSpecial(inMenu);
-            UpdateScream(inMenu);
+           ///TEST ADDON FOR ANIMATION UpdateScream(inMenu);
 
 
             bool canWeapon = _human.MountState == HumanMountState.None && !_illegalWeaponStates.Contains(_human.State) && !inMenu && !_human.Dead;
@@ -384,14 +384,16 @@ namespace Controllers
                 defaultMenu.GetComponent<Canvas>().enabled = !defaultMenu.GetComponent<Canvas>().enabled;
             }
         }
-        void UpdateScream(bool inMenu)
-        {
-            if (Input.GetKeyDown(KeyCode.Period))
-            {
-                _human.Scream();
 
-            }
-        }
+        //TEST ADDON FOR ANIMATION IF NEED TO ADD MORE ANIMATIONS CAN KINDA FOLLOW THIS FORMAT, ADD ANIMATION VIA PLAYER ARMATURE, THEN ADD TO PREFAB, THEN ADD TO HUMANANIMATIONS SCRIPT, THEN CAN USE VIA CROSSFADE ANIMATION OR EMOTE STATES AS SHOWN IN SCREAM OF HUMAN
+        // void UpdateScream(bool inMenu)
+        //{
+        //   if (Input.GetKeyDown(KeyCode.Period))
+        //   {
+        //       _human.Scream();
+        //
+        //   }
+        //}
 
         void UpdateCycleSpecial(bool inMenu)
         {

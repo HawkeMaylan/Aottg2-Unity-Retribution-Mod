@@ -75,6 +75,6 @@
         public static string EmoteNo = "Armature|emote_no";
         public static string EmoteYes = "Armature|emote_yes";
         public static string EmoteWave = "Armature|emote_wave";
-        public static string Scream = "Scream";
+        ////TEST ADDON FOR ANIMATIONS public static string Scream = "Scream";
     }
 }

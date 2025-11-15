@@ -3985,12 +3985,14 @@ namespace Characters
             }
         }
 
-        public void Scream()
-        {
 
-            string animation = HumanAnimations.Scream;
-            EmoteAnimation(animation);
-        }
+        //FUNCTIONING ANIMATION ADDON ADDING SCREAM (kinda, just a test)
+        /////public void Scream()
+        ///{
+        ///
+        //    string animation = HumanAnimations.Scream;
+        //    EmoteAnimation(animation);
+        //}
 
         public void CycleSpecialBackwards()
         {
