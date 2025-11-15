@@ -1452,8 +1452,10 @@ namespace Characters
                 currentVelocity = rb.velocity;
             }
 
-            // Photon instantiate the gas pickup at this body's position
-            GameObject gasPickupObj = PhotonNetwork.Instantiate("Buildables/bodyGasPickup", transform.position, transform.rotation);
+            
+            float spawnHeight = 1f; 
+            Vector3 gasSpawnPosition = transform.position + Vector3.up * spawnHeight;
+            GameObject gasPickupObj = PhotonNetwork.Instantiate("Buildables/bodyGasPickup", gasSpawnPosition, transform.rotation);
 
             // Apply velocity to gas pickup
             Rigidbody gasRb = gasPickupObj.GetComponent<Rigidbody>();
@@ -1523,16 +1525,16 @@ namespace Characters
                     if (!string.IsNullOrEmpty(visibleName))
                     {
                         // Find the proxtext child in the corpse object
-                        Transform proxTextChild = corpseObj.transform.Find("proxText");
-                        if (proxTextChild == null)
+                        Transform bodyTextChild = corpseObj.transform.Find("bodyNameText");
+                        if (bodyTextChild == null)
                         {
                             // If direct find fails, try searching recursively
-                            proxTextChild = FindDeepChild(corpseObj.transform, "proxText");
+                            bodyTextChild = FindDeepChild(corpseObj.transform, "bodyNameText");
                         }
 
-                        if (proxTextChild != null)
+                        if (bodyTextChild != null)
                         {
-                            TextDisplay textDisplay = proxTextChild.GetComponent<TextDisplay>();
+                            TextDisplay textDisplay = bodyTextChild.GetComponent<TextDisplay>();
                             if (textDisplay != null)
                             {
                                 // Set the visible name as the text
