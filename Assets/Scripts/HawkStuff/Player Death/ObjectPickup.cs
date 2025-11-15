@@ -6,6 +6,7 @@ using Settings;
 using GameManagers;
 using ApplicationManagers;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
 {
@@ -44,6 +45,10 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
     }
     private ObjectState currentState = ObjectState.onGroundItem;
 
+    // Static list to track all active pickups
+    private static List<ObjectPickup> activePickups = new List<ObjectPickup>();
+    private static bool isProcessingPickup = false;
+
     // Struct to store Rigidbody properties
     private struct RigidbodyProperties
     {
@@ -69,8 +74,17 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
             SaveRigidbodyProperties();
         }
 
+        // Add this pickup to the active list
+        activePickups.Add(this);
+
         // Start delay coroutine
         StartCoroutine(EnablePickupAfterDelay());
+    }
+
+    private void OnDestroy()
+    {
+        // Remove this pickup from the active list when destroyed
+        activePickups.Remove(this);
     }
 
     private IEnumerator EnablePickupAfterDelay()
@@ -184,7 +198,8 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
 
         if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
         {
-            TryPickupObject();
+            // Use centralized pickup system to prevent multiple pickups
+            TryCentralizedPickup();
         }
     }
 
@@ -213,12 +228,80 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
+    private void TryCentralizedPickup()
+    {
+        if (isProcessingPickup) return;
+
+        // Find the closest pickup object using centralized system
+        ObjectPickup closestPickup = FindClosestPickupObject();
+
+        if (closestPickup != null)
+        {
+            isProcessingPickup = true;
+            closestPickup.photonView.RPC("RPC_PickupObject", RpcTarget.All, localHuman.photonView.ViewID);
+
+            // Reset the processing flag after a short delay
+            StartCoroutine(ResetProcessingFlag());
+        }
+    }
+
+    private IEnumerator ResetProcessingFlag()
+    {
+        yield return new WaitForSeconds(0.1f);
+        isProcessingPickup = false;
+    }
+
     private void TryPickupObject()
     {
-        if (currentState != ObjectState.onGroundItem || localHuman == null || !canBePickedUp) return;
+        // This method is now deprecated - using centralized system instead
+        TryCentralizedPickup();
+    }
 
-        // Call RPC to pickup object on all clients
-        photonView.RPC("RPC_PickupObject", RpcTarget.All, localHuman.photonView.ViewID);
+    private ObjectPickup FindClosestPickupObject()
+    {
+        if (localHuman == null) return null;
+
+        // Get player's position and forward direction
+        Vector3 playerPosition = localHuman.transform.position;
+        Vector3 playerForward = localHuman.transform.forward;
+
+        List<ObjectPickup> availablePickups = new List<ObjectPickup>();
+
+        // Find all pickups that are in onGroundItem state and can be picked up
+        foreach (ObjectPickup pickup in activePickups)
+        {
+            if (pickup != null &&
+                pickup.currentState == ObjectState.onGroundItem &&
+                pickup.canBePickedUp &&
+                pickup.isInside) // Only consider pickups where player is inside trigger
+            {
+                availablePickups.Add(pickup);
+            }
+        }
+
+        if (availablePickups.Count == 0) return null;
+        if (availablePickups.Count == 1) return availablePickups[0];
+
+        // If multiple pickups available, find the closest one
+        ObjectPickup closestPickup = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (ObjectPickup pickup in availablePickups)
+        {
+            if (pickup == null) continue;
+
+            float distance = Vector3.Distance(playerPosition, pickup.transform.position);
+
+            // Simple distance-based priority for now
+            if (distance < closestDistance)
+            {
+                closestPickup = pickup;
+                closestDistance = distance;
+            }
+        }
+
+        Debug.Log($"Closest pickup found: {closestPickup?.name} at distance {closestDistance}");
+        return closestPickup;
     }
 
     private void TryDropObject()
