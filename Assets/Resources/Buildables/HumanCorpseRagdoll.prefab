@@ -16428,6 +16428,8 @@ MonoBehaviour:
   hipChildName: chest
   carryPositionOffset: {x: 0, y: -0.0015, z: 0.0015}
   carryRotationOffset: {x: 6.45, y: 0, z: 0}
+  statPenalty: 20
+  minimumStatValue: 50
 --- !u!1 &6264646279966748074
 GameObject:
   m_ObjectHideFlags: 0

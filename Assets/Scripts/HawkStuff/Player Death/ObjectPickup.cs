@@ -17,6 +17,10 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
     public Vector3 carryPositionOffset = Vector3.zero;
     public Vector3 carryRotationOffset = Vector3.zero;
 
+    [Header("Stat Penalty Settings")]
+    public int statPenalty = 20; // How much to reduce speed and acceleration
+    public int minimumStatValue = 50; // Minimum value for speed and acceleration
+
     private Human localHuman;
     private static string currentPrompt = "";
     private bool isInside = false;
@@ -27,6 +31,10 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
     private float lastUiCheckTime = 0f;
     private const float UI_CHECK_INTERVAL = 2f;
     private int currentOwnerViewID = -1;
+
+    // Stats storage for the owner
+    private int originalOwnerSpeed = 0;
+    private int originalOwnerAcceleration = 0;
 
     // Object states
     public enum ObjectState
@@ -240,6 +248,12 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
             return;
         }
 
+        // Store original stats and apply penalty (only on owner's client)
+        if (human.photonView.IsMine)
+        {
+            StoreAndModifyStats(human, true);
+        }
+
         // Remove the Rigidbody component if it exists
         if (rb != null)
         {
@@ -273,6 +287,17 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (currentState != ObjectState.pickedUpObject) return;
 
+        // Restore original stats (only on owner's client)
+        PhotonView ownerPhotonView = PhotonView.Find(currentOwnerViewID);
+        if (ownerPhotonView != null && ownerPhotonView.IsMine)
+        {
+            Human ownerHuman = ownerPhotonView.GetComponent<Human>();
+            if (ownerHuman != null)
+            {
+                RestoreStats(ownerHuman);
+            }
+        }
+
         // Re-add the Rigidbody component if it originally had one
         if (hadRigidbody && rb == null)
         {
@@ -292,6 +317,38 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
             triggerZone.enabled = true;
 
         Debug.Log("Object dropped");
+    }
+
+    private void StoreAndModifyStats(Human human, bool applyPenalty)
+    {
+        var stats = human.Stats;
+
+        // Store original stats (only speed and acceleration)
+        originalOwnerSpeed = stats.Speed;
+        originalOwnerAcceleration = stats.Acceleration;
+
+        // Apply penalty using RPC
+        if (applyPenalty)
+        {
+            int newSpeed = Mathf.Max(minimumStatValue, stats.Speed - statPenalty);
+            int newAcceleration = Mathf.Max(minimumStatValue, stats.Acceleration - statPenalty);
+
+            human.photonView.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
+                newSpeed, stats.Gas, stats.Ammunition, newAcceleration, stats.HorseSpeed);
+
+            Debug.Log($"Stats modified: Speed {stats.Speed} -> {newSpeed}, Acceleration {stats.Acceleration} -> {newAcceleration}");
+        }
+    }
+
+    private void RestoreStats(Human human)
+    {
+        var stats = human.Stats;
+
+        // Restore original stats using RPC (only speed and acceleration, keep other stats the same)
+        human.photonView.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
+            originalOwnerSpeed, stats.Gas, stats.Ammunition, originalOwnerAcceleration, stats.HorseSpeed);
+
+        Debug.Log($"Stats restored: Speed {originalOwnerSpeed}, Acceleration {originalOwnerAcceleration}");
     }
 
     private void ClearPrompt()
