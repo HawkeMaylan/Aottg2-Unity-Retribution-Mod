@@ -270,6 +270,7 @@ namespace Controllers
             UpdateDashRight(inMenu);
             UpdateDashLeft(inMenu);
             UpdateCycleSpecial(inMenu);
+            UpdateScream(inMenu);
 
 
             bool canWeapon = _human.MountState == HumanMountState.None && !_illegalWeaponStates.Contains(_human.State) && !inMenu && !_human.Dead;
@@ -381,6 +382,14 @@ namespace Controllers
             if (defaultMenu != null)
             {
                 defaultMenu.GetComponent<Canvas>().enabled = !defaultMenu.GetComponent<Canvas>().enabled;
+            }
+        }
+        void UpdateScream(bool inMenu)
+        {
+            if (Input.GetKeyDown(KeyCode.Period))
+            {
+                _human.Scream();
+
             }
         }
 

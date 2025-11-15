@@ -3985,6 +3985,11 @@ namespace Characters
             }
         }
 
+        public void Scream()
+        {
+            CrossFade(HumanAnimations.Scream, 0.1f);
+        }
+
         public void CycleSpecialBackwards()
         {
             if (State == HumanState.SpecialAction)
