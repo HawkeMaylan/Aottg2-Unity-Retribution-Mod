@@ -290,15 +290,30 @@ namespace Controllers
             if (_focusTimeLeft <= 0f || _enemy == null)
             {
                 var enemy = FindNearestEnemy();
+
                 if (enemy != null)
-                    _enemy = enemy;
-                else if (_enemy != null)
                 {
-                    if (TeamInfo.SameTeam(_titan.Team, _enemy.GetTeam()) || Vector3.Distance(_titan.Cache.Transform.position, _enemy.GetPosition()) > FocusRange)
-                        _enemy = null;
+                    float enemyDistance = Vector3.Distance(_titan.Cache.Transform.position, enemy.GetPosition());
+
+                    // Switch targets if: no current enemy OR new enemy is within focus range
+                    if (_enemy == null || enemyDistance <= FocusRange)
+                    {
+                        _enemy = enemy;
+
+                        if (_usePathfinding && _agent.isOnNavMesh && _agent.pathPending == false &&
+                            !(_moveToActive && _moveToIgnoreEnemies))
+                            SetAgentDestination(_enemy.GetPosition());
+                    }
                 }
-                if (_enemy != null && _enemy.ValidTarget() && _usePathfinding && _agent.isOnNavMesh && _agent.pathPending == false && !(_moveToActive && _moveToIgnoreEnemies))
-                    SetAgentDestination(_enemy.GetPosition());
+
+                // Clear current enemy if it's beyond detect range or invalid
+                if (_enemy != null && (!_enemy.ValidTarget() ||
+                    TeamInfo.SameTeam(_titan.Team, _enemy.GetTeam()) ||
+                    Vector3.Distance(_titan.Cache.Transform.position, _enemy.GetPosition()) > DetectRange))
+                {
+                    _enemy = null;
+                }
+
                 _focusTimeLeft = FocusTime;
             }
             _titan.TargetEnemy = _enemy;
