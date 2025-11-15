@@ -20,10 +20,21 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
     private Human localHuman;
     private static string currentPrompt = "";
     private bool isInside = false;
-    private bool isPickedUp = false;
     private Rigidbody rb;
     private bool hadRigidbody = false;
     private RigidbodyProperties savedRigidbodyProperties;
+    private bool canBePickedUp = false;
+    private float lastUiCheckTime = 0f;
+    private const float UI_CHECK_INTERVAL = 2f;
+    private int currentOwnerViewID = -1;
+
+    // Object states
+    public enum ObjectState
+    {
+        onGroundItem,
+        pickedUpObject
+    }
+    private ObjectState currentState = ObjectState.onGroundItem;
 
     // Struct to store Rigidbody properties
     private struct RigidbodyProperties
@@ -49,6 +60,16 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
         {
             SaveRigidbodyProperties();
         }
+
+        // Start delay coroutine
+        StartCoroutine(EnablePickupAfterDelay());
+    }
+
+    private IEnumerator EnablePickupAfterDelay()
+    {
+        yield return new WaitForSeconds(1f);
+        canBePickedUp = true;
+        Debug.Log("Object can now be picked up");
     }
 
     private void SaveRigidbodyProperties()
@@ -85,22 +106,67 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (stream.IsWriting)
         {
-            stream.SendNext(isPickedUp);
+            stream.SendNext((int)currentState);
+            stream.SendNext(currentOwnerViewID);
         }
         else
         {
-            isPickedUp = (bool)stream.ReceiveNext();
+            currentState = (ObjectState)stream.ReceiveNext();
+            currentOwnerViewID = (int)stream.ReceiveNext();
         }
     }
 
     private void Update()
     {
-        if (ChatManager.IsChatActive() || isPickedUp)
+        if (ChatManager.IsChatActive() || !canBePickedUp)
             return;
 
+        switch (currentState)
+        {
+            case ObjectState.onGroundItem:
+                UpdateOnGroundState();
+                break;
+            case ObjectState.pickedUpObject:
+                UpdatePickedUpState();
+                break;
+        }
+    }
+
+    private void UpdateOnGroundState()
+    {
         if (isInside && localHuman != null)
         {
             UpdatePromptAndInput();
+        }
+
+        // Periodically check if UI should be removed
+        CheckUiVisibility();
+    }
+
+    private void UpdatePickedUpState()
+    {
+        // Only the owner can drop the object
+        if (currentOwnerViewID == localHuman?.photonView.ViewID)
+        {
+            if (SettingsManager.InputSettings.Interaction.Interact2.GetKeyDown())
+            {
+                TryDropObject();
+            }
+        }
+    }
+
+    private void CheckUiVisibility()
+    {
+        if (Time.time - lastUiCheckTime >= UI_CHECK_INTERVAL)
+        {
+            lastUiCheckTime = Time.time;
+
+            // If UI is active but player is no longer inside, clear the prompt
+            if (!string.IsNullOrEmpty(currentPrompt) && !isInside)
+            {
+                ClearPrompt();
+                Debug.Log("UI cleared - player no longer in pickup zone");
+            }
         }
     }
 
@@ -116,13 +182,15 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isPickedUp) return;
+        if (currentState != ObjectState.onGroundItem || !canBePickedUp) return;
 
         Human human = other.GetComponentInParent<Human>();
         if (human != null && human.photonView.IsMine)
         {
             localHuman = human;
             isInside = true;
+            // Reset UI check timer when player enters
+            lastUiCheckTime = Time.time;
         }
     }
 
@@ -139,15 +207,25 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
 
     private void TryPickupObject()
     {
-        if (isPickedUp || localHuman == null) return;
+        if (currentState != ObjectState.onGroundItem || localHuman == null || !canBePickedUp) return;
 
         // Call RPC to pickup object on all clients
         photonView.RPC("RPC_PickupObject", RpcTarget.All, localHuman.photonView.ViewID);
     }
 
+    private void TryDropObject()
+    {
+        if (currentState != ObjectState.pickedUpObject || currentOwnerViewID != localHuman?.photonView.ViewID) return;
+
+        // Call RPC to drop object on all clients
+        photonView.RPC("RPC_DropObject", RpcTarget.All);
+    }
+
     [PunRPC]
     private void RPC_PickupObject(int humanViewID)
     {
+        if (!canBePickedUp || currentState != ObjectState.onGroundItem) return;
+
         PhotonView humanPhotonView = PhotonView.Find(humanViewID);
         if (humanPhotonView == null) return;
 
@@ -176,20 +254,24 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
         transform.localPosition = carryPositionOffset;
         transform.localRotation = Quaternion.Euler(carryRotationOffset);
 
-        isPickedUp = true;
+        // Update state and owner
+        currentState = ObjectState.pickedUpObject;
+        currentOwnerViewID = humanViewID;
 
         // Disable the trigger zone since object is picked up
         if (triggerZone != null)
             triggerZone.enabled = false;
 
+        // Clear prompt since object is picked up
+        ClearPrompt();
+
         Debug.Log($"Object picked up and parented to {hipChildName}");
     }
 
-    // Optional: Add method to drop the object and re-add Rigidbody
     [PunRPC]
     private void RPC_DropObject()
     {
-        if (!isPickedUp) return;
+        if (currentState != ObjectState.pickedUpObject) return;
 
         // Re-add the Rigidbody component if it originally had one
         if (hadRigidbody && rb == null)
@@ -201,7 +283,9 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
         // Unparent the object
         transform.SetParent(null);
 
-        isPickedUp = false;
+        // Update state and clear owner
+        currentState = ObjectState.onGroundItem;
+        currentOwnerViewID = -1;
 
         // Re-enable the trigger zone
         if (triggerZone != null)
@@ -217,7 +301,8 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
 
     private void OnGUI()
     {
-        if (!string.IsNullOrEmpty(currentPrompt) && !isPickedUp)
+        // Only show prompt in onGroundItem state
+        if (!string.IsNullOrEmpty(currentPrompt) && currentState == ObjectState.onGroundItem && canBePickedUp)
         {
             GUIStyle style = new GUIStyle(GUI.skin.label)
             {
