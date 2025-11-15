@@ -39,7 +39,7 @@ namespace Characters
         public HumanStats Stats;
         public bool FinishSetup;
         private HumanCustomSkinLoader _customSkinLoader;
-        public override List<string> EmoteActions => new List<string>() { "Salute", "Wave", "Nod", "Shake", "Dance", "Eat", "Flip" };
+        public override List<string> EmoteActions => new List<string>() { "Salute", "Wave", "Nod", "Shake", "Dance", "Eat", "Flip", "Scream" };
         public static LayerMask AimMask = PhysicsLayer.GetMask(PhysicsLayer.TitanPushbox, PhysicsLayer.MapObjectProjectiles,
            PhysicsLayer.MapObjectEntities, PhysicsLayer.MapObjectAll);
         public static LayerMask ClipMask = PhysicsLayer.GetMask(PhysicsLayer.MapObjectAll, PhysicsLayer.MapObjectCharacters,
@@ -3987,7 +3987,9 @@ namespace Characters
 
         public void Scream()
         {
-            CrossFade(HumanAnimations.Scream, 0.1f);
+
+            string animation = HumanAnimations.Scream;
+            EmoteAnimation(animation);
         }
 
         public void CycleSpecialBackwards()
