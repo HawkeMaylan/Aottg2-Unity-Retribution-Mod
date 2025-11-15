@@ -1834,7 +1834,7 @@ namespace Characters
         }
 
         // Recursive method to find deep child by name
-        private Transform FindDeepChild(Transform parent, string childName)
+        public Transform FindDeepChild(Transform parent, string childName)
         {
             foreach (Transform child in parent)
             {
