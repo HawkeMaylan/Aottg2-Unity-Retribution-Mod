@@ -410,14 +410,15 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
         originalOwnerSpeed = stats.Speed;
         originalOwnerAcceleration = stats.Acceleration;
 
-        // Apply penalty using RPC
+        // Apply penalty using individual RPCs
         if (applyPenalty)
         {
             int newSpeed = Mathf.Max(minimumStatValue, stats.Speed - statPenalty);
             int newAcceleration = Mathf.Max(minimumStatValue, stats.Acceleration - statPenalty);
 
-            human.photonView.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
-                newSpeed, stats.Gas, stats.Ammunition, newAcceleration, stats.HorseSpeed);
+            // Use individual RPCs instead of RPC_SetStats
+            human.photonView.RPC("RPC_SetSpeed", RpcTarget.AllBufferedViaServer, newSpeed);
+            human.photonView.RPC("RPC_SetAcceleration", RpcTarget.AllBufferedViaServer, newAcceleration);
 
             Debug.Log($"Stats modified: Speed {stats.Speed} -> {newSpeed}, Acceleration {stats.Acceleration} -> {newAcceleration}");
         }
@@ -427,9 +428,9 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
     {
         var stats = human.Stats;
 
-        // Restore original stats using RPC (only speed and acceleration, keep other stats the same)
-        human.photonView.RPC("RPC_SetStats", RpcTarget.AllBufferedViaServer,
-            originalOwnerSpeed, stats.Gas, stats.Ammunition, originalOwnerAcceleration, stats.HorseSpeed);
+        // Restore original stats using individual RPCs
+        human.photonView.RPC("RPC_SetSpeed", RpcTarget.AllBufferedViaServer, originalOwnerSpeed);
+        human.photonView.RPC("RPC_SetAcceleration", RpcTarget.AllBufferedViaServer, originalOwnerAcceleration);
 
         Debug.Log($"Stats restored: Speed {originalOwnerSpeed}, Acceleration {originalOwnerAcceleration}");
     }

@@ -4886,6 +4886,41 @@ namespace Characters
             Stats.UpdateStats();
         }
 
+        [PunRPC]
+        public void RPC_SetSpeed(int speed)
+        {
+            Stats.Speed = speed;
+            Stats.UpdateStats();
+        }
+
+        [PunRPC]
+        public void RPC_SetGas(int gas)
+        {
+            Stats.Gas = gas;
+            Stats.UpdateStats();
+        }
+
+        [PunRPC]
+        public void RPC_SetAmmunition(int ammo)
+        {
+            Stats.Ammunition = ammo;
+            Stats.UpdateStats();
+        }
+
+        [PunRPC]
+        public void RPC_SetAcceleration(int acceleration)
+        {
+            Stats.Acceleration = acceleration;
+            Stats.UpdateStats();
+        }
+
+        [PunRPC]
+        public void RPC_SetHorseSpeed(float horseSpeed)
+        {
+            Stats.HorseSpeed = horseSpeed;
+            Stats.UpdateStats();
+        }
+
 
         private void RegisterSprite(string itemName, string resourcePath)
         {
