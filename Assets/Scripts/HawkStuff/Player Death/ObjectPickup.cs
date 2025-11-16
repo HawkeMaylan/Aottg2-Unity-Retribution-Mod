@@ -33,9 +33,10 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
     private const float UI_CHECK_INTERVAL = 2f;
     private int currentOwnerViewID = -1;
 
-    // Stats storage for the owner
+    // Stats storage for the owner with reliability improvements
     private int originalOwnerSpeed = 0;
     private int originalOwnerAcceleration = 0;
+    private bool hasStoredStats = false;
 
     // Object states
     public enum ObjectState
@@ -85,6 +86,20 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
     {
         // Remove this pickup from the active list when destroyed
         activePickups.Remove(this);
+
+        // Safety measure: Restore stats if this object is destroyed while being carried
+        if (currentState == ObjectState.pickedUpObject && hasStoredStats)
+        {
+            PhotonView ownerPhotonView = PhotonView.Find(currentOwnerViewID);
+            if (ownerPhotonView != null && ownerPhotonView.IsMine)
+            {
+                Human ownerHuman = ownerPhotonView.GetComponent<Human>();
+                if (ownerHuman != null)
+                {
+                    ForceRestoreStats(ownerHuman);
+                }
+            }
+        }
     }
 
     private IEnumerator EnablePickupAfterDelay()
@@ -130,11 +145,23 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
         {
             stream.SendNext((int)currentState);
             stream.SendNext(currentOwnerViewID);
+            stream.SendNext(hasStoredStats);
+            if (hasStoredStats)
+            {
+                stream.SendNext(originalOwnerSpeed);
+                stream.SendNext(originalOwnerAcceleration);
+            }
         }
         else
         {
             currentState = (ObjectState)stream.ReceiveNext();
             currentOwnerViewID = (int)stream.ReceiveNext();
+            hasStoredStats = (bool)stream.ReceiveNext();
+            if (hasStoredStats)
+            {
+                originalOwnerSpeed = (int)stream.ReceiveNext();
+                originalOwnerAcceleration = (int)stream.ReceiveNext();
+            }
         }
     }
 
@@ -362,7 +389,7 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
         // Clear prompt since object is picked up
         ClearPrompt();
 
-        Debug.Log($"Object picked up and parented to {hipChildName}");
+        Debug.Log($"Object picked up and parented to {hipChildName}. Stored stats - Speed: {originalOwnerSpeed}, Accel: {originalOwnerAcceleration}");
     }
 
     [PunRPC]
@@ -370,15 +397,41 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (currentState != ObjectState.pickedUpObject) return;
 
-        // Restore original stats (only on owner's client)
+        Debug.Log($"RPC_DropObject called. hasStoredStats: {hasStoredStats}, currentOwnerViewID: {currentOwnerViewID}");
+
+        // Restore original stats with verification
         PhotonView ownerPhotonView = PhotonView.Find(currentOwnerViewID);
-        if (ownerPhotonView != null && ownerPhotonView.IsMine)
+        if (ownerPhotonView != null)
         {
             Human ownerHuman = ownerPhotonView.GetComponent<Human>();
             if (ownerHuman != null)
             {
-                RestoreStats(ownerHuman);
+                // Only restore if we have stored stats
+                if (hasStoredStats)
+                {
+                    if (ownerPhotonView.IsMine)
+                    {
+                        Debug.Log($"Restoring stats for owner. Speed: {originalOwnerSpeed}, Accel: {originalOwnerAcceleration}");
+                        RestoreStats(ownerHuman);
+                    }
+                    else
+                    {
+                        // If we're not the owner but have stored stats, something went wrong - force cleanup
+                        Debug.LogWarning("Cleaning up stored stats for non-owner player");
+                        hasStoredStats = false;
+                        originalOwnerSpeed = 0;
+                        originalOwnerAcceleration = 0;
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("No stored stats to restore!");
+                }
             }
+        }
+        else
+        {
+            Debug.LogWarning("Owner photon view not found!");
         }
 
         // Re-add the Rigidbody component if it originally had one
@@ -409,16 +462,19 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
         // Store original stats (only speed and acceleration)
         originalOwnerSpeed = stats.Speed;
         originalOwnerAcceleration = stats.Acceleration;
+        hasStoredStats = true;
 
-        // Apply penalty using individual RPCs
+        Debug.Log($"Storing original stats - Speed: {originalOwnerSpeed}, Acceleration: {originalOwnerAcceleration}");
+
+        // Apply penalty using individual RPCs with AllBuffered for reliability
         if (applyPenalty)
         {
             int newSpeed = Mathf.Max(minimumStatValue, stats.Speed - statPenalty);
             int newAcceleration = Mathf.Max(minimumStatValue, stats.Acceleration - statPenalty);
 
-            // Use individual RPCs instead of RPC_SetStats
-            human.photonView.RPC("RPC_SetSpeed", RpcTarget.AllBufferedViaServer, newSpeed);
-            human.photonView.RPC("RPC_SetAcceleration", RpcTarget.AllBufferedViaServer, newAcceleration);
+            // Use AllBuffered to ensure stats persist through network issues
+            human.photonView.RPC("RPC_SetSpeed", RpcTarget.AllBuffered, newSpeed);
+            human.photonView.RPC("RPC_SetAcceleration", RpcTarget.AllBuffered, newAcceleration);
 
             Debug.Log($"Stats modified: Speed {stats.Speed} -> {newSpeed}, Acceleration {stats.Acceleration} -> {newAcceleration}");
         }
@@ -426,13 +482,68 @@ public class ObjectPickup : MonoBehaviourPunCallbacks, IPunObservable
 
     private void RestoreStats(Human human)
     {
-        var stats = human.Stats;
+        if (!hasStoredStats)
+        {
+            Debug.LogError("Cannot restore stats - no stored stats found!");
+            return;
+        }
 
-        // Restore original stats using individual RPCs
+        Debug.Log($"Attempting to restore stats - Speed: {originalOwnerSpeed}, Acceleration: {originalOwnerAcceleration}");
+
+        // Restore original stats using individual RPCs with AllBuffered
+        human.photonView.RPC("RPC_SetSpeed", RpcTarget.AllBuffered, originalOwnerSpeed);
+        human.photonView.RPC("RPC_SetAcceleration", RpcTarget.AllBuffered, originalOwnerAcceleration);
+
+        Debug.Log($"Stats restored: Speed {originalOwnerSpeed}, Acceleration {originalOwnerAcceleration}");
+
+        // Clear stored stats after successful restoration
+        hasStoredStats = false;
+        originalOwnerSpeed = 0;
+        originalOwnerAcceleration = 0;
+
+        // Verify restoration after a short delay
+        StartCoroutine(VerifyStatRestoration(human, 0.5f));
+    }
+
+    private void ForceRestoreStats(Human human)
+    {
+        if (!hasStoredStats)
+        {
+            Debug.LogError("Cannot force restore stats - no stored stats found!");
+            return;
+        }
+
+        // Force restore with AllBufferedViaServer for maximum reliability
         human.photonView.RPC("RPC_SetSpeed", RpcTarget.AllBufferedViaServer, originalOwnerSpeed);
         human.photonView.RPC("RPC_SetAcceleration", RpcTarget.AllBufferedViaServer, originalOwnerAcceleration);
 
-        Debug.Log($"Stats restored: Speed {originalOwnerSpeed}, Acceleration {originalOwnerAcceleration}");
+        Debug.LogWarning($"Force restored stats: Speed {originalOwnerSpeed}, Acceleration {originalOwnerAcceleration}");
+
+        // Clear stored stats
+        hasStoredStats = false;
+        originalOwnerSpeed = 0;
+        originalOwnerAcceleration = 0;
+    }
+
+    private IEnumerator VerifyStatRestoration(Human human, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        var stats = human.Stats;
+        Debug.Log($"Verifying stat restoration - Current Speed: {stats.Speed}, Current Accel: {stats.Acceleration}");
+
+        // Note: We can't compare with originalOwnerSpeed/Accel here because they were cleared
+        // Instead, we'll check if the stats are reasonable (not at penalized values)
+        if (stats.Speed <= minimumStatValue || stats.Acceleration <= minimumStatValue)
+        {
+            Debug.LogWarning($"Stats may not be properly restored! Speed: {stats.Speed}, Accel: {stats.Acceleration}");
+            // We can't force restore here since we cleared the stored values
+            // But we log the issue for debugging
+        }
+        else
+        {
+            Debug.Log("Stat restoration appears successful");
+        }
     }
 
     private void ClearPrompt()
