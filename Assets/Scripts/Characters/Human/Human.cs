@@ -1134,11 +1134,24 @@ namespace Characters
                 ToggleSparks(false);
             }
 
-            // Apply the flare color locally
+            // Apply the flare color locally and sync to other players
             ApplyFlareColor(flareColor);
+
+            // Sync color to other players via RPC
+            if (photonView.IsMine)
+            {
+                photonView.RPC("RPC_SyncFlareColor", RpcTarget.Others, flareColor.r, flareColor.g, flareColor.b, flareColor.a);
+            }
 
             // Start coroutine to spawn physics copy after 2 seconds
             StartCoroutine(SpawnFlareCopyAfterDelay(flareColor));
+        }
+
+        [PunRPC]
+        private void RPC_SyncFlareColor(float r, float g, float b, float a)
+        {
+            Color flareColor = new Color(r, g, b, a);
+            ApplyFlareColor(flareColor);
         }
 
         private IEnumerator SpawnFlareCopyAfterDelay(Color flareColor)
