@@ -22,7 +22,7 @@ namespace Characters
             var human = (Human)_owner;
 
             // Activate the flare firing state and animation
-            human.FireFlare();
+            human.FireFlare(_color);
 
             // Start coroutine to delay projectile spawn
             human.StartCoroutine(SpawnFlareWithDelay(human));

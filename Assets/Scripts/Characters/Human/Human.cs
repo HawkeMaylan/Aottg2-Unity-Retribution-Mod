@@ -1111,39 +1111,113 @@ namespace Characters
         ///  Hawks New States
         /// </summary>
 
-        public void FireFlare()
+        public void FireFlare(Color flareColor)
         {
-            if (State == HumanState.FiringFlare  || State == HumanState.EmoteAction || State == HumanState.SpecialAction || State == HumanState.SpecialAttack || State == HumanState.Attack || State == HumanState.GroundDodge || Dead)
+            if (State == HumanState.FiringFlare || State == HumanState.EmoteAction || State == HumanState.SpecialAction || State == HumanState.SpecialAttack || State == HumanState.Attack || State == HumanState.GroundDodge || Dead)
                 return;
 
             if (Grounded)
             {
                 State = HumanState.FiringFlare;
-
-                // Set timer to match animation length
                 float flareAnimationLength = Animation.GetLength("FiringFlare");
                 _flareTimeLeft = flareAnimationLength;
-
                 CrossFade(HumanAnimations.IdleM, 0.1f);
-
                 CrossFade(HumanAnimations.FiringFlare, 0.1f);
                 ToggleSparks(false);
             }
             else
             {
                 State = HumanState.FiringFlare;
-
-                // Set timer to match animation length
                 float flareAnimationLength = Animation.GetLength("FiringFlare");
                 _flareTimeLeft = flareAnimationLength;
-
-
-
                 Animation.PlayOverlay("FiringFlare", 0.1f, 0f);
                 ToggleSparks(false);
             }
 
-            
+            // Apply the flare color
+            ApplyFlareColor(flareColor);
+
+            // Start coroutine to spawn physics copy after 2 seconds
+            StartCoroutine(SpawnFlareCopyAfterDelay(flareColor));
+        }
+
+        private IEnumerator SpawnFlareCopyAfterDelay(Color flareColor)
+        {
+            yield return new WaitForSeconds(2f);
+            SpawnFlareModelCopy(flareColor);
+        }
+
+        private void ApplyFlareColor(Color color)
+        {
+            Transform flareModel = FindDeepChild(transform, "FlareModel");
+            if (flareModel != null)
+            {
+                Renderer renderer = flareModel.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    // Get all materials from the renderer
+                    Material[] materials = renderer.materials;
+
+                    // Find and update the FlareBandMaterial
+                    for (int i = 0; i < materials.Length; i++)
+                    {
+                        if (materials[i].name.Contains("FlareBandMaterial"))
+                        {
+                            materials[i].color = color;
+                            // Or if you need to set a specific property:
+                            // materials[i].SetColor("_Color", color);
+                            break;
+                        }
+                    }
+
+                    // Apply the modified materials back to the renderer
+                    renderer.materials = materials;
+                }
+                else
+                {
+                    Debug.LogWarning("Renderer component not found on FlareModel");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("FlareModel not found");
+            }
+        }
+
+        private void SpawnFlareModelCopy(Color flareColor)
+        {
+            Transform flareModel = FindDeepChild(transform, "FlareModel");
+            if (flareModel != null)
+            {
+                // Get the position and rotation of the flare model
+                Vector3 position = flareModel.position;
+                Quaternion rotation = flareModel.rotation;
+
+                // Create the network object
+                object[] instantiationData = new object[] { flareColor.r, flareColor.g, flareColor.b, flareColor.a };
+
+                // PhotonNetwork.Instantiate with your flare model prefab path
+                GameObject flareCopy = PhotonNetwork.Instantiate("Buildables/FlareModel", position, rotation, 0, instantiationData);
+
+                if (flareCopy != null)
+                {
+                    // Get the Rigidbody (already on prefab) and add force
+                    Rigidbody rb = flareCopy.GetComponent<Rigidbody>();
+                    if (rb != null)
+                    {
+                        // Add force in the forward direction of the flare model
+                        rb.AddForce(flareModel.forward * 10f, ForceMode.Impulse);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Rigidbody not found on FlareModel prefab");
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogWarning("FlareModel not found for spawning copy");
+            }
         }
 
 
