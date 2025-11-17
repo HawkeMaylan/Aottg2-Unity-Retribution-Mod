@@ -1116,16 +1116,34 @@ namespace Characters
             if (State == HumanState.FiringFlare  || State == HumanState.EmoteAction || State == HumanState.SpecialAction || State == HumanState.SpecialAttack || State == HumanState.Attack || State == HumanState.GroundDodge || Dead)
                 return;
 
+            if (Grounded)
+            {
+                State = HumanState.FiringFlare;
 
-        
-            State = HumanState.FiringFlare;
+                // Set timer to match animation length
+                float flareAnimationLength = Animation.GetLength("FiringFlare");
+                _flareTimeLeft = flareAnimationLength;
 
-            // Set timer to match animation length
-            float flareAnimationLength = Animation.GetLength("FiringFlare");
-            _flareTimeLeft = flareAnimationLength;
+                CrossFade(HumanAnimations.IdleM, 0.1f);
 
-            Animation.PlayOverlay("FiringFlare", 0.1f, 0f);
-            ToggleSparks(false);
+                CrossFade(HumanAnimations.FiringFlare, 0.1f);
+                ToggleSparks(false);
+            }
+            else
+            {
+                State = HumanState.FiringFlare;
+
+                // Set timer to match animation length
+                float flareAnimationLength = Animation.GetLength("FiringFlare");
+                _flareTimeLeft = flareAnimationLength;
+
+
+
+                Animation.PlayOverlay("FiringFlare", 0.1f, 0f);
+                ToggleSparks(false);
+            }
+
+            
         }
 
 
