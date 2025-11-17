@@ -1113,18 +1113,18 @@ namespace Characters
 
         public void FireFlare()
         {
-            if (State == HumanState.FiringFlare || Dead)
+            if (State == HumanState.FiringFlare  || State == HumanState.EmoteAction || State == HumanState.SpecialAction || State == HumanState.SpecialAttack || State == HumanState.Attack || State == HumanState.GroundDodge || Dead)
                 return;
 
+
+        
             State = HumanState.FiringFlare;
-            _flareTimeLeft = 2f;
 
-            // Use the new overlay system to play flare animation on top of any existing animation
-            if (Animation != null)
-            {
-                Animation.PlayOverlay("FiringFlare", 0.1f, 0f);
-            }
+            // Set timer to match animation length
+            float flareAnimationLength = Animation.GetLength("FiringFlare");
+            _flareTimeLeft = flareAnimationLength;
 
+            Animation.PlayOverlay("FiringFlare", 0.1f, 0f);
             ToggleSparks(false);
         }
 
