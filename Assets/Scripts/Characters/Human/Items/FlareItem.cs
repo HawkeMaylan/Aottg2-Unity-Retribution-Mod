@@ -1,6 +1,7 @@
 ﻿using Projectiles;
 using System.Collections;
 using UnityEngine;
+using Characters;
 
 namespace Characters
 {
@@ -20,6 +21,9 @@ namespace Characters
         protected override void Activate()
         {
             var human = (Human)_owner;
+
+            if (human.State == HumanState.FiringFlare)
+                return;
 
             // Activate the flare firing state and animation
             human.FireFlare(_color);
