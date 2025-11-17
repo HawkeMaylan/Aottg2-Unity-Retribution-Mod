@@ -2191,11 +2191,18 @@ namespace Characters
                 else if (State == HumanState.FiringFlare)
                 {
                     _flareTimeLeft -= Time.deltaTime;
+
+                    // If mounted, preserve mount position but still show flare animation
+                    if (MountState == HumanMountState.Horse)
+                    {
+                        // Keep the character mounted on horse
+                        Cache.Transform.position = Horse.Cache.Transform.position + Vector3.up * 1.95f;
+                        Cache.Transform.rotation = Horse.Cache.Transform.rotation;
+                    }
+
                     if (_flareTimeLeft <= 0f)
                     {
-                        // Stop the overlay animation
-                        if (Animation != null)
-                            Animation.StopOverlay("FiringFlare", 0.1f);
+                        Animation.StopOverlay("FiringFlare", 0.1f);
                         Idle();
                     }
                 }
