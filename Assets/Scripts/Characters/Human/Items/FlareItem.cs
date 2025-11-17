@@ -18,12 +18,26 @@ namespace Characters
             Cooldown = cooldown;
         }
 
+        public override bool CanUse()
+        {
+            // First check the base conditions (like cooldown)
+            if (!base.CanUse())
+                return false;
+
+            var human = _owner as Human;
+            if (human == null)
+                return false;
+
+            // Check if human is already firing flare
+            if (human.State == HumanState.FiringFlare)
+                return false;
+
+            return true;
+        }
+
         protected override void Activate()
         {
             var human = (Human)_owner;
-
-            if (human.State == HumanState.FiringFlare)
-                return;
 
             // Activate the flare firing state and animation
             human.FireFlare(_color);
