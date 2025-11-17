@@ -998,12 +998,12 @@ namespace Characters
                 return; 
             }
 
-            if (BladeSheathed == true && ((BladeWeapon)Weapon).CurrentDurability > 0)
+            if (BladeSheathed == true && ((BladeWeapon)Weapon).CurrentDurability > 0 && (Weapon is BladeWeapon))
             {
                 Sheath();
                 return;
             }
-            if (BladeSheathed == true && ((BladeWeapon)Weapon).CurrentDurability == 0)
+            if (BladeSheathed == true && ((BladeWeapon)Weapon).CurrentDurability == 0 && (Weapon is BladeWeapon))
             {
                 BladeSheathed = false;
                 // Sync over network
@@ -1075,27 +1075,24 @@ namespace Characters
 
 
             CrossFade(_reloadAnimation, 0.1f, 0f);
-            if (((BladeWeapon)Weapon).BladesLeft <= 0)
+            if ((Weapon is BladeWeapon) && ((BladeWeapon)Weapon).BladesLeft <= 0)
             {
-
                 ((BladeWeapon)Weapon).UseDurability(20000);
                 BladeSheathed = true;
                 // Sync over network
                 if (PhotonNetwork.InRoom)
                 {
-                    // Update networked variable
                     photonView.RPC("SyncSheathState", RpcTarget.All, BladeSheathed);
                 }
                 else
                 {
-                    // Single player fallback
                     ApplySheathVisuals(BladeSheathed);
                 }
                 return;
             }
 
 
-                State = HumanState.Reload;
+            State = HumanState.Reload;
             _stateTimeLeft = Animation.GetTotalTime(_reloadAnimation);
             _needFinishReload = true;
             _reloadTimeLeft = _stateTimeLeft;
