@@ -208,6 +208,9 @@ MonoBehaviour:
   - RPC_SetGas
   - RPC_SetHorseSpeed
   - RPC_SetSpeed
+  - RPC_ApplyFlareColor
+  - RPC_RemoveRigidbody
+  - RPC_StartRigidbodyRemovalTimer
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
