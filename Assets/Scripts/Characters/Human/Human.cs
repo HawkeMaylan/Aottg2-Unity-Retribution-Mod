@@ -4407,12 +4407,14 @@ namespace Characters
 
         public bool CanBladeAttack()
         {
+           
             return Weapon is BladeWeapon && ((BladeWeapon)Weapon).CurrentDurability > 0f && State == HumanState.Idle;
         }
 
         public void StartSpecialAttack(string animation)
         {
-            if (State == HumanState.Attack || State == HumanState.SpecialAttack)
+             
+            if (State == HumanState.Attack || State == HumanState.SpecialAttack )
                 FalseAttack();
             PlayAnimation(animation);
             State = HumanState.SpecialAttack;
