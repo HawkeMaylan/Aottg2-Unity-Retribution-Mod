@@ -1113,20 +1113,19 @@ namespace Characters
 
         public void FireFlare()
         {
-            // Check if we can fire flare
-            if (State == HumanState.Attack || State == HumanState.SpecialAttack ||
-                State == HumanState.FiringFlare || Dead)
+            if (State == HumanState.FiringFlare || Dead)
                 return;
 
-            // Set state and timer
             State = HumanState.FiringFlare;
-            _flareTimeLeft = 2.5f; // 2 seconds duration
+            _flareTimeLeft = 2f;
 
-            // Play animation
-            CrossFade("FiringFlare", 0.1f);
+            // Use the new overlay system to play flare animation on top of any existing animation
+            if (Animation != null)
+            {
+                Animation.PlayOverlay("FiringFlare", 0.1f, 0f);
+            }
+
             ToggleSparks(false);
-
-            
         }
 
 
@@ -2193,7 +2192,12 @@ namespace Characters
                 {
                     _flareTimeLeft -= Time.deltaTime;
                     if (_flareTimeLeft <= 0f)
+                    {
+                        // Stop the overlay animation
+                        if (Animation != null)
+                            Animation.StopOverlay("FiringFlare", 0.1f);
                         Idle();
+                    }
                 }
 
 
