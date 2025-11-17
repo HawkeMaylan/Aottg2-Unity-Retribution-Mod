@@ -169,6 +169,9 @@ namespace Characters
 
         private bool BladeSheathed = false;
 
+        //States Addons
+        private float _flareTimeLeft = 0f;
+
 
 
         private void CreateStaminaBar()
@@ -1103,8 +1106,28 @@ namespace Characters
                 
 
         }
-    
 
+        /// <summary>
+        ///  Hawks New States
+        /// </summary>
+
+        public void FireFlare()
+        {
+            // Check if we can fire flare
+            if (State == HumanState.Attack || State == HumanState.SpecialAttack ||
+                State == HumanState.FiringFlare || Dead)
+                return;
+
+            // Set state and timer
+            State = HumanState.FiringFlare;
+            _flareTimeLeft = 2.5f; // 2 seconds duration
+
+            // Play animation
+            CrossFade("FiringFlare", 0.1f);
+            ToggleSparks(false);
+
+            
+        }
 
 
         public void Sheath()
@@ -1185,6 +1208,8 @@ namespace Characters
                 ApplySheathVisuals(BladeSheathed);
             }
         }
+
+
 
         [PunRPC]
         private void SyncSheathState(bool sheathed)
@@ -2160,7 +2185,20 @@ namespace Characters
                 {
                     if (Grabber == null || Grabber.Dead)
                         Ungrab(false, true);
+
                 }
+
+                /////FLARE STATE ADDON
+                else if (State == HumanState.FiringFlare)
+                {
+                    _flareTimeLeft -= Time.deltaTime;
+                    if (_flareTimeLeft <= 0f)
+                        Idle();
+                }
+
+
+
+
                 else if (MountState == HumanMountState.MapObject)
                 {
                     if (MountedTransform == null)
@@ -4967,7 +5005,8 @@ namespace Characters
         Land,
         MountingHorse,
         Stun,
-        WallSlide
+        WallSlide,
+        FiringFlare
 
     }
 
