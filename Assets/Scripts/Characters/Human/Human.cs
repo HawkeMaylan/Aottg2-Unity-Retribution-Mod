@@ -1134,7 +1134,7 @@ namespace Characters
                 ToggleSparks(false);
             }
 
-            // Apply the flare color
+            // Apply the flare color locally
             ApplyFlareColor(flareColor);
 
             // Start coroutine to spawn physics copy after 2 seconds
@@ -1155,22 +1155,16 @@ namespace Characters
                 Renderer renderer = flareModel.GetComponent<Renderer>();
                 if (renderer != null)
                 {
-                    // Get all materials from the renderer
                     Material[] materials = renderer.materials;
-
-                    // Find and update the FlareBandMaterial
                     for (int i = 0; i < materials.Length; i++)
                     {
                         if (materials[i].name.Contains("FlareBandMaterial"))
                         {
                             materials[i].color = color;
-                            // Or if you need to set a specific property:
-                            // materials[i].SetColor("_Color", color);
+                            materials[i].SetColor("_Color", color);
                             break;
                         }
                     }
-
-                    // Apply the modified materials back to the renderer
                     renderer.materials = materials;
                 }
             }
@@ -1181,26 +1175,17 @@ namespace Characters
             Transform flareModel = FindDeepChild(transform, "FlareModel");
             if (flareModel != null)
             {
-                // Get the position and rotation of the flare model
                 Vector3 position = flareModel.position;
                 Quaternion rotation = flareModel.rotation;
+                Vector3 forceDirection = flareModel.forward;
 
-                // Create the network object
-                object[] instantiationData = new object[] { flareColor.r, flareColor.g, flareColor.b, flareColor.a };
+                // Include both color AND force direction in instantiation data
+                object[] instantiationData = new object[] {
+            flareColor.r, flareColor.g, flareColor.b, flareColor.a,
+            forceDirection.x, forceDirection.y, forceDirection.z
+        };
 
-                // PhotonNetwork.Instantiate with your flare model prefab path
                 GameObject flareCopy = PhotonNetwork.Instantiate("Buildables/FlareModel", position, rotation, 0, instantiationData);
-
-                if (flareCopy != null)
-                {
-                    // Get the Rigidbody (already on prefab) and add force
-                    Rigidbody rb = flareCopy.GetComponent<Rigidbody>();
-                    if (rb != null)
-                    {
-                        // Add force in the forward direction of the flare model
-                        rb.AddForce(flareModel.forward * 10f, ForceMode.Impulse);
-                    }
-                }
             }
         }
 
