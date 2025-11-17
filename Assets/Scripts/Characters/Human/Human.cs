@@ -1173,14 +1173,6 @@ namespace Characters
                     // Apply the modified materials back to the renderer
                     renderer.materials = materials;
                 }
-                else
-                {
-                    Debug.LogWarning("Renderer component not found on FlareModel");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("FlareModel not found");
             }
         }
 
@@ -1208,15 +1200,7 @@ namespace Characters
                         // Add force in the forward direction of the flare model
                         rb.AddForce(flareModel.forward * 10f, ForceMode.Impulse);
                     }
-                    else
-                    {
-                        Debug.LogWarning("Rigidbody not found on FlareModel prefab");
-                    }
                 }
-            }
-            else
-            {
-                Debug.LogWarning("FlareModel not found for spawning copy");
             }
         }
 

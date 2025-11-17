@@ -57,7 +57,6 @@ public class NetworkedFlare : MonoBehaviourPun, IPunInstantiateMagicCallback
         if (rb != null)
         {
             Destroy(rb);
-            Debug.Log("Rigidbody removed from flare after 30 seconds");
         }
 
         // Optional: Also remove the collider if you don't need it anymore
@@ -95,17 +94,7 @@ public class NetworkedFlare : MonoBehaviourPun, IPunInstantiateMagicCallback
                 // Also try setting the main color property
                 materials[i].SetColor("_Color", color);
                 foundMaterial = true;
-                Debug.Log($"Applied color to FlareBandMaterial: {color}");
                 break;
-            }
-        }
-
-        if (!foundMaterial)
-        {
-            Debug.LogWarning("FlareBandMaterial not found. Available materials:");
-            foreach (var material in materials)
-            {
-                Debug.Log($" - {material.name}");
             }
         }
 
