@@ -14973,6 +14973,7 @@ Transform:
   m_Children:
   - {fileID: 401830}
   - {fileID: 401826}
+  - {fileID: 7750201787733175468}
   m_Father: {fileID: 401860}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &101868
@@ -17321,6 +17322,68 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 4485423581346734995, guid: b177f58d81500014b8d625ee09d919d6, type: 3}
   m_PrefabInstance: {fileID: 4978065724100238472}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &5097129914650350899
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 401858}
+    m_Modifications:
+    - target: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.00053
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.000428
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.000039
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7568874
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.13375793
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.6346893
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.07999936
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 17.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 80.419
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 362.93
+      objectReference: {fileID: 0}
+    - target: {fileID: 8564859609001614169, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+      propertyPath: m_Name
+      value: FlareGunModelHand_R
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+--- !u!4 &7750201787733175468 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3256836800339949983, guid: ea96317423f306e4785085681bc6a62d, type: 3}
+  m_PrefabInstance: {fileID: 5097129914650350899}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5145350154477012241
 PrefabInstance:
