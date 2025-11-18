@@ -13,6 +13,7 @@
 
 
         public string WeirdRunTest => "TestRun";
+        public string TitanSlumpedWalk => "TitanSlumpedWalk";
         public string NormalWalk => "Amarture_VER2|run.walk";
 
         // Remove the virtual Walk property and use a field instead

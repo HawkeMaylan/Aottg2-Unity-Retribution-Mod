@@ -603,8 +603,10 @@ namespace Characters
             // Define walk animations with their percentile chances
             var walkAnimationChances = new Dictionary<string, float>
     {
-        { basicAnimations.NormalWalk, 70f },    // 70% chance
-        { basicAnimations.WeirdRunTest, 30f }   // 30% chance
+        { basicAnimations.NormalWalk, 0f },    // % chance
+        { basicAnimations.WeirdRunTest, 0f },  
+        { basicAnimations.TitanSlumpedWalk, 100f }
+                
         // Add more animations as needed with their percentages
     };
 
