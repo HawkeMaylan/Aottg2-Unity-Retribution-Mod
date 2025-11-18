@@ -99,6 +99,12 @@ namespace Characters
         protected Dictionary<string, float> _rootMotionAnimations = new Dictionary<string, float>();
         public Dictionary<string, string> AttackAnimations = new Dictionary<string, string>();
 
+
+
+
+        protected string _selectedWalkAnimation;
+        protected bool _hasSelectedWalkAnimation = false;
+
         public virtual void Init(bool ai, string team, JSONNode data)
         {
             base.Init(ai, team);
@@ -563,16 +569,62 @@ namespace Characters
         protected virtual void CreateAnimations(BaseTitanAnimations animations)
         {
             if (animations == null)
-                animations = new BaseTitanAnimations();
+                animations = new BasicTitanAnimations();
+
             BaseTitanAnimations = animations;
             _rootMotionAnimations = GetRootMotionAnimations();
+
+            // Select and sync walk animation if we're the owner
+            if (IsMine())
+            {
+                SelectAndSyncWalkAnimation();
+            }
+
+            // Build attack animations dictionary AFTER setting the walk animation
             foreach (var fieldInfo in BaseTitanAnimations.GetType().GetFields())
             {
                 if (fieldInfo.Name.StartsWith("Attack"))
                 {
-                    AttackAnimations.Add(fieldInfo.Name, (string)fieldInfo.GetValue(BaseTitanAnimations));
+                    string animationName = (string)fieldInfo.GetValue(BaseTitanAnimations);
+                    // Only add non-empty animation names to the dictionary
+                    if (!string.IsNullOrEmpty(animationName))
+                    {
+                        AttackAnimations.Add(fieldInfo.Name, animationName);
+                    }
                 }
             }
+        }
+
+        protected virtual void SelectAndSyncWalkAnimation()
+        {
+            if (!IsMine() || !(BaseTitanAnimations is BasicTitanAnimations basicAnimations))
+                return;
+
+            string selectedWalk;
+            if (UnityEngine.Random.Range(0, 2) == 0)
+            {
+                selectedWalk = basicAnimations.NormalWalk;
+            }
+            else
+            {
+                selectedWalk = basicAnimations.WeirdRunTest;
+            }
+
+            // Use the safe method to set the walk animation
+            basicAnimations.SetWalkAnimation(selectedWalk);
+            _selectedWalkAnimation = selectedWalk;
+
+            Cache.PhotonView.RPC("SetWalkAnimationRPC", RpcTarget.All, new object[] { selectedWalk });
+        }
+
+        [PunRPC]
+        public void SetWalkAnimationRPC(string animationName, PhotonMessageInfo info)
+        {
+            if (info.Sender != Cache.PhotonView.Owner || !(BaseTitanAnimations is BasicTitanAnimations basicAnimations))
+                return;
+
+            _selectedWalkAnimation = animationName;
+            basicAnimations.SetWalkAnimation(animationName);
         }
 
         public override Transform GetCameraAnchor()

@@ -212,6 +212,8 @@ MonoBehaviour:
   - RPC_RemoveRigidbody
   - RPC_StartRigidbodyRemovalTimer
   - RPC_SyncFlareColor
+  - SetAnimationsRPC
+  - SetWalkAnimationRPC
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

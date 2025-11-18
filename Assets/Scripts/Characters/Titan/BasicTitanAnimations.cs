@@ -10,7 +10,28 @@
         public string JumpCrawler = "Amarture_VER2|attack.crawler.jump.0";
         public string FallCrawler = "Amarture_VER2|attack.crawler.jump.1";
         public string LandCrawler = "Amarture_VER2|attack.crawler.jump.2";
-        public override string Walk => "Amarture_VER2|run.walk";
+
+
+        public string WeirdRunTest => "TestRun";
+        public string NormalWalk => "Amarture_VER2|run.walk";
+
+        // Remove the virtual Walk property and use a field instead
+        private string _walkAnimation = "Amarture_VER2|run.walk"; // Default
+
+        public override string Walk => _walkAnimation;
+
+        // Method to safely change the walk animation
+        public void SetWalkAnimation(string animation)
+        {
+            _walkAnimation = animation;
+        }
+
+
+
+
+
+
+
         public override string Jump => "Amarture_VER2|attack.jumper.0";
         public override string Fall => "Amarture_VER2|attack.jumper.1";
         public override string Land => "Amarture_VER2|attack.jumper.2";
