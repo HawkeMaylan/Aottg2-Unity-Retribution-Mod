@@ -14,7 +14,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.AI;
 using Cameras;
-
+using System.Linq;
 namespace Characters
 {
     abstract class BaseTitan : BaseCharacter
@@ -600,21 +600,49 @@ namespace Characters
             if (!IsMine() || !(BaseTitanAnimations is BasicTitanAnimations basicAnimations))
                 return;
 
-            string selectedWalk;
-            if (UnityEngine.Random.Range(0, 2) == 0)
-            {
-                selectedWalk = basicAnimations.NormalWalk;
-            }
-            else
-            {
-                selectedWalk = basicAnimations.WeirdRunTest;
-            }
+            // Define walk animations with their percentile chances
+            var walkAnimationChances = new Dictionary<string, float>
+    {
+        { basicAnimations.NormalWalk, 70f },    // 70% chance
+        { basicAnimations.WeirdRunTest, 30f }   // 30% chance
+        // Add more animations as needed with their percentages
+    };
+
+            string selectedWalk = SelectRandomAnimation(walkAnimationChances);
 
             // Use the safe method to set the walk animation
             basicAnimations.SetWalkAnimation(selectedWalk);
             _selectedWalkAnimation = selectedWalk;
 
             Cache.PhotonView.RPC("SetWalkAnimationRPC", RpcTarget.All, new object[] { selectedWalk });
+        }
+
+        private string SelectRandomAnimation(Dictionary<string, float> animationChances)
+        {
+            float total = 0f;
+
+            // Calculate total of all percentages
+            foreach (var chance in animationChances.Values)
+            {
+                total += chance;
+            }
+
+            // Generate random number between 0 and total
+            float randomPoint = UnityEngine.Random.Range(0f, total);
+
+            // Find which animation corresponds to the random point
+            float current = 0f;
+            foreach (var animation in animationChances)
+            {
+                current += animation.Value;
+                if (randomPoint <= current)
+                {
+                    return animation.Key;
+                }
+            }
+
+            // Fallback - return the first animation if something goes wrong
+            return animationChances.Keys.First();
         }
 
         [PunRPC]
