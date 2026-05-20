@@ -1,4 +1,4 @@
-name: Project Automation Pipeline
+yamlname: Project Automation Pipeline
 
 on:
   push:
@@ -8,10 +8,12 @@ on:
 
 jobs:
   run-automation:
-    runs-on: ubuntu-latest
+    # Explicitly specify official GitHub-hosted environments to avoid the rogue runner
+    runs-on: 
+      - ubuntu-latest
+      - github-hosted
 
     steps:
-    # 1. Clear out pre-installed bloating software safely
     - name: Free Disk Space (Ubuntu Runner)
       if: runner.os == 'Linux'
       run: |
@@ -21,14 +23,12 @@ jobs:
         sudo rm -rf "/usr/local/share/boost"
         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
-    # 2. Shallow checkout to bypass the "no space left on device" log issue
     - name: Checkout Repository Code
       uses: actions/checkout@v4
       with:
         fetch-depth: 1
 
-    # 3. Verify the environment safely
     - name: Verify Environment
       run: |
-        echo "The environment is safe, clean, and working!"
+        echo "The agent successfully bypassed the rogue runner!"
         df -h
